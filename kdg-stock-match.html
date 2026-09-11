@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>포레스트핏 거래처별 재고장 통합 매칭</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+<style>
+*{box-sizing:border-box;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif}
+body{margin:0;background:linear-gradient(135deg,#f7f3eb 0%,#edf3ef 100%);color:#1f2a24}
+.wrap{max-width:1180px;margin:0 auto;padding:42px 24px 72px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.logo{font-size:22px;font-weight:850;letter-spacing:.08em;color:#244734}
+.badge{padding:9px 15px;border-radius:999px;background:#ffffffcc;color:#486052;font-size:13px;font-weight:750}
+h1{font-size:38px;letter-spacing:-.05em;color:#173d2b;margin:0 0 10px;font-weight:900}
+.desc{font-size:15px;color:#6d776f;line-height:1.7;margin-bottom:22px;font-weight:600}
+.card{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.95);border-radius:22px;padding:22px;margin-bottom:16px;box-shadow:0 14px 35px rgba(38,49,43,.07)}
+label{display:block;font-size:16px;font-weight:850;margin-bottom:9px;color:#173d2b}
+input,button{width:100%;padding:12px 14px;border:1px solid #d8dfdb;border-radius:12px;font-size:14px;background:#fff;margin-bottom:12px}
+button{border:0;background:#244734;color:#fff;font-weight:850;cursor:pointer}
+button.secondary{background:#7b8b82}
+button.danger{background:#a45c5c}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.grid3{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.small{font-size:13px;color:#7c867f;line-height:1.6}
+.notice{background:#fff8dc;border:1px solid #efd894;color:#6b3d00;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:800;line-height:1.6;margin-top:8px}
+.status{padding:12px 14px;border-radius:12px;background:#edf7ff;color:#25516b;font-weight:800;margin-top:8px;display:none;white-space:pre-line}
+.progress-box{display:none;margin-top:14px;padding:16px;border:1px solid #d9e5df;border-radius:16px;background:#f8fbf9}
+.progress-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px;font-size:14px;font-weight:850;color:#173d2b}
+.progress-track{height:16px;border-radius:999px;background:#e5ebe8;overflow:hidden}
+.progress-bar{height:100%;width:0%;background:#244734;transition:width .18s ease}
+.progress-detail{margin-top:9px;font-size:13px;color:#617068;font-weight:700;white-space:pre-line}
+.step-card{position:relative}
+.step-card.locked{opacity:.55}
+.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#244734;color:#fff;font-size:13px;font-weight:900;margin-right:8px}
+button:disabled,input:disabled{cursor:not-allowed;opacity:.55}
+.drop-zone{border:2px dashed #c6d4cc;border-radius:14px;padding:14px;background:#fbfdfc;transition:.18s ease;margin-bottom:10px}
+.drop-zone.dragover{border-color:#244734;background:#eef7f1;box-shadow:0 0 0 3px rgba(36,71,52,.08)}
+.drop-zone input[type=file]{margin-bottom:6px}
+.drop-guide{font-size:12px;color:#66756d;font-weight:750;line-height:1.5;text-align:center}
+.drop-guide strong{color:#244734}
+.summary{background:#fff;border:1px solid #e5ebe8;border-radius:16px;padding:16px}
+.summary b{font-size:26px;color:#244734}
+.vendor-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.vendor-row{border:1px solid #dfe7e2;border-radius:16px;padding:14px;background:#fbfdfc}
+.vendor-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.vendor-name{font-size:15px;font-weight:850;color:#173d2b}
+.vendor-state{font-size:12px;color:#7c867f;font-weight:700}
+.file-name{font-size:12px;color:#486052;margin-top:-5px;margin-bottom:8px;word-break:break-all}
+.table-wrap{max-height:470px;overflow:auto;background:#fff;border:1px solid #d9e1dd;border-radius:16px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid #e6ece9;padding:8px 10px;white-space:nowrap;text-align:center;vertical-align:middle}
+th{background:#e6f5ec;color:#173d2b;font-weight:850;position:sticky;top:0;z-index:2}
+.ok{background:#eefaf3;color:#177245;font-weight:800}
+.warn{background:#fff8dc;color:#6b3d00;font-weight:800}
+.bad{background:#fff2f2;color:#8a2f2f;font-weight:800}
+@media(max-width:900px){.grid2,.grid3,.grid4,.vendor-list{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">FORESTFIT</div>
+    <div class="badge">거래처별 재고장 통합 매칭</div>
+  </div>
+
+  <h1>거래처별 재고장 통합 매칭</h1>
+  <div class="desc">
+    재고장 원본 파일은 한 번만 첨부하고, 거래처별 재고표를 각각 첨부해 해당 거래처 탭의 G열에 재고를 입력합니다.<br>
+    거래처명과 재고장 탭명은 <b>띄어쓰기만 제외하고 완전히 일치</b>해야 합니다.
+  </div>
+
+  <div class="card step-card" id="step1Card">
+    <label><span class="step-number">1</span>재고장 원본 파일 첨부</label>
+    <div class="drop-zone" id="stockDropZone">
+      <input type="file" id="stockFile" accept=".xlsx,.xls">
+      <div class="drop-guide"><strong>PC에 저장된 엑셀 파일을 이 영역으로 끌어놓거나</strong> 파일 선택 버튼을 이용해 주세요.</div>
+    </div>
+    <div class="small">
+      첫 번째 탭은 처리하지 않습니다.<br>
+      두 번째 탭부터 D열 사입명 / E열 기장 / F열 사이즈 / G열 재고 구조를 사용합니다.
+    </div>
+  </div>
+
+  <div class="card step-card locked" id="step2Card">
+    <label><span class="step-number">2</span>거래처별 재고표 첨부</label>
+    <div id="fixedVendorList" class="vendor-list"></div>
+    <div class="notice">
+      고정 거래처: 케이디지 / 리자드 / 시나브로 / 리마인드 / 뉴행 / 신안어패럴 / 계란속노른자<br>
+      첨부하지 않은 거래처는 제외 후 계산을 실행합니다.<br>
+      카카오톡으로 전달받은 엑셀 파일은 PC에 저장한 후, 각 거래처 영역으로 끌어놓거나 파일 선택 버튼을 이용해 첨부해 주세요.
+    </div>
+  </div>
+
+  <div class="card step-card locked" id="step3Card">
+    <label><span class="step-number">3</span>전체 거래처 재고 매칭</label>
+    <div class="small" style="margin-bottom:12px;">첨부하지 않은 거래처는 제외 후 계산을 실행합니다.</div>
+    <button id="processBtn" onclick="processAll()" disabled>전체 거래처 재고 매칭 실행</button>
+    <div id="matchProgressBox" class="progress-box">
+      <div class="progress-head"><span id="matchProgressTitle">매칭 준비 중</span><span id="matchProgressPct">0%</span></div>
+      <div class="progress-track"><div id="matchProgressBar" class="progress-bar"></div></div>
+      <div id="matchProgressDetail" class="progress-detail"></div>
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div class="card step-card locked" id="step4Card">
+    <label><span class="step-number">4</span>요약</label>
+    <div class="grid4">
+      <div class="summary"><b id="totalCnt">0</b><div class="small">처리 대상</div></div>
+      <div class="summary"><b id="matchedCnt">0</b><div class="small">매칭 완료</div></div>
+      <div class="summary"><b id="unmatchedCnt">0</b><div class="small">매칭안됨</div></div>
+      <div class="summary"><b id="vendorCnt">0</b><div class="small">처리 거래처</div></div>
+    </div>
+  </div>
+
+  <div class="card step-card locked" id="step5Card">
+    <label><span class="step-number">5</span>결과 미리보기 및 다운로드</label>
+    <button id="downloadExcelBtn" onclick="downloadModified()" disabled>첫 번째 탭 유지 재고장 다운로드</button>
+    <button id="downloadCsvBtn" class="secondary" onclick="downloadResultCsv()" disabled>매칭 결과 CSV 다운로드</button>
+    <div id="downloadProgressBox" class="progress-box">
+      <div class="progress-head"><span id="downloadProgressTitle">결과 파일 생성 준비 중</span><span id="downloadProgressPct">0%</span></div>
+      <div class="progress-track"><div id="downloadProgressBar" class="progress-bar"></div></div>
+      <div id="downloadProgressDetail" class="progress-detail"></div>
+    </div>
+    <div class="small" style="margin:8px 0 12px;">첫 번째 탭을 포함한 원본 양식은 그대로 유지하고, 매칭된 거래처 탭의 G열 값만 직접 변경합니다.</div>
+    <div class="table-wrap" id="resultTable"></div>
+  </div>
+</div>
+
+<script>
+const FIXED_VENDORS=["케이디지","리자드","시나브로","리마인드","뉴행","신안어패럴","계란속노른자"];
+const vendorFiles=new Map();
+let stockWbExcel=null;
+let originalStockBuffer=null;
+let originalStockFileName="";
+let resultRows=[];
+
+function txt(v){
+  if(v==null)return "";
+  if(typeof v==="object" && v.text)return String(v.text).trim();
+  if(typeof v==="object" && v.richText)return v.richText.map(x=>x.text||"").join("").trim();
+  if(typeof v==="object" && v.result!=null)return String(v.result).trim();
+  return String(v).trim();
+}
+function num(v){
+  const s=txt(v).replace(/,/g,"");
+  if(s==="" || s==="-")return 0;
+  const n=Number(s);
+  return Number.isFinite(n)?n:0;
+}
+function setStatus(msg){
+  const el=document.getElementById("status");
+  el.style.display="block";
+  el.textContent=msg;
+}
+
+function nextPaint(){
+  return new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+}
+
+function setStepEnabled(stepNo,enabled){
+  const card=document.getElementById(`step${stepNo}Card`);
+  if(card)card.classList.toggle("locked",!enabled);
+}
+
+function refreshStepState(){
+  const hasStock=!!stockWbExcel;
+  const hasVendor=vendorFiles.size>0;
+  setStepEnabled(2,hasStock);
+  setStepEnabled(3,hasStock&&hasVendor);
+  document.querySelectorAll('#step2Card input').forEach(el=>el.disabled=!hasStock);
+  const processBtn=document.getElementById("processBtn");
+  if(processBtn)processBtn.disabled=!(hasStock&&hasVendor);
+}
+
+function updateProgress(kind,pct,title,detail){
+  const safe=Math.max(0,Math.min(100,Math.round(pct)));
+  const prefix=kind==="download"?"download":"match";
+  const box=document.getElementById(`${prefix}ProgressBox`);
+  if(box)box.style.display="block";
+  document.getElementById(`${prefix}ProgressBar`).style.width=`${safe}%`;
+  document.getElementById(`${prefix}ProgressPct`).textContent=`${safe}%`;
+  document.getElementById(`${prefix}ProgressTitle`).textContent=title||"진행 중";
+  document.getElementById(`${prefix}ProgressDetail`).textContent=detail||"";
+}
+function escapeHtml(v){
+  return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+function escapeCsv(v){return `"${String(v??"").replace(/"/g,'""')}"`;}
+function normalizeVendorName(v){return String(v||"").replace(/\s+/g,"");}
+function normalizeSimple(v){return txt(v).toUpperCase().trim();}
+
+/*
+  미매칭 문구 판정
+  - 채우기 없음 / 흰색: "매칭안됨"
+  - 흰색 외 배경색: "거래처 재고"
+  정상 매칭된 경우에는 이 함수를 사용하지 않고 실제 재고 수량을 입력합니다.
+*/
+function isWhiteOrNoFill(cell){
+  const fill=cell?.fill;
+
+  // 채우기가 없거나 ExcelJS 기본값인 경우
+  if(!fill || fill.type!=="pattern" || !fill.pattern || fill.pattern==="none"){
+    return true;
+  }
+
+  // 단색 채우기가 아닌 패턴 채우기는 색상이 적용된 것으로 판단
+  if(fill.pattern!=="solid"){
+    return false;
+  }
+
+  const color=fill.fgColor || {};
+
+  // 색상 정보 자체가 없으면 채우기 없음으로 판단
+  if(color.argb==null && color.rgb==null && color.theme==null && color.indexed==null){
+    return true;
+  }
+
+  // ARGB/RGB 직접 지정 흰색
+  const rawArgb=String(color.argb || color.rgb || "").toUpperCase().replace(/^#/,"");
+  const rgb=rawArgb.length===8 ? rawArgb.slice(2) : rawArgb;
+  if(rgb==="FFFFFF"){
+    return true;
+  }
+
+  // Excel 테마 0(Light 1)은 기본 흰색
+  // 음수 tint가 있으면 회색 계열로 어두워진 색이므로 색상 적용으로 판단
+  if(Number(color.theme)===0){
+    const tint=Number(color.tint ?? 0);
+    return !Number.isFinite(tint) || tint>=0;
+  }
+
+  // Excel 색상 인덱스: 9=흰색, 64=자동색상
+  if(Number(color.indexed)===9 || Number(color.indexed)===64){
+    return true;
+  }
+
+  return false;
+}
+
+function getUnmatchedText(cell){
+  return isWhiteOrNoFill(cell) ? "매칭안됨" : "거래처 재고";
+}
+
+function normalizeSinabroCode(v){
+  return txt(v)
+    .toUpperCase()
+    .replace(/\s+/g,"")
+    .replace(/^S\.A\./,"")
+    .replace(/^\d+\./,"");
+}
+
+function normalizeSinabroSize(v){
+  const s=txt(v).toUpperCase().replace(/\s+/g,"");
+  const map={
+    "26":"S","26(S)":"S","S":"S",
+    "28":"M","28(M)":"M","M":"M",
+    "30":"L","30(L)":"L","L":"L",
+    "32":"XL","32(XL)":"XL","XL":"XL",
+    "34":"2XL","34(2XL)":"2XL","2XL":"2XL",
+    "36":"3XL","36(3XL)":"3XL","3XL":"3XL"
+  };
+  return map[s] || s;
+}
+
+
+function isAllowedExcelFile(file,allowCsv=true){
+  if(!file)return false;
+  const ext=(file.name.split(".").pop()||"").toLowerCase();
+  return allowCsv ? ["xlsx","xls","csv"].includes(ext) : ["xlsx","xls"].includes(ext);
+}
+function extractDroppedFile(e){
+  const dt=e.dataTransfer;
+  if(!dt)return null;
+  if(dt.files && dt.files.length)return dt.files[0];
+  if(dt.items){
+    for(const item of dt.items){
+      if(item.kind==="file"){
+        const file=item.getAsFile();
+        if(file)return file;
+      }
+    }
+  }
+  return null;
+}
+function bindDropZone(el,onFile,allowCsv=true){
+  if(!el)return;
+  ["dragenter","dragover"].forEach(type=>el.addEventListener(type,e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    if(e.dataTransfer)e.dataTransfer.dropEffect="copy";
+    el.classList.add("dragover");
+  }));
+  ["dragleave","drop"].forEach(type=>el.addEventListener(type,e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    el.classList.remove("dragover");
+  }));
+  el.addEventListener("drop",async e=>{
+    const file=extractDroppedFile(e);
+    if(!file){
+      alert("드래그한 항목에서 실제 파일 정보를 읽지 못했습니다. PC에 저장된 엑셀 파일을 다시 끌어놓거나 파일 선택 버튼을 이용해 주세요.");
+      return;
+    }
+    if(!isAllowedExcelFile(file,allowCsv)){
+      alert(allowCsv ? "엑셀 또는 CSV 파일만 첨부할 수 있습니다." : "엑셀 파일(.xlsx, .xls)만 첨부할 수 있습니다.");
+      return;
+    }
+    await onFile(file);
+  });
+}
+async function loadStockFile(file){
+  if(!file)return;
+  if(!isAllowedExcelFile(file,false)){alert("엑셀 파일(.xlsx, .xls)만 첨부할 수 있습니다.");return;}
+  try{
+    const buffer=await file.arrayBuffer();
+    originalStockBuffer=buffer.slice(0);
+    originalStockFileName=file.name;
+    stockWbExcel=new ExcelJS.Workbook();
+    await stockWbExcel.xlsx.load(buffer);
+    setStatus(`${file.name} 업로드 완료 / 전체 시트 ${stockWbExcel.worksheets.length}개`);
+    refreshStepState();
+  }catch(err){
+    console.error(err);
+    alert("재고장 파일을 불러오지 못했습니다.");
+  }
+}
+
+function renderFixedVendors(){
+  document.getElementById("fixedVendorList").innerHTML=FIXED_VENDORS.map((name,index)=>`
+    <div class="vendor-row">
+      <div class="vendor-head">
+        <div class="vendor-name">${name}</div>
+        <div class="vendor-state" id="state-${index}">미첨부</div>
+      </div>
+      <div class="drop-zone" id="vendor-drop-${index}">
+        <input type="file" id="vendor-input-${index}" accept=".xlsx,.xls,.csv" onchange="setFixedVendorFile(${index},this.files[0])">
+        <div class="drop-guide"><strong>PC에 저장된 엑셀 파일을 여기에 끌어놓기</strong></div>
+      </div>
+      <div class="file-name" id="file-${index}"></div>
+    </div>
+  `).join("");
+  FIXED_VENDORS.forEach((name,index)=>{
+    bindDropZone(document.getElementById(`vendor-drop-${index}`),file=>{
+      setFixedVendorFile(index,file);
+    },true);
+  });
+}
+function setFixedVendorFile(index,file){
+  const name=FIXED_VENDORS[index];
+  if(!file){
+    vendorFiles.delete(name);
+    document.getElementById(`state-${index}`).textContent="미첨부";
+    document.getElementById(`file-${index}`).textContent="";
+    refreshStepState();
+    return;
+  }
+  vendorFiles.set(name,file);
+  document.getElementById(`state-${index}`).textContent="첨부 완료";
+  document.getElementById(`file-${index}`).textContent=file.name;
+  refreshStepState();
+}
+document.getElementById("stockFile").addEventListener("change",e=>loadStockFile(e.target.files[0]));
+bindDropZone(document.getElementById("stockDropZone"),loadStockFile,false);
+
+async function readWorkbook(file){
+  const buffer=await file.arrayBuffer();
+  return XLSX.read(new Uint8Array(buffer),{type:"array",cellDates:true,raw:false});
+}
+function sheetAoA(wb,sheetName){
+  return XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1,raw:false,defval:"",blankrows:false});
+}
+function findStockSheet(vendorName){
+  const target=normalizeVendorName(vendorName);
+  return stockWbExcel.worksheets.slice(1).find(ws=>normalizeVendorName(ws.name)===target) || null;
+}
+
+/* 케이디지 */
+function parseKdgItem(v){
+  let s=txt(v).toUpperCase().replace(/\s+/g,"").replace(/^S\.A\./,"").replace(/^\d+\./,"");
+  let length="기본";
+  const korLen=s.match(/\((숏|롱|기본)\)/);
+  if(korLen){length=korLen[1];s=s.replace(/\((숏|롱|기본)\)/g,"");}
+  s=s.replace(/^[^0-9]+/,"");
+  if(s.endsWith("SH")){length="숏";s=s.slice(0,-2);}
+  else if(s.endsWith("LO")){length="롱";s=s.slice(0,-2);}
+  return {code:s,length};
+}
+function kdgKey(name,size){
+  const item=parseKdgItem(name);
+  return `${item.code}||${item.length}||${normalizeSimple(size)}`;
+}
+function buildKdgLookup(wb){
+  const sheetNames=["여성복(사계)","여성복(겨울)","남성복(사계)","여성복(여름)","남성복(여름)","남녀공용(여름)","B상품","재고부족"];
+  const sizeCols={"S":4,"M":5,"L":6,"XL":7,"2XL":8,"3XL":9};
+  const sheetMaps={};
+  sheetNames.forEach(sheetName=>{
+    if(!wb.Sheets[sheetName])return;
+    const map=new Map();
+    const rows=sheetAoA(wb,sheetName);
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i]||[];
+      const item=txt(r[1]);
+      if(!item)continue;
+      Object.entries(sizeCols).forEach(([size,col])=>map.set(kdgKey(item,size),num(r[col-1])));
+    }
+    sheetMaps[sheetName]=map;
+  });
+  return {type:"kdg",sheetMaps};
+}
+function lookupKdg(lookup,name,size){
+  const item=parseKdgItem(name);
+  let search=[];
+  if(item.code.startsWith("7"))search=["여성복(사계)","여성복(겨울)","B상품","재고부족"];
+  else if(item.code.startsWith("0"))search=["남성복(사계)","B상품","재고부족"];
+  else if(item.code.startsWith("4"))search=["여성복(여름)","B상품","재고부족"];
+  else if(item.code.startsWith("5"))search=["남성복(여름)","남녀공용(여름)","B상품","재고부족"];
+  else search=["B상품","재고부족"];
+  const k=kdgKey(name,size);
+  for(const sheet of search){
+    const map=lookup.sheetMaps[sheet];
+    if(map && map.has(k))return {matched:true,value:map.get(k),sourceSheet:sheet};
+  }
+  return {matched:false};
+}
+
+/* 리자드 */
+function genericKey(name,size){return `${normalizeSimple(name).replace(/\s+/g,"").replace(/^S\.A\./,"").replace(/^\d+\./,"")}||${normalizeSimple(size)}`;}
+function buildLizardLookup(wb){
+  const rows=sheetAoA(wb,wb.SheetNames[0]);
+  const map=new Map();
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    if(txt(r[1])&&txt(r[2]))map.set(genericKey(r[1],r[2]),num(r[3]));
+    if(txt(r[12])&&txt(r[13]))map.set(genericKey(r[12],r[13]),num(r[14]));
+    if(txt(r[0])&&txt(r[2]))map.set(genericKey(r[0],r[2]),num(r[3]));
+  }
+  return {type:"map",map};
+}
+
+/* 리마인드 */
+function buildRemindLookup(wb){
+  const rows=sheetAoA(wb,wb.SheetNames[0]);
+  const map=new Map();
+  const sizes=["F","S","M","L","XL","2XL","3XL"];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const code=txt(r[2]);
+    if(!code)continue;
+    sizes.forEach((size,idx)=>map.set(`${code.trim()}||${size}`,num(r[3+idx])));
+  }
+  return {type:"rawMap",map};
+}
+
+/* 계란속노른자 */
+function buildEggYolkLookup(wb){
+  const rows=sheetAoA(wb,wb.SheetNames[0]);
+  const map=new Map();
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const code=txt(r[0]), size=txt(r[2]);
+    if(code&&size)map.set(`${code.trim()}||${size.trim()}`,num(r[4]));
+  }
+  return {type:"rawMap",map};
+}
+
+/* 뉴행 */
+function buildNewhaengLookup(wb){
+  const sheet=wb.Sheets["재고표"] ? "재고표" : wb.SheetNames[0];
+  const rows=sheetAoA(wb,sheet);
+  const map=new Map();
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const code=txt(r[0]), size=txt(r[2]);
+    if(code&&size)map.set(`${normalizeSimple(code)}||${normalizeSimple(size)}`,num(r[4]));
+  }
+  return {type:"upperMap",map};
+}
+
+/* 시나브로 */
+function parseSinabroQty(v){
+  const s=txt(v);
+  if(["일시품절","품절","완판"].includes(s))return 0;
+  return num(s);
+}
+function buildSinabroLookup(wb){
+  const targetSheets=["주메인품목","DF(봄 가을)","DW(겨울)","DM(여름)&DS"];
+  const sheetMaps={};
+  targetSheets.forEach(sheetName=>{
+    if(!wb.Sheets[sheetName])return;
+    const rows=sheetAoA(wb,sheetName);
+    const map=new Map();
+    const sizes=["S","M","L","XL","2XL","3XL"];
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i]||[];
+      const code=txt(r[0]);
+      if(!code)continue;
+      sizes.forEach((size,idx)=>map.set(`${normalizeSinabroCode(code)}||${size}`,parseSinabroQty(r[2+idx])));
+    }
+    sheetMaps[sheetName]=map;
+  });
+  return {type:"sinabro",sheetMaps};
+}
+function lookupSinabro(lookup,name,size){
+  const code=normalizeSinabroCode(name), sz=normalizeSinabroSize(size);
+  let search;
+  if(code.startsWith("DF"))search=["DF(봄 가을)","주메인품목"];
+  else if(code.startsWith("DW"))search=["DW(겨울)","주메인품목"];
+  else if(code.startsWith("DM"))search=["DM(여름)&DS","주메인품목"];
+  else if(code.startsWith("DS"))search=["주메인품목","DM(여름)&DS"];
+  else search=["주메인품목","DF(봄 가을)","DW(겨울)","DM(여름)&DS"];
+  const k=`${code}||${sz}`;
+  for(const sheet of search){
+    const map=lookup.sheetMaps[sheet];
+    if(map&&map.has(k))return {matched:true,value:map.get(k),sourceSheet:sheet};
+  }
+  return {matched:false};
+}
+
+/* 신안어패럴 */
+function parseShinanItem(v){
+  const source=txt(v);
+  const main=source.split("[")[0].trim();
+  const m=main.match(/^(.*?)\s*-\s*(F|S|M|L|XL|2XL|3XL|4XL|5XL)$/i);
+  if(!m)return null;
+  let part=m[1].trim();
+  const size=m[2].toUpperCase();
+  let length="단일기장";
+  const lm=part.match(/^(숏|기본|롱|일반)★(.*)$/);
+  if(lm){
+    length=lm[1]==="일반" ? "단일기장" : lm[1];
+    part=lm[2].trim();
+  }
+  const code=part.replace(/\s*\([^)]*\)\s*$/,"").trim();
+  return {code,length,size};
+}
+function buildShinanLookup(wb){
+  const sheet=wb.Sheets["재고현황"] ? "재고현황" : wb.SheetNames[0];
+  const rows=sheetAoA(wb,sheet);
+  const map=new Map();
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const parsed=parseShinanItem(r[1]);
+    if(!parsed)continue;
+    const k=`${normalizeSimple(parsed.code)}||${parsed.length}||${parsed.size}`;
+    map.set(k,num(r[2]));
+  }
+  return {type:"shinan",map};
+}
+
+function buildLookup(vendorName,wb){
+  switch(normalizeVendorName(vendorName)){
+    case "케이디지": return buildKdgLookup(wb);
+    case "리자드": return buildLizardLookup(wb);
+    case "리마인드": return buildRemindLookup(wb);
+    case "계란속노른자": return buildEggYolkLookup(wb);
+    case "뉴행": return buildNewhaengLookup(wb);
+    case "시나브로": return buildSinabroLookup(wb);
+    case "신안어패럴": return buildShinanLookup(wb);
+    default: return null;
+  }
+}
+function findInLookup(vendorName,lookup,name,length,size){
+  const vn=normalizeVendorName(vendorName);
+  if(vn==="케이디지")return lookupKdg(lookup,name,size);
+  if(vn==="시나브로")return lookupSinabro(lookup,name,size);
+  if(vn==="신안어패럴"){
+    const stockLength=txt(length).replace(/\s+/g,"") || "단일기장";
+    const k=`${normalizeSimple(name)}||${stockLength}||${normalizeSimple(size)}`;
+    return lookup.map.has(k)?{matched:true,value:lookup.map.get(k)}:{matched:false};
+  }
+  if(vn==="리마인드" || vn==="계란속노른자"){
+    const k=`${txt(name).trim()}||${txt(size).trim()}`;
+    return lookup.map.has(k)?{matched:true,value:lookup.map.get(k)}:{matched:false};
+  }
+  if(vn==="뉴행"){
+    const k=`${normalizeSimple(name)}||${normalizeSimple(size)}`;
+    return lookup.map.has(k)?{matched:true,value:lookup.map.get(k)}:{matched:false};
+  }
+  const k=genericKey(name,size);
+  return lookup.map.has(k)?{matched:true,value:lookup.map.get(k)}:{matched:false};
+}
+
+async function processAll(){
+  if(!stockWbExcel){alert("재고장 원본 파일을 첨부해주세요.");return;}
+  if(!vendorFiles.size){alert("거래처 재고표를 한 개 이상 첨부해주세요.");return;}
+
+  resultRows=[];
+  const messages=[];
+  let processedVendors=0;
+  const processBtn=document.getElementById("processBtn");
+  processBtn.disabled=true;
+  processBtn.textContent="재고 매칭 진행 중...";
+  document.getElementById("downloadExcelBtn").disabled=true;
+  document.getElementById("downloadCsvBtn").disabled=true;
+  setStepEnabled(5,false);
+  setStepEnabled(6,false);
+  updateProgress("match",0,"처리 대상 확인 중","첨부하지 않은 거래처는 제외 후 계산을 실행합니다.");
+  await nextPaint();
+
+  try{
+    const jobs=[];
+    for(const [vendorName,file] of vendorFiles.entries()){
+      const stockSheet=findStockSheet(vendorName);
+      if(!stockSheet){
+        messages.push(`${vendorName}: 재고장 탭 없음`);
+        continue;
+      }
+      const rowNumbers=[];
+      stockSheet.eachRow({includeEmpty:false},(row,rowNumber)=>{
+        if(rowNumber>1)rowNumbers.push(rowNumber);
+      });
+      jobs.push({vendorName,file,stockSheet,rowNumbers});
+    }
+
+    const totalRows=jobs.reduce((sum,j)=>sum+j.rowNumbers.length,0) || 1;
+    let completedRows=0;
+
+    for(let vendorIndex=0;vendorIndex<jobs.length;vendorIndex++){
+      const {vendorName,file,stockSheet,rowNumbers}=jobs[vendorIndex];
+      updateProgress("match",completedRows/totalRows*100,`${vendorName} 재고표 읽는 중`,`거래처 ${vendorIndex+1} / ${jobs.length}`);
+      await nextPaint();
+
+      const wb=await readWorkbook(file);
+      const lookup=buildLookup(vendorName,wb);
+      if(!lookup){
+        messages.push(`${vendorName}: 전용 계산 규칙 없음`);
+        completedRows+=rowNumbers.length;
+        continue;
+      }
+
+      processedVendors++;
+      let currentName="", currentLength="";
+      for(let i=0;i<rowNumbers.length;i++){
+        const rowNumber=rowNumbers[i];
+        const row=stockSheet.getRow(rowNumber);
+        const d=txt(row.getCell(4).value);
+        const e=txt(row.getCell(5).value);
+        const f=txt(row.getCell(6).value);
+        const g=row.getCell(7);
+
+        if(d)currentName=d;
+        if(e)currentLength=e;
+
+        const name=currentName;
+        const length=currentLength;
+        const size=f;
+        if(name && size){
+          const found=findInLookup(vendorName,lookup,name,length,size);
+          const unmatchedText=getUnmatchedText(g);
+          const outputValue=found.matched ? found.value : unmatchedText;
+          g.value=outputValue;
+          resultRows.push({
+            vendor:vendorName,
+            sheet:stockSheet.name,
+            sourceSheet:found.sourceSheet||"-",
+            rowNo:rowNumber,
+            name,
+            length:length||"-",
+            size,
+            stock:outputValue,
+            status:found.matched ? "매칭완료" : unmatchedText
+          });
+        }
+
+        completedRows++;
+        if(i%100===0 || i===rowNumbers.length-1){
+          updateProgress("match",completedRows/totalRows*100,`${vendorName} 매칭 중`,`거래처 ${vendorIndex+1} / ${jobs.length} · 행 ${i+1} / ${rowNumbers.length}
+전체 ${completedRows.toLocaleString()} / ${totalRows.toLocaleString()}행`);
+          await nextPaint();
+        }
+      }
+    }
+
+    updateProgress("match",99,"결과 화면 정리 중","매칭 결과를 표로 정리하고 있습니다.");
+    await nextPaint();
+    renderResult(processedVendors);
+    const matched=resultRows.filter(r=>r.status==="매칭완료").length;
+    const unmatched=resultRows.filter(r=>r.status==="매칭안됨").length;
+    const vendorStock=resultRows.filter(r=>r.status==="거래처 재고").length;
+    updateProgress("match",100,"재고 매칭 완료",`거래처 ${processedVendors}개 · 매칭 ${matched.toLocaleString()}건 · 매칭안됨 ${unmatched.toLocaleString()}건 · 거래처 재고 ${vendorStock.toLocaleString()}건`);
+    setStatus(`완료: 거래처 ${processedVendors}개 처리 / 매칭 ${matched}건 / 매칭안됨 ${unmatched}건 / 거래처 재고 ${vendorStock}건${messages.length?`\n${messages.join("\n")}`:""}`);
+    setStepEnabled(5,true);
+    setStepEnabled(6,true);
+    document.getElementById("downloadExcelBtn").disabled=false;
+    document.getElementById("downloadCsvBtn").disabled=false;
+  }catch(err){
+    console.error(err);
+    updateProgress("match",0,"처리 오류 발생",err.message||"첨부 파일 형식과 시트 구성을 확인해주세요.");
+    setStatus("처리 중 오류가 발생했습니다.");
+    alert("처리 중 오류가 발생했습니다. 첨부 파일 형식과 시트 구성을 확인해주세요.");
+  }finally{
+    processBtn.textContent="전체 거래처 재고 매칭 실행";
+    refreshStepState();
+  }
+}
+
+function renderResult(vendorCount){
+  const total=resultRows.length;
+  const matched=resultRows.filter(r=>r.status==="매칭완료").length;
+  document.getElementById("totalCnt").textContent=total;
+  document.getElementById("matchedCnt").textContent=matched;
+  document.getElementById("unmatchedCnt").textContent=total-matched;
+  document.getElementById("vendorCnt").textContent=vendorCount;
+
+  let html="<table><thead><tr>";
+  ["상태","거래처","재고장 탭","조회 시트","행번호","사입명(D열)","기장(E열)","사이즈(F열)","G열 입력 재고"].forEach(h=>html+=`<th>${h}</th>`);
+  html+="</tr></thead><tbody>";
+  resultRows.slice(0,1000).forEach(r=>{
+    html+=`<tr>
+      <td class="${r.status==="매칭완료"?"ok":"warn"}">${escapeHtml(r.status)}</td>
+      <td>${escapeHtml(r.vendor)}</td>
+      <td>${escapeHtml(r.sheet)}</td>
+      <td>${escapeHtml(r.sourceSheet)}</td>
+      <td>${r.rowNo}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.length)}</td>
+      <td>${escapeHtml(r.size)}</td>
+      <td>${escapeHtml(r.stock)}</td>
+    </tr>`;
+  });
+  html+="</tbody></table>";
+  document.getElementById("resultTable").innerHTML=html;
+}
+
+const XML_NS="http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+const REL_NS="http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+
+function parseXml(xmlText,label){
+  const doc=new DOMParser().parseFromString(xmlText,"application/xml");
+  const err=doc.getElementsByTagName("parsererror")[0];
+  if(err)throw new Error(`${label||"XML"} 파싱 오류: ${err.textContent}`);
+  return doc;
+}
+
+function normalizeZipPath(baseDir,target){
+  let path=String(target||"").replace(/\\/g,"/");
+  if(path.startsWith("/"))return path.slice(1);
+  const parts=(baseDir+"/"+path).split("/");
+  const out=[];
+  for(const part of parts){
+    if(!part || part===".")continue;
+    if(part==="..")out.pop();
+    else out.push(part);
+  }
+  return out.join("/");
+}
+
+async function getWorksheetPathMap(zip){
+  const workbookFile=zip.file("xl/workbook.xml");
+  const relsFile=zip.file("xl/_rels/workbook.xml.rels");
+  if(!workbookFile || !relsFile)throw new Error("통합문서 구조를 찾지 못했습니다.");
+
+  const workbookDoc=parseXml(await workbookFile.async("string"),"workbook.xml");
+  const relsDoc=parseXml(await relsFile.async("string"),"workbook.xml.rels");
+  const relMap=new Map();
+  Array.from(relsDoc.getElementsByTagName("Relationship")).forEach(rel=>{
+    relMap.set(rel.getAttribute("Id"),rel.getAttribute("Target"));
+  });
+
+  const map=new Map();
+  Array.from(workbookDoc.getElementsByTagNameNS(XML_NS,"sheet")).forEach(sheet=>{
+    const name=sheet.getAttribute("name");
+    const rid=sheet.getAttributeNS(REL_NS,"id") || sheet.getAttribute("r:id");
+    const target=relMap.get(rid);
+    if(name && target)map.set(name,normalizeZipPath("xl",target));
+  });
+  return map;
+}
+
+function columnNumber(ref){
+  const letters=String(ref).match(/^[A-Z]+/i)?.[0]?.toUpperCase()||"";
+  let n=0;
+  for(const ch of letters)n=n*26+(ch.charCodeAt(0)-64);
+  return n;
+}
+
+function findDirectChildByTag(parent,localName){
+  return Array.from(parent.childNodes).find(n=>n.nodeType===1 && n.localName===localName) || null;
+}
+
+function setWorksheetCellValue(xmlText,cellRef,value){
+  const doc=parseXml(xmlText,"worksheet.xml");
+  const sheetData=doc.getElementsByTagNameNS(XML_NS,"sheetData")[0];
+  if(!sheetData)throw new Error("워크시트의 sheetData를 찾지 못했습니다.");
+
+  const rowNo=Number(String(cellRef).match(/\d+$/)?.[0]);
+  if(!rowNo)throw new Error(`잘못된 셀 주소입니다: ${cellRef}`);
+
+  let row=Array.from(sheetData.getElementsByTagNameNS(XML_NS,"row"))
+    .find(r=>Number(r.getAttribute("r"))===rowNo);
+
+  if(!row){
+    row=doc.createElementNS(XML_NS,"row");
+    row.setAttribute("r",String(rowNo));
+    const next=Array.from(sheetData.children).find(r=>Number(r.getAttribute("r"))>rowNo);
+    sheetData.insertBefore(row,next||null);
+  }
+
+  let cell=Array.from(row.getElementsByTagNameNS(XML_NS,"c"))
+    .find(c=>c.getAttribute("r").toUpperCase()===cellRef.toUpperCase());
+
+  if(!cell){
+    cell=doc.createElementNS(XML_NS,"c");
+    cell.setAttribute("r",cellRef.toUpperCase());
+    const targetCol=columnNumber(cellRef);
+    const next=Array.from(row.children).find(c=>c.localName==="c" && columnNumber(c.getAttribute("r"))>targetCol);
+    row.insertBefore(cell,next||null);
+  }
+
+  while(cell.firstChild)cell.removeChild(cell.firstChild);
+
+  const isNumber=typeof value==="number" && Number.isFinite(value);
+  if(isNumber){
+    cell.removeAttribute("t");
+    const v=doc.createElementNS(XML_NS,"v");
+    v.textContent=String(value);
+    cell.appendChild(v);
+  }else{
+    cell.setAttribute("t","inlineStr");
+    const is=doc.createElementNS(XML_NS,"is");
+    const t=doc.createElementNS(XML_NS,"t");
+    const str=String(value??"");
+    if(/^\s|\s$/.test(str))t.setAttributeNS("http://www.w3.org/XML/1998/namespace","xml:space","preserve");
+    t.textContent=str;
+    is.appendChild(t);
+    cell.appendChild(is);
+  }
+
+  return new XMLSerializer().serializeToString(doc);
+}
+
+async function buildOriginalPreservedWorkbook(){
+  if(!originalStockBuffer)throw new Error("원본 재고장 파일이 없습니다.");
+  const zip=await JSZip.loadAsync(originalStockBuffer);
+  const pathMap=await getWorksheetPathMap(zip);
+
+  const updatesBySheet=new Map();
+  resultRows.forEach(item=>{
+    if(!updatesBySheet.has(item.sheet))updatesBySheet.set(item.sheet,[]);
+    updatesBySheet.get(item.sheet).push({rowNo:item.rowNo,value:item.stock});
+  });
+
+  const sheetEntries=Array.from(updatesBySheet.entries());
+  let completedUpdates=0;
+  const totalUpdates=sheetEntries.reduce((sum,[,updates])=>sum+updates.length,0) || 1;
+  for(let sheetIndex=0;sheetIndex<sheetEntries.length;sheetIndex++){
+    const [sheetName,updates]=sheetEntries[sheetIndex];
+    updateProgress("download",5+(completedUpdates/totalUpdates)*85,`${sheetName} 탭 반영 중`,`탭 ${sheetIndex+1} / ${sheetEntries.length} · ${completedUpdates.toLocaleString()} / ${totalUpdates.toLocaleString()}셀`);
+    await nextPaint();
+    const sheetPath=pathMap.get(sheetName);
+    if(!sheetPath)throw new Error(`${sheetName} 탭의 XML 경로를 찾지 못했습니다.`);
+    const sheetFile=zip.file(sheetPath);
+    if(!sheetFile)throw new Error(`${sheetName} 탭 파일을 찾지 못했습니다.`);
+
+    let xml=await sheetFile.async("string");
+    updates.sort((a,b)=>a.rowNo-b.rowNo);
+    for(let i=0;i<updates.length;i++){
+      const update=updates[i];
+      xml=setWorksheetCellValue(xml,`G${update.rowNo}`,update.value);
+      completedUpdates++;
+      if(i%200===0 || i===updates.length-1){
+        updateProgress("download",5+(completedUpdates/totalUpdates)*85,`${sheetName} 탭 반영 중`,`탭 ${sheetIndex+1} / ${sheetEntries.length} · ${completedUpdates.toLocaleString()} / ${totalUpdates.toLocaleString()}셀`);
+        await nextPaint();
+      }
+    }
+    zip.file(sheetPath,xml);
+  }
+
+  updateProgress("download",92,"엑셀 파일 압축 중","원본 양식을 유지한 결과 파일을 생성하고 있습니다.");
+  await nextPaint();
+  return zip.generateAsync({
+    type:"blob",
+    mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    compression:"DEFLATE",
+    compressionOptions:{level:6}
+  });
+}
+
+async function downloadModified(){
+  if(!stockWbExcel || !originalStockBuffer || !resultRows.length){
+    alert("먼저 전체 거래처 재고 매칭을 실행해주세요.");
+    return;
+  }
+
+  const btn=document.getElementById("downloadExcelBtn");
+  btn.disabled=true;
+  btn.textContent="결과 파일 생성 중...";
+  updateProgress("download",0,"결과 파일 생성 준비 중","원본 파일 구조를 확인하고 있습니다.");
+  await nextPaint();
+  try{
+    setStatus("원본 양식을 유지한 결과 파일을 생성하고 있습니다...");
+    const blob=await buildOriginalPreservedWorkbook();
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    const base=(originalStockFileName||"재고장.xlsx").replace(/\.(xlsx|xls)$/i,"");
+    a.download=`${base}_G열재고반영.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    updateProgress("download",100,"결과 파일 다운로드 완료","첫 번째 탭과 원본 양식을 유지하고 거래처 탭 G열 값만 반영했습니다.");
+    setStatus("다운로드 완료: 첫 번째 탭과 원본 양식은 수정하지 않고 거래처 탭 G열 값만 반영했습니다.");
+  }catch(err){
+    console.error(err);
+    setStatus(`다운로드 생성 오류: ${err.message}`);
+    updateProgress("download",0,"결과 파일 생성 오류",err.message||"개발자 도구의 오류 내용을 확인해주세요.");
+    alert("결과 파일 생성 중 오류가 발생했습니다. 개발자 도구의 오류 내용을 확인해주세요.");
+  }finally{
+    btn.disabled=false;
+    btn.textContent="첫 번째 탭 유지 재고장 다운로드";
+  }
+}
+function downloadResultCsv(){
+  if(!resultRows.length){alert("먼저 전체 거래처 재고 매칭을 실행해주세요.");return;}
+  const rows=[["상태","거래처","재고장 탭","조회 시트","행번호","사입명","기장","사이즈","입력 재고"]];
+  resultRows.forEach(r=>rows.push([r.status,r.vendor,r.sheet,r.sourceSheet,r.rowNo,r.name,r.length,r.size,r.stock]));
+  const csv="\uFEFF"+rows.map(row=>row.map(escapeCsv).join(",")).join("\r\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="거래처별_재고장_매칭결과.csv";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(a.href);
+}
+
+renderFixedVendors();
+refreshStepState();
+</script>
+</body>
+</html>
