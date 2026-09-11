@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORESTFIT 통합 상품 대응 · CS 전달 관리 V2.15</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<style>
+:root{
+  --bg:#f4f5f2; --card:#fff; --line:#dfe3dc; --text:#202521; --sub:#707871;
+  --dark:#263229; --soft:#eef1ec; --red:#b83832; --redbg:#fff0ee; --amber:#9b6614; --amberbg:#fff7df;
+  --green:#39704a; --greenbg:#edf7ef; --blue:#315f8a; --bluebg:#edf4fb;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif}
+button,input,select,textarea{font:inherit}
+.container{max-width:1680px;margin:0 auto;padding:30px 24px 70px}
+.header{background:var(--dark);color:#fff;border-radius:18px;padding:28px 30px;margin-bottom:18px;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+.brand{font-size:12px;letter-spacing:.16em;opacity:.7;margin-bottom:8px}.header h1{font-size:27px;margin:0 0 8px}.header p{margin:0;color:#dce2dd;font-size:14px;line-height:1.65}.version{font-size:12px;background:#ffffff1f;border:1px solid #ffffff2e;border-radius:999px;padding:7px 11px;white-space:nowrap}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 3px 14px rgba(28,36,30,.04)}
+.upload-card h3,.settings h3{font-size:16px;margin:0 0 7px}.upload-card p{font-size:12px;color:var(--sub);line-height:1.5;margin:0 0 12px}.upload-box{border:1.5px dashed #cbd1c9;background:#fafbfa;border-radius:12px;padding:13px;transition:.15s ease}.upload-box input{width:100%}.upload-box::after{content:"파일을 이 영역에 끌어다 놓아도 됩니다";display:block;margin-top:8px;font-size:11px;color:#8a928b;text-align:center}.upload-box.dragover{border-color:#315f8a;background:#edf4fb;box-shadow:0 0 0 3px rgba(49,95,138,.10)}.upload-box.dragover::after{content:"여기에 놓으면 바로 첨부됩니다";color:#315f8a;font-weight:800}.file-state{font-size:12px;margin-top:8px;color:var(--sub);min-height:18px}.file-state.ok{color:var(--green);font-weight:700}.file-state.bad{color:var(--red);font-weight:700}
+.tag{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800;margin-right:4px;white-space:nowrap}.tag.prev{background:#eef0fb;color:#5b5f98}.tag.stock{background:var(--redbg);color:var(--red)}.tag.gs{background:var(--bluebg);color:var(--blue)}.tag.all{background:#f0edfb;color:#5d4b97}.tag.bflow{background:#eaf6f3;color:#2d6f64}.tag.good{background:var(--greenbg);color:var(--green)}.tag.warn{background:var(--amberbg);color:var(--amber)}.tag.gray{background:#f0f1ef;color:#626862}.tag.red{background:var(--redbg);color:var(--red)}.tag.overdue{background:#b42318;color:#fff;box-shadow:0 0 0 1px rgba(180,35,24,.08)}
+.settings{margin-top:14px}.settings-grid{display:grid;grid-template-columns:180px 1fr 220px;gap:12px;align-items:start}.settings label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.settings input,.settings textarea{width:100%;border:1px solid #d7dcd5;border-radius:9px;padding:9px 10px;background:#fff}.settings textarea{height:70px;resize:vertical}.hint{font-size:11px;color:var(--sub);line-height:1.5;margin-top:5px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer;background:var(--dark);color:#fff}.btn.secondary{background:#68736b}.btn.light{background:#eef1ed;color:#364239;border:1px solid #d9ded8}.btn.red{background:#9d403a}.btn:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(8,minmax(120px,1fr));gap:10px;margin:15px 0}.stat{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px}.stat .label{font-size:11px;color:var(--sub);font-weight:700}.stat .num{font-size:23px;font-weight:900;margin-top:4px}.stat.danger .num{color:var(--red)}.stat.warn .num{color:var(--amber)}
+.toolbar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.tabs{display:flex;gap:5px;flex-wrap:wrap}.tab{border:1px solid #dde1db;background:#f7f8f6;color:#536057;border-radius:999px;padding:8px 11px;cursor:pointer;font-size:12px;font-weight:800}.tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}.sort-box{display:flex;align-items:center;gap:6px;margin-left:auto}.sort-box label{font-size:12px;font-weight:800;color:#59635c;white-space:nowrap}.sort-box select{border:1px solid #d9ded8;border-radius:10px;padding:9px 30px 9px 10px;background:#fff;color:#2b342e;font-weight:700}.search{min-width:280px;max-width:430px;flex:1}.search input{width:100%;border:1px solid #d9ded8;border-radius:10px;padding:9px 11px}
+.workflow-tabs-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}.workflow-tabs-label{font-size:11px;font-weight:900;color:#6b756d;margin-bottom:8px}.workflow-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.workflow-tab{border:1px solid #d9ded8;background:#f7f8f6;color:#48534b;border-radius:11px;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:900;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px}.workflow-tab strong{font-size:14px}.workflow-tab .workflow-count{min-width:26px;height:24px;padding:0 7px;border-radius:999px;background:#e9ede8;color:#4e5951;display:inline-flex;align-items:center;justify-content:center;font-size:11px}.workflow-tab.active{background:#263229;color:#fff;border-color:#263229}.workflow-tab.active .workflow-count{background:#ffffff26;color:#fff}.workflow-tab[data-workflow="alternative"].active{background:#8a5b12;border-color:#8a5b12}.workflow-tab[data-workflow="resolved"].active{background:#39704a;border-color:#39704a}.workflow-move-notice{display:none;margin:0 0 10px;padding:10px 13px;border:1px solid #e7c27f;border-radius:10px;background:#fff8e8;color:#76520d;font-size:12px;font-weight:800;line-height:1.5}.workflow-move-notice.show{display:block}.toolbar-subtitle{width:100%;font-size:10px;font-weight:900;color:#818981;margin-bottom:-3px}.inbound-unknown-btn{border:1px solid #d59c47;background:#fff8e8;color:#7c5715;border-radius:8px;padding:9px 11px;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap}.inbound-unknown-btn:hover{background:#fff1cf}.moved-note{margin-top:7px;padding:8px 10px;border-radius:8px;background:#fff4d6;color:#805910;font-size:10px;font-weight:900;line-height:1.45}@media(max-width:760px){.workflow-tabs{grid-template-columns:1fr}.workflow-tab{text-align:left}}
+.table-card{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden}.table-wrap{overflow:auto;max-height:70vh}.data-table{border-collapse:separate;border-spacing:0;width:100%;min-width:2050px;font-size:12px}.data-table th{position:sticky;top:0;z-index:3;background:#ecefeb;color:#38423b;font-weight:900;border-bottom:1px solid #d5dad3;padding:9px 8px;white-space:nowrap;text-align:center}.data-table td{border-bottom:1px solid #edf0ec;padding:8px;vertical-align:top;text-align:center;background:#fff}.data-table tr:hover td{background:#fafbf9}.data-table tr.problem td:first-child{box-shadow:inset 4px 0 var(--red)}.left{text-align:left!important}.nowrap{white-space:nowrap}.order-no{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;white-space:nowrap}.product{max-width:290px;min-width:220px}.option{max-width:180px;min-width:135px}.cs-summary{max-width:310px;min-width:240px;line-height:1.55;color:#3c4740;text-align:left}.mini-input,.mini-select{width:100%;min-width:120px;border:1px solid #d7dcd6;border-radius:8px;padding:7px 8px;background:#fff}.mini-textarea{width:100%;min-width:190px;height:57px;border:1px solid #d7dcd6;border-radius:8px;padding:7px 8px;resize:vertical;background:#fff}.shared-note{font-size:10px;color:#7b837d;margin-top:4px}.row-actions button{border:1px solid #d9ded8;background:#f7f8f6;border-radius:7px;padding:6px 8px;cursor:pointer;font-size:11px;white-space:nowrap}
+.notice-needed{color:var(--red);font-weight:900}.notice-check{color:var(--amber);font-weight:900}.notice-done{color:var(--green);font-weight:900}.ship-bad{color:var(--red);font-weight:900}.ship-warn{color:var(--amber);font-weight:900}.ship-good{color:var(--green);font-weight:900}
+.empty{padding:65px 20px;text-align:center;color:#858c86}.empty b{display:block;color:#465149;margin-bottom:8px}
+.modal-back{position:fixed;inset:0;background:rgba(16,23,18,.45);display:none;align-items:center;justify-content:center;padding:25px;z-index:50}.modal-back.show{display:flex}.modal{background:#fff;width:min(900px,95vw);max-height:86vh;overflow:auto;border-radius:16px;border:1px solid #dfe3dd;box-shadow:0 20px 80px rgba(0,0,0,.25)}.modal-head{position:sticky;top:0;background:#fff;padding:17px 20px;border-bottom:1px solid #e5e8e3;display:flex;justify-content:space-between;align-items:center;z-index:1}.modal-head h3{margin:0;font-size:17px}.modal-head button{border:0;background:#eef0ed;border-radius:8px;padding:7px 10px;cursor:pointer}.modal-body{padding:18px 20px}.cs-item{border:1px solid #e3e6e1;border-radius:11px;padding:12px;margin-bottom:10px;background:#fafbfa}.cs-meta{font-size:11px;color:#6d756e;margin-bottom:7px;font-weight:800}.cs-memo{white-space:pre-wrap;line-height:1.65;font-size:13px}.section-note{margin:15px 0 0;padding:12px 14px;border-radius:10px;background:#f3f5f2;color:#59625b;font-size:12px;line-height:1.6}
+.badge-count{display:inline-block;margin-top:5px;background:#f1f2f0;color:#596159;border-radius:7px;padding:3px 6px;font-size:10px;font-weight:800}
+
+.product-manage-table{min-width:2650px}.product-manage-table td{vertical-align:middle}.group-product{min-width:250px;max-width:320px}.group-option{min-width:170px;max-width:230px}.group-supplier{min-width:130px}.group-summary{min-width:260px;max-width:340px;text-align:left;line-height:1.5}.wide-input{min-width:165px}.wide-textarea{min-width:220px;height:62px}.target-check{transform:scale(1.15)}.input-missing{border-color:#df7770!important;background:#fff7f6!important}.input-attention{border-color:#e3a23a!important;background:#fff9e8!important;box-shadow:0 0 0 2px rgba(227,162,58,.14)!important}.input-first{border-color:#d85f56!important;background:#fff1ef!important;box-shadow:0 0 0 2px rgba(216,95,86,.13)!important}.required-note{font-size:10px;color:var(--red);font-weight:800;margin-top:4px}.order-list{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;line-height:1.6}.group-status{min-width:145px}.route-mini{margin-top:5px}.response-guide{font-size:10px;color:#6f786f;margin-top:5px;line-height:1.4}.auto-btn{border:1px solid #cfd5cf;background:#f4f6f3;border-radius:7px;padding:5px 7px;cursor:pointer;font-size:10px;font-weight:800;margin-top:5px}.input-ok{color:var(--green);font-size:10px;font-weight:800;margin-top:4px}.inbound-tools{display:flex;align-items:center;gap:6px;margin-top:5px;justify-content:center}.inbound-unknown-label{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:#687168;white-space:nowrap}.inbound-unknown-label input{width:auto;margin:0}.auto-note{font-size:10px;color:#6d756e;margin-top:4px;line-height:1.35}.cs-auto{background:#fbfcfa}.cs-manual{background:#fffaf0;border-color:#d9b56e!important}
+
+
+.choice-chips{display:flex;gap:7px;flex-wrap:wrap}
+.choice-chip{border:1px solid #d7dcd6;background:#fff;color:#4c574f;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800;cursor:pointer;transition:.15s}
+.choice-chip:hover{border-color:#9da79f;background:#f8faf7}.choice-chip.active{background:var(--dark);border-color:var(--dark);color:#fff}.choice-chip.danger.active{background:#8f514d;border-color:#8f514d}.choice-chip.none.active{background:#747b75;border-color:#747b75}
+.prev-info{margin-top:8px;padding:7px 9px;border-radius:8px;background:#f5f5fb;color:#5b5f75;font-size:11px;line-height:1.45}
+.prev-reference{margin-top:9px;border:1px solid #dfe2ef;border-radius:10px;background:#fafaff;overflow:hidden}.prev-reference summary{cursor:pointer;list-style:none;padding:8px 10px;font-size:11px;font-weight:800;color:#555b8d}.prev-reference summary::-webkit-details-marker{display:none}.prev-reference summary:before{content:"▸";margin-right:6px}.prev-reference[open] summary:before{content:"▾"}.prev-ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;padding:0 10px 10px;font-size:11px;line-height:1.45}.prev-ref-item{min-width:0}.prev-ref-item b{display:block;color:#72778f;font-size:10px;margin-bottom:2px}.prev-ref-item span{display:block;white-space:pre-wrap;word-break:break-word;color:#33394f}.prev-ref-item.full{grid-column:1/-1}.prev-apply-row{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding-top:4px;border-top:1px dashed #e0e3ee}.apply-prev-values{border:1px solid #8e96c9;background:#f0f2ff;color:#40487b;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:900;cursor:pointer}.apply-prev-values:hover{background:#e7eaff}.prev-apply-note{font-size:10px;color:#7a7f96}@media(max-width:720px){.prev-ref-grid{grid-template-columns:1fr}.prev-apply-row{align-items:flex-start;flex-direction:column}}
+
+/* V2.1 세로 업무판: 가로 스크롤 제거 */
+.table-card{background:transparent;border:0;border-radius:0;overflow:visible}
+.table-wrap{overflow:visible;max-height:none}
+.supplier-board{display:flex;flex-direction:column;gap:18px}
+.supplier-section{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 3px 14px rgba(28,36,30,.04)}
+.supplier-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 17px;background:#ecefeb;border-bottom:1px solid #dce0da;position:sticky;top:0;z-index:2}
+.supplier-head strong{font-size:15px;color:#263229}.supplier-head span{font-size:11px;color:#687168;font-weight:800}
+.task-list{display:flex;flex-direction:column}
+.task-card{padding:16px 18px;border-bottom:1px solid #edf0ec;background:#fff;position:relative}
+.task-card:last-child{border-bottom:0}.task-card.problem{box-shadow:inset 4px 0 var(--red)}
+.task-card:hover{background:#fcfdfb}
+.task-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.task-title-wrap{min-width:0;flex:1}.task-badges{margin-bottom:7px}.task-title{font-size:15px;font-weight:900;line-height:1.45;color:#242d27}.task-option{display:inline-block;margin-left:7px;font-size:12px;color:#566158;font-weight:800;background:#f2f4f1;border-radius:7px;padding:3px 7px}
+.cs-target-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #d9ded8;border-radius:9px;background:#f8f9f7;font-size:11px;font-weight:800;white-space:nowrap}.cs-target-pill input{margin:0}
+.task-meta{display:flex;gap:7px 14px;flex-wrap:wrap;margin-top:9px;font-size:11px;color:#687168}.task-meta b{color:#39443d}.task-meta .mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.current-cs{margin-top:11px;padding:9px 11px;border-radius:9px;background:#f4f6f3;font-size:12px;line-height:1.55;color:#465149}.current-cs b{color:#27332b;margin-right:5px}
+.cs-date{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#e8eee8;color:#42604a;font-size:10px;font-weight:900;vertical-align:1px}.cs-guide{margin-top:7px;padding:8px 10px;border-radius:8px;background:#fff8e8;border:1px solid #f0dfb5;color:#72531a;font-size:11px;line-height:1.5}.cs-guide b{color:#5c4316}.work-cs-date{display:inline-block;margin-top:7px;padding:3px 8px;border-radius:999px;background:#e8eee8;color:#42604a;font-size:10px;font-weight:900}.work-cs-guide{margin-top:8px;padding:8px 10px;border-radius:9px;background:#fff8e8;border:1px solid #f0dfb5;color:#72531a;font-size:12px;line-height:1.5}
+.workflow{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(260px,1.1fr) minmax(320px,1.4fr);gap:10px;margin-top:12px;align-items:stretch}
+.flow-box{border:1px solid #e0e4de;border-radius:11px;padding:11px;background:#fafbfa;min-width:0}.flow-box.active-first{border-color:#d85f56;background:#fff5f3}.flow-box.active-next{border-color:#e3a23a;background:#fffaf0}
+.flow-label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:900;color:#536057;margin-bottom:7px}.flow-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#263229;color:#fff;font-size:10px;margin-right:5px}
+.flow-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.flow-row input[type=date],.flow-row select,.flow-row input[type=text],.flow-row textarea{border:1px solid #d6dcd5;border-radius:8px;background:#fff;padding:8px 9px;min-height:36px}.flow-row input[type=date]{min-width:145px}.flow-row select{min-width:120px}.flow-row input[type=text]{width:100%}.flow-row textarea{width:100%;min-height:58px;resize:vertical}
+.status-line{margin-top:7px;font-size:10px;font-weight:800;line-height:1.4}.status-line.good{color:var(--green)}.status-line.warn{color:var(--amber)}.status-line.bad{color:var(--red)}
+.cs-preview{white-space:pre-wrap;background:#fff;border:1px solid #e0e4de;border-radius:8px;padding:9px 10px;font-size:11px;line-height:1.55;min-height:58px;color:#3e4942}
+.edit-details,.extra-details{margin-top:7px}.edit-details summary,.extra-details summary{cursor:pointer;font-size:10px;font-weight:900;color:#687168;user-select:none}.edit-details[open] summary,.extra-details[open] summary{margin-bottom:7px}
+.edit-details textarea{width:100%;min-height:90px;border:1px solid #d6dcd5;border-radius:8px;padding:8px 9px;resize:vertical;background:#fff}.edit-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:5px}
+.more-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:8px;padding:10px;background:#f7f8f6;border-radius:9px}.more-field label{display:block;font-size:10px;font-weight:900;color:#667068;margin-bottom:4px}.more-field input,.more-field select,.more-field textarea{width:100%;border:1px solid #d6dcd5;border-radius:8px;padding:8px 9px;background:#fff}.more-field textarea{min-height:56px;resize:vertical}.more-field.full{grid-column:1/-1}
+.task-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap}.task-foot .input-ok,.task-foot .required-note{margin:0}.task-foot button{border:1px solid #d9ded8;background:#f7f8f6;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:11px;font-weight:800}
+
+.resolved-note{font-size:11px;color:var(--green);font-weight:800;margin-top:6px}.stock-workflow{grid-template-columns:minmax(260px,.8fr) minmax(360px,1.2fr)}
+@media(max-width:1050px){.workflow{grid-template-columns:1fr}.supplier-head{position:static}.more-panel{grid-template-columns:1fr}.more-field.full{grid-column:auto}}
+
+
+/* V2.5 한건씩 CS 처리 모드 */
+.work-start-btn{background:#315f8a}.work-modal-back{z-index:70;background:rgba(12,18,14,.58)}
+.work-modal{width:min(980px,96vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.work-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px 22px;border-bottom:1px solid #e3e7e1;background:#fff}
+.work-modal-head h3{margin:3px 0 3px;font-size:20px}.work-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;color:#7b847d}.work-progress{font-size:12px;font-weight:800;color:#687168}
+.work-modal-head button{border:1px solid #d8ddd7;background:#f4f6f3;border-radius:9px;padding:8px 11px;font-weight:800;cursor:pointer}
+.work-modal-body{padding:20px 22px;overflow:auto;background:#f7f8f6;flex:1}.work-nav{padding:13px 22px;border-top:1px solid #e1e5df;background:#fff;display:flex;justify-content:space-between;gap:10px}
+.work-info{background:#fff;border:1px solid #e0e4de;border-radius:14px;padding:16px;margin-bottom:12px}.work-info-title{font-size:18px;font-weight:900;line-height:1.4}.work-info-opt{font-size:13px;color:#59645c;margin-top:4px}.work-info-meta{display:flex;gap:8px 14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#6a746c}.work-info-meta b{color:#354139}
+.work-status{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.work-panel{background:#fff;border:1px solid #e0e4de;border-radius:14px;padding:15px}.work-panel h4{font-size:12px;margin:0 0 9px;color:#536058}.work-current{font-size:15px;font-weight:900;line-height:1.5}.work-cs-short{font-size:14px;font-weight:800;line-height:1.55;white-space:pre-wrap}.work-action{background:#fff;border:1px solid #e0e4de;border-radius:14px;padding:15px;margin-bottom:12px}.work-action h4{font-size:13px;margin:0 0 10px}.work-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.work-action-field label{display:block;font-size:10px;font-weight:900;color:#667068;margin-bottom:4px}.work-action-field input,.work-action-field select,.work-action-field textarea{width:100%;border:1px solid #d5dbd4;border-radius:9px;padding:9px 10px;background:#fff}.work-action-field textarea{min-height:66px;resize:vertical}.work-action-field.full{grid-column:1/-1}
+.work-original{background:#fff;border:1px solid #e0e4de;border-radius:14px;padding:15px}.work-original h4{font-size:13px;margin:0 0 10px}.work-order{border-top:1px solid #edf0ec;padding:10px 0}.work-order:first-of-type{border-top:0;padding-top:0}.work-order-meta{font-size:11px;font-weight:800;color:#677168;margin-bottom:6px}.work-memo{font-size:12px;line-height:1.55;white-space:pre-wrap;color:#3f4942;background:#f7f8f6;border-radius:9px;padding:9px;margin-top:5px}
+.work-good{color:var(--green);font-weight:900}.work-bad{color:var(--red);font-weight:900}.work-warn{color:var(--amber);font-weight:900}.work-manual-note{font-size:10px;color:#8a6b2e;margin-top:5px}.work-empty{padding:40px;text-align:center;color:#747d76}.reopen-item{border:1px solid #d7b56f;background:#fff8e8;color:#805a12;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:900;cursor:pointer}.resolved-help{font-size:10px;color:#6d766e;margin-top:6px;font-weight:700}
+@media(max-width:760px){.work-status,.work-action-grid{grid-template-columns:1fr}.work-action-field.full{grid-column:auto}.work-modal-body{padding:14px}.work-modal-head,.work-nav{padding-left:14px;padding-right:14px}}
+
+@media(max-width:1250px){.grid4{grid-template-columns:repeat(2,1fr)}.settings-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.header{flex-direction:column}.search{margin-left:0;min-width:100%}}
+@media(max-width:760px){.grid4{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+
+.source-inbound-note{margin-top:7px;font-size:11px;color:#667068;font-weight:700;line-height:1.5}.source-inbound-note strong{color:#334238}.order-inbound-bad{color:#b42318;font-weight:900}.order-inbound-missing{color:#946200;font-weight:900}.order-inbound-good{color:#39704a;font-weight:900}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <div class="brand">FORESTFIT INTERNAL TOOL</div>
+      <h1>통합 상품 대응 · CS 전달 관리</h1>
+      <p>품절 / GS / 기타채널 주문 파일의 동일 양식을 통합해 상품 단위로 정리한 뒤 사이트 안에서 대응 내용을 입력하고,<br>거래처별로 위에서 아래로 필요한 건만 처리합니다. 품절건은 입고일 입력 없이 대체 대응하고, 일반 납기건은 입고예정일이 준수일 이내면 업무목록에서 자동 제외합니다. 모든 주문번호는 끝까지 보존됩니다.</p>
+    </div>
+    <div class="version">UNIFIED V2.21 · 입고일 입력 후 단계 자동이동 · 주문별 납기판정</div>
+  </div>
+
+  <div class="grid4">
+    <div class="card upload-card">
+      <h3><span class="tag stock">1. 품절</span> 품절 주문 파일</h3>
+      <p>이 파일의 모든 주문은 문제 주문으로 분류합니다. 사용자정의1 · 사입상품명 · CS일자를 읽어 CS 안내 여부를 분석합니다. <b>품절 파일은 입고예정일 컬럼이 없어도 정상 인식합니다.</b></p>
+      <div class="upload-box"><input type="file" id="stockFile" accept=".csv,.xlsx,.xls"><div class="file-state" id="stockState">선택된 파일 없음</div></div>
+    </div>
+    <div class="card upload-card">
+      <h3><span class="tag gs">2. GS</span> GS 납기 파일</h3>
+      <p>신규 공통 양식의 <b>사용자정의1 · 사입상품명 · 입고예정일</b>을 읽습니다. GS 출고준수일은 주문일 기준 주말·공휴일을 제외하고 +8영업일로 계산합니다.</p>
+      <div class="upload-box"><input type="file" id="gsFile" accept=".csv,.xlsx,.xls"><div class="file-state" id="gsState">선택된 파일 없음</div></div>
+    </div>
+    <div class="card upload-card">
+      <h3><span class="tag all">3. 기타채널</span> 기타채널 납기 파일</h3>
+      <p>GS를 제외한 채널 주문의 신규 공통 양식에서 주문번호별 입고예정일을 읽고, 채널별 출고준수일과 비교합니다.</p>
+      <div class="upload-box"><input type="file" id="allFile" accept=".csv,.xlsx,.xls"><div class="file-state" id="allState">선택된 파일 없음</div></div>
+    </div>
+    <div class="card upload-card">
+      <h3><span class="tag bflow">4. 비플로우</span> 출고준수일 파일</h3>
+      <p>실제 b-flow 주문 내역 양식을 기준으로 주문번호를 매칭합니다. 비플로우 기본 출고준수일은 주문일 +5일이며, 보조 파일의 T열 출고예정일은 별도 참고값으로 표시합니다.</p>
+      <div class="upload-box"><input type="file" id="bflowFile" accept=".csv,.xlsx,.xls"><div class="file-state" id="bflowState">선택된 파일 없음 · 선택사항</div></div>
+      <div class="small" style="margin-top:8px">인식 컬럼: 주문번호 / 판매채널 / 상품명 / 옵션정보 / 출고예정일 · 열 위치가 바뀌어도 헤더명으로 자동 인식</div>
+    </div>
+    <div class="card upload-card">
+      <h3><span class="tag prev">5. 어제 결과</span> 이전 입력 파일</h3>
+      <p>어제 내려받은 <b>CS전달 엑셀</b>을 선택하면 같은 상품+옵션의 이전 내용을 오늘 화면에서 <b>참고용</b>으로 보여줍니다. 자동 반영하지 않으며, 필요한 건만 <b>[어제 값 그대로 입력]</b> 버튼으로 복사할 수 있습니다.</p>
+      <div class="upload-box"><input type="file" id="previousFile" accept=".csv,.xlsx,.xls"><div class="file-state" id="previousState">선택된 파일 없음 · 선택사항</div></div>
+      <div class="small" style="margin-top:8px">어제 값은 기본적으로 보기 전용입니다. [어제 값 그대로 입력]을 직접 누른 상품만 오늘 입력칸에 복사됩니다.</div>
+    </div>
+  </div>
+
+  <div class="card settings">
+    <h3>계산 설정</h3>
+    <div class="settings-grid">
+      <div><label>오늘 날짜</label><input type="date" id="todayDate"><div class="hint">기타채널 지연 및 GS·퀸잇 고객 안내기한 경과 판정에 사용합니다.</div></div>
+      <div><label>공휴일</label><textarea id="holidays" placeholder="한 줄에 하나씩 입력&#10;예: 2026-10-05"></textarea><div class="hint">토·일은 자동 제외합니다. GS/기타채널 영업일 계산에 공통 적용됩니다.</div></div>
+      <div><label>입력 유지</label><div id="saveStatus" class="section-note" style="margin:0">현재 페이지에서 임시 유지 · 재계산해도 입력값이 사라지지 않습니다.</div></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="mergeBtn">상품 대응표 만들기 / 재계산</button>
+      <button class="btn secondary" id="checkExcelBtn" disabled>확인 필요 품번 엑셀 다운로드</button>
+      <button class="btn secondary" id="excelBtn" disabled>CS 전달용 엑셀 다운로드</button>
+    </div>
+    <div class="section-note">
+      <b>품절건:</b> 입고예정일 없이 [다른 옵션 입력 / 대체품 입력 / 해당없음] 메뉴칩 중 하나를 선택해 대응합니다.<br>
+      <b>업무 단계:</b> ① 입고일정 기입 → ② 대체품 / 옵션 변경 상품 순서로 처리합니다. 품절건은 바로 ②에 표시됩니다.<br>
+      <b>일반 납기건:</b> ① 입고일정 기입에서 날짜를 입력합니다. 출고준수일 이내면 자동 제외되고, 납기 초과면 ②로 이동합니다. [입고일정 확인불가 → 2번 탭 이동]을 누른 건도 즉시 ②로 이동해 대체품/옵션 변경을 확인합니다. 잘못 입력해 제외된 건은 [납기 내 입고 · 되돌리기] 탭에서 수정할 수 있습니다.<br>
+      <b>CS 이력:</b> 신규 양식의 <b>CS일자</b>를 최근 상담일로 표시하고, CS메모에 대체품/다른 옵션 안내내용이 있으면 사이트에 함께 보여주며 입력칸에도 안전하게 반영합니다.<br>      <b>입고예정일:</b> GS/기타채널 파일의 마지막 열 <b>재고매칭(1)입고예정일</b>을 주문번호별 입고일로 읽습니다. <b>품절 파일은 해당 컬럼이 없어도 됩니다.</b> 일반 납기건은 비어 있으면 ① 입고일정 기입, 출고준수일보다 늦으면 ② 대체품 / 옵션 변경 상품으로 자동 분류합니다.<br>
+      <b>CS 전달내용:</b> 한 줄 요약으로 자동 작성하며 필요할 때만 수정합니다. 처리결과 공유 문구는 넣지 않습니다.<br>      <b>확인 필요 품번 파일:</b> 원본 파일을 모두 불러온 뒤 [확인 필요 품번 엑셀 다운로드]를 누르면 주문별 입고예정일 판정 결과를 기준으로 <b>입고일 미기입 / 납기일정 초과 / 품절</b>만 내려받습니다. 같은 품번에 미기입 주문과 초과 주문이 섞여 있으면 구분별로 각각 표시합니다.<br>
+      <b>어제 참고:</b> 이전 입력 파일을 선택하면 같은 상품+옵션의 어제 내용을 카드에서 참고할 수 있습니다. 어제 값은 오늘 입력칸에 자동 반영하지 않습니다. 상품+옵션이 같고 거래처 또는 사입상품명까지 일치할 때만 참고를 표시하며, 필요할 때 [어제 값 그대로 입력] 버튼으로 해당 상품에만 복사할 수 있습니다. 현재 페이지에서 입력한 값은 재계산해도 유지됩니다.<br>
+      <b>출고준수일 기준:</b> 퀸잇 주문일 +21영업일 / GS 주문일 +8영업일(단, +8영업일 날짜가 금요일 또는 공휴일 전날이면 +7영업일) / 네이버·롯데ON 주문일 +1개월 / 하프클럽 주문일 +15영업일 / 비플로우 주문일 +5일입니다. 퀸잇 고객 안내기한은 사용자정의1 다음 영업일, GS 고객 안내기한은 주문일 다음 2영업일 이내로 유지합니다.
+    </div>
+  </div>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="label">현재 조치 필요</div><div class="num" id="sAll">0</div></div>
+    <div class="stat"><div class="label">원본 주문 보존</div><div class="num" id="sOrders">0</div></div>
+    <div class="stat danger"><div class="label">품절 포함</div><div class="num" id="sStock">0</div></div>
+    <div class="stat danger"><div class="label">CS 전달 대상</div><div class="num" id="sTarget">0</div></div>
+    <div class="stat danger"><div class="label">입력 필요</div><div class="num" id="sNeedInput">0</div></div>
+    <div class="stat danger"><div class="label">기한 경과 포함</div><div class="num" id="sOverdue">0</div></div>
+    <div class="stat danger"><div class="label">출고불가 포함</div><div class="num" id="sBad">0</div></div>
+    <div class="stat warn"><div class="label">확인 필요</div><div class="num" id="sCheck">0</div></div>
+    <div class="stat"><div class="label">납기 내 입고 · 제외됨</div><div class="num" id="sResolved">0</div></div>
+  </div>
+
+  <div class="workflow-tabs-wrap">
+    <div class="workflow-tabs-label">업무 단계</div>
+    <div class="workflow-tabs" id="workflowTabs">
+      <button class="workflow-tab active" data-workflow="inbound"><strong>1. 입고일정 기입</strong><span class="workflow-count" id="wInbound">0</span></button>
+      <button class="workflow-tab" data-workflow="alternative"><strong>2. 대체품 / 옵션 변경 상품</strong><span class="workflow-count" id="wAlternative">0</span></button>
+      <button class="workflow-tab" data-workflow="resolved"><strong>납기 내 입고 · 되돌리기</strong><span class="workflow-count" id="wResolved">0</span></button>
+    </div>
+  </div>
+  <div class="workflow-move-notice" id="workflowMoveNotice"></div>
+
+  <div class="toolbar">
+    <div class="toolbar-subtitle">현재 업무 단계 안에서 보기</div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-filter="all">전체</button>
+      <button class="tab" data-filter="target">CS 전달 대상</button>
+      <button class="tab" data-filter="needinput">입력 필요</button>
+      <button class="tab" data-filter="stock">품절</button>
+      <button class="tab" data-filter="gs">GS</button>
+      <button class="tab" data-filter="overdue">기한 경과</button>
+      <button class="tab" data-filter="bad">출고불가</button>
+    </div>
+    <button class="btn work-start-btn" id="workStartBtn" type="button">한건씩 CS 처리</button>
+    <div class="sort-box">
+      <label for="sortSelect">정렬</label>
+      <select id="sortSelect">
+        <option value="supplier" selected>거래처명순</option>
+        <option value="priority">우선처리순</option>
+        <option value="purchase">사입상품명순</option>
+        <option value="product">상품명순</option>
+      </select>
+    </div>
+    <div class="search"><input id="searchInput" placeholder="거래처 / 사입상품명 / 상품 / 옵션 / 주문번호 / 판매처 / CS 검색"></div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-wrap" id="tableWrap"><div class="empty"><b>품절 / GS / 기타채널 주문 파일을 선택해주세요.</b>세 파일은 사입상품명이 포함된 동일 양식을 사용합니다. 상품 대응표 생성 후 사이트 안에서 대응 내용을 입력하고 CS 전달용 엑셀을 내려받을 수 있습니다.</div></div>
+  </div>
+</div>
+
+<div class="modal-back" id="csModal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">전체 CS 이력</h3><button id="modalClose">닫기</button></div><div class="modal-body" id="modalBody"></div></div></div>
+
+<div class="modal-back work-modal-back" id="workModal">
+  <div class="modal work-modal">
+    <div class="work-modal-head">
+      <div>
+        <div class="work-kicker">CS ONE BY ONE</div>
+        <h3 id="workTitle">한건씩 CS 처리</h3>
+        <div class="work-progress" id="workProgress">0 / 0</div>
+      </div>
+      <button id="workClose" type="button">목록으로</button>
+    </div>
+    <div class="work-modal-body" id="workBody"></div>
+    <div class="work-nav">
+      <button type="button" class="btn light" id="workPrev">← 이전</button>
+      <button type="button" class="btn" id="workNext">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const REQUIRED_HEADERS=["사용자정의1","주문일자","판매처명","판매처주문번호","상품옵션","옵션상품명","공급처명(재고매칭)","사입상품명"];
+const STORE_SHARED="forestfit_unified_shared_v1";
+const STORE_ORDER="forestfit_unified_order_v1";
+const STORE_SETTINGS="forestfit_unified_settings_v1";
+const STORE_PRODUCT="forestfit_product_response_v14"; // V1.4 저장값과 호환 유지
+let filesData={stock:null,gs:null,all:null,bflow:null};
+let previousRows=[];
+let previousMap=new Map();
+let mergedRows=[];
+let productGroups=[];
+let activeWorkflow="inbound";
+let activeFilter="all";
+let activeSort="supplier";
+let sharedStore={};
+let orderStore={};
+let productStore={};
+let currentSettings={};
+let workQueue=[];
+let workIndex=0;
+
+// V2.4: 전일 내용은 기억하지 않되, 현재 페이지에서 입력한 값은 재계산 시 유지합니다.
+function loadJSON(k,fallback){return fallback}
+function saveJSON(k,v){flashSave()}
+function flashSave(){const el=document.getElementById("saveStatus");if(!el)return;el.textContent="현재 작업 임시저장 · "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});clearTimeout(flashSave.t);flashSave.t=setTimeout(()=>el.textContent="현재 페이지에서 임시 유지 · 재계산해도 입력값이 사라지지 않습니다.",1800)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function unwrap(v){let s=String(v??"").trim();const m=s.match(/^=\s*"([\s\S]*)"$/);return m?m[1]:s}
+function normText(v){return unwrap(v).replace(/\u3000/g," ").replace(/\s+/g," ").trim()}
+function normOption(v){return normText(v).toLowerCase()
+  .replace(/기본\s*옵션\s*:\s*옵션/gi,"")
+  .replace(/(?:컬러|색상|기장|사이즈|옵션)\s*[:：]?/gi,"")
+  .replace(/_?[a-z]+\d{5,}/gi,"")
+  .replace(/[\s_\-:]+/g,"").replace(/\//g,",").replace(/,+/g,",").replace(/^,|,$/g,"")}
+function extractCode(product){const s=normText(product);const all=[...s.matchAll(/\(([A-Za-z]{1,4}\d{2,})\)/g)];if(all.length)return all[all.length-1][1].toUpperCase();const m=s.match(/\b([A-Za-z]{1,4}\d{2,})\b/);return m?m[1].toUpperCase():""}
+function normProduct(v){
+  const s=normText(v);
+  const code=extractCode(s);
+  if(code)return "CODE:"+code;
+  return "NAME:"+s.toLowerCase()
+    .replace(/[＜＞<>\[\](){}]/g,"")
+    .replace(/판매종료/g,"")
+    .replace(/^\s*(?:포레스트핏|forestfit)\s*\/?\s*/i,"")
+    .replace(/^\s*\[?브리치\]?\s*/i,"")
+    .replace(/빠른배송|단독/g,"")
+    .replace(/\s+/g,"")
+    .trim()
+}
+function productOptionKey(row){return normProduct(row.product)+"||"+normOption(row.option)}
+function exactKey(row){return normText(row.orderNo)+"||"+normProduct(row.product)+"||"+normOption(row.option)}
+function cleanCsvOrderNo(v){return unwrap(v)}
+
+function parseCSV(text){
+  const rows=[];let row=[],field="",q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){field+='"';i++}else q=false}else field+=ch}
+    else{if(ch==='"')q=true;else if(ch===','){row.push(field);field=""}else if(ch==='\n'){row.push(field);rows.push(row);row=[];field=""}else if(ch!=='\r')field+=ch}
+  }
+  if(field!==""||row.length){row.push(field);rows.push(row)}
+  return rows;
+}
+function decodeCsvBuffer(buf){
+  const u8=new Uint8Array(buf);let utf=new TextDecoder("utf-8",{fatal:false}).decode(u8);
+  const bad=(utf.match(/�/g)||[]).length;
+  if(bad>0){try{return new TextDecoder("euc-kr").decode(u8)}catch(e){}}
+  return utf.replace(/^\uFEFF/,"");
+}
+async function readInputFile(file){
+  const ext=(file.name.split('.').pop()||"").toLowerCase();
+  if(ext==="csv"){
+    const text=decodeCsvBuffer(await file.arrayBuffer());
+    return parseCSV(text);
+  }
+  if(!window.XLSX)throw new Error("엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.");
+  const wb=XLSX.read(await file.arrayBuffer(),{type:"array",cellDates:true});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:false,blankrows:false});
+}
+function headerMap(headers){const map={};headers.forEach((h,i)=>{map[normText(h)]=i});return map}
+function validateHeaders(headers,kind){
+  const map=headerMap(headers);const missing=REQUIRED_HEADERS.filter(h=>map[h]===undefined);
+  // 품절 파일은 입고예정일을 사용하지 않으므로 해당 컬럼이 없어도 정상 인식합니다.
+  // GS / 기타채널 파일만 주문별 납기판정을 위해 입고예정일 컬럼을 필수로 확인합니다.
+  if(kind!=="stock" && headerIndexAny(map,["재고매칭(1)입고예정일","입고예정일"])===undefined)missing.push("재고매칭(1)입고예정일");
+  if(missing.length)return {ok:false,missing:[...new Set(missing)],map};
+  return {ok:true,legacy:false,map};
+}
+function parseCs(row,map){
+  const arr=[];
+  for(let n=1;n<=6;n++){
+    const worker=map["작업자"+n]!==undefined?normText(row[map["작업자"+n]]):"";
+    const type=map["CS유형"+n]!==undefined?normText(row[map["CS유형"+n]]):"";
+    const kind=map["CS종류"+n]!==undefined?normText(row[map["CS종류"+n]]):"";
+    const memo=map["CS메모"+n]!==undefined?String(row[map["CS메모"+n]]??"").replace(/<br\s*\/?\s*>/gi,"\n").trim():"";
+    if(worker||type||kind||memo)arr.push({slot:n,worker,type,kind,memo});
+  }
+  return arr;
+}
+function rowsFromSheet(rows,sourceKind){
+  if(!rows||!rows.length)return [];
+  const headers=rows[0].map(normText);const chk=validateHeaders(headers,sourceKind);
+  if(!chk.ok)throw new Error(`신규 공통 양식 필수 컬럼 누락: ${chk.missing.join(", ")}`);
+  const m=chk.map;const out=[];
+  const inboundIdx=headerIndexAny(m,["재고매칭(1)입고예정일","입고예정일"]);
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    if(r.every(v=>normText(v)===""))continue;
+    const orderNo=cleanCsvOrderNo(r[m["판매처주문번호"]]);
+    const product=normText(r[m["옵션상품명"]]);
+    const option=normText(r[m["상품옵션"]]);
+    if(!orderNo&&!product&&!option)continue;
+    const inboundRaw=inboundIdx===undefined?"":normText(r[inboundIdx]);
+    const inboundParsed=inboundRaw?(dateKey(toDate(inboundRaw))||inboundRaw):"";
+    out.push({
+      sourceKinds:new Set([sourceKind]),
+      userDefined:m["사용자정의1"]===undefined?"":unwrap(r[m["사용자정의1"]]),
+      orderDate:unwrap(r[m["주문일자"]]),seller:normText(r[m["판매처명"]]),orderNo,option,product,
+      supplier:normText(r[m["공급처명(재고매칭)"]]),sourcePurchaseName:normText(r[m["사입상품명"]]),
+      csDate:m["CS일자"]===undefined?"":dateKey(toDate(r[m["CS일자"]]))||normText(r[m["CS일자"]]),
+      sourceInboundColumnPresent:inboundIdx!==undefined,sourceInboundRaw:inboundRaw,sourceInboundDate:inboundParsed,
+      cs:parseCs(r,m),duplicateCount:1,legacyNoCustom:chk.legacy
+    });
+  }
+  return out;
+}
+function headerIndexAny(map,names){for(const n of names){if(map[n]!==undefined)return map[n]}return undefined}
+function previousRowsFromSheet(rows){
+  if(!rows||!rows.length)return [];
+  const headers=rows[0].map(normText),m=headerMap(headers);
+  const pi=headerIndexAny(m,["상품명","옵션상품명"]),oi=headerIndexAny(m,["옵션","옵션명","상품옵션"]);
+  if(pi===undefined||oi===undefined)throw new Error("어제 결과 파일에서 상품명 / 옵션 컬럼을 찾을 수 없습니다.");
+  const si=headerIndexAny(m,["거래처","거래처명","공급처명","공급처명(재고매칭)"]);
+  const pni=headerIndexAny(m,["사입상품명"]),osi=headerIndexAny(m,["다른옵션재고","다른 옵션 재고"]);
+  const ai=headerIndexAny(m,["다른옵션","대체가능옵션","다른 옵션","상품옵션 변경안내"]);
+  const subi=headerIndexAny(m,["대체품"]),combined=headerIndexAny(m,["대체안"]);
+  const ii=headerIndexAny(m,["입고예정일"]),proci=headerIndexAny(m,["처리내용","처리방향"]);
+  const csi=headerIndexAny(m,["CS전달내용","CS 전달내용"]),mi=headerIndexAny(m,["내부메모","메모"]);
+  const out=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[],product=normText(r[pi]),option=normText(r[oi]);if(!product&&!option)continue;
+    let optionStock=osi===undefined?"":normText(r[osi]);
+    let altOption=ai===undefined?"":normText(r[ai]);
+    let substituteProduct=subi===undefined?"":normText(r[subi]);
+    const combinedText=combined===undefined?"":normText(r[combined]);
+    const csText=csi===undefined?"":normText(r[csi]);
+    const referenceText=[combinedText,csText].filter(Boolean).join(" / ");
+    if(referenceText){
+      const am=referenceText.match(/(?:상품옵션\s*변경|대체옵션|다른\s*옵션|옵션)\s*[:：]\s*([^/]+)/i);
+      const sm=referenceText.match(/대체품\s*[:：]\s*([^/]+)/i);
+      if(!altOption&&am)altOption=normText(am[1]);
+      if(!substituteProduct&&sm)substituteProduct=normText(sm[1]);
+      if(!optionStock&&/해당없음/.test(referenceText))optionStock="해당없음";
+    }
+    if(!optionStock){if(altOption)optionStock="있음";else if(substituteProduct)optionStock="없음";else optionStock="미확인"}
+    const inboundRaw=ii===undefined?"":normText(r[ii]);
+    const inboundUnknown=/확인\s*(?:불가|안됨)|미확정/.test(inboundRaw);
+    const inboundDate=inboundUnknown?"":dateKey(toDate(inboundRaw));
+    out.push({
+      product,option,supplier:si===undefined?"":normText(r[si]),purchaseName:pni===undefined?"":normText(r[pni]),
+      optionStock,altOption,substituteProduct,inboundDate,inboundUnknown,
+      processDirection:proci===undefined?"":normText(r[proci]),csInstruction:csi===undefined?"":normText(r[csi]),internalMemo:mi===undefined?"":normText(r[mi])
+    });
+  }
+  return out;
+}
+function rebuildPreviousMap(){
+  previousMap=new Map();
+  previousRows.forEach(x=>{const k=normProduct(x.product)+"||"+normOption(x.option);if(!previousMap.has(k))previousMap.set(k,[]);previousMap.get(k).push(x)});
+}
+function findPreviousForGroup(g){
+  // 어제 참고는 상품+옵션이 같은 것만 후보로 잡고,
+  // 그중 거래처 또는 사입상품명까지 일치할 때만 표시합니다.
+  // 단순 상품+옵션 일치만으로 첫 번째 값을 가져오는 fallback은 사용하지 않습니다.
+  const arr=previousMap.get(normProduct(g.product)+"||"+normOption(g.option))||[];
+  if(!arr.length)return null;
+  const supplier=normText(g.supplier).toLowerCase();
+  const purchase=normText(g.sourcePurchaseName||g.purchaseName).toLowerCase();
+
+  // 둘 다 값이 있으면 둘 다 일치하는 항목을 최우선으로 사용
+  if(supplier&&purchase){
+    const exact=arr.find(x=>normText(x.supplier).toLowerCase()===supplier&&normText(x.purchaseName).toLowerCase()===purchase);
+    if(exact)return exact;
+  }
+  // 거래처 또는 사입상품명 중 하나라도 실제 값이 일치해야 참고 표시
+  if(supplier){
+    const bySupplier=arr.find(x=>normText(x.supplier).toLowerCase()===supplier);
+    if(bySupplier)return bySupplier;
+  }
+  if(purchase){
+    const byPurchase=arr.find(x=>normText(x.purchaseName).toLowerCase()===purchase);
+    if(byPurchase)return byPurchase;
+  }
+  return null;
+}
+function previousReferenceHtml(g){
+  const p=g.previousRef;if(!p)return "";
+  const inbound=p.inboundUnknown?"확인 불가":(p.inboundDate||"-");
+  const optionStock=p.optionStock&&p.optionStock!=="미확인"?p.optionStock:"-";
+  return `<details class="prev-reference"><summary>어제 참고 있음 · 펼쳐보기</summary><div class="prev-ref-grid">
+    <div class="prev-ref-item"><b>어제 사입상품명</b><span>${esc(p.purchaseName||'-')}</span></div>
+    <div class="prev-ref-item"><b>어제 입고예정일</b><span>${esc(inbound)}</span></div>
+    <div class="prev-ref-item"><b>어제 대응구분</b><span>${esc(optionStock)}</span></div>
+    <div class="prev-ref-item"><b>어제 다른 옵션</b><span>${esc(p.altOption||'-')}</span></div>
+    <div class="prev-ref-item"><b>어제 대체품</b><span>${esc(p.substituteProduct||'-')}</span></div>
+    <div class="prev-ref-item"><b>어제 처리내용</b><span>${esc(p.processDirection||'-')}</span></div>
+    <div class="prev-ref-item full"><b>어제 CS 전달내용</b><span>${esc(p.csInstruction||'-')}</span></div>
+    ${p.internalMemo?`<div class="prev-ref-item full"><b>어제 내부메모</b><span>${esc(p.internalMemo)}</span></div>`:''}
+    <div class="prev-apply-row"><button type="button" class="apply-prev-values" data-group="${esc(g.key)}">어제 값 그대로 입력</button><span class="prev-apply-note">누른 상품에만 어제 입력값을 복사합니다.</span></div>
+  </div></details>`;
+}
+
+function toDate(v){
+  if(v instanceof Date&&!isNaN(v))return new Date(v.getFullYear(),v.getMonth(),v.getDate());
+  if(typeof v==="number"&&window.XLSX){const x=XLSX.SSF.parse_date_code(v);return x?new Date(x.y,x.m-1,x.d):null}
+  let s=unwrap(v);if(!s)return null;s=s.trim();
+  let m=s.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})(?:[ T].*)?$/);if(m)return validDate(+m[1],+m[2],+m[3]);
+  m=s.match(/^(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일?/);if(m)return validDate(+m[1],+m[2],+m[3]);
+  return null;
+}
+function validDate(y,m,d){const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null}
+function dateKey(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`:""}
+function getHolidaySet(){return new Set(document.getElementById("holidays").value.split(/\n+/).map(x=>dateKey(toDate(x.trim()))).filter(Boolean))}
+function isWeekend(d){return d.getDay()===0||d.getDay()===6}
+function addBusinessDays(date,days,holidays){if(!date)return null;const d=new Date(date);let c=0;while(c<days){d.setDate(d.getDate()+1);if(!isWeekend(d)&&!holidays.has(dateKey(d)))c++}return d}
+function safeAddMonth(date){if(!date)return null;const y=date.getFullYear(),m=date.getMonth(),day=date.getDate();const last=new Date(y,m+2,0).getDate();return new Date(y,m+1,Math.min(day,last))}
+function addCalendarDays(date,days){if(!date)return null;const d=new Date(date);d.setDate(d.getDate()+days);return d}
+function gsDue(row,holidays){
+  const base=toDate(row.orderDate);
+  if(!base)return null;
+  const due8=addBusinessDays(base,8,holidays);
+  if(!due8)return null;
+  const nextCalendarDay=new Date(due8);
+  nextCalendarDay.setDate(nextCalendarDay.getDate()+1);
+  const isFriday=due8.getDay()===5;
+  const isDayBeforeHoliday=holidays.has(dateKey(nextCalendarDay));
+  return (isFriday||isDayBeforeHoliday)?addBusinessDays(base,7,holidays):due8;
+}
+
+function bflowRowsFromSheet(rows){
+  if(!rows||rows.length<2)throw new Error("비플로우 출고준수일 파일에 데이터가 없습니다.");
+
+  // 실제 b-flow 주문 내역 양식의 헤더명으로 컬럼을 찾습니다.
+  // 열이 추가/이동돼도 주문번호·판매채널·상품명·옵션정보·출고예정일 헤더만 유지되면 정상 인식합니다.
+  const headers=(rows[0]||[]).map(normText);
+  const m=headerMap(headers);
+  const required=["주문번호","판매채널","상품명","옵션정보","출고예정일"];
+  const missing=required.filter(h=>m[h]===undefined);
+  if(missing.length)throw new Error(`비플로우 파일 신규 공통 양식 필수 컬럼 누락: ${missing.join(", ")}`);
+
+  const out=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const orderNo=cleanCsvOrderNo(r[m["주문번호"]]);
+    if(!normText(orderNo))continue;
+
+    const sellerCode=m["판매자 상품코드"]!==undefined?normText(r[m["판매자 상품코드"]]):"";
+    const product=normText(r[m["상품명"]]);
+    const option=normText(r[m["옵션정보"]]);
+    const rawShip=unwrap(r[m["출고예정일"]]);
+
+    out.push({
+      orderNo:normText(orderNo),
+      channel:normText(r[m["판매채널"]]),
+      product,
+      option,
+      sellerCode,
+      shipDate:toDate(rawShip),
+      rawShipDate:rawShip
+    });
+  }
+  if(!out.length)throw new Error("비플로우 출고준수일 파일에서 주문번호 데이터를 찾지 못했습니다.");
+  return out;
+}
+function findBflowMatch(row){
+  const data=filesData.bflow||[];
+  const orderNo=normText(row.orderNo);
+  let cand=data.filter(v=>normText(v.orderNo)===orderNo);
+  if(!cand.length)return null;
+  if(cand.length===1)return cand[0];
+  const pk=normProduct(row.product),ok=normOption(row.option);
+  const rowCode=extractCode(row.product);
+  let m=cand.find(v=>{
+    const codeMatch=rowCode && (extractCode(v.product)===rowCode || String(v.sellerCode||"").toUpperCase()===rowCode);
+    const productMatch=normProduct(v.product)===pk || codeMatch;
+    return productMatch && normOption(v.option)===ok;
+  });
+  if(m)return m;
+  m=cand.find(v=>normOption(v.option)===ok);
+  if(m&&cand.filter(v=>normOption(v.option)===ok).length===1)return m;
+  m=cand.find(v=>normProduct(v.product)===pk);
+  if(m&&cand.filter(v=>normProduct(v.product)===pk).length===1)return m;
+  return null;
+}
+function bflowDue(row,holidays){
+  const orderDate=toDate(row.orderDate);
+  if(!orderDate)return {date:null,effectiveDate:null,note:"비플로우 주문일 확인 필요",matched:false,bflowShipDate:null};
+  const baseDue=addCalendarDays(orderDate,5);
+  if(!filesData.bflow){
+    return {date:baseDue,effectiveDate:baseDue,note:`비플로우 기본 출고준수일 ${dateKey(baseDue)} · 보조파일 미첨부`,matched:false,bflowShipDate:null};
+  }
+  const match=findBflowMatch(row);
+  if(!match){
+    return {date:baseDue,effectiveDate:baseDue,note:`비플로우 기본 출고준수일 ${dateKey(baseDue)} · T열 출고예정일 매칭 필요`,matched:false,bflowShipDate:null};
+  }
+  const shipDate=match.shipDate||toDate(match.rawShipDate);
+  const note=shipDate
+    ? `비플로우 기본 출고준수일 ${dateKey(baseDue)} · T열 출고예정일 ${dateKey(shipDate)}`
+    : `비플로우 기본 출고준수일 ${dateKey(baseDue)} · T열 출고예정일 확인 필요`;
+  return {date:baseDue,effectiveDate:baseDue,note,matched:true,match,bflowShipDate:shipDate||null};
+}
+function allDue(row,holidays){
+  const d=toDate(row.orderDate);
+  const s=row.seller.replace(/\s/g,"").toLowerCase();
+  if(!d)return {date:null,effectiveDate:null,note:"주문일 확인 필요"};
+  if(s.includes("퀸잇")){
+    const due=addBusinessDays(d,21,holidays);return {date:due,effectiveDate:due,note:"퀸잇 주문일 기준 +21영업일"};
+  }
+  if(s.includes("하프클럽")){
+    const due=addBusinessDays(d,15,holidays);return {date:due,effectiveDate:due,note:"하프클럽 주문일 기준 +15영업일"};
+  }
+  if(s.includes("네이버")){
+    const due=safeAddMonth(d);return {date:due,effectiveDate:due,note:"네이버 주문일 +1개월"};
+  }
+  if(s.includes("롯데on")||s.includes("롯데온")){
+    const due=safeAddMonth(d);return {date:due,effectiveDate:due,note:"롯데ON 주문일 +1개월"};
+  }
+  if(s.includes("비플로우"))return bflowDue(row,holidays);
+  return {date:null,effectiveDate:null,note:"채널 출고준수일 규칙 확인 필요"};
+}
+function businessDaysBetween(from,to,holidays){if(!from||!to)return 0;let d=new Date(from),c=0;while(d<to){d.setDate(d.getDate()+1);if(!isWeekend(d)&&!holidays.has(dateKey(d)))c++}return c}
+function customerNoticeDeadline(row,holidays){
+  const seller=normText(row.seller).replace(/\s/g,"").toLowerCase();
+  let start=null,end=null,note="",applies=false;
+  if(row.route==="gs"){
+    // GS 고객 안내기한은 기존 규칙대로 주문일 기준 2영업일 이내
+    const orderDate=toDate(row.orderDate);
+    if(!orderDate)return {start:null,end:null,note:"GS 주문일 확인 필요",overdue:false,applies:true};
+    start=addBusinessDays(orderDate,1,holidays);
+    end=addBusinessDays(orderDate,2,holidays);
+    note="GS · 주문 다음 2영업일 이내";
+    applies=true;
+  }else if(seller.includes("퀸잇")){
+    // 퀸잇 고객 안내기한은 A열 사용자정의1 날짜의 다음 영업일
+    const qBase=toDate(row.userDefined);
+    if(!qBase)return {start:null,end:null,note:"퀸잇 사용자정의1 확인 필요",overdue:false,applies:true};
+    start=addBusinessDays(qBase,1,holidays);
+    end=start;
+    note="퀸잇 · 사용자정의1 다음 영업일 · 패널티 없음";
+    applies=true;
+  }
+  if(!applies)return {start:null,end:null,note:"-",overdue:false,applies:false};
+  const today=toDate(document.getElementById("todayDate").value);
+  const overdue=!!(today&&end&&today.getTime()>end.getTime());
+  return {start,end,note,overdue,applies:true};
+}
+function deadlineDisplay(d){
+  if(!d||!d.applies)return "-";
+  const s=dateKey(d.start),e=dateKey(d.end);
+  return s&&e&&s!==e?`${s} ~ ${e}`:(e||s||"-");
+}
+function parseShortDateFromCs(text,baseDate){
+  if(!text)return null;let m=text.match(/(?:입고\s*예정일?|입고예정일|입고일)\s*[:：]?\s*(\d{1,2})[\/.월\s]+(\d{1,2})/i);
+  if(!m)return null;const base=toDate(baseDate)||new Date();return validDate(base.getFullYear(),+m[1],+m[2]);
+}
+function allCsText(row){return row.cs.map(x=>[x.worker,x.type,x.kind,x.memo].filter(Boolean).join(" ")).join("\n")}
+function cleanCsMemo(text){
+  return String(text||"")
+    .replace(/<br\s*\/?\s*>/gi," ")
+    .replace(/\r/g,"")
+    .replace(/>{2,}/g," ")
+    .replace(/\/{3,}/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+function extractCsGuidanceFromMemo(text){
+  const raw=String(text||"").replace(/<br\s*\/?\s*>/gi,"\n");
+  const pick=(re)=>{
+    const m=raw.match(re);if(!m)return "";
+    return normText(String(m[1]||"").replace(/[\/\s]+$/,""));
+  };
+  return {
+    altOption:pick(/(?:다른\s*옵션|상품옵션\s*변경(?:안내)?|대체\s*가능\s*옵션|옵션\s*변경)\s*[:：]\s*([^>\r\n]+)/i),
+    substituteProduct:pick(/대체품\s*[:：]\s*([^>\r\n]+)/i)
+  };
+}
+function csGuidanceForRow(row){
+  const ordered=[...(row.cs||[])].sort((a,b)=>(b.slot||0)-(a.slot||0));
+  let altOption="",substituteProduct="";
+  for(const c of ordered){
+    const g=extractCsGuidanceFromMemo(c.memo);
+    if(!altOption&&g.altOption)altOption=g.altOption;
+    if(!substituteProduct&&g.substituteProduct)substituteProduct=g.substituteProduct;
+    if(altOption&&substituteProduct)break;
+  }
+  return {date:row.csDate||"",altOption,substituteProduct};
+}
+function latestDateText(values){
+  const ds=values.map(v=>dateKey(toDate(v))||normText(v)).filter(Boolean).sort();
+  return ds.length?ds[ds.length-1]:"";
+}
+function groupCsGuideHtml(g){
+  const bits=[];
+  if(g.historyAltOptions?.length)bits.push(`옵션 변경안내: ${g.historyAltOptions.join(" / ")}`);
+  if(g.historySubstitutes?.length)bits.push(`대체품: ${g.historySubstitutes.join(" / ")}`);
+  if(!bits.length)return "";
+  return `<div class="cs-guide"><b>기존 CS 안내내용</b> · ${esc(bits.join(" · "))}</div>`;
+}
+function csSituationFromMemo(text){
+  const t=cleanCsMemo(text);if(!t)return "";
+  const x=t.replace(/\s+/g," ").trim();
+
+  // 고객 반응/연락 결과를 가장 우선해서 현재 상황으로 표현
+  if(/미수긍|미동의|동의\s*(?:안|하지)|변경\s*(?:거부|원치)|취소\s*원치|거절/.test(x))return "고객 미수긍";
+  if(/부재중|부재|미응답|연락\s*(?:안됨|두절)|통화\s*(?:불가|안됨)|전화.*(?:안\s*받|미수신)/.test(x))return "고객 부재중 · 재안내 필요";
+  if(/고객.*(?:수긍|동의)|(?:수긍|동의).*고객|변경해달라|변경\s*요청|변경\s*원함/.test(x)){
+    if(/상품변경|옵션\d*변경|변경\s*완료|송장출력전\s*상품변경/.test(x))return "고객 동의 · 상품변경 완료";
+    return "고객 동의 · 변경 요청";
+  }
+  if(/상품변경|옵션\d*변경|변경\s*완료|송장출력전\s*상품변경/.test(x))return "상품변경 완료";
+  if(/환불\s*(?:완료|처리)|직권\s*환불/.test(x))return "환불 처리";
+  if(/취소\s*(?:완료|처리)|주문\s*취소/.test(x))return "취소 처리";
+
+  // 고객에게 무엇을 안내했는지 한 문장으로 표시
+  const sms=/문자\s*(?:발송|전송)|문자발송/.test(x);
+  const call=/고객\s*통화|통화시|고객님.*통화/.test(x);
+  const substitute=/대체품|대체\s*상품/.test(x);
+  const altOption=/대체\s*가능\s*옵션|옵션\s*변경|변경\s*가능|다른\s*옵션/.test(x);
+  const stock=/품절|결품/.test(x);
+  const inbound=/입고\s*예정일|입고예정일|입고일/.test(x);
+  const ship=/출고기간|출고\s*예정|납기/.test(x);
+
+  if(sms&&substitute)return "대체품 문자 안내 발송";
+  if(sms&&altOption)return "대체 옵션 문자 안내 발송";
+  if(sms&&stock)return "품절 문자 안내 발송";
+  if(sms&&inbound)return "입고일 문자 안내 발송";
+  if(sms&&ship)return "출고일 문자 안내 발송";
+  if(sms)return "고객 문자 안내 발송";
+  if(call&&substitute)return "대체품 유선 안내";
+  if(call&&altOption)return "대체 옵션 유선 안내";
+  if(call&&stock)return "품절 유선 안내";
+  if(call&&inbound)return "입고일 유선 안내";
+  if(call)return "고객 유선 안내";
+
+  // 내부 처리상태는 고객 접촉정보가 없을 때만 보조 표시
+  if(/대체품\s*확인\s*요청|대체품\s*확인/.test(x))return "대체품 확인 중";
+  if(/품절\s*등록\s*완료/.test(x))return "품절 등록 완료";
+  if(/품절\s*등록|결품\s*등록/.test(x))return /요청/.test(x)?"품절 등록 요청 중":"품절 등록 확인 중";
+  if(/입고\s*예정일|입고예정일/.test(x))return "입고일 확인 중";
+  if(/출고기간|출고\s*예정|납기/.test(x))return "출고일 확인 중";
+
+  let fallback=x.replace(/^\[[^\]]+\]\s*/,"");
+  if(fallback.length>55)fallback=fallback.slice(0,55)+"…";
+  return fallback;
+}
+
+function summarizeCs(row){
+  if(!row.cs||!row.cs.length)return "CS 이력 없음";
+  const ordered=[...row.cs].sort((a,b)=>(a.slot||0)-(b.slot||0));
+  const situations=ordered.map(c=>csSituationFromMemo(c.memo)).filter(Boolean);
+  if(!situations.length)return "CS 이력 없음";
+
+  // 같은 상태 반복 제거
+  const uniqSituations=[];
+  for(const s of situations){if(!uniqSituations.includes(s))uniqSituations.push(s)}
+
+  // 가장 최근 고객상황을 우선하고, 직전 안내행위가 있으면 함께 표시
+  const customerRe=/(고객 미수긍|고객 부재중|고객 동의|상품변경 완료|환불 처리|취소 처리)/;
+  const actionRe=/(문자 안내 발송|유선 안내)/;
+  let latestCustomer="",latestAction="";
+  for(let i=uniqSituations.length-1;i>=0;i--){
+    const s=uniqSituations[i];
+    if(!latestCustomer&&customerRe.test(s))latestCustomer=s;
+    if(!latestAction&&actionRe.test(s))latestAction=s;
+    if(latestCustomer&&latestAction)break;
+  }
+  if(latestCustomer&&latestAction&&latestCustomer!==latestAction)return `${latestAction} · ${latestCustomer}`;
+  if(latestCustomer)return latestCustomer;
+  if(latestAction)return latestAction;
+
+  // 고객 반응이 아직 없으면 가장 최근 진행상태 1개만 보여줌
+  return uniqSituations[uniqSituations.length-1];
+}
+function noticeStatus(row){
+  if(!row.isStock)return {code:"na",label:"-"};
+  const t=allCsText(row).replace(/\s+/g," ");if(!t.trim())return {code:"need",label:"고객 안내 필요"};
+  const customerContact=/문자\s*(발송|ㅇ)|문자발송|고객\s*통화|통화시|고객님.*안내|안내.*고객/i.test(t);
+  const stockContext=/품절|결품|대체품|대체|상품변경|옵션\d*변경|취소|환불|변경\s*안내/i.test(t);
+  if(customerContact&&stockContext)return {code:"done",label:"안내 이력 있음"};
+  if(customerContact&&!stockContext)return {code:"check",label:"안내 내용 확인"};
+  return {code:"need",label:"고객 안내 필요"};
+}
+function deriveInbound(row){
+  const shared=sharedStore[row.sharedKey];
+  if(shared&&Object.prototype.hasOwnProperty.call(shared,"inboundDate"))return shared.inboundDate||"";
+  if(row.sourceInboundColumnPresent)return row.sourceInboundDate||"";
+  // 구양식 호환: 입고예정일 컬럼 자체가 없을 때만 CS메모의 입고일을 보조로 사용합니다.
+  for(const c of row.cs){const d=parseShortDateFromCs(c.memo,row.orderDate);if(d)return dateKey(d)}
+  return "";
+}
+function shippingStatus(row){
+  const inbound=toDate(row.inboundDate);
+  if(row.route==="gs"&&!row.dueDate)return {code:"check",label:"GS 주문일 확인 필요"};
+  if(!row.dueDate)return {code:"check",label:row.dueNote||"납기 확인 필요"};
+  if(!row.inboundDate){
+    if(row.inboundUnknown)return {code:"unknown",label:"입고일 확인 불가"};
+    return {code:"check",label:"입고일 확인 필요"};
+  }
+  if(!inbound)return {code:"check",label:"입고일 형식 확인"};
+  const limit=row.effectiveDueDate||row.dueDate;
+  if(inbound.getTime()>limit.getTime())return {code:"bad",label:`출고불가 · 준수일 ${dateKey(limit)} 초과`};
+  return {code:"good",label:`문제 없음 · 준수일 ${dateKey(limit)} 이내`};
+}
+function analyzeRow(row,holidays){
+  row.isStock=row.sourceKinds.has("stock");
+  row.route=/^GS\b|GS\s*SHOP/i.test(row.seller)?"gs":"other";
+  row.sharedKey=productOptionKey(row);
+  row.exactKey=exactKey(row);
+  row.shared=sharedStore[row.sharedKey]||{};
+  row.baseInboundDate=deriveInbound(row);
+  row.inboundDate=row.baseInboundDate;
+  row.inboundUnknown=!!row.shared.inboundUnknown;
+  if(row.inboundDate)row.inboundUnknown=false;
+  row.process=row.shared.process||"";row.memo=row.shared.memo||"";
+  row.csSummary=summarizeCs(row);
+  row.notice=noticeStatus(row);
+  row.bflowMatched=false;row.bflowChannel="";row.bflowShipDate=null;row.effectiveDueDate=null;
+  if(row.route==="gs"){
+    row.dueDate=gsDue(row,holidays);row.effectiveDueDate=row.dueDate;row.dueNote=row.dueDate?"GS 주문일 기준 +8영업일 · 단, +8영업일 날짜가 금요일 또는 공휴일 전날이면 +7영업일":"GS 주문일 확인 필요";
+  }else{
+    const x=allDue(row,holidays);row.dueDate=x.date;row.effectiveDueDate=x.effectiveDate||x.date;row.dueNote=x.note;
+    row.bflowMatched=!!x.matched;row.bflowChannel=x.match?.channel||"";row.bflowShipDate=x.bflowShipDate||null;
+  }
+  row.shipping=shippingStatus(row);
+  row.noticeDeadline=customerNoticeDeadline(row,holidays);
+  const today=toDate(document.getElementById("todayDate").value);const od=toDate(row.orderDate);
+  row.delayDays=businessDaysBetween(od,today,holidays);
+  const orderSaved=orderStore[row.exactKey]||{};row.done=!!orderSaved.done;
+  return row;
+}
+function mergeAllRows(){
+  const all=[...(filesData.stock||[]),...(filesData.gs||[]),...(filesData.all||[])].map(src=>({
+    ...src, sourceKinds:new Set(src.sourceKinds), cs:(src.cs||[]).map(c=>({...c})), duplicateCount:1
+  }));
+  const map=new Map();
+  for(const row of all){
+    const k=exactKey(row);
+    if(!map.has(k))map.set(k,row);
+    else{
+      const base=map.get(k);row.sourceKinds.forEach(x=>base.sourceKinds.add(x));base.duplicateCount++;
+      const seen=new Set(base.cs.map(x=>`${x.worker}|${x.type}|${x.kind}|${x.memo}`));
+      for(const c of row.cs){const ck=`${c.worker}|${c.type}|${c.kind}|${c.memo}`;if(!seen.has(ck)){base.cs.push(c);seen.add(ck)}}
+      if(!base.userDefined&&row.userDefined)base.userDefined=row.userDefined;
+      if(!base.orderDate&&row.orderDate)base.orderDate=row.orderDate;
+      if(!base.supplier&&row.supplier)base.supplier=row.supplier;
+      if(!base.sourceInboundDate&&row.sourceInboundDate){base.sourceInboundDate=row.sourceInboundDate;base.sourceInboundRaw=row.sourceInboundRaw;base.sourceInboundColumnPresent=base.sourceInboundColumnPresent||row.sourceInboundColumnPresent;}
+      if(row.csDate){
+        const bd=toDate(base.csDate),rd=toDate(row.csDate);
+        if(!base.csDate||(rd&&(!bd||rd.getTime()>bd.getTime())))base.csDate=row.csDate;
+      }
+    }
+  }
+  const holidays=getHolidaySet();mergedRows=[...map.values()].map(r=>analyzeRow(r,holidays));
+  const groupCounts={};mergedRows.forEach(r=>groupCounts[r.sharedKey]=(groupCounts[r.sharedKey]||0)+1);mergedRows.forEach(r=>r.sameItemCount=groupCounts[r.sharedKey]);
+  mergedRows.sort((a,b)=>{
+    if(a.isStock!==b.isStock)return a.isStock?-1:1;
+    const p=a.sharedKey.localeCompare(b.sharedKey,"ko");if(p)return p;
+    return String(b.orderDate).localeCompare(String(a.orderDate));
+  });
+}
+
+function sourceBadges(row){let h="";if(row.noticeDeadline?.overdue)h+='<span class="tag overdue">기한 경과</span>';if(row.isStock)h+='<span class="tag stock">품절</span>';if(row.bflowMatched)h+='<span class="tag bflow">비플로우 매칭</span>';return h}
+function noticeHtml(n){if(n.code==="need")return `<span class="notice-needed">● ${esc(n.label)}</span>`;if(n.code==="check")return `<span class="notice-check">● ${esc(n.label)}</span>`;if(n.code==="done")return `<span class="notice-done">● ${esc(n.label)}</span>`;return "-"}
+function shippingHtml(s){if(s.code==="bad")return `<span class="ship-bad">● ${esc(s.label)}</span>`;if(s.code==="check")return `<span class="ship-warn">● ${esc(s.label)}</span>`;return `<span class="ship-good">● ${esc(s.label)}</span>`}
+function productGroupKey(row){return [row.isStock?"stock":"regular",normText(row.supplier).toLowerCase(),normText(row.sourcePurchaseName).toLowerCase(),normProduct(row.product),normOption(row.option)].join("||")}
+function uniq(arr){return [...new Set(arr.filter(v=>normText(v)!==""))]}
+function groupDueInfo(g){
+  const ds=uniq((g.orders||[]).map(r=>dateKey(r.effectiveDueDate||r.dueDate)).filter(Boolean)).sort();
+  if(!ds.length)return "출고준수일 확인 필요";
+  return ds.length===1?`출고준수일 ${ds[0]}`:`가장 빠른 준수일 ${ds[0]} · 주문별 상이`;
+}
+function groupInboundInfo(g){
+  if(g.isStock)return "품절건 · 입고일 입력 불필요";
+  if(g.inboundUnknown)return "입고일정 확인불가 처리";
+  if(g.inboundOverrideActive){
+    if(g.inboundDate)return `직접 입력 ${g.inboundDate} · ${g.orderCount}건 일괄 적용`;
+    return `직접 미입력 처리 · ${g.orderCount}건 입고일 확인 필요`;
+  }
+  const dates=g.inboundDates||[];const parts=[];
+  if(dates.length===1)parts.push(`파일 입고예정일 ${dates[0]}`);
+  else if(dates.length>1)parts.push(`파일 입고예정일 주문별 상이 · ${dates.slice(0,3).join(", ")}${dates.length>3?` 외 ${dates.length-3}개`:""}`);
+  if(g.missingInboundCount)parts.push(`미입력 ${g.missingInboundCount}건`);
+  if(g.invalidInboundCount)parts.push(`형식 확인 ${g.invalidInboundCount}건`);
+  return parts.length?parts.join(" · "):"파일 입고예정일 미입력";
+}
+function groupInboundExportText(g){
+  if(g.isStock)return "-";
+  if(g.inboundUnknown)return "확인 안됨";
+  if(g.inboundOverrideActive)return g.inboundDate||"";
+  const dates=g.inboundDates||[];
+  if(!dates.length)return "";
+  if(dates.length===1&&!g.missingInboundCount&&!g.invalidInboundCount)return dates[0];
+  return `${dates.join(", ")}${g.missingInboundCount?` / 미입력 ${g.missingInboundCount}건`:""}${g.invalidInboundCount?` / 형식확인 ${g.invalidInboundCount}건`:""}`;
+}
+function inboundResolved(g){return g.isStock||g.inboundUnknown||!g.hasInboundInputIssue}
+function groupPriority(g){
+  if(g.isStock){if(g.overdue)return "기한 경과";if(g.noticeNeed)return "고객 안내 필요";return "품절 대응 필요";}
+  if(g.hasInboundInputIssue&&!g.inboundUnknown)return "입고일 확인 필요";
+  if(g.resolvedOnTime)return "납기 내 입고";
+  if(g.overdue)return "기한 경과";
+  if(g.shippingBad)return "출고 불가";
+  if(g.noticeNeed)return "고객 안내 필요";
+  if(g.inboundUnknown)return "입고일 확인 불가";
+  if(g.shippingCheck)return "납기 확인 필요";
+  return "";
+}
+function productValidation(g){
+  if(g.resolvedOnTime)return {ok:true,missing:[],stage:"resolved"};
+  if(!g.csTarget)return {ok:true,missing:[],stage:"done"};
+  if(!normText(g.purchaseName))return {ok:false,missing:["사입상품명"],stage:"purchase"};
+  if(g.isStock){
+    if(!g.optionStock||g.optionStock==="미확인")return {ok:false,missing:["대체 방법"],stage:"stock"};
+    if(g.optionStock==="있음"&&!normText(g.altOption))return {ok:false,missing:["다른 옵션"],stage:"altOption"};
+    if(g.optionStock==="없음"&&!normText(g.substituteProduct))return {ok:false,missing:["대체품"],stage:"substitute"};
+  }else{
+    if(g.hasInboundInputIssue&&!g.inboundUnknown)return {ok:false,missing:["입고예정일 확인"],stage:"inbound"};
+    if((g.shippingBad||g.inboundUnknown)&&!normText(g.altOption)&&!normText(g.substituteProduct))return {ok:false,missing:["상품옵션 변경 또는 대체품"],stage:"alternative"};
+  }
+  if(!normText(g.csInstruction))return {ok:false,missing:["CS 전달내용"],stage:"cs"};
+  return {ok:true,missing:[],stage:"done"};
+}
+function buildProductGroups(){
+  const map=new Map();
+  mergedRows.forEach(r=>{const k=productGroupKey(r);if(!map.has(k))map.set(k,{key:k,supplier:r.supplier,sourcePurchaseName:r.sourcePurchaseName||"",product:r.product,option:r.option,orders:[]});map.get(k).orders.push(r)});
+  productGroups=[...map.values()].map(g=>{
+    const saved=productStore[g.key]||{};const previous=findPreviousForGroup(g);
+    g.orderCount=g.orders.length;g.orderNos=uniq(g.orders.map(r=>r.orderNo));g.sellers=uniq(g.orders.map(r=>r.seller));
+    g.isStock=g.orders.every(r=>r.isStock);g.hasGs=g.orders.some(r=>r.route==="gs");g.hasOther=g.orders.some(r=>r.route==="other");
+    g.overdue=g.orders.some(r=>r.noticeDeadline?.overdue);g.noticeNeed=g.orders.some(r=>r.notice.code==="need");
+    g.csSummary=uniq(g.orders.map(r=>r.csSummary).filter(x=>x&&x!=="CS 이력 없음")).join(" / ")||"CS 이력 없음";
+    g.latestCsDate=latestDateText(g.orders.map(r=>r.csDate));
+    const historyGuides=g.orders.map(r=>csGuidanceForRow(r));g.historyAltOptions=uniq(historyGuides.map(x=>x.altOption));g.historySubstitutes=uniq(historyGuides.map(x=>x.substituteProduct));
+    g.purchaseName=(saved.purchaseName!==undefined?saved.purchaseName:g.sourcePurchaseName)||"";g.previousLoaded=!!previous;g.previousRef=previous||null;
+    const oneHistoryAlt=g.historyAltOptions.length===1?g.historyAltOptions[0]:"";const oneHistorySub=g.historySubstitutes.length===1?g.historySubstitutes[0]:"";
+    g.optionStock=saved.optionStock!==undefined?saved.optionStock:(g.isStock&&oneHistoryAlt&&!oneHistorySub?"있음":(g.isStock&&oneHistorySub&&!oneHistoryAlt?"없음":"미확인"));
+    g.altOption=saved.altOption!==undefined?saved.altOption:oneHistoryAlt;g.substituteProduct=saved.substituteProduct!==undefined?saved.substituteProduct:oneHistorySub;
+
+    const hasInboundOverride=Object.prototype.hasOwnProperty.call(saved,"inboundDate");const hasUnknownOverride=Object.prototype.hasOwnProperty.call(saved,"inboundUnknown");
+    g.inboundOverrideActive=!g.isStock&&hasInboundOverride;g.inboundUnknown=g.isStock?true:(hasUnknownOverride?!!saved.inboundUnknown:false);
+    if(hasInboundOverride&&normText(saved.inboundDate))g.inboundUnknown=false;
+    g.orders.forEach(r=>{
+      if(g.isStock){r.inboundDate="";r.inboundUnknown=true;}
+      else if(g.inboundUnknown){r.inboundDate="";r.inboundUnknown=true;}
+      else if(hasInboundOverride){r.inboundDate=normText(saved.inboundDate);r.inboundUnknown=false;}
+      else{r.inboundDate=r.baseInboundDate||"";r.inboundUnknown=false;}
+      r.shipping=shippingStatus(r);
+    });
+    g.inboundDates=uniq(g.orders.map(r=>normText(r.inboundDate)).filter(Boolean));
+    g.missingInboundCount=g.isStock?0:g.orders.filter(r=>!normText(r.inboundDate)&&!r.inboundUnknown).length;
+    g.invalidInboundCount=g.isStock?0:g.orders.filter(r=>normText(r.inboundDate)&&!toDate(r.inboundDate)).length;
+    g.hasInboundInputIssue=!g.isStock&&(g.missingInboundCount>0||g.invalidInboundCount>0);
+    if(g.isStock)g.inboundDate="";else if(hasInboundOverride)g.inboundDate=normText(saved.inboundDate);else if(!g.hasInboundInputIssue&&g.inboundDates.length===1)g.inboundDate=g.inboundDates[0];else g.inboundDate="";
+    g.internalMemo=saved.internalMemo!==undefined?saved.internalMemo:"";
+    g.shippingBad=g.orders.some(r=>r.shipping.code==="bad");g.shippingCheck=g.orders.some(r=>r.shipping.code==="check");
+    g.resolvedOnTime=!g.isStock&&!g.inboundUnknown&&!g.hasInboundInputIssue&&g.orders.length>0&&g.orders.every(r=>r.shipping.code==="good");
+    const inTime=g.orders.some(r=>r.noticeDeadline?.applies&&!r.noticeDeadline?.overdue);const autoProcess=inTime?"금일 내로 취소 요망":(g.overdue?"기한 경과 · 우선 안내 요망":"미정");
+    g.processDirection=saved.processDirection||autoProcess;g.csInstructionManual=!!saved.csInstructionManual;
+    const autoTarget=!g.resolvedOnTime&&(g.isStock||g.noticeNeed||g.overdue||g.shippingBad||g.shippingCheck||g.inboundUnknown||g.hasInboundInputIssue);
+    g.csTarget=saved.csTarget!==undefined?!!saved.csTarget:autoTarget;g.csInstruction=(g.csInstructionManual&&saved.csInstruction)?saved.csInstruction:autoCsInstruction(g);g.validation=productValidation(g);return g;
+  });
+  sortProductGroups();
+}
+function sortProductGroups(){
+  const ko=(a,b)=>String(a||"").localeCompare(String(b||""),"ko",{numeric:true,sensitivity:"base"});
+  productGroups.sort((a,b)=>{
+    if(activeSort==="priority"){
+      const score=g=>(!inboundResolved(g)?100:0)+(g.overdue?40:0)+(g.noticeNeed?30:0)+(g.shippingBad?20:0)+(g.isStock?10:0);
+      const pa=score(a),pb=score(b);
+      if(pa!==pb)return pb-pa;
+      return ko(a.supplier,b.supplier)||ko(a.purchaseName,b.purchaseName)||ko(a.product,b.product)||ko(a.option,b.option);
+    }
+    if(activeSort==="purchase") return ko(a.purchaseName,b.purchaseName)||ko(a.supplier,b.supplier)||ko(a.product,b.product)||ko(a.option,b.option);
+    if(activeSort==="product") return ko(a.product,b.product)||ko(a.supplier,b.supplier)||ko(a.purchaseName,b.purchaseName)||ko(a.option,b.option);
+    // 기본: 거래처별로 한데 모은 뒤 사입상품명 → 상품명 → 옵션명 순
+    return ko(a.supplier,b.supplier)||ko(a.purchaseName,b.purchaseName)||ko(a.product,b.product)||ko(a.option,b.option);
+  });
+}
+function productBadges(g){
+  let h="";if(g.resolvedOnTime)return '<span class="tag good">납기 내 입고 · 제외됨</span>';if(g.overdue)h+='<span class="tag overdue">기한 경과</span>';
+  if(g.isStock){h+='<span class="tag stock">품절 대응 필요</span>';if(g.noticeNeed)h+='<span class="tag warn">고객 안내 필요</span>';}
+  else{if(g.hasInboundInputIssue&&!g.inboundUnknown)h+='<span class="tag warn">입고일 미입력</span>';else if(g.inboundUnknown)h+='<span class="tag gray">입고일정 확인불가</span><span class="tag warn">대체 안내 필요</span>';if(g.shippingBad)h+='<span class="tag red">출고 불가</span>';if(g.noticeNeed)h+='<span class="tag warn">고객 안내 필요</span>';}
+  return h||'<span class="tag good">특이사항 없음</span>';
+}
+function workflowStage(g){
+  if(g.resolvedOnTime)return "resolved";
+  if(g.isStock)return "alternative";
+  if(g.hasInboundInputIssue&&!g.inboundUnknown)return "inbound";
+  if(g.inboundUnknown||g.shippingBad)return "alternative";
+  return "inbound";
+}
+function syncWorkflowTabs(){
+  document.querySelectorAll(".workflow-tab").forEach(x=>x.classList.toggle("active",x.dataset.workflow===activeWorkflow));
+}
+function syncStatusTabs(){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.filter===activeFilter));
+}
+function showWorkflowMoveNotice(msg){
+  const el=document.getElementById("workflowMoveNotice");if(!el)return;
+  el.textContent=msg;el.classList.add("show");clearTimeout(showWorkflowMoveNotice.t);
+  showWorkflowMoveNotice.t=setTimeout(()=>el.classList.remove("show"),4500);
+}
+function filterGroups(){
+  const q=normText(document.getElementById("searchInput").value).toLowerCase();
+  return productGroups.filter(g=>{
+    if(workflowStage(g)!==activeWorkflow)return false;
+    let ok=true;
+    if(activeFilter==="target")ok=g.csTarget;
+    else if(activeFilter==="needinput")ok=g.csTarget&&!g.validation.ok;
+    else if(activeFilter==="stock")ok=g.isStock;
+    else if(activeFilter==="gs")ok=g.hasGs;
+    else if(activeFilter==="overdue")ok=g.overdue;
+    else if(activeFilter==="bad")ok=g.shippingBad;
+    if(!ok)return false;if(!q)return true;
+    return [g.supplier,g.purchaseName,g.product,g.option,g.sellers.join(" "),g.orderNos.join(" "),g.csSummary,g.latestCsDate,groupInboundExportText(g),(g.historyAltOptions||[]).join(" "),(g.historySubstitutes||[]).join(" "),g.csInstruction,g.internalMemo].join(" ").toLowerCase().includes(q);
+  });
+}
+function fieldClass(g,field){
+  if(!g.csTarget||!g.validation||!g.validation.missing.includes(field))return "";
+  // 입고예정일은 최우선 확인이므로 가장 강하게 강조
+  if(field==="입고예정일"||field==="입고예정일 확인")return " input-first";
+  // 단계별로 지금 확인해야 하는 한 칸만 강조
+  return " input-attention";
+}
+function autoCsInstruction(g){
+  const parts=[];const inTime=g.orders.some(r=>r.noticeDeadline?.applies&&!r.noticeDeadline?.overdue);if(g.overdue)parts.push("기한 경과");
+  if(g.isStock){
+    parts.push("품절");if(g.optionStock==="있음")parts.push(g.altOption?`다른 옵션: ${g.altOption}`:"다른 옵션 입력 필요");else if(g.optionStock==="없음")parts.push(g.substituteProduct?`대체품: ${g.substituteProduct}`:"대체품 확인 필요");else if(g.optionStock==="해당없음")parts.push("해당없음");else parts.push("대체 방법 선택 필요");
+  }else if(g.hasInboundInputIssue&&!g.inboundUnknown){parts.push(`입고일 확인 필요${g.missingInboundCount?` ${g.missingInboundCount}건`:""}`);
+  }else if(g.inboundUnknown){parts.push("입고일 확인 불가");if(g.altOption)parts.push(`상품옵션 변경: ${g.altOption}`);else if(g.substituteProduct)parts.push(`대체품: ${g.substituteProduct}`);else parts.push("상품옵션 변경 또는 대체품 안내 필요");
+  }else if(g.shippingBad){
+    const bad=g.orders.filter(r=>r.shipping.code==="bad");const dates=uniq(bad.map(r=>normText(r.inboundDate)).filter(Boolean));const limits=uniq(bad.map(r=>dateKey(r.effectiveDueDate||r.dueDate)).filter(Boolean));let t="출고불가";
+    if(dates.length===1)t+=` · 입고 ${dates[0]}`;else if(dates.length>1)t+=" · 주문별 입고일 상이";if(limits.length===1)t+=` / 준수 ${limits[0]}`;parts.push(t);
+    if(g.altOption)parts.push(`상품옵션 변경: ${g.altOption}`);else if(g.substituteProduct)parts.push(`대체품: ${g.substituteProduct}`);else parts.push("상품옵션 변경 또는 대체품 안내 필요");
+  }else if(g.resolvedOnTime){parts.push(`${groupInboundExportText(g)||"입고일 확인"} · 납기 내`);}else parts.push("납기 확인 필요");
+  let process="";if(inTime)process="금일 내로 취소 요망";else if(g.overdue)process="우선 안내 요망";else if(g.processDirection&&g.processDirection!=="미정")process=g.processDirection;if(process)parts.push(process);return parts.join(" / ");
+}
+function render(){
+  updateStats();
+  const rows=filterGroups();
+  const wrap=document.getElementById("tableWrap");
+  if(!productGroups.length){wrap.innerHTML='<div class="empty"><b>상품 대응표가 없습니다.</b>품절 / GS / 기타채널 파일을 선택한 뒤 [상품 대응표 만들기]를 눌러주세요.</div>';return}
+  if(!rows.length){
+    const emptyMsg=activeWorkflow==="resolved"
+      ? '<div class="empty"><b>납기 내 입고로 제외된 상품이 없습니다.</b>입고예정일이 출고준수일 이내로 판정되면 이 탭에 보관됩니다.</div>'
+      : activeWorkflow==="alternative"
+        ? '<div class="empty"><b>대체품 / 옵션 변경이 필요한 상품이 없습니다.</b>품절, 납기일정 초과, 입고일정 확인불가 상품이 이 탭으로 모입니다.</div>'
+        : '<div class="empty"><b>입고일정 확인이 필요한 상품이 없습니다.</b>입고일을 입력해 납기 내이면 자동 제외되고, 납기 초과 또는 확인불가면 2번 탭으로 이동합니다.</div>';
+    wrap.innerHTML=emptyMsg;return
+  }
+
+  const bySupplier=new Map();
+  rows.forEach(g=>{
+    const supplier=normText(g.supplier)||"거래처 미확인";
+    if(!bySupplier.has(supplier))bySupplier.set(supplier,[]);
+    bySupplier.get(supplier).push(g);
+  });
+
+  let h='<div class="supplier-board">';
+  for(const [supplier,groups] of bySupplier){
+    h+=`<section class="supplier-section"><div class="supplier-head"><strong>${esc(supplier)}</strong><span>${groups.length}개 상품 · ${groups.reduce((n,g)=>n+g.orderCount,0)}건 주문</span></div><div class="task-list">`;
+    groups.forEach(g=>{
+      const v=g.validation;
+      const needInbound=!g.isStock&&g.hasInboundInputIssue&&!g.inboundUnknown;
+      const needStock=g.isStock&&(!g.optionStock||g.optionStock==="미확인");
+      const needAlternative=!g.isStock&&(g.shippingBad||g.inboundUnknown);
+      const shipLabel=g.isStock?"품절건 · 입고일 입력 불필요":(g.resolvedOnTime?"납기 내 입고 · 조치목록에서 제외됨":(g.hasInboundInputIssue&&!g.inboundUnknown?"입고일 입력 필요":(g.shippingBad?"출고 불가 · 대체 안내 필요":(g.inboundUnknown?"입고일정 확인불가 · 대체 안내 단계로 이동":"납기 확인 필요"))));
+      const shipClass=g.resolvedOnTime?"good":(g.shippingBad?"bad":"warn");
+
+      let firstFlow="";
+      if(g.isStock){
+        firstFlow=`<div class="flow-box ${needStock?'active-first':''}">
+          <div class="flow-label"><span><span class="flow-num">1</span>대체 방법</span><span>${needStock?'미확인':''}</span></div>
+          <div class="choice-chips">
+            <button type="button" class="choice-chip stock-choice ${g.optionStock==='있음'?'active':''}" data-value="있음" data-group="${esc(g.key)}">다른 옵션 입력</button>
+            <button type="button" class="choice-chip danger stock-choice ${g.optionStock==='없음'?'active':''}" data-value="없음" data-group="${esc(g.key)}">대체품 입력</button>
+            <button type="button" class="choice-chip none stock-choice ${g.optionStock==='해당없음'?'active':''}" data-value="해당없음" data-group="${esc(g.key)}">해당없음</button>
+          </div>
+          ${g.optionStock==='있음'?`<div class="flow-row" style="margin-top:8px"><input type="text" class="group-edit${fieldClass(g,'다른 옵션')}" data-field="altOption" data-group="${esc(g.key)}" value="${esc(g.altOption)}" placeholder="다른 옵션 예: 흑청 L 가용재고"></div>`:''}
+          ${g.optionStock==='없음'?`<div class="flow-row" style="margin-top:8px"><input type="text" class="group-edit${fieldClass(g,'대체품')}" data-field="substituteProduct" data-group="${esc(g.key)}" value="${esc(g.substituteProduct)}" placeholder="대체품 상품명/옵션"></div>`:''}
+        </div>`;
+      }else{
+        firstFlow=`<div class="flow-box ${needInbound?'active-first':''}">
+          <div class="flow-label"><span><span class="flow-num">1</span>입고예정일</span><span>${esc(groupDueInfo(g))}</span></div>
+          <div class="flow-row">
+            <input class="inbound-date${fieldClass(g,'입고예정일 확인')}" type="date" data-field="inboundDate" data-group="${esc(g.key)}" value="${esc(g.inboundDate)}">
+            ${g.inboundUnknown
+              ? `<button type="button" class="inbound-unknown-btn move-to-inbound" data-group="${esc(g.key)}">확인불가 해제</button>`
+              : `<button type="button" class="inbound-unknown-btn inbound-unknown" data-group="${esc(g.key)}">입고일정 확인불가 → 2번 탭 이동</button>`}
+          </div>
+          <div class="source-inbound-note"><strong>파일 입고정보</strong> · ${esc(groupInboundInfo(g))}</div>
+          <div class="status-line ${shipClass}">${esc(shipLabel)}</div>
+          ${g.inboundUnknown?'<div class="moved-note">입고일정 확인불가로 ② 대체품 / 옵션 변경 상품 탭으로 이동된 건입니다.</div>':''}
+        </div>`;
+        if(needAlternative){
+          firstFlow+=`<div class="flow-box active-next">
+            <div class="flow-label"><span><span class="flow-num">2</span>대체품 / 옵션 변경</span><span>둘 중 하나 입력</span></div>
+            <div class="flow-row"><input type="text" class="group-edit${fieldClass(g,'상품옵션 변경 또는 대체품')}" data-field="altOption" data-group="${esc(g.key)}" value="${esc(g.altOption)}" placeholder="상품옵션 변경안내 예: 흑청 L"></div>
+            <div class="flow-row" style="margin-top:7px"><input type="text" class="group-edit${fieldClass(g,'상품옵션 변경 또는 대체품')}" data-field="substituteProduct" data-group="${esc(g.key)}" value="${esc(g.substituteProduct)}" placeholder="대체품 상품명/옵션"></div>
+          </div>`;
+        }
+      }
+
+      const csStep=g.isStock?2:(needAlternative?3:2);
+      const csFlow=`<div class="flow-box">
+        <div class="flow-label"><span><span class="flow-num">${csStep}</span>CS 전달내용</span><span>${g.csInstructionManual?'수정됨':'자동 작성'}</span></div>
+        <div class="cs-preview">${esc(g.csInstruction||'자동 작성 내용 없음')}</div>
+        <details class="edit-details"><summary>필요할 때만 문구 수정</summary>
+          <textarea class="cs-instruction ${g.csInstructionManual?'cs-manual':'cs-auto'} group-edit${fieldClass(g,'CS 전달내용')}" data-field="csInstruction" data-group="${esc(g.key)}" placeholder="자동 작성 후 수정 가능">${esc(g.csInstruction)}</textarea>
+          <div class="edit-actions"><button type="button" class="auto-btn restore-cs" data-group="${esc(g.key)}">자동문구 복원</button></div>
+        </details>
+      </div>`;
+
+      h+=`<article class="task-card ${g.isStock?'problem':''}" data-group="${esc(g.key)}">
+        <div class="task-head">
+          <div class="task-title-wrap">
+            <div class="task-badges">${productBadges(g)}</div>
+            <div class="task-title">${esc(g.product)} <span class="task-option">${esc(g.option||'-')}</span></div>
+            ${previousReferenceHtml(g)}
+            <div class="task-meta">
+              <span><b>사입</b> ${esc(g.purchaseName||'-')}</span>
+              <span><b>판매처</b> ${esc(g.sellers.join(', ')||'-')}</span>
+              <span><b>주문</b> ${g.orderCount}건</span>
+              <span><b>주문번호</b> <span class="mono">${esc(g.orderNos.slice(0,2).join(', '))}${g.orderNos.length>2?' 외 '+(g.orderNos.length-2)+'건':''}</span></span>
+            </div>
+          </div>
+          <label class="cs-target-pill"><input type="checkbox" class="target-check group-check" data-group="${esc(g.key)}" ${g.csTarget?'checked':''}> CS 전달</label>
+        </div>
+
+        <div class="current-cs"><b>현재 CS 상황</b> ${esc(g.csSummary||'CS 이력 없음')}${g.latestCsDate?`<span class="cs-date">최근 CS ${esc(g.latestCsDate)}</span>`:''}${groupCsGuideHtml(g)}</div>
+        <div class="workflow ${g.isStock?'stock-workflow':''}">${firstFlow}${csFlow}</div>
+
+        <details class="extra-details"><summary>추가정보 · 다른 대체안 · 내부메모</summary>
+          <div class="more-panel">
+            <div class="more-field"><label>사입상품명</label><input class="group-edit" data-field="purchaseName" data-group="${esc(g.key)}" value="${esc(g.purchaseName)}"></div>
+            <div class="more-field"><label>처리내용</label><input class="group-edit" data-field="processDirection" data-group="${esc(g.key)}" value="${esc(g.processDirection==='미정'?'':g.processDirection)}" placeholder="필요 시 수정"></div>
+            <div class="more-field"><label>다른 옵션</label><input class="group-edit" data-field="altOption" data-group="${esc(g.key)}" value="${esc(g.altOption)}" placeholder="필요 시 입력"></div>
+            <div class="more-field"><label>대체품</label><input class="group-edit" data-field="substituteProduct" data-group="${esc(g.key)}" value="${esc(g.substituteProduct)}" placeholder="필요 시 입력"></div>
+            <div class="more-field full"><label>내부메모</label><textarea class="group-edit" data-field="internalMemo" data-group="${esc(g.key)}" placeholder="필요한 경우만 입력">${esc(g.internalMemo)}</textarea></div>
+          </div>
+        </details>
+
+        <div class="task-foot">
+          <div>${v.ok?'<span class="input-ok">CS 전달 준비 완료</span>':`<span class="required-note">${esc(v.missing.join(', '))} 확인 필요</span>`}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">${g.resolvedOnTime?`<button class="reopen-item" data-group="${esc(g.key)}">입고일 지우고 조치목록 복귀</button>`:`<button class="work-one" data-group="${esc(g.key)}">한건씩 처리</button>`}<button class="view-group" data-group="${esc(g.key)}">주문·CS 보기 (${g.orderCount})</button></div>
+        </div>
+        ${g.resolvedOnTime?'<div class="resolved-help">입고일을 잘못 입력했다면 위 날짜를 바로 수정하거나 [입고일 지우고 조치목록 복귀]를 누르면 됩니다.</div>':''}
+      </article>`;
+    });
+    h+='</div></section>';
+  }
+  h+='</div>';
+  wrap.innerHTML=h;
+  bindProductEvents();
+}
+function updateStats(){
+  const set=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=n};
+  const active=productGroups.filter(g=>!g.resolvedOnTime);
+  set("sAll",active.length);set("sOrders",mergedRows.length);set("sStock",active.filter(g=>g.isStock).length);set("sTarget",active.filter(g=>g.csTarget).length);set("sNeedInput",active.filter(g=>g.csTarget&&!g.validation.ok).length);set("sOverdue",active.filter(g=>g.overdue).length);set("sBad",active.filter(g=>g.shippingBad).length);set("sCheck",active.filter(g=>(!g.isStock&&g.hasInboundInputIssue&&!g.inboundUnknown)||g.shippingCheck||g.noticeNeed).length);set("sResolved",productGroups.filter(g=>g.resolvedOnTime).length);
+  set("wInbound",productGroups.filter(g=>workflowStage(g)==="inbound").length);
+  set("wAlternative",productGroups.filter(g=>workflowStage(g)==="alternative").length);
+  set("wResolved",productGroups.filter(g=>workflowStage(g)==="resolved").length);
+}
+function saveGroupField(key,field,value,opts={}){
+  productStore[key]=productStore[key]||{};productStore[key][field]=value;
+  if(field==="csInstruction"&&opts.manual!==false)productStore[key].csInstructionManual=true;if(field==="csInstructionManual")productStore[key].csInstructionManual=!!value;flashSave();
+  const g=productGroups.find(x=>x.key===key);if(!g)return;g[field]=value;if(field==="csInstruction"&&opts.manual!==false)g.csInstructionManual=true;if(field==="csInstructionManual")g.csInstructionManual=!!value;
+  if(field==="inboundDate"||field==="inboundUnknown"){
+    if(field==="inboundDate"&&value){g.inboundUnknown=false;productStore[key].inboundUnknown=false;}
+    g.inboundOverrideActive=!g.isStock&&Object.prototype.hasOwnProperty.call(productStore[key],"inboundDate");
+    g.orders.forEach(r=>{if(g.isStock){r.inboundDate="";r.inboundUnknown=true;}else if(g.inboundUnknown){r.inboundDate="";r.inboundUnknown=true;}else if(g.inboundOverrideActive){r.inboundDate=normText(g.inboundDate);r.inboundUnknown=false;}else{r.inboundDate=r.baseInboundDate||"";r.inboundUnknown=false;}r.shipping=shippingStatus(r)});
+    g.inboundDates=uniq(g.orders.map(r=>normText(r.inboundDate)).filter(Boolean));g.missingInboundCount=g.isStock?0:g.orders.filter(r=>!normText(r.inboundDate)&&!r.inboundUnknown).length;g.invalidInboundCount=g.isStock?0:g.orders.filter(r=>normText(r.inboundDate)&&!toDate(r.inboundDate)).length;g.hasInboundInputIssue=!g.isStock&&(g.missingInboundCount>0||g.invalidInboundCount>0);
+    g.shippingBad=g.orders.some(r=>r.shipping.code==="bad");g.shippingCheck=g.orders.some(r=>r.shipping.code==="check");g.resolvedOnTime=!g.isStock&&!g.inboundUnknown&&!g.hasInboundInputIssue&&g.orders.length>0&&g.orders.every(r=>r.shipping.code==="good");
+    if(g.resolvedOnTime)g.csTarget=false;else if(g.shippingBad||g.inboundUnknown||g.hasInboundInputIssue)g.csTarget=true;
+  }
+  if(!g.csInstructionManual&&["optionStock","altOption","substituteProduct","inboundDate","inboundUnknown","processDirection"].includes(field)){g.csInstruction=autoCsInstruction(g);productStore[key].csInstruction=g.csInstruction;}
+  g.validation=productValidation(g);
+}
+function applyPreviousValues(key){
+  const g=productGroups.find(x=>x.key===key);
+  if(!g||!g.previousRef)return false;
+  const p=g.previousRef;
+  const saved=productStore[key]||{};
+  const hasTodayInput=Object.keys(saved).some(k=>!["csTarget"].includes(k));
+  if(hasTodayInput&&!confirm("현재 입력값이 있습니다. 어제 값으로 덮어쓸까요?"))return false;
+
+  // 어제 참고값을 사용자가 직접 요청한 경우에만 오늘 입력칸으로 복사합니다.
+  saveGroupField(key,"purchaseName",p.purchaseName||g.purchaseName||"",{manual:false});
+  if(g.isStock){
+    saveGroupField(key,"optionStock",p.optionStock||"미확인",{manual:false});
+    saveGroupField(key,"altOption",p.altOption||"",{manual:false});
+    saveGroupField(key,"substituteProduct",p.substituteProduct||"",{manual:false});
+  }else{
+    saveGroupField(key,"inboundDate",p.inboundDate||"",{manual:false});
+    saveGroupField(key,"inboundUnknown",!!p.inboundUnknown,{manual:false});
+    saveGroupField(key,"altOption",p.altOption||"",{manual:false});
+    saveGroupField(key,"substituteProduct",p.substituteProduct||"",{manual:false});
+  }
+  saveGroupField(key,"processDirection",p.processDirection||"",{manual:false});
+  saveGroupField(key,"internalMemo",p.internalMemo||"",{manual:false});
+
+  // '그대로 입력'이므로 어제 CS 문구가 있으면 자동문구가 덮어쓰지 않게 수동값으로 고정합니다.
+  if(normText(p.csInstruction)){
+    saveGroupField(key,"csInstructionManual",true,{manual:false});
+    saveGroupField(key,"csInstruction",p.csInstruction,{manual:true});
+  }else{
+    saveGroupField(key,"csInstructionManual",false,{manual:false});
+    const gg=productGroups.find(x=>x.key===key);
+    if(gg){const t=autoCsInstruction(gg);saveGroupField(key,"csInstruction",t,{manual:false});}
+  }
+  const gg=productGroups.find(x=>x.key===key);if(gg)gg.validation=productValidation(gg);
+  return true;
+}
+
+function bindProductEvents(){
+  document.querySelectorAll(".group-edit").forEach(el=>{
+    const evt=el.tagName==="TEXTAREA"||el.tagName==="INPUT"?"input":"change";
+    el.addEventListener(evt,e=>{saveGroupField(e.target.dataset.group,e.target.dataset.field,e.target.value,{manual:e.target.dataset.field==="csInstruction"})});
+    el.addEventListener("change",e=>{const g=productGroups.find(x=>x.key===e.target.dataset.group);if(g){g.validation=productValidation(g);render()}});
+  });
+  document.querySelectorAll(".inbound-date").forEach(el=>{
+    el.addEventListener("change",e=>{
+      const key=e.target.dataset.group;const val=e.target.value;
+      saveGroupField(key,"inboundDate",val,{manual:false});
+      if(val)saveGroupField(key,"inboundUnknown",false,{manual:false});
+      const g=productGroups.find(x=>x.key===key);
+      if(!g){render();return}
+      g.validation=productValidation(g);
+      // 입고예정일을 입력한 뒤 준수일을 초과하면 즉시 ② 대체품/옵션 변경 단계로 이동합니다.
+      if(val&&g.shippingBad){
+        activeWorkflow="alternative";activeFilter="all";syncWorkflowTabs();syncStatusTabs();render();
+        showWorkflowMoveNotice("입고예정일이 출고준수일보다 늦어 출고불가로 판정되었습니다. ② 대체품 / 옵션 변경 상품 탭으로 이동했습니다.");
+        return;
+      }
+      render();
+    });
+  });
+  document.querySelectorAll(".inbound-unknown").forEach(el=>el.addEventListener("click",e=>{
+    const key=e.currentTarget.dataset.group;
+    saveGroupField(key,"inboundDate","",{manual:false});
+    saveGroupField(key,"inboundUnknown",true,{manual:false});
+    const g=productGroups.find(x=>x.key===key);if(g)g.validation=productValidation(g);
+    activeWorkflow="alternative";activeFilter="all";syncWorkflowTabs();syncStatusTabs();render();
+    showWorkflowMoveNotice("입고일정 확인불가로 저장했습니다. ② 대체품 / 옵션 변경 상품 탭으로 이동했습니다.");
+  }));
+  document.querySelectorAll(".move-to-inbound").forEach(el=>el.addEventListener("click",e=>{
+    const key=e.currentTarget.dataset.group;
+    saveGroupField(key,"inboundUnknown",false,{manual:false});
+    const g=productGroups.find(x=>x.key===key);if(g)g.validation=productValidation(g);
+    activeWorkflow="inbound";activeFilter="all";syncWorkflowTabs();syncStatusTabs();render();
+    showWorkflowMoveNotice("입고일정 확인불가를 해제했습니다. ① 입고일정 기입 탭으로 이동했습니다.");
+  }));
+  document.querySelectorAll(".stock-choice").forEach(el=>el.addEventListener("click",e=>{
+    saveGroupField(e.currentTarget.dataset.group,"optionStock",e.currentTarget.dataset.value,{manual:false});render();
+  }));
+  document.querySelectorAll("#tableWrap .apply-prev-values").forEach(el=>el.addEventListener("click",()=>{
+    if(applyPreviousValues(el.dataset.group))render();
+  }));
+  document.querySelectorAll(".group-check").forEach(el=>el.addEventListener("change",e=>{saveGroupField(e.target.dataset.group,"csTarget",e.target.checked);const g=productGroups.find(x=>x.key===e.target.dataset.group);if(g){g.csTarget=e.target.checked;g.validation=productValidation(g)}render()}));
+  document.querySelectorAll(".view-group").forEach(el=>el.addEventListener("click",()=>openGroup(el.dataset.group)));
+  document.querySelectorAll(".work-one").forEach(el=>el.addEventListener("click",()=>openWorkMode(el.dataset.group)));
+  document.querySelectorAll(".reopen-item").forEach(el=>el.addEventListener("click",()=>{
+    const key=el.dataset.group;
+    saveGroupField(key,"inboundDate","",{manual:false});
+    saveGroupField(key,"inboundUnknown",false,{manual:false});
+    saveGroupField(key,"csTarget",true,{manual:false});
+    const g=productGroups.find(x=>x.key===key);if(g){g.csTarget=true;g.validation=productValidation(g)}
+    activeWorkflow="inbound";activeFilter="all";syncWorkflowTabs();syncStatusTabs();render();
+  }));
+  document.querySelectorAll(".restore-cs").forEach(el=>el.addEventListener("click",()=>{
+    const g=productGroups.find(x=>x.key===el.dataset.group);if(!g)return;
+    g.csInstructionManual=false;saveGroupField(g.key,"csInstructionManual",false,{manual:false});
+    const t=autoCsInstruction(g);g.csInstruction=t;saveGroupField(g.key,"csInstruction",t,{manual:false});g.validation=productValidation(g);render();
+  }));
+}
+function getWorkQueue(){
+  return filterGroups().map(g=>g.key);
+}
+function workShippingText(g){
+  if(g.isStock)return "품절 대응";if(g.resolvedOnTime)return "납기 내 입고 · 목록 제외";if(g.hasInboundInputIssue&&!g.inboundUnknown)return `입고일 입력 필요${g.missingInboundCount?` · ${g.missingInboundCount}건`:""}`;if(g.shippingBad)return "출고 불가 · 대체 안내 필요";if(g.inboundUnknown)return "입고일정 확인불가 · 대체품/옵션 변경 필요";return "납기 확인 필요";
+}
+function originalCsHtml(g){
+  let h="";g.orders.forEach((r,idx)=>{const inbound=r.isStock?"-":(r.inboundUnknown?"확인 불가":(r.inboundDate||"미입력"));const cls=r.shipping.code==="bad"?"order-inbound-bad":(r.shipping.code==="good"?"order-inbound-good":"order-inbound-missing");
+    h+=`<div class="work-order"><div class="work-order-meta">${idx+1}. ${esc(r.seller)} · ${esc(r.orderDate)} · 주문번호 ${esc(r.orderNo)} · 출고준수일 ${esc(dateKey(r.effectiveDueDate||r.dueDate)||'-')} · 입고예정일 <span class="${cls}">${esc(inbound)}</span> · ${esc(r.shipping.label)}${r.csDate?` · 최근 CS ${esc(r.csDate)}`:''}</div>`;
+    if(r.cs&&r.cs.length)r.cs.forEach(c=>{h+=`<div class="work-memo"><b>${esc(c.worker||'-')} · ${esc(c.type||'-')} · ${esc(c.kind||'-')}</b><br>${esc(c.memo||'(메모 없음)')}</div>`});else h+='<div class="work-memo">CS 이력 없음</div>';h+='</div>'});return h;
+}
+function renderWorkItem(){
+  const body=document.getElementById("workBody");
+  if(!workQueue.length){body.innerHTML='<div class="work-empty"><b>현재 처리할 항목이 없습니다.</b></div>';document.getElementById("workProgress").textContent="0 / 0";return}
+  workIndex=Math.max(0,Math.min(workIndex,workQueue.length-1));
+  const key=workQueue[workIndex];
+  const g=productGroups.find(x=>x.key===key);
+  if(!g){workQueue.splice(workIndex,1);if(workIndex>=workQueue.length)workIndex=Math.max(0,workQueue.length-1);return renderWorkItem()}
+  document.getElementById("workTitle").textContent=`${g.product} / ${g.option||'-'}`;
+  document.getElementById("workProgress").textContent=`${workIndex+1} / ${workQueue.length}`;
+  const statusClass=g.resolvedOnTime?'work-good':(g.shippingBad?'work-bad':'work-warn');
+  let action='';
+  if(g.isStock){
+    action=`<div class="work-action-field full"><label>대체 방법 ${g.optionStock==='미확인'?'<span style="color:#9b6614">· 미확인</span>':''}</label><div class="choice-chips">
+      <button type="button" class="choice-chip work-stock-choice ${g.optionStock==='있음'?'active':''}" data-value="있음" data-group="${esc(g.key)}">다른 옵션 입력</button>
+      <button type="button" class="choice-chip danger work-stock-choice ${g.optionStock==='없음'?'active':''}" data-value="없음" data-group="${esc(g.key)}">대체품 입력</button>
+      <button type="button" class="choice-chip none work-stock-choice ${g.optionStock==='해당없음'?'active':''}" data-value="해당없음" data-group="${esc(g.key)}">해당없음</button>
+    </div></div>`;
+    if(g.optionStock==='있음')action+=`<div class="work-action-field full"><label>다른 옵션</label><input class="work-control" data-field="altOption" data-group="${esc(g.key)}" value="${esc(g.altOption)}" placeholder="예: 흑청 L 가용재고"></div>`;
+    if(g.optionStock==='없음')action+=`<div class="work-action-field full"><label>대체품</label><input class="work-control" data-field="substituteProduct" data-group="${esc(g.key)}" value="${esc(g.substituteProduct)}" placeholder="대체품 상품명/옵션"></div>`;
+  }else{
+    action+=`<div class="work-action-field"><label>입고예정일</label><input type="date" class="work-inbound-date" data-group="${esc(g.key)}" value="${esc(g.inboundDate)}"><div class="source-inbound-note"><strong>파일 입고정보</strong> · ${esc(groupInboundInfo(g))}</div></div>`;
+    action+=`<div class="work-action-field"><label>입고일정 확인</label>${g.inboundUnknown
+      ? `<button type="button" class="inbound-unknown-btn work-unknown-release" data-group="${esc(g.key)}">확인불가 해제 → 1번 탭</button>`
+      : `<button type="button" class="inbound-unknown-btn work-inbound-unknown" data-group="${esc(g.key)}">확인불가 → 2번 탭 이동</button>`}${g.inboundUnknown?'<div class="moved-note">② 대체품 / 옵션 변경 상품 단계로 이동된 건입니다.</div>':''}</div>`;
+    if(g.shippingBad||g.inboundUnknown){
+      action+=`<div class="work-action-field"><label>상품옵션 변경안내</label><input class="work-control" data-field="altOption" data-group="${esc(g.key)}" value="${esc(g.altOption)}" placeholder="변경 가능 옵션"></div>`;
+      action+=`<div class="work-action-field"><label>대체품</label><input class="work-control" data-field="substituteProduct" data-group="${esc(g.key)}" value="${esc(g.substituteProduct)}" placeholder="대체품 상품명/옵션"></div>`;
+    }
+  }
+  body.innerHTML=`
+    <div class="work-info">
+      <div class="work-info-title">${esc(g.product)}</div><div class="work-info-opt">${esc(g.option||'-')}</div>
+      <div class="work-info-meta"><span><b>거래처</b> ${esc(g.supplier||'-')}</span><span><b>사입상품명</b> ${esc(g.purchaseName||'-')}</span><span><b>판매처</b> ${esc(g.sellers.join(', ')||'-')}</span><span><b>주문</b> ${g.orderCount}건</span></div>${previousReferenceHtml(g)}
+    </div>
+    <div class="work-status">
+      <div class="work-panel"><h4>현재 CS 상황</h4><div class="work-current">${esc(g.csSummary||'CS 이력 없음')}</div>${g.latestCsDate?`<span class="work-cs-date">최근 CS ${esc(g.latestCsDate)}</span>`:''}${(g.historyAltOptions?.length||g.historySubstitutes?.length)?`<div class="work-cs-guide">${g.historyAltOptions?.length?`<b>옵션 변경안내</b> ${esc(g.historyAltOptions.join(" / "))}`:""}${g.historyAltOptions?.length&&g.historySubstitutes?.length?"<br>":""}${g.historySubstitutes?.length?`<b>대체품</b> ${esc(g.historySubstitutes.join(" / "))}`:""}</div>`:''}</div>
+      <div class="work-panel"><h4>현재 처리 상태</h4><div class="work-current ${statusClass}">${esc(workShippingText(g))}</div></div>
+    </div>
+    <div class="work-action"><h4>이번 건 처리</h4><div class="work-action-grid">${action}
+      <div class="work-action-field full"><label>CS 전달내용 · 짧게 자동작성</label><textarea class="work-cs-text" data-group="${esc(g.key)}">${esc(g.csInstruction)}</textarea>${g.csInstructionManual?'<div class="work-manual-note">직접 수정한 문구입니다.</div>':''}</div>
+      <div class="work-action-field full" style="display:flex;gap:8px;align-items:center"><button type="button" class="auto-btn work-restore" data-group="${esc(g.key)}">자동문구 복원</button><span style="font-size:11px;color:#737c75">${g.validation.ok?'CS 전달 준비 완료':esc(g.validation.missing.join(', ')+' 확인 필요')}</span></div>
+    </div></div>
+    <div class="work-original"><h4>원본 CS 내용</h4>${originalCsHtml(g)}</div>`;
+  document.getElementById("workPrev").disabled=workIndex===0;
+  document.getElementById("workNext").textContent=workIndex===workQueue.length-1?'마지막':'다음 →';
+  bindWorkEvents();
+}
+function openWorkMode(startKey){
+  workQueue=getWorkQueue();
+  if(!workQueue.length){alert("현재 화면에 처리할 상품이 없습니다.");return}
+  const idx=startKey?workQueue.indexOf(startKey):-1;workIndex=idx>=0?idx:0;
+  document.getElementById("workModal").classList.add("show");renderWorkItem();
+}
+function bindWorkEvents(){
+  document.querySelectorAll("#workBody .apply-prev-values").forEach(el=>el.addEventListener("click",()=>{
+    const key=el.dataset.group;
+    if(!applyPreviousValues(key))return;
+    render();
+    workQueue=getWorkQueue();
+    if(workIndex>=workQueue.length)workIndex=Math.max(0,workQueue.length-1);
+    renderWorkItem();
+  }));
+  document.querySelectorAll("#workBody .work-stock-choice").forEach(el=>el.addEventListener("click",e=>{
+    saveGroupField(e.currentTarget.dataset.group,"optionStock",e.currentTarget.dataset.value,{manual:false});render();renderWorkItem();
+  }));
+  document.querySelectorAll("#workBody .work-control").forEach(el=>el.addEventListener("change",e=>{
+    saveGroupField(e.target.dataset.group,e.target.dataset.field,e.target.value,{manual:false});render();renderWorkItem();
+  }));
+  document.querySelectorAll("#workBody .work-inbound-date").forEach(el=>el.addEventListener("change",e=>{
+    const key=e.target.dataset.group;const val=e.target.value;
+    saveGroupField(key,"inboundDate",val,{manual:false});
+    if(val)saveGroupField(key,"inboundUnknown",false,{manual:false});
+    const g=productGroups.find(x=>x.key===key);
+    if(g)g.validation=productValidation(g);
+    if(g&&val&&g.shippingBad){
+      activeWorkflow="alternative";activeFilter="all";syncWorkflowTabs();syncStatusTabs();render();
+      workQueue=getWorkQueue();
+      const idx=workQueue.indexOf(key);
+      workIndex=idx>=0?idx:Math.min(workIndex,Math.max(0,workQueue.length-1));
+      renderWorkItem();
+      showWorkflowMoveNotice("입고예정일이 출고준수일보다 늦어 출고불가로 판정되었습니다. ② 대체품 / 옵션 변경 상품 탭으로 이동했습니다.");
+      return;
+    }
+    render();
+    if(g&&g.resolvedOnTime){
+      workQueue=getWorkQueue();
+      if(workIndex>=workQueue.length)workIndex=Math.max(0,workQueue.length-1);
+    }
+    renderWorkItem();
+  }));
+  document.querySelectorAll("#workBody .work-inbound-unknown").forEach(el=>el.addEventListener("click",e=>{
+    const key=e.currentTarget.dataset.group;saveGroupField(key,"inboundDate","",{manual:false});saveGroupField(key,"inboundUnknown",true,{manual:false});
+    const g=productGroups.find(x=>x.key===key);if(g)g.validation=productValidation(g);
+    activeWorkflow="alternative";activeFilter="all";syncWorkflowTabs();syncStatusTabs();render();
+    workQueue=getWorkQueue();const idx=workQueue.indexOf(key);workIndex=idx>=0?idx:Math.min(workIndex,Math.max(0,workQueue.length-1));renderWorkItem();
+    showWorkflowMoveNotice("입고일정 확인불가로 저장했습니다. ② 대체품 / 옵션 변경 상품 탭으로 이동했습니다.");
+  }));
+  document.querySelectorAll("#workBody .work-unknown-release").forEach(el=>el.addEventListener("click",e=>{
+    const key=e.currentTarget.dataset.group;saveGroupField(key,"inboundUnknown",false,{manual:false});
+    const g=productGroups.find(x=>x.key===key);if(g)g.validation=productValidation(g);
+    activeWorkflow="inbound";activeFilter="all";syncWorkflowTabs();syncStatusTabs();render();
+    workQueue=getWorkQueue();const idx=workQueue.indexOf(key);workIndex=idx>=0?idx:Math.min(workIndex,Math.max(0,workQueue.length-1));renderWorkItem();
+    showWorkflowMoveNotice("입고일정 확인불가를 해제했습니다. ① 입고일정 기입 탭으로 이동했습니다.");
+  }));
+  document.querySelectorAll("#workBody .work-cs-text").forEach(el=>el.addEventListener("input",e=>saveGroupField(e.target.dataset.group,"csInstruction",e.target.value,{manual:true})));
+  document.querySelectorAll("#workBody .work-restore").forEach(el=>el.addEventListener("click",()=>{
+    const g=productGroups.find(x=>x.key===el.dataset.group);if(!g)return;g.csInstructionManual=false;saveGroupField(g.key,"csInstructionManual",false,{manual:false});const t=autoCsInstruction(g);g.csInstruction=t;saveGroupField(g.key,"csInstruction",t,{manual:false});g.validation=productValidation(g);render();renderWorkItem();
+  }));
+}
+function moveWork(delta){
+  if(!workQueue.length)return;
+  const next=workIndex+delta;if(next<0||next>=workQueue.length)return;workIndex=next;renderWorkItem();
+}
+function openGroup(key){
+  const g=productGroups.find(x=>x.key===key);if(!g)return;document.getElementById("modalTitle").textContent=`주문 및 CS 이력 · ${g.product} / ${g.option}`;
+  let h=`<div class="section-note" style="margin-top:0"><b>거래처</b> ${esc(g.supplier||'-')} · <b>사입상품명</b> ${esc(g.purchaseName||'-')} · <b>총 주문</b> ${g.orderCount}건<br><b>입고정보</b> ${esc(groupInboundInfo(g))}<br><b>CS 전달내용</b><br>${esc(g.csInstruction||'미입력')}</div>`;
+  g.orders.forEach((r,idx)=>{const inbound=r.isStock?"-":(r.inboundUnknown?"확인 불가":(r.inboundDate||"미입력"));
+    h+=`<div class="cs-item"><div class="cs-meta">${idx+1}. ${sourceBadges(r)} · ${esc(r.seller)} · ${esc(r.orderDate)} · 주문번호 <span class="order-no">${esc(r.orderNo)}</span></div><div style="font-size:12px;line-height:1.65"><b>안내기한</b> ${esc(deadlineDisplay(r.noticeDeadline))} ${r.noticeDeadline?.overdue?'· 기한 경과':''} / <b>출고준수일</b> ${esc(dateKey(r.effectiveDueDate||r.dueDate)||'-')} / <b>입고예정일</b> ${esc(inbound)} ${r.bflowShipDate?`/ <b>비플로우 T열 출고예정일</b> ${esc(dateKey(r.bflowShipDate))}`:''} / <b>출고판정</b> ${esc(r.shipping.label)} / <b>고객안내</b> ${esc(r.notice.label)}</div><div class="section-note"><b>현재 CS 상황</b>${r.csDate?` · <b>최근 CS ${esc(r.csDate)}</b>`:''}<br>${esc(r.csSummary)}${(()=>{const cg=csGuidanceForRow(r);const b=[];if(cg.altOption)b.push(`옵션 변경안내: ${cg.altOption}`);if(cg.substituteProduct)b.push(`대체품: ${cg.substituteProduct}`);return b.length?`<br><b>기존 안내내용</b> ${esc(b.join(" · "))}`:""})()}</div>`;
+    if(r.cs.length)r.cs.forEach(c=>{h+=`<div class="cs-memo" style="margin-top:8px"><b>${esc(c.worker||'-')} · ${esc(c.type||'-')} · ${esc(c.kind||'-')} · CS${c.slot}</b><br>${esc(c.memo||'(메모 없음)')}</div>`});h+='</div>'});document.getElementById("modalBody").innerHTML=h;document.getElementById("csModal").classList.add("show");
+}
+async function onFile(kind,file){
+  const state=document.getElementById(kind+"State");
+  if(!state)return;
+  state.className="file-state";
+  state.textContent=`${file.name} · 파일 읽는 중...`;
+  try{
+    const raw=await readInputFile(file);
+    const parsed=kind==="bflow"?bflowRowsFromSheet(raw):rowsFromSheet(raw,kind);
+    filesData[kind]=parsed;
+    state.className="file-state ok";
+    state.textContent=`${file.name} · ${parsed.length}건 인식 완료`;
+  }catch(e){
+    filesData[kind]=null;
+    state.className="file-state bad";
+    state.textContent=`${file.name} · 인식 실패: ${e.message}`;
+    alert(`${file.name}\n${e.message}`);
+  }
+}
+async function onPreviousFile(file){
+  const state=document.getElementById("previousState");
+  if(!state)return;
+  state.className="file-state";
+  state.textContent=`${file.name} · 어제 참고자료 읽는 중...`;
+  try{
+    const raw=await readInputFile(file);
+    previousRows=previousRowsFromSheet(raw);
+    rebuildPreviousMap();
+    state.className="file-state ok";
+    state.textContent=`${file.name} · 어제 참고 ${previousRows.length}건 인식 완료`;
+    if(mergedRows.length){buildProductGroups();render();}
+  }catch(e){
+    previousRows=[];
+    previousMap=new Map();
+    state.className="file-state bad";
+    state.textContent=`${file.name} · 인식 실패: ${e.message}`;
+    alert(`${file.name}\n${e.message}`);
+  }
+}
+function saveSettings(){currentSettings={today:document.getElementById("todayDate").value,holidays:document.getElementById("holidays").value}}
+function recalc(){
+  if(!filesData.stock||!filesData.gs||!filesData.all){alert("품절 / GS / 기타채널 주문 파일 3개를 모두 업로드해주세요.\n세 파일은 사입상품명이 포함된 동일 양식이어야 합니다.\n비플로우 출고준수일 파일은 선택사항입니다.");return}
+  saveSettings();mergeAllRows();buildProductGroups();
+  // ① 입고일정 기입 대상이 하나도 없고 ② 대응 대상만 있으면 빈 화면에 머물지 않고 ②를 바로 보여줍니다.
+  if(activeWorkflow==="inbound"){
+    const inboundCount=productGroups.filter(g=>workflowStage(g)==="inbound").length;
+    const altCount=productGroups.filter(g=>workflowStage(g)==="alternative").length;
+    if(inboundCount===0&&altCount>0){activeWorkflow="alternative";activeFilter="all";syncWorkflowTabs();syncStatusTabs();}
+  }
+  render();document.getElementById("excelBtn").disabled=false;document.getElementById("checkExcelBtn").disabled=false;flashSave();
+}
+function csPriorityForOrder(r,g){if(r.noticeDeadline?.overdue)return "기한 경과";if(r.notice.code==="need")return "고객안내 필요";if(r.shipping.code==="bad")return "출고불가";if(r.isStock)return "품절";if(r.shipping.code==="check")return "납기 확인";return "안내"}
+function checkCategory(g){if(g.isStock)return "품절";if(g.hasInboundInputIssue||g.inboundUnknown)return "입고일 미기입";if(g.shippingBad)return "납기일정 초과";return ""}
+function exportCheckRows(){
+  const sortOrder={"입고일 미기입":1,"납기일정 초과":2,"품절":3};const out=[];
+  productGroups.forEach(g=>{if(g.resolvedOnTime)return;const push=(category,orders)=>{if(!orders.length)return;const inbound=category==="품절"?"-":uniq(orders.map(r=>r.inboundUnknown?"확인 안됨":normText(r.inboundDate)).filter(Boolean)).join(", ");const dues=orders.map(r=>dateKey(r.effectiveDueDate||r.dueDate)).filter(Boolean).sort();out.push({"구분":category,"거래처":g.supplier,"품번(사입상품명)":g.purchaseName,"상품명":g.product,"옵션":g.option,"판매처":uniq(orders.map(r=>r.seller)).join(", "),"대상주문수":orders.length,"전체주문수":g.orderCount,"입고예정일":inbound,"가장 빠른 출고준수일":dues[0]||""})};
+    if(g.isStock){push("품절",g.orders);return;}const missing=g.orders.filter(r=>r.inboundUnknown||!normText(r.inboundDate)||(normText(r.inboundDate)&&!toDate(r.inboundDate)));const late=g.orders.filter(r=>r.shipping.code==="bad");push("입고일 미기입",missing);push("납기일정 초과",late);
+  });
+  return out.sort((a,b)=>{const c=(sortOrder[a["구분"]]||99)-(sortOrder[b["구분"]]||99);if(c)return c;return String(a["거래처"]||"").localeCompare(String(b["거래처"]||""),"ko")||String(a["품번(사입상품명)"]||"").localeCompare(String(b["품번(사입상품명)"]||""),"ko")||String(a["상품명"]||"").localeCompare(String(b["상품명"]||""),"ko")||String(a["옵션"]||"").localeCompare(String(b["옵션"]||""),"ko")});
+}
+async function downloadCheckExcel(){
+  try{
+    if(!productGroups.length){
+      alert("상품 대응표를 먼저 만들어주세요.");
+      return;
+    }
+    const data=exportCheckRows();
+    if(!data.length){
+      alert("현재 '입고일 미기입 / 납기일정 초과 / 품절'에 해당하는 확인 필요 품번이 없습니다.");
+      return;
+    }
+    const filename=`FORESTFIT_확인필요품번_${document.getElementById("todayDate").value||dateKey(new Date())}.xlsx`;
+
+    // 1순위: ExcelJS - 한 시트, 첫 행 고정, 필터, 구분별 강조
+    if(window.ExcelJS){
+      try{
+        const wb=new ExcelJS.Workbook();
+        wb.creator="FORESTFIT";
+        const ws=wb.addWorksheet("확인필요품번",{views:[{state:"frozen",ySplit:1,topLeftCell:"A2",activeCell:"A2"}]});
+        const headers=Object.keys(data[0]);
+        const widths={
+          "구분":18,"거래처":18,"품번(사입상품명)":30,"상품명":42,"옵션":24,
+          "판매처":22,"대상주문수":12,"전체주문수":12,"입고예정일":20,"가장 빠른 출고준수일":20
+        };
+        ws.columns=headers.map(h=>({header:h,key:h,width:widths[h]||16}));
+        data.forEach(o=>ws.addRow(o));
+        ws.autoFilter={from:{row:1,column:1},to:{row:1,column:headers.length}};
+
+        const header=ws.getRow(1);
+        header.height=28;
+        header.eachCell(cell=>{
+          cell.font={bold:true,color:{argb:"FF1E2720"}};
+          cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE7EAE5"}};
+          cell.alignment={horizontal:"center",vertical:"middle",wrapText:true};
+          cell.border={bottom:{style:"thin",color:{argb:"FFB8BDB7"}}};
+        });
+
+        const categoryStyle={
+          "입고일 미기입":{fill:"FFFFF4D6",font:"FF8A5A0A"},
+          "납기일정 초과":{fill:"FFFDE9E7",font:"FFB42318"},
+          "품절":{fill:"FFFFF0EE",font:"FFB83832"}
+        };
+        const centerHeaders=new Set(["구분","옵션","대상주문수","전체주문수","입고예정일","가장 빠른 출고준수일"]);
+        for(let r=2;r<=ws.rowCount;r++){
+          const row=ws.getRow(r);
+          row.height=34;
+          headers.forEach((h,idx)=>{
+            const cell=row.getCell(idx+1);
+            cell.alignment={horizontal:centerHeaders.has(h)?"center":"left",vertical:"middle",wrapText:true};
+            cell.border={bottom:{style:"hair",color:{argb:"FFE5E9E4"}}};
+          });
+          const typeCell=row.getCell(1);
+          const st=categoryStyle[String(typeCell.value||"")];
+          if(st){
+            typeCell.fill={type:"pattern",pattern:"solid",fgColor:{argb:st.fill}};
+            typeCell.font={bold:true,color:{argb:st.font}};
+            typeCell.alignment={horizontal:"center",vertical:"middle"};
+          }
+        }
+
+        const buf=await wb.xlsx.writeBuffer();
+        const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement("a");
+        a.href=url;a.download=filename;a.style.display="none";
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1500);
+        return;
+      }catch(e){
+        console.warn("확인 필요 품번 ExcelJS 다운로드 실패, XLSX 방식으로 재시도",e);
+      }
+    }
+
+    // 2순위 fallback: XLSX
+    if(window.XLSX){
+      const wb=XLSX.utils.book_new();
+      const headers=Object.keys(data[0]);
+      const ws=XLSX.utils.json_to_sheet(data,{header:headers});
+      try{styleSheet(ws,headers);}catch(_){
+        ws["!autofilter"]={ref:ws["!ref"]};
+        ws["!freeze"]={xSplit:0,ySplit:1};
+      }
+      XLSX.utils.book_append_sheet(wb,ws,"확인필요품번");
+      XLSX.writeFile(wb,filename);
+      return;
+    }
+
+    alert("엑셀 다운로드 라이브러리를 불러오지 못했습니다. 인터넷 연결 후 페이지를 다시 열어주세요.");
+  }catch(e){
+    console.error(e);
+    alert("확인 필요 품번 파일 다운로드 중 오류가 발생했습니다.\n"+(e?.message||e));
+  }
+}
+function orderNeedsCsExport(r,g){
+  if(r.isStock)return true;if(r.inboundUnknown||!normText(r.inboundDate)||!toDate(r.inboundDate))return true;if(r.shipping.code==="bad"||r.shipping.code==="check")return true;if(r.notice.code==="need"||r.noticeDeadline?.overdue)return true;return false;
+}
+function exportCsRows(){
+  const out=[];productGroups.filter(g=>g.csTarget&&!g.resolvedOnTime).forEach(g=>g.orders.filter(r=>orderNeedsCsExport(r,g)).forEach(r=>{out.push({"상태":csPriorityForOrder(r,g),"판매처":r.seller,"주문번호":r.orderNo,"상품명":g.product,"옵션":g.option,"현재 CS 상황":r.csSummary,"최근 CS일자":r.csDate||"","출고준수일":dateKey(r.effectiveDueDate||r.dueDate),"입고예정일":r.isStock?"-":(r.inboundUnknown?"확인 불가":(r.inboundDate||"")),"CS 전달내용":g.csInstruction,"처리내용":g.processDirection==="미정"?"":g.processDirection,"거래처":g.supplier,"사입상품명":g.purchaseName})}));return out;
+}
+function exportProductRows(){return productGroups.map(g=>({
+  "CS전달대상":g.csTarget?"Y":"N","입력상태":g.validation.ok?"완료":"입력 필요: "+g.validation.missing.join(", "),"거래처명":g.supplier,"사입상품명":g.purchaseName,"상품명":g.product,"옵션명":g.option,"주문수":g.orderCount,"판매처":g.sellers.join(", "),"주문번호전체":g.orderNos.join("\n"),"품절포함":g.isStock?"Y":"N","GS포함":g.hasGs?"Y":"N","기한경과포함":g.overdue?"Y":"N","출고불가포함":g.shippingBad?"Y":"N","다른옵션재고":g.optionStock,"다른옵션":g.altOption,"대체품":g.substituteProduct,"입고예정일":groupInboundExportText(g),"처리내용":g.processDirection,"CS전달내용":g.csInstruction,"현재CS상황":g.csSummary,"내부메모":g.internalMemo
+}))}
+function exportPreservedOrders(){return mergedRows.map(r=>({
+  "원본구분":[r.isStock?"품절":"",r.route==="gs"?"GS":"기타채널"].filter(Boolean).join(" / "),"사용자정의1":r.userDefined,"주문일자":r.orderDate,"판매처명":r.seller,"판매처주문번호":r.orderNo,"상품옵션":r.option,"옵션상품명":r.product,"공급처명":r.supplier,"사입상품명":r.sourcePurchaseName||"","안내기한":deadlineDisplay(r.noticeDeadline),"납기/준수일":dateKey(r.dueDate),"비플로우 T열 출고예정일":dateKey(r.bflowShipDate),"판정기준일":dateKey(r.effectiveDueDate),"출고판정":r.shipping.label,"고객안내":r.notice.label,"원본파일입고예정일":r.sourceInboundDate||"","입고예정일":r.isStock?"확인 불가":(r.inboundUnknown?"확인 불가":(r.inboundDate||"")),"현재CS상황":r.csSummary,"최근CS일자":r.csDate||"","완전중복통합건수":r.duplicateCount,"전체CS":r.cs.map(c=>`[${c.worker||'-'} / ${c.type||'-'} / ${c.kind||'-'}]\n${c.memo}`).join("\n\n")
+}))}
+function addObjectSheet(wb,name,data){
+  const headers=Object.keys(data[0]||{"안내":"데이터 없음"});
+  const rows=data.length?data:[{"안내":"데이터 없음"}];
+  const hs=Object.keys(rows[0]);
+  const a=[hs,...rows.map(o=>hs.map(h=>o[h]??""))];
+  const ws=XLSX.utils.aoa_to_sheet(a);
+  styleSheet(ws,hs);
+  XLSX.utils.book_append_sheet(wb,ws,name);
+}
+function csStatusStyle(status){
+  const s=normText(status);
+  if(s==="기한 경과")return {fill:"FDE9E7",font:"B42318"};
+  if(s==="출고불가")return {fill:"FDE9E7",font:"B42318"};
+  if(s==="품절")return {fill:"FFF0EE",font:"B83832"};
+  if(s==="고객안내 필요")return {fill:"FFF4D6",font:"8A5A0A"};
+  if(s==="납기 확인")return {fill:"FFF4D6",font:"8A5A0A"};
+  return {fill:"EDF7EF",font:"39704A"};
+}
+async function downloadExcel(){
+  if(!productGroups.length)return;
+  const targets=productGroups.filter(g=>g.csTarget&&!g.resolvedOnTime),bad=targets.filter(g=>!g.validation.ok);
+  if(!targets.length){alert("CS 전달 대상으로 체크된 상품이 없습니다.");return}
+  if(bad.length){
+    const msg=bad.slice(0,12).map((g,i)=>`${i+1}. ${g.product} / ${g.option} → ${g.validation.missing.join(', ')}`).join("\n");
+    alert(`CS 전달 전에 입력이 필요한 상품이 ${bad.length}개 있습니다.\n\n${msg}${bad.length>12?'\n외 '+(bad.length-12)+'개':''}`);
+    return;
+  }
+  const data=exportCsRows();
+  const filename=`FORESTFIT_CS전달_${document.getElementById("todayDate").value||dateKey(new Date())}.xlsx`;
+
+  // ExcelJS가 로드되면 헤더 고정 + 필터 + 정렬까지 적용한 CS 전용 단일 시트로 저장
+  if(window.ExcelJS){
+    try{
+      const wb=new ExcelJS.Workbook();
+      wb.creator="FORESTFIT";
+      const ws=wb.addWorksheet("CS전달",{views:[{state:"frozen",ySplit:1}]});
+      const headers=Object.keys(data[0]||{"안내":"데이터 없음"});
+      const widths={
+        "상태":15,"판매처":18,"주문번호":22,"상품명":42,"옵션":24,"현재 CS 상황":30,
+        "최근 CS일자":14,"출고준수일":14,"입고예정일":14,"CS 전달내용":44,"처리내용":24,"거래처":18,"사입상품명":28
+      };
+      ws.columns=headers.map(h=>({header:h,key:h,width:widths[h]||16}));
+      (data.length?data:[{"안내":"데이터 없음"}]).forEach(o=>ws.addRow(o));
+      ws.autoFilter={from:{row:1,column:1},to:{row:1,column:headers.length}};
+      ws.views=[{state:"frozen",ySplit:1,topLeftCell:"A2",activeCell:"A2"}];
+
+      const header=ws.getRow(1);
+      header.height=27;
+      header.eachCell(cell=>{
+        cell.font={bold:true,color:{argb:"FF1E2720"}};
+        cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE7EAE5"}};
+        cell.alignment={horizontal:"center",vertical:"middle",wrapText:true};
+        cell.border={bottom:{style:"thin",color:{argb:"FFB8BDB7"}}};
+      });
+
+      const leftHeaders=new Set(["판매처","상품명","현재 CS 상황","CS 전달내용","처리내용","거래처","사입상품명"]);
+      const centerHeaders=new Set(["상태","주문번호","옵션","최근 CS일자","출고준수일","입고예정일"]);
+      for(let r=2;r<=ws.rowCount;r++){
+        const row=ws.getRow(r);
+        row.height=36;
+        headers.forEach((h,idx)=>{
+          const cell=row.getCell(idx+1);
+          cell.alignment={
+            horizontal:leftHeaders.has(h)?"left":(centerHeaders.has(h)?"center":"left"),
+            vertical:"middle",wrapText:true
+          };
+          cell.border={bottom:{style:"hair",color:{argb:"FFE5E9E4"}}};
+        });
+        const statusCell=row.getCell(1);
+        const st=csStatusStyle(statusCell.value);
+        statusCell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+st.fill}};
+        statusCell.font={bold:true,color:{argb:"FF"+st.font}};
+        statusCell.alignment={horizontal:"center",vertical:"middle"};
+      }
+
+      const buf=await wb.xlsx.writeBuffer();
+      const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      return;
+    }catch(e){console.warn("ExcelJS export fallback",e)}
+  }
+
+  // ExcelJS 로드 실패 시에도 기본 엑셀은 다운로드 가능하도록 fallback 유지
+  if(!window.XLSX){alert("엑셀 라이브러리를 불러오지 못했습니다.");return}
+  const wb=XLSX.utils.book_new();addObjectSheet(wb,"CS전달",data);
+  XLSX.writeFile(wb,filename);
+}
+function styleSheet(ws,headers){
+  const range=XLSX.utils.decode_range(ws["!ref"]||"A1:A1");
+  for(let c=range.s.c;c<=range.e.c;c++){
+    const a=XLSX.utils.encode_cell({r:0,c});
+    if(ws[a])ws[a].s={fill:{patternType:"solid",fgColor:{rgb:"E7EAE5"}},font:{bold:true,color:{rgb:"1E2720"}},alignment:{horizontal:"center",vertical:"center",wrapText:true},border:{bottom:{style:"thin",color:{rgb:"B8BDB7"}}}};
+  }
+  const leftHeaders=new Set(["판매처","상품명","현재 CS 상황","CS 전달내용","처리내용","거래처","사입상품명"]);
+  const centerHeaders=new Set(["상태","주문번호","옵션","최근 CS일자","출고준수일","입고예정일"]);
+  for(let r=1;r<=range.e.r;r++)for(let c=0;c<=range.e.c;c++){
+    const a=XLSX.utils.encode_cell({r,c});if(!ws[a])continue;
+    const h=headers[c]||"";
+    ws[a].s=ws[a].s||{};
+    ws[a].s.alignment={horizontal:leftHeaders.has(h)?"left":(centerHeaders.has(h)?"center":"left"),vertical:"center",wrapText:true};
+    if(c===0){
+      const st=csStatusStyle(ws[a].v);
+      ws[a].s.fill={patternType:"solid",fgColor:{rgb:st.fill}};
+      ws[a].s.font={bold:true,color:{rgb:st.font}};
+    }
+  }
+  ws["!autofilter"]={ref:ws["!ref"]};
+  ws["!freeze"]={xSplit:0,ySplit:1};
+  const widths={"상태":15,"판매처":18,"주문번호":22,"상품명":42,"옵션":24,"현재 CS 상황":30,"최근 CS일자":14,"출고준수일":14,"입고예정일":14,"CS 전달내용":44,"처리내용":24,"거래처":18,"사입상품명":28};
+  ws["!cols"]=headers.map(h=>({wch:widths[h]||16}));
+}
+function loadSettings(){document.getElementById("todayDate").value=dateKey(new Date());document.getElementById("holidays").value="";currentSettings={today:document.getElementById("todayDate").value,holidays:""}}
+
+["stock","gs","all","bflow"].forEach(kind=>document.getElementById(kind+"File").addEventListener("change",e=>{const f=e.target.files[0];if(f)onFile(kind,f)}));
+document.getElementById("previousFile").addEventListener("change",e=>{const f=e.target.files[0];if(f)onPreviousFile(f)});
+
+// 파일 드래그 & 드롭 첨부
+function isAcceptedUpload(file){
+  const name=(file?.name||"").toLowerCase();
+  return name.endsWith(".csv")||name.endsWith(".xlsx")||name.endsWith(".xls");
+}
+function setupDropUpload(inputId,handler){
+  const input=document.getElementById(inputId);
+  if(!input)return;
+  const box=input.closest(".upload-box");
+  if(!box)return;
+  ["dragenter","dragover"].forEach(type=>box.addEventListener(type,e=>{
+    e.preventDefault();e.stopPropagation();box.classList.add("dragover");
+    if(e.dataTransfer)e.dataTransfer.dropEffect="copy";
+  }));
+  ["dragleave","dragend"].forEach(type=>box.addEventListener(type,e=>{
+    e.preventDefault();e.stopPropagation();
+    if(type==="dragend"||!box.contains(e.relatedTarget))box.classList.remove("dragover");
+  }));
+  box.addEventListener("drop",e=>{
+    e.preventDefault();e.stopPropagation();box.classList.remove("dragover");
+    const files=Array.from(e.dataTransfer?.files||[]);
+    if(!files.length)return;
+    const file=files[0];
+    if(!isAcceptedUpload(file)){alert("CSV 또는 Excel 파일(.csv, .xlsx, .xls)만 첨부할 수 있습니다.");return}
+    try{const dt=new DataTransfer();dt.items.add(file);input.files=dt.files}catch(_){}
+    handler(file);
+  });
+}
+setupDropUpload("stockFile",f=>onFile("stock",f));
+setupDropUpload("gsFile",f=>onFile("gs",f));
+setupDropUpload("allFile",f=>onFile("all",f));
+setupDropUpload("bflowFile",f=>onFile("bflow",f));
+setupDropUpload("previousFile",f=>onPreviousFile(f));
+
+// 파일을 페이지 바깥에 잘못 놓아 브라우저가 파일을 열어버리는 동작 방지
+document.addEventListener("dragover",e=>{if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes("Files"))e.preventDefault()});
+document.addEventListener("drop",e=>{if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes("Files")&&!e.target.closest(".upload-box"))e.preventDefault()});
+document.getElementById("mergeBtn").addEventListener("click",recalc);document.getElementById("checkExcelBtn").addEventListener("click",downloadCheckExcel);document.getElementById("excelBtn").addEventListener("click",downloadExcel);document.getElementById("workStartBtn").addEventListener("click",()=>openWorkMode());
+document.getElementById("searchInput").addEventListener("input",render);document.getElementById("sortSelect").addEventListener("change",e=>{activeSort=e.target.value||"supplier";sortProductGroups();render()});document.getElementById("todayDate").addEventListener("change",()=>{saveSettings();if(mergedRows.length){mergeAllRows();buildProductGroups();render()}});document.getElementById("holidays").addEventListener("change",()=>{saveSettings();if(mergedRows.length){mergeAllRows();buildProductGroups();render()}});
+document.querySelectorAll(".workflow-tab").forEach(b=>b.addEventListener("click",()=>{activeWorkflow=b.dataset.workflow;activeFilter="all";syncWorkflowTabs();syncStatusTabs();render()}));
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;syncStatusTabs();render()}));
+document.getElementById("modalClose").addEventListener("click",()=>document.getElementById("csModal").classList.remove("show"));document.getElementById("csModal").addEventListener("click",e=>{if(e.target.id==="csModal")e.currentTarget.classList.remove("show")});
+document.getElementById("workClose").addEventListener("click",()=>document.getElementById("workModal").classList.remove("show"));document.getElementById("workModal").addEventListener("click",e=>{if(e.target.id==="workModal")e.currentTarget.classList.remove("show")});document.getElementById("workPrev").addEventListener("click",()=>moveWork(-1));document.getElementById("workNext").addEventListener("click",()=>moveWork(1));
+loadSettings();
+</script>
+</body>
+</html>
