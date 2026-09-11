@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>포레스트핏 동대문 주문취합</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif}
+body{margin:0;background:linear-gradient(135deg,#f7f3eb 0%,#edf3ef 100%);color:#1f2a24}
+.wrap{max-width:1220px;margin:0 auto;padding:42px 24px 70px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+.logo{font-size:22px;font-weight:850;letter-spacing:.08em;color:#244734}
+.badge{padding:9px 15px;border-radius:999px;background:#ffffffcc;color:#486052;font-size:13px;font-weight:750}
+h1{font-size:38px;letter-spacing:-.05em;color:#173d2b;margin:0 0 10px;font-weight:900}
+.desc{font-size:15px;color:#6d776f;line-height:1.6;margin-bottom:22px;font-weight:600}
+.card{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.95);border-radius:22px;padding:22px;margin-bottom:16px;box-shadow:0 14px 35px rgba(38,49,43,.07)}
+label{display:block;font-size:16px;font-weight:850;margin-bottom:9px;color:#173d2b}
+input,select,button{width:100%;padding:12px 14px;border:1px solid #d8dfdb;border-radius:12px;font-size:14px;background:#fff;margin-bottom:12px}
+button{border:0;background:#244734;color:#fff;font-weight:850;cursor:pointer}
+button.secondary{background:#7b8b82}
+.small{font-size:13px;color:#7c867f;line-height:1.55}
+.status{padding:12px 14px;border-radius:12px;background:#edf7ff;color:#25516b;font-weight:800;margin-top:8px;display:none}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.summarybox{background:#fff;border:1px solid #e5ebe8;border-radius:16px;padding:16px;min-height:260px;max-height:360px;overflow:auto}
+.summarybox h3{margin:0 0 10px;font-size:16px;color:#173d2b}
+.summarybox b{font-size:24px;color:#244734}
+.mini-list{display:flex;flex-direction:column;gap:8px}
+.mini-card{border:1px solid #e1e8e4;border-radius:14px;padding:12px;text-align:left;line-height:1.45;font-size:13px;font-weight:700}
+.mini-card.soldout-card{background:#fff5f5;color:#4a2f2f}
+.mini-card.sample-card{background:#edf7ff;color:#25516b}
+.mini-card.check-card{background:#fff8dc;color:#6b3d00}
+.mini-card .label{font-weight:900;color:#173d2b}
+.schedule-box{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.schedule-item{background:#fff;border:1px solid #e5ebe8;border-radius:16px;padding:14px}
+.schedule-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.schedule-row{background:#f8fbf9;border:1px solid #e5ebe8;border-radius:12px;padding:10px;font-size:13px;line-height:1.5;text-align:left;color:#34443a;font-weight:750}
+.schedule-row .memo-line{margin-top:4px;color:#6b3d00}
+.schedule-row b{color:#173d2b}
+.table-wrap{max-height:360px;overflow:auto;background:#fff;border:1px solid #d9e1dd;border-radius:16px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid #e6ece9;padding:8px 10px;white-space:nowrap;text-align:center;vertical-align:middle}
+th{background:#e6f5ec;color:#173d2b;font-weight:850;position:sticky;top:0;z-index:2}
+td.text{text-align:left;white-space:normal;line-height:1.45}
+.warn{background:#fff5f5;color:#4a2f2f;font-weight:750}
+.sample{background:#edf7ff;color:#25516b;font-weight:750}
+.memo{background:#fff8dc;color:#6b3d00;font-weight:750}
+@media(max-width:900px){.grid3,.schedule-box{grid-template-columns:1fr}}
+
+.schedule-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.schedule-row{background:#f8fbf9;border:1px solid #e5ebe8;border-radius:12px;padding:10px;font-size:13px;line-height:1.5;text-align:left;color:#34443a;font-weight:750}
+.schedule-row .main-line{font-weight:900;color:#173d2b}
+.schedule-row .memo-line{margin-top:4px;color:#6b3d00}
+/* 품절 경고 팝업 */
+.soldout-popup-bg{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+.soldout-popup{
+    width:520px;
+    background:#fff;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+    border:4px solid #e53935;
+}
+
+.soldout-popup-header{
+    background:#e53935;
+    color:white;
+    padding:22px;
+    font-size:24px;
+    font-weight:900;
+}
+
+.soldout-popup-body{
+    padding:28px;
+    font-size:18px;
+    line-height:1.7;
+    font-weight:700;
+    color:#333;
+}
+
+.soldout-popup-body strong{
+    color:#e53935;
+}
+
+.soldout-popup-btn{
+    width:100%;
+    background:#222;
+    color:white;
+    border:0;
+    padding:18px;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">FORESTFIT</div>
+    <div class="badge">동대문 주문취합</div>
+  </div>
+
+  <h1>동대문 주문취합</h1>
+  <div class="desc">
+    파일 1개를 업로드하면 품절/샘플/확인필요/입고일정 건을 빠르게 분류합니다.<br>
+    화면에는 일부만 미리보기로 표시하고, 다운로드는 전체 데이터 기준으로 생성합니다.
+  </div>
+
+  <div class="card">
+    <label>1. 파일 업로드</label>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+    <label>시트 선택</label>
+    <select id="sheetSelect"></select>
+    <button id="runBtn" onclick="processFile()">주문취합 정리 실행</button>
+    <div id="status" class="status"></div>
+    <div class="small">
+      기준 열: A 거래처명 / D 사입상품명 / E 상품명 / F 옵션명 / H 주문수 / J 입고수 / N 거래처 메모 / Q 바코드
+    </div>
+  </div>
+
+  <div class="card">
+    <label>2. 요약</label>
+    <div class="small" style="margin-bottom:14px;">품절/종료 요청과 샘플 건을 바로 확인할 수 있도록 정리합니다.</div>
+    <div class="grid3">
+      <div class="summarybox">
+        <h3>품절/종료 요청 <span id="soldoutCnt" class="small">0건</span></h3>
+        <div id="soldoutSummary" class="mini-list"></div>
+      </div>
+      <div class="summarybox">
+        <h3>샘플 포함 <span id="sampleCnt" class="small">0건</span></h3>
+        <div id="sampleSummary" class="mini-list"></div>
+      </div>
+      <div class="summarybox">
+        <h3>확인 필요/가능 <span id="checkCnt" class="small">0건</span></h3>
+        <div id="checkSummary" class="mini-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <label>3. 거래처/메모별 실제 입고일 입력</label>
+    <div id="scheduleInputs" class="schedule-box"></div>
+    <div class="small">H열 주문수량 - I열 출고수량이 1 이상인 건 중, 날짜 입력 가능한 메모만 거래처와 메모별로 묶어 실제 입고일을 입력합니다.</div>
+    <br>
+    <button onclick="downloadCellmateCsv()">셀메이트 입고일 CSV 만들기</button>
+    <button class="secondary" onclick="downloadSummaryCsv()">전체 정리 CSV 다운로드</button>
+  </div>
+
+  <div class="card">
+    <label>4. 입고예정일 업체 연락 요망</label>
+    <div class="small" style="margin-bottom:10px;">모레/주초/주중/주말/다음주/차주/확인필요/입고예정/진행예정/빈칸 등 날짜 확인이 필요한 건입니다. 확인 후 입고일을 입력하면 셀메이트 CSV에 함께 반영됩니다.</div>
+    <div id="contactRequiredBox" class="schedule-box"></div>
+  </div>
+
+  <div class="card">
+    <label>5. 미리보기</label>
+    <div class="small" style="margin-bottom:10px;">각 항목은 최대 80건만 화면 표시됩니다.</div>
+    <div class="table-wrap" id="previewTable"></div>
+  </div>
+</div>
+
+<script>
+let workbook=null;
+let scheduleRows=[];
+let soldoutRows=[];
+let sampleRows=[];
+let checkRows=[];
+let scheduleInputRows=[];
+let contactRows=[];
+let allValidRows=[];
+const PREVIEW_LIMIT=80;
+
+const soldoutWords=["깔품","품절","판매종료","종료"];
+const returnWords=["반품","반납"];
+const excludeScheduleWords=["매입중","차감요청"];
+
+function txt(v){return v==null?"":String(v).trim();}
+function num(v){const n=Number(txt(v).replace(/,/g,"")); return Number.isFinite(n)?n:0;}
+function setStatus(msg){const el=document.getElementById("status"); el.style.display="block"; el.textContent=msg;}
+function escapeCsv(v){return `"${String(v??"").replace(/"/g,'""')}"`;}
+function includesAny(s, arr){s=txt(s); return arr.some(w=>s.includes(w));}
+
+function getRows(){
+  const name=document.getElementById("sheetSelect").value;
+  return XLSX.utils.sheet_to_json(workbook.Sheets[name],{header:1,raw:false,defval:"",blankrows:false});
+}
+
+function buildText(r){
+  return `거래처명: ${r.supplier||"-"} / 사입상품명: ${r.buyName||"-"} / 상품명: ${r.product||"-"} / 옵션명: ${r.option||"-"} / 거래처 메모: ${r.memo||"-"}`;
+}
+
+function isSample(r){return txt(r.product).includes("샘플") || txt(r.buyName).includes("샘플") || txt(r.memo).includes("샘플");}
+function isReturn(r){return includesAny(r.product,returnWords) || includesAny(r.buyName,returnWords) || includesAny(r.memo,returnWords);}
+function isSoldout(r){
+ const memo = txt(r.memo).replace(/\s/g,"");
+ return includesAny(memo,soldoutWords);
+}
+function isCheck(r){return txt(r.memo).includes("확인") || txt(r.product).includes("확인");}
+function isSchedule(r){
+  const m=txt(r.memo);
+  if(!m) return false;
+  if(isSoldout(r) || isSample(r) || isReturn(r) || isCheck(r)) return false;
+  if(includesAny(m,excludeScheduleWords)) return false;
+  return true;
+}
+
+function findStartRow(rows){
+  for(let i=0;i<Math.min(rows.length,30);i++){
+    const a=txt(rows[i][0]), e=txt(rows[i][4]);
+    if(a.includes("공급처") || a.includes("거래처") || e.includes("상품명")) return i+1;
+  }
+  return 1;
+}
+
+function processFile(){
+  if(!workbook){alert("파일을 업로드해주세요.");return;}
+  const btn=document.getElementById("runBtn");
+  btn.disabled=true;
+  btn.textContent="처리 중...";
+  setStatus("파일 읽는 중입니다...");
+
+  setTimeout(()=>{
+    try{
+      scheduleRows=[]; soldoutRows=[]; sampleRows=[]; checkRows=[]; scheduleInputRows=[]; contactRows=[]; allValidRows=[];
+      const rows=getRows();
+      const start=findStartRow(rows);
+
+      let curSupplier="", curBuyName="", curProduct="";
+
+      for(let i=start;i<rows.length;i++){
+        const r=rows[i]||[];
+        if(r.every(v=>txt(v)==="")) continue;
+
+        if(txt(r[0])) curSupplier=txt(r[0]);
+        if(txt(r[3])) curBuyName=txt(r[3]);
+        if(txt(r[4])) curProduct=txt(r[4]);
+
+        const row={
+          rowNo:i+1,
+          supplier:curSupplier,
+          buyName:curBuyName,
+          product:curProduct,
+          option:txt(r[5]),
+          orderQty:num(r[7]),        // H열 주문수량
+          shippedQty:num(r[8]),      // I열 출고수량
+          receivedQty:num(r[9]),     // J열 입고수량
+          memo:txt(r[13]),
+          barcode:txt(r[16])
+        };
+
+        if(!row.supplier && !row.buyName && !row.product && !row.option && !row.memo) continue;
+
+        row.unreceivedQty=Math.max(row.orderQty-row.receivedQty,0);
+        row.unshippedQty=Math.max(row.orderQty-row.shippedQty,0);
+        row.text=buildText(row);
+        allValidRows.push(row);
+
+        if(isSample(row)){sampleRows.push(row); continue;}
+        if(isReturn(row)) continue;
+        if(isSoldout(row)){soldoutRows.push(row); continue;}
+
+        // H열 주문수량 - I열 출고수량이 1 이상이면 일정 입력/업체 연락 대상
+        if(row.unshippedQty > 0){
+          if(isContactRequiredMemo(row)){
+            contactRows.push(row);
+          }else{
+            scheduleInputRows.push(row);
+          }
+        }
+
+        if(isCheck(row)){checkRows.push(row); continue;}
+        if(isSchedule(row)) scheduleRows.push(row);
+      }
+
+      renderResult();
+      setStatus(`정리 완료: 일정입력 대상 ${scheduleInputRows.length}건 / 업체 연락 요망 ${contactRows.length}건 / 품절 ${soldoutRows.length}건 / 샘플 ${sampleRows.length}건 / 확인 ${checkRows.length}건`);
+      if(soldoutRows.length > 0){
+
+showSoldoutPopup(soldoutRows.length);
+
+}
+    }catch(err){
+      console.error(err);
+      alert("실행 오류: " + (err && err.message ? err.message : err));
+      setStatus("오류가 발생했습니다. 콘솔 오류를 확인해주세요.");
+    }finally{
+      btn.disabled=false;
+      btn.textContent="주문취합 정리 실행";
+    }
+  },20);
+}
+
+function renderResult(){
+  document.getElementById("soldoutCnt").textContent=soldoutRows.length + "건";
+  document.getElementById("sampleCnt").textContent=sampleRows.length + "건";
+  document.getElementById("checkCnt").textContent=checkRows.length + "건";
+  renderSummaryCards();
+  renderScheduleInputs();
+  renderContactRequired();
+  renderPreview();
+}
+
+function summaryCardHtml(r, type){
+  const cls = type==="soldout" ? "soldout-card" : type==="sample" ? "sample-card" : "check-card";
+  const request = type==="soldout" ? `<br><span class="label">요청:</span> 셀메이트 품절처리 및 전채널 재고 0처리 부탁드립니다.` : "";
+  return `
+    <div class="mini-card ${cls}">
+      <span class="label">거래처명:</span> ${r.supplier || "-"}<br>
+      <span class="label">사입상품명:</span> ${r.buyName || "-"}<br>
+      <span class="label">상품명:</span> ${r.product || "-"}<br>
+      <span class="label">옵션명:</span> ${r.option || "-"}<br>
+      <span class="label">거래처 메모:</span> ${r.memo || "-"}${request}
+    </div>
+  `;
+}
+
+function renderSummaryCards(){
+  const limit=30;
+  const soldoutBox=document.getElementById("soldoutSummary");
+  const sampleBox=document.getElementById("sampleSummary");
+  const checkBox=document.getElementById("checkSummary");
+
+  soldoutBox.innerHTML = soldoutRows.length
+    ? soldoutRows.slice(0,limit).map(r=>summaryCardHtml(r,"soldout")).join("")
+    : '<div class="small">해당 건이 없습니다.</div>';
+
+  sampleBox.innerHTML = sampleRows.length
+    ? sampleRows.slice(0,limit).map(r=>summaryCardHtml(r,"sample")).join("")
+    : '<div class="small">해당 건이 없습니다.</div>';
+
+  checkBox.innerHTML = checkRows.length
+    ? checkRows.slice(0,limit).map(r=>summaryCardHtml(r,"check")).join("")
+    : '<div class="small">해당 건이 없습니다.</div>';
+}
+
+
+
+function memoNormalized(row){
+  return txt(row.memo || "").replace(/\s+/g,"").trim();
+}
+
+function isContactRequiredMemo(row){
+  const memoRaw = txt(row.memo || "");
+  const memo = memoRaw.replace(/\s+/g,"").trim();
+
+  // 메모가 없거나 의미없는 표시만 있으면 업체 확인 필요
+  if(!memo || memo === "-" || memo === "." || memo === "없음") return true;
+
+  // 날짜 확정이 어려운 표현은 업체 연락 요망
+  const contactWords = [
+    "모레","주초","주중","주말",
+    "다음주","다음주초","다음주중","다음주말",
+    "차주","차주초","차주중","차주말",
+    "확인가능","확인필요","확인중","확인",
+    "입고예정","진행예정","업체확인","일정확인",
+    "미정","추후안내","추후","예정"
+  ];
+
+  if(contactWords.some(w => memo.includes(w))) return true;
+
+  // 날짜 입력 가능한 표현
+  // 오늘/내일 또는 월~일 요일/밤 표현이 명확히 들어간 경우만 3번에 남김
+  if(memo.includes("오늘") || memo.includes("내일")) return false;
+  if(/[월화수목금토일]/.test(memo)) return false;
+
+  // 6/25, 6.25, 6월25일, 25일 등 날짜가 명확하면 3번
+  if(/\d{1,2}[\/.월]\d{1,2}/.test(memo) || /\d{1,2}일/.test(memo)) return false;
+
+  return true;
+}
+
+function renderContactRequired(){
+  const box=document.getElementById("contactRequiredBox");
+  if(!box) return;
+
+  const rows=contactRows.filter(r=>Number(r.unshippedQty||0)>0);
+  const keys=[...new Set(rows.map(r=>scheduleGroupKey(r)))].sort();
+
+  if(!keys.length){
+    box.innerHTML='<div class="small">업체 연락 요망 건이 없습니다.</div>';
+    return;
+  }
+
+  box.innerHTML=keys.map(key=>{
+    const items=rows.filter(r=>scheduleGroupKey(r)===key);
+    const label=scheduleGroupLabel(key);
+
+    const list=items.map((r,idx)=>`
+      <div class="schedule-row">
+        <div class="main-line">${idx+1}. ${r.buyName || "-"} / ${r.option || "-"}</div>
+        <div class="memo-line">미출고수량: ${r.unshippedQty || 0}개</div>
+        <div class="memo-line">거래처 메모: ${r.memo || "-"}</div>
+      </div>
+    `).join("");
+
+    return `
+      <div class="schedule-item">
+        <label>${label}</label>
+        <input type="date" data-key="${key}">
+        <div class="small">${items.length}건</div>
+        <div class="schedule-list">${list}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+
+function scheduleGroupKey(row){
+  const supplier = row.supplier || "거래처 미기재";
+  const memo = row.memo || "메모 없음";
+  return supplier + "||" + memo;
+}
+
+function scheduleGroupLabel(key){
+  const parts = String(key).split("||");
+  const supplier = parts[0] || "거래처 미기재";
+  const memo = parts[1] || "메모 없음";
+  return supplier + " / " + memo;
+}
+
+function renderScheduleInputs(){
+  const box=document.getElementById("scheduleInputs");
+
+  // H열 주문수량 - I열 출고수량이 1 이상이고, 날짜 입력 가능한 메모만 3번에 표시
+  const inputRows=scheduleInputRows
+    .filter(r=>Number(r.unshippedQty||0)>0)
+    .filter(r=>!isContactRequiredMemo(r));
+
+  const keys=[...new Set(inputRows.map(r=>scheduleGroupKey(r)))].sort();
+
+  if(!keys.length){
+    box.innerHTML='<div class="small">일정 입력 대상이 없습니다.</div>';
+    return;
+  }
+
+  box.innerHTML=keys.map(key=>{
+    const items=inputRows.filter(r=>scheduleGroupKey(r)===key);
+    const label=scheduleGroupLabel(key);
+
+    const list=items.map((r,idx)=>`
+      <div class="schedule-row">
+        <div class="main-line">${idx+1}. ${r.buyName || "-"} / ${r.option || "-"}</div>
+        <div class="memo-line">미출고수량: ${r.unshippedQty || 0}개</div>
+        <div class="memo-line">거래처 메모: ${r.memo || "-"}</div>
+      </div>
+    `).join("");
+
+    return `
+      <div class="schedule-item">
+        <label>${label}</label>
+        <input type="date" data-key="${key}">
+        <div class="small">${items.length}건</div>
+        <div class="schedule-list">${list}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function rowPreview(title, rows, cls){
+  const preview=rows.slice(0,PREVIEW_LIMIT);
+  let html=`<tr><th colspan="6">${title} — 화면 ${preview.length}건 / 전체 ${rows.length}건</th></tr>`;
+  html += `<tr><th>거래처명</th><th>사입상품명</th><th>상품명</th><th>옵션명</th><th>거래처 메모</th><th>바코드</th></tr>`;
+  preview.forEach(r=>{
+    html += `<tr class="${cls}"><td>${r.supplier}</td><td>${r.buyName}</td><td class="text">${r.product}</td><td>${r.option}</td><td>${r.orderQty}</td><td>${r.shippedQty}</td><td>${r.unshippedQty}</td><td class="text">${r.memo}</td><td>${r.barcode}</td></tr>`;
+  });
+  return html;
+}
+
+function renderPreview(){
+  let html='<table>';
+  html+=rowPreview("입고일정",scheduleRows,"memo");
+  html+=rowPreview("품절/종료 요청",soldoutRows,"warn");
+  html+=rowPreview("샘플 포함",sampleRows,"sample");
+  html+=rowPreview("확인 필요/가능",checkRows,"sample");
+  html+=rowPreview("입고예정일 업체 연락 요망",contactRows,"warn");
+  html+='</table>';
+  document.getElementById("previewTable").innerHTML=html;
+}
+
+function dateMap(){
+  const map={};
+  document.querySelectorAll("#scheduleInputs input[type=date], #contactRequiredBox input[type=date]").forEach(i=>{
+    if(i.value) map[i.dataset.key]=i.value;
+  });
+  return map;
+}
+
+
+function asciiBytes(str){
+  const arr=[];
+  for(let i=0;i<str.length;i++) arr.push(str.charCodeAt(i)&255);
+  return arr;
+}
+
+function downloadCellmateCsv(){
+  const map=dateMap();
+
+  const targets=[...scheduleInputRows, ...contactRows]
+    .filter(r=>Number(r.unshippedQty||0)>0)
+    .filter(r=>map[scheduleGroupKey(r)])
+    .filter(r=>r.barcode);
+
+  if(!targets.length){
+    alert("입고일을 입력한 거래처/메모 그룹이 없거나 Q열 바코드가 없습니다.");
+    return;
+  }
+
+  const rows=[["입고예정번호","상품명","옵션내용","바코드번호","입고예정일","입고예정수량","삭제여부"]];
+  targets.forEach(r=>{
+    rows.push(["","","",r.barcode,map[scheduleGroupKey(r)],"",""]);
+  });
+
+  const csv="\uFEFF"+rows.map(row=>row.map(escapeCsv).join(",")).join("\r\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="셀메이트_입고예정일_입력.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+
+function downloadSummaryCsv(){
+  const rows=[["구분","거래처명","사입상품명","상품명","옵션명","주문수","입고수","미입고","거래처 메모","바코드"]];
+  scheduleRows.forEach(r=>rows.push(["입고일정",r.supplier,r.buyName,r.product,r.option,r.orderQty,r.receivedQty,r.unreceivedQty,r.memo,r.barcode]));
+  soldoutRows.forEach(r=>rows.push(["품절/종료",r.supplier,r.buyName,r.product,r.option,r.orderQty,r.receivedQty,r.unreceivedQty,r.memo,r.barcode]));
+  sampleRows.forEach(r=>rows.push(["샘플",r.supplier,r.buyName,r.product,r.option,r.orderQty,r.receivedQty,r.unreceivedQty,r.memo,r.barcode]));
+  checkRows.forEach(r=>rows.push(["확인",r.supplier,r.buyName,r.product,r.option,r.orderQty,r.receivedQty,r.unreceivedQty,r.memo,r.barcode]));
+  contactRows.forEach(r=>rows.push(["업체연락요망",r.supplier,r.buyName,r.product,r.option,r.orderQty,r.receivedQty,r.unreceivedQty,r.memo,r.barcode]));
+
+  const csv="\uFEFF"+rows.map(row=>row.map(escapeCsv).join(",")).join("\r\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="동대문_주문취합_정리결과.csv";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+document.getElementById("fileInput").addEventListener("change",e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  setStatus("파일 업로드 중입니다...");
+  const reader=new FileReader();
+  reader.onload=evt=>{
+    try{
+      workbook=XLSX.read(new Uint8Array(evt.target.result),{type:"array",cellDates:true});
+      const select=document.getElementById("sheetSelect");
+      select.innerHTML="";
+      workbook.SheetNames.forEach((name,idx)=>{
+        select.add(new Option(name,name));
+        if(idx===0)select.value=name;
+      });
+      setStatus("파일 업로드 완료. 주문취합 정리 실행을 눌러주세요.");
+    }catch(err){
+      console.error(err);
+      alert("파일을 읽는 중 오류가 발생했습니다: "+err.message);
+      setStatus("파일 읽기 오류");
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+function showSoldoutPopup(count){
+
+const div=document.createElement("div");
+
+div.className="soldout-popup-bg";
+
+div.innerHTML=`
+
+<div class="soldout-popup">
+
+<div class="soldout-popup-header">
+⚠️ 전일 동대문 발주 품절건 확인 필요
+</div>
+
+
+<div class="soldout-popup-body">
+
+전일 발주건 중<br>
+
+<strong>품절/판매종료 상품이 총 ${count}건 있습니다.</strong>
+
+<br><br>
+
+
+🚨 필수 처리사항<br>
+
+<strong>
+2. 요약 > 품절/종료 요청 확인 후<br>
+셀메이트 옵션 품절 처리 + 전체 판매처 일시품절 처리해주세요.
+</strong>
+
+
+</div>
+
+
+<button class="soldout-popup-btn">
+확인
+</button>
+
+
+</div>
+
+`;
+
+
+document.body.appendChild(div);
+
+
+div.querySelector("button").onclick=function(){
+
+document.body.removeChild(div);
+
+};
+
+
+}
+</script>
+</body>
+</html>
