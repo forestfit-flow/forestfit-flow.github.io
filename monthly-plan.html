@@ -1,0 +1,1646 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>월별 상품 키워드 자동입력</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+          integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"
+          onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';"></script>
+  <style>
+    :root{
+      --ink:#171717;
+      --muted:#737373;
+      --accent:#3157ff;
+      --accent-2:#8b7cff;
+      --accent-soft:#eef2ff;
+      --butter:#fff2b8;
+      --mint:#dff4ea;
+      --panel:#ffffff;
+      --line:#e7e5e4;
+      --line-strong:#d6d3d1;
+      --ok:#1f7a52;
+      --ok-bg:#eef9f3;
+      --warn:#9a6b12;
+      --warn-bg:#fff9e9;
+      --bad:#b44444;
+      --bad-bg:#fff1f1;
+      --shadow:0 18px 55px rgba(23,23,23,.07);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;color:var(--ink)}
+    body{
+      background:
+        radial-gradient(880px 420px at 2% -8%,rgba(49,87,255,.09),transparent 60%),
+        radial-gradient(760px 380px at 100% 0%,rgba(255,242,184,.38),transparent 58%),
+        linear-gradient(180deg,#f8f7f4 0%,#f4f3ef 50%,#f8f7f4 100%);
+    }
+    .wrap{max-width:1180px;margin:0 auto;padding:46px 26px 72px}
+    .hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid rgba(214,211,209,.9)}
+    h1{font-size:31px;letter-spacing:-1.05px;margin:0 0 8px;color:#171717;font-weight:950}
+    h1::after{content:"";display:inline-block;width:9px;height:9px;margin-left:11px;border-radius:50%;background:var(--accent);box-shadow:13px -5px 0 var(--butter),25px 2px 0 #b8f0d2;vertical-align:middle}
+    .sub{font-size:13.5px;color:#78716c;line-height:1.68}
+    .privacy{font-size:11.5px;color:#525252;background:rgba(255,255,255,.88);border:1px solid var(--line);padding:9px 12px;border-radius:999px;white-space:nowrap;box-shadow:0 6px 18px rgba(23,23,23,.04)}
+    .panel{background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:24px;margin-bottom:18px}
+    .step{display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:start;padding:18px 0;border-bottom:1px solid #f0efec}
+    .step:last-child{border-bottom:0;padding-bottom:0}
+    .num{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#171717,#343434);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;box-shadow:0 6px 14px rgba(23,23,23,.15);position:relative}
+    .num::after{content:"";position:absolute;right:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+    .step h2{font-size:15px;margin:2px 0 10px;color:#262626}
+    .hint{font-size:12px;color:#8a817b;line-height:1.6;margin-top:8px}
+    .month-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;max-width:920px}
+    .month-grid input{display:none}
+    .month-grid label{height:40px;border:1px solid var(--line-strong);background:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:#57534e;cursor:pointer;transition:.16s}
+    .month-grid label:hover{border-color:#9caafc;background:#f7f8ff;transform:translateY(-1px)}
+    .month-grid input:checked+label{color:#fff;border-color:var(--accent);background:linear-gradient(135deg,#3157ff,#6d7cff);box-shadow:0 7px 16px rgba(49,87,255,.22)}
+    .drop{border:1.5px dashed #b8b4ae;background:linear-gradient(180deg,#fff,#faf9f6);border-radius:18px;padding:26px;min-height:145px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:.18s}
+    .drop:hover:not(.disabled){border-color:#8ea0ff;background:linear-gradient(180deg,#fff,#f7f8ff);box-shadow:0 10px 28px rgba(49,87,255,.07)}
+    .drop.drag{border-color:var(--accent);background:#f1f4ff;box-shadow:0 0 0 4px rgba(49,87,255,.09)}
+    .drop.disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.15)}
+    .drop-title{font-weight:900;color:#262626;margin-bottom:6px}
+    .drop-text{font-size:12.5px;color:#837b75;line-height:1.6}
+    .file-pill{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:999px;background:#eef2ff;color:#344fbf;font-size:12px;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .native-file-guide{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;min-width:108px;height:36px;padding:0 15px;border-radius:999px;background:#171717;color:#fff;font-size:12px;font-weight:900;box-shadow:0 7px 18px rgba(23,23,23,.12);transition:.16s}
+    .drop:hover:not(.disabled) .native-file-guide{background:var(--accent);transform:translateY(-1px)}
+    .drop.disabled .native-file-guide{background:#c8c5c0;box-shadow:none}
+    input[type=file].native-file-input{
+      display:block;
+      width:min(100%,520px);
+      margin:14px auto 0;
+      padding:7px;
+      border:1px solid #d8d5d0;
+      border-radius:12px;
+      background:#fff;
+      color:#57534e;
+      font-size:12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    input[type=file].native-file-input::file-selector-button{
+      border:0;
+      border-radius:9px;
+      padding:9px 14px;
+      margin-right:10px;
+      background:#171717;
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+    }
+    input[type=file].native-file-input:disabled{
+      opacity:.48;
+      cursor:not-allowed;
+      background:#f3f2ef;
+    }
+    .drop.file-loading{border-color:#8ea0ff;background:#f5f7ff}
+    .drop.file-success{border-color:#9bd4b7;background:#f4fbf7;box-shadow:0 0 0 4px rgba(31,122,82,.06)}
+    .drop.file-error{border-color:#e6adad;background:#fff7f7}
+    .file-state{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      min-height:25px;
+      margin-top:10px;
+      font-size:12px;
+      font-weight:900;
+      color:#746e68;
+    }
+    .file-state::before{
+      content:"";
+      width:8px;height:8px;border-radius:50%;
+      background:#b8b4ae;
+      flex:0 0 auto;
+    }
+    .file-state.loading{color:#3157ff}
+    .file-state.loading::before{background:#3157ff;box-shadow:0 0 0 4px rgba(49,87,255,.09)}
+    .file-state.ok{color:#1f7a52}
+    .file-state.ok::before{background:#1f7a52;box-shadow:0 0 0 4px rgba(31,122,82,.09)}
+    .file-state.bad{color:#b44444}
+    .file-state.bad::before{background:#b44444;box-shadow:0 0 0 4px rgba(180,68,68,.08)}
+    .options{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:12px}
+    .check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#57534e;font-weight:700}
+    .check input{accent-color:var(--accent);width:16px;height:16px}
+    .rule-box{margin-top:13px;padding:12px 14px;border:1px solid #ece9e4;background:#fbfaf7;border-radius:13px;color:#746e68;font-size:12px;line-height:1.75}
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    button{border:0;border-radius:12px;min-height:42px;padding:0 18px;font-weight:900;font-size:13px;cursor:pointer;transition:.16s}
+    button:disabled{opacity:.42;cursor:not-allowed}
+    button:not(:disabled):hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(135deg,#3157ff,#5b72ff);color:#fff;box-shadow:0 9px 20px rgba(49,87,255,.2)}
+    .download{background:linear-gradient(135deg,#171717,#343434);color:#fff;box-shadow:0 9px 20px rgba(23,23,23,.16)}
+    .secondary{background:#f1f0ed;color:#4c4945;border:1px solid #e5e2dd}
+    .status{margin-top:14px;border:1px solid #e7e5e4;background:#faf9f7;color:#66615c;border-radius:12px;padding:11px 13px;font-size:12px;line-height:1.6}
+    .status.ok{border-color:#d5ebdf;background:var(--ok-bg);color:var(--ok)}
+    .status.warn{border-color:#f0e0b9;background:var(--warn-bg);color:var(--warn)}
+    .status.bad{border-color:#efd1d1;background:var(--bad-bg);color:var(--bad)}
+    .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px}
+    .metric{border:1px solid #e8e6e2;background:linear-gradient(180deg,#fff,#fbfaf7);border-radius:15px;padding:14px 15px;position:relative;overflow:hidden}
+    .metric::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),#9aa8ff,var(--butter))}
+    .metric small{display:block;color:#8a817b;font-size:10.5px;margin-bottom:5px}
+    .metric b{font-size:22px;color:#1f1f1f}
+    .result-panel{display:none}
+    .result-panel.show{display:block}
+    .result-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:14px}
+    .result-head h3{margin:0;color:#262626;font-size:17px}
+    .result-note{font-size:11.5px;color:#8a817b;margin-top:4px}
+    .table-wrap{border:1px solid #e7e5e4;border-radius:15px;overflow:auto;max-height:530px;background:#fff}
+    table{width:100%;border-collapse:collapse;min-width:980px}
+    th,td{padding:9px 10px;border-bottom:1px solid #f0efec;font-size:11.5px;text-align:center;vertical-align:middle}
+    th{position:sticky;top:0;z-index:1;background:#f2f2ef;color:#3f3c39;font-weight:900}
+    td.product{text-align:left;font-weight:800;min-width:270px}
+    td.keyword{text-align:left;min-width:105px}
+    tr:hover td{background:#f8f9ff}
+    .badge{display:inline-flex;align-items:center;justify-content:center;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:900;white-space:nowrap}
+    .b-ok{background:#e9f7f0;color:#26744f}.b-warn{background:#fff4db;color:#8b651a}.b-bad{background:#fdeaea;color:#a64343}.b-skip{background:#efefed;color:#6f6a65}
+    .source{color:#706964;font-size:10.5px;white-space:nowrap}
+    .empty{padding:30px;color:#999}
+    .sheet-info{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+    .sheet-chip{border:1px solid #e4e1dc;background:#fff;border-radius:999px;padding:5px 8px;font-size:10.5px;color:#746e68}
+    .sheet-chip.target{background:#eef2ff;border-color:#c8d2ff;color:#3150bd;font-weight:900}
+    .field-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:900px}
+    .field{display:flex;flex-direction:column;gap:7px}
+    .field label{font-size:11.5px;font-weight:900;color:#57534e}
+    .field input{height:42px;border:1px solid #dcd8d2;border-radius:11px;background:#fff;padding:0 12px;color:#292524;font-size:13px;font-weight:700;outline:none}
+    .field input:focus{border-color:#7e92ff;box-shadow:0 0 0 3px rgba(49,87,255,.1)}
+    .detected{display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:9px;margin-top:12px}
+    .detected>div{border:1px solid #e7e5e4;background:#fbfaf7;border-radius:12px;padding:10px 12px}
+    .detected small{display:block;color:#8a817b;font-size:10.5px;margin-bottom:3px}
+    .detected b{font-size:16px;color:#262626}
+    .drop.compact{min-height:126px;padding:22px}
+    .preserve-note{margin-top:12px;padding:11px 13px;border:1px solid #cfe6da;background:#f1faf5;border-radius:12px;color:#3f6d57;font-size:11.5px;line-height:1.65;font-weight:700}
+    .ranking-preview{display:none;margin-top:14px;padding:15px;border:1px solid #e5e2dd;border-radius:15px;background:#fbfaf7}
+    .ranking-preview.show{display:block}
+    .ranking-preview-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-weight:950;color:#292524}
+    .ranking-preview-title::before{content:"TOP 5";padding:4px 7px;border-radius:999px;background:#171717;color:#fff;font-size:9px;letter-spacing:.3px}
+    .ranking-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+    .ranking-card{min-width:0;border:1px solid #e8e5e0;border-radius:12px;background:#fff;padding:11px}
+    .ranking-card h4{margin:0 0 8px;font-size:11.5px;color:#3157ff}
+    .ranking-item{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:6px;align-items:center;padding:5px 0;border-top:1px solid #f3f1ed;font-size:10.5px}
+    .ranking-item:first-of-type{border-top:0}
+    .ranking-no{font-weight:950;color:#171717}
+    .ranking-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4c4945;text-align:left}
+    .ranking-qty{font-weight:850;color:#706964;white-space:nowrap}
+    .ranking-empty{padding:7px 0;color:#aaa;font-size:10.5px}
+    .ready-box{margin:12px 0 4px;padding:13px 14px;border:1px solid #e5e2dd;border-radius:13px;background:#fbfaf8}
+    .ready-title{font-size:11px;font-weight:900;color:#57534e;margin-bottom:9px}
+    .ready-list{display:flex;gap:7px;flex-wrap:wrap}
+    .ready-chip{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:5px 9px;border-radius:999px;background:#f0efec;color:#77716b;font-size:10.5px;font-weight:900;border:1px solid #e5e2dd}
+    .ready-chip::before{content:"";width:7px;height:7px;border-radius:50%;background:#b8b4ae}
+    .ready-chip.ok{background:#eef9f3;color:#1f7a52;border-color:#d1e8db}
+    .ready-chip.ok::before{background:#1f7a52}
+    .ready-chip.bad{background:#fff5f5;color:#a34b4b;border-color:#efd7d7}
+    .ready-chip.bad::before{background:#c45e5e}
+    .run-help{margin-top:9px;font-size:11.5px;color:#8a817b;line-height:1.55}
+    .primary.running{background:linear-gradient(135deg,#7b88c9,#8d98cf);box-shadow:none}
+    .extra-note{margin-top:10px;padding:11px 13px;border:1px solid #dbe2ff;background:#f7f8ff;border-radius:12px;color:#56617a;font-size:11.5px;line-height:1.65}
+    .extra-file-list{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+    .extra-file-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid #e5e2dd;border-radius:11px;background:#fff;font-size:11.5px}
+    .extra-file-main{min-width:0;display:flex;align-items:center;gap:8px}
+    .extra-file-dot{width:8px;height:8px;border-radius:50%;background:#1f7a52;flex:0 0 auto}
+    .extra-file-name{font-weight:850;color:#3f3c39;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .extra-file-meta{color:#8a817b;white-space:nowrap}
+    .extra-file-remove{min-height:30px;padding:0 10px;border-radius:9px;background:#f1f0ed;color:#68625c;border:1px solid #e5e2dd;font-size:10.5px;box-shadow:none}
+    .extra-toolbar{display:flex;justify-content:flex-end;margin-top:8px}
+    .extra-toolbar button{min-height:32px;padding:0 11px;font-size:10.5px}
+    @media(max-width:1100px){.ranking-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:900px){.month-grid{grid-template-columns:repeat(6,1fr)}.summary{grid-template-columns:repeat(2,1fr)}.field-grid{grid-template-columns:1fr}.privacy{display:none}}
+    @media(max-width:560px){.ranking-grid{grid-template-columns:1fr}.wrap{padding:28px 14px 50px}.hero{display:block}.month-grid{grid-template-columns:repeat(4,1fr)}.step{grid-template-columns:36px 1fr}.panel{padding:18px}.summary{grid-template-columns:1fr 1fr}.detected{grid-template-columns:1fr}.actions button{width:100%}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <h1>월별 상품 키워드 자동입력</h1>
+      <div class="sub">2026 사업계획서에서 선택한 월의 상품 키워드와 상품별 판매실적을 자동 채우고, 미매칭 상품은 추가 참고 엑셀까지 이어서 검색합니다.<br>작성일 · 부서 · 담당자까지 지정된 병합셀에 입력하며 원본 엑셀의 양식·병합·수식은 그대로 유지합니다.</div>
+    </div>
+    <div class="privacy">파일은 서버로 전송되지 않고 브라우저에서만 처리됩니다.</div>
+  </header>
+
+  <section class="panel">
+    <div class="step">
+      <div class="num">1</div>
+      <div>
+        <h2>작성할 달 선택</h2>
+        <div class="month-grid" id="monthGrid"></div>
+        <div class="hint">선택한 월 탭은 <b>입력 대상</b>으로 사용하며, 키워드를 찾는 원본 탭에서는 제외합니다.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <div>
+        <h2>2026 사업계획서 파일 첨부</h2>
+        <div id="dropZone" class="drop disabled" tabindex="0" role="button" aria-label="엑셀 파일 첨부" aria-disabled="true">
+          <div style="width:100%">
+            <div class="drop-title">사업계획서 XLSX 파일을 첨부해주세요.</div>
+            <div class="drop-text">작성할 달을 먼저 선택한 뒤 아래 <b>파일 선택</b>을 누르거나, 이 박스 안으로 XLSX 파일을 끌어놓으세요.</div>
+            <input id="fileInput" class="native-file-input" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled />
+            <div id="planFileState" class="file-state">아직 첨부된 파일이 없습니다.</div>
+            <div id="filePill" class="file-pill" style="display:none"></div>
+          </div>
+        </div>
+        <div id="sheetInfo" class="sheet-info"></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <div>
+        <h2>월 판매자료 CSV 파일 첨부</h2>
+        <div id="salesDropZone" class="drop compact" tabindex="0" role="button" aria-label="판매자료 CSV 첨부">
+          <div style="width:100%">
+            <div class="drop-title">판매자료 CSV 파일을 첨부해주세요.</div>
+            <div class="drop-text">1행에서 <b>상품명</b> · <b>판매량</b> · <b>판매금액</b> 열을 자동으로 찾습니다.<br>아래 <b>파일 선택</b>을 누르거나 이 박스 안으로 CSV 파일을 끌어놓으세요.</div>
+            <input id="salesFileInput" class="native-file-input" type="file" accept=".csv,text/csv" />
+            <div id="salesFileState" class="file-state">아직 첨부된 파일이 없습니다.</div>
+            <div id="salesFilePill" class="file-pill" style="display:none"></div>
+          </div>
+        </div>
+        <div id="salesDetected" class="detected" style="display:none">
+          <div><small>합계 판매량 → E16:J16</small><b id="detectedQty">-</b></div>
+          <div><small>합계 판매금액 → E17:J17</small><b id="detectedAmount">-</b></div>
+          <div><small>상품별 실적 인식</small><b id="detectedProducts">-</b></div>
+        </div>
+        <div id="rankingPreview" class="ranking-preview">
+          <div class="ranking-preview-title">판매량 기준 자동 판매순위 미리보기</div>
+          <div id="rankingGrid" class="ranking-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">4</div>
+      <div>
+        <h2>추가 키워드 참고 엑셀 첨부 <span style="font-size:11px;color:#8a817b;font-weight:700">(선택)</span></h2>
+        <div id="extraDropZone" class="drop compact" tabindex="0" role="button" aria-label="추가 키워드 참고 XLSX 첨부">
+          <div style="width:100%">
+            <div class="drop-title">키워드를 추가로 찾을 XLSX 파일을 첨부해주세요.</div>
+            <div class="drop-text">기존 사업계획서의 다른 월 탭에서 <b>상품명이 매칭되지 않은 상품만</b> 이 파일들에서 다시 찾습니다.<br>여러 파일을 한 번에 선택하거나 계속 추가할 수 있으며, 첨부한 순서대로 우선 사용합니다.</div>
+            <input id="extraFileInput" class="native-file-input" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple />
+            <div id="extraFileState" class="file-state">추가 참고 파일은 선택사항입니다.</div>
+          </div>
+        </div>
+        <div class="extra-note"><b>검색 기준</b> · 추가 파일의 모든 시트에서 C:E 상품명을 찾고 F:G(핏) · H:I(소재) · J:K(디테일) · L:M(기능) 값을 읽습니다. 기존 월 탭에서 이미 정상 매칭된 상품은 추가 파일로 덮어쓰지 않습니다.</div>
+        <div id="extraFileList" class="extra-file-list"></div>
+        <div class="extra-toolbar"><button id="clearExtraBtn" class="secondary" type="button" style="display:none">추가 파일 전체 비우기</button></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">5</div>
+      <div>
+        <h2>작성 정보 입력</h2>
+        <div class="field-grid">
+          <div class="field"><label for="writeDate">작성일</label><input id="writeDate" type="date" min="2026-01-01" max="2026-12-31"></div>
+          <div class="field"><label for="department">부서</label><input id="department" type="text" placeholder="예: 판매팀" maxlength="50"></div>
+          <div class="field"><label for="managerName">담당자</label><input id="managerName" type="text" placeholder="예: 홍길동" maxlength="50"></div>
+        </div>
+        <div class="hint">작성일은 엑셀에 <b>YYYY.MM.DD</b> 형식으로 입력합니다. · T5:U5 작성일 · T6:U6 부서 · T7:U7 담당자</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">6</div>
+      <div>
+        <h2>사업계획서 자동 입력</h2>
+        <div class="rule-box">
+          <b>고정 입력</b> · CSV 합계 판매량 → E16:J16 · 판매금액 → E17:J17 · 작성일 → T5:U5 · 부서 → T6:U6 · 담당자 → T7:U7.<br>
+          <b>판매순위 자동 입력</b> · 3번 판매자료 CSV의 <b>판매량</b>을 상품명별로 합산한 뒤 내림차순 정렬하여 전체 / 데님 / 팬츠 / 슬랙스 / 스커트 각각 TOP5 상품명을 작성 월 탭의 순위 1~5위 C:E 병합셀에 자동 입력합니다. · 전체 판매순위는 24~28행을 사용하며 <b>29행의 ‘기타’ 및 수식은 절대 수정하지 않습니다.</b><br>
+          <b>상품별 판매실적</b> · C:E 병합셀 상품명이 CSV의 상품명과 정확히 일치하면 같은 행 N:O 병합셀에 판매량, T:U 병합셀에 판매금액을 입력합니다. · 동일 상품이 여러 구역에 반복되면 모두 같은 판매실적을 입력합니다.<br>
+          <b>키워드 처리</b> · 첫 번째/두 번째 탭과 선택한 월 탭은 검색 원본에서 제외합니다. · 순위(B열)가 숫자인 행의 C:E 병합셀 상품명을 비교합니다. · 같은 상품을 찾으면 빈 F:G(핏), H:I(소재), J:K(디테일), L:M(기능)에 자동 입력합니다. · 판매순위 자동 변경으로 상품명이 바뀐 행은 이전 상품의 키워드가 남지 않도록 키워드칸을 비운 뒤 새 상품 기준으로 다시 채웁니다. · 상품명이 다른 탭 어디에도 매칭되지 않으면 빈 키워드칸을 <b>노란색</b>으로 표시하며, 사용자가 값을 입력하거나 붙여넣으면 노란색이 자동으로 사라집니다.<br>
+          <b>추가 참고 파일</b> · 기존 사업계획서의 다른 월 탭에서 같은 상품명을 찾지 못한 경우에만 4번에서 첨부한 추가 XLSX 파일을 순서대로 검색합니다. · 추가 파일에서 같은 상품을 찾으면 해당 키워드를 입력하고, 추가 파일에서도 찾지 못한 상품만 빈 키워드칸을 노란색으로 표시합니다.<br>
+          <b>카테고리 판별</b> · CSV의 <b>상품명</b>만 기준으로 분류합니다. · <b>데님</b>: 데님·청바지·생지·노컷진·찐스판 포함 상품 → 37~41행 · <b>슬랙스</b>: 슬랙스 포함 상품 → 59~63행 · <b>스커트</b>: 스커트 포함 상품 → 70~74행 · <b>팬츠</b>: 위 세 카테고리에 분류되지 않은 나머지 상품 중 판매량 상위 5개 → 48~52행. · ‘데님 스커트’처럼 단어가 겹치면 스커트가 우선이며, 75행은 합계행이라 절대 수정하지 않습니다.
+        </div>
+        <div class="ready-box">
+          <div class="ready-title">실행 준비 상태</div>
+          <div id="readyList" class="ready-list"></div>
+          <div id="runHelp" class="run-help">필수 항목을 확인한 뒤 자동 입력 실행을 눌러주세요.</div>
+        </div>
+        <div class="actions">
+          <button id="runBtn" class="primary">자동 입력 실행</button>
+          <button id="resetBtn" class="secondary" disabled>처음부터</button>
+        </div>
+        <div class="preserve-note">원본 XLSX를 새로 재작성하지 않고 압축 내부의 선택 월 워크시트 XML에서 지정된 셀 값만 변경합니다. 기존 병합 범위, 수식, 셀 서식, 다른 시트는 해제·재작성하지 않습니다. 수식이 들어있는 입력 대상 셀은 덮어쓰지 않으며, <b>29행은 별도 보호행으로 지정하여 셀 값을 전혀 수정하지 않습니다.</b></div>
+        <div id="status" class="status">1번에서 작성할 달을 선택해주세요.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultPanel" class="panel result-panel">
+    <div class="result-head">
+      <div>
+        <h3>처리 결과</h3>
+        <div id="resultNote" class="result-note"></div>
+      </div>
+      <button id="downloadBtn" class="download" disabled>완료 XLSX 다운로드</button>
+    </div>
+    <div class="summary">
+      <div class="metric"><small>대상 상품 행</small><b id="mRows">0</b></div>
+      <div class="metric"><small>고유 상품</small><b id="mProducts">0</b></div>
+      <div class="metric"><small>자동 입력 행</small><b id="mFilled">0</b></div>
+      <div class="metric"><small>미매칭 상품</small><b id="mMiss">0</b></div>
+      <div class="metric"><small>상이 키워드 이력</small><b id="mConflict">0</b></div>
+    </div>
+    <div class="table-wrap" style="margin-top:16px">
+      <table>
+        <thead>
+          <tr><th>상품명</th><th>대상 위치</th><th>참조 탭</th><th>핏</th><th>소재</th><th>디테일</th><th>기능</th><th>상태</th></tr>
+        </thead>
+        <tbody id="resultBody"><tr><td colspan="8" class="empty">처리 결과가 없습니다.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+'use strict';
+
+const NS_MAIN='http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+const NS_REL='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+const NS_PKG_REL='http://schemas.openxmlformats.org/package/2006/relationships';
+const $=s=>document.querySelector(s);
+
+let selectedMonth='';
+let sourceFile=null;
+let salesFile=null;
+let salesSummary=null;
+let loadedContext=null;
+let processedZip=null;
+let outputName='';
+let resultRows=[];
+let isRunning=false;
+let extraKeywordFiles=[];
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function normalizeText(v){return String(v??'').replace(/\u00a0/g,' ').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,' ').trim();}
+function normalizeProduct(v){return normalizeText(v);}
+function isRealRank(v){return /^\d+$/.test(normalizeText(v));}
+function isRealProduct(v){const s=normalizeProduct(v);return !!s && s!=='기타';}
+
+
+function decodeCsv(buffer){
+  const bytes=new Uint8Array(buffer);
+  try{
+    return new TextDecoder('utf-8',{fatal:true}).decode(bytes).replace(/^\uFEFF/,'');
+  }catch(_){
+    try{return new TextDecoder('euc-kr').decode(bytes).replace(/^\uFEFF/,'');}
+    catch(e){return new TextDecoder('utf-8').decode(bytes).replace(/^\uFEFF/,'');}
+  }
+}
+
+function parseCsv(text){
+  const rows=[];let row=[],field='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){
+      if(ch==='"'){
+        if(text[i+1]==='"'){field+='"';i++;}
+        else quoted=false;
+      }else field+=ch;
+    }else{
+      if(ch==='"')quoted=true;
+      else if(ch===','){row.push(field);field='';}
+      else if(ch==='\n'){row.push(field);rows.push(row);row=[];field='';}
+      else if(ch==='\r'){}
+      else field+=ch;
+    }
+  }
+  if(quoted)throw new Error('CSV 따옴표 구조가 올바르지 않습니다.');
+  if(field!==''||row.length){row.push(field);rows.push(row);}
+  while(rows.length&&rows[rows.length-1].every(v=>normalizeText(v)===''))rows.pop();
+  return rows;
+}
+
+function parseNumeric(v,label){
+  const s=normalizeText(v).replace(/,/g,'');
+  if(!s)throw new Error(`합계 행의 ${label} 값이 비어 있습니다.`);
+  const n=Number(s);
+  if(!Number.isFinite(n))throw new Error(`합계 행의 ${label} 값이 숫자가 아닙니다: ${v}`);
+  return n;
+}
+
+function parseNumericOrZero(v){
+  const s=normalizeText(v).replace(/,/g,'');
+  if(!s)return 0;
+  const n=Number(s);
+  return Number.isFinite(n)?n:0;
+}
+
+function formatNumber(v){return Number(v||0).toLocaleString('ko-KR');}
+
+
+function classifySalesProduct(product){
+  const name=normalizeProduct(product);
+
+  // 사용자 지정 분류 규칙: 상품분류 열은 사용하지 않고 "상품명"에 포함된 단어만 봅니다.
+  // 한 상품이 여러 규칙에 동시에 해당할 수 있으므로 스커트 → 슬랙스 → 데님 순으로 우선 분류합니다.
+  // 예: "데님 스커트"는 데님이 아니라 스커트에 들어갑니다.
+  if(/스커트/i.test(name))return 'skirt';
+  if(/슬랙스/i.test(name))return 'slacks';
+  if(/(데님|청바지|생지|노컷진|찐스판)/i.test(name))return 'denim';
+
+  // 위 세 카테고리에 한 번도 분류되지 않은 상품은 팬츠 후보로 사용합니다.
+  return 'pants';
+}
+
+function buildSalesRankings(productSales){
+  const items=[...productSales.entries()].map(([product,sale])=>({
+    product,
+    qty:Number(sale.qty||0),
+    amount:Number(sale.amount||0),
+    category:classifySalesProduct(product)
+  }));
+
+  // 판매량 내림차순. 판매량이 같으면 판매금액 내림차순 → 상품명 오름차순으로 순서를 고정합니다.
+  const sorter=(a,b)=>b.qty-a.qty || b.amount-a.amount || a.product.localeCompare(b.product,'ko',{numeric:true,sensitivity:'base'});
+  const top=list=>[...list].sort(sorter).slice(0,5);
+
+  return {
+    overall:top(items),
+    denim:top(items.filter(x=>x.category==='denim')),
+    slacks:top(items.filter(x=>x.category==='slacks')),
+    skirt:top(items.filter(x=>x.category==='skirt')),
+    // 데님·슬랙스·스커트 조건에 해당하지 않아 아직 카테고리에 배정되지 않은 상품 중 TOP5
+    pants:top(items.filter(x=>x.category==='pants'))
+  };
+}
+
+function renderSalesRankings(summary){
+  const preview=$('#rankingPreview'),grid=$('#rankingGrid');
+  if(!preview||!grid||!summary?.rankings){return;}
+  const defs=[
+    ['overall','전체'],['denim','데님'],['pants','팬츠'],['slacks','슬랙스'],['skirt','스커트']
+  ];
+  grid.innerHTML=defs.map(([key,label])=>{
+    const rows=summary.rankings[key]||[];
+    const body=rows.length?rows.map((item,i)=>`<div class="ranking-item"><span class="ranking-no">${i+1}</span><span class="ranking-name" title="${esc(item.product)}">${esc(item.product)}</span><span class="ranking-qty">${formatNumber(item.qty)}</span></div>`).join(''):'<div class="ranking-empty">해당 상품 없음</div>';
+    return `<div class="ranking-card"><h4>${label} 판매순위</h4>${body}</div>`;
+  }).join('');
+  preview.classList.add('show');
+}
+
+async function readSalesCsv(file){
+  const rows=parseCsv(decodeCsv(await file.arrayBuffer()));
+  if(rows.length<2)throw new Error('판매자료 CSV에 데이터가 없습니다.');
+  const header=rows[0].map(normalizeText);
+  const categoryIndex=header.indexOf('상품분류');
+  const productIndex=header.indexOf('상품명');
+  const qtyIndex=header.indexOf('판매량');
+  const amountIndex=header.indexOf('판매금액');
+  if(productIndex<0||qtyIndex<0||amountIndex<0)throw new Error('CSV 1행에서 "상품명", "판매량", "판매금액" 열을 찾지 못했습니다.');
+  const last=rows[rows.length-1]||[];
+  if(normalizeText(last[0])!=='합계')throw new Error('CSV의 가장 아래 행에서 "합계"를 찾지 못했습니다.');
+
+  // 동일 상품명이 여러 행이면 판매량/판매금액을 합산합니다.
+  // 판매순위 카테고리는 아래 buildSalesRankings에서 상품명 단어만 기준으로 판별합니다.
+  const productSales=new Map();
+  for(let i=1;i<rows.length-1;i++){
+    const row=rows[i]||[];
+    const product=normalizeProduct(row[productIndex]);
+    if(!product)continue;
+    const qty=parseNumericOrZero(row[qtyIndex]);
+    const amount=parseNumericOrZero(row[amountIndex]);
+    const classification=categoryIndex>=0?normalizeText(row[categoryIndex]):'';
+    const prev=productSales.get(product)||{qty:0,amount:0,count:0,classifications:new Set()};
+    prev.qty+=qty;
+    prev.amount+=amount;
+    prev.count++;
+    if(classification)prev.classifications.add(classification);
+    productSales.set(product,prev);
+  }
+
+  const rankings=buildSalesRankings(productSales);
+  return {
+    qty:parseNumeric(last[qtyIndex],'판매량'),
+    amount:parseNumeric(last[amountIndex],'판매금액'),
+    categoryIndex,
+    productIndex,
+    qtyIndex,
+    amountIndex,
+    productSales,
+    rankings,
+    totalRow:rows.length
+  };
+}
+
+function formatWriteDate(value){
+  const s=normalizeText(value);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return '';
+  const [y,m,d]=s.split('-');
+  return `${y}.${m}.${d}`;
+}
+
+function setStatus(text,type=''){
+  const el=$('#status');
+  el.className='status'+(type?' '+type:'');
+  el.textContent=text;
+}
+
+function fileSizeText(bytes){
+  const n=Number(bytes||0);
+  if(n<1024)return `${n} B`;
+  if(n<1024*1024)return `${(n/1024).toFixed(1)} KB`;
+  return `${(n/1024/1024).toFixed(2)} MB`;
+}
+
+function setFileState(kind,text,state=''){
+  const isPlan=kind==='plan';
+  const zone=$(isPlan?'#dropZone':'#salesDropZone');
+  const stateEl=$(isPlan?'#planFileState':'#salesFileState');
+  if(zone){
+    zone.classList.remove('file-loading','file-success','file-error');
+    if(state==='loading')zone.classList.add('file-loading');
+    else if(state==='ok')zone.classList.add('file-success');
+    else if(state==='bad')zone.classList.add('file-error');
+  }
+  if(stateEl){
+    stateEl.className='file-state'+(state?' '+state:'');
+    stateEl.textContent=text;
+  }
+}
+
+function firstDroppedFile(dataTransfer){
+  if(!dataTransfer)return null;
+  if(dataTransfer.files&&dataTransfer.files.length)return dataTransfer.files[0];
+  if(dataTransfer.items){
+    for(const item of dataTransfer.items){
+      if(item.kind==='file'){
+        const f=item.getAsFile();
+        if(f)return f;
+      }
+    }
+  }
+  return null;
+}
+
+function droppedFiles(dataTransfer){
+  if(!dataTransfer)return [];
+  if(dataTransfer.files&&dataTransfer.files.length)return [...dataTransfer.files];
+  const out=[];
+  if(dataTransfer.items){
+    for(const item of dataTransfer.items){
+      if(item.kind!=='file')continue;
+      const f=item.getAsFile();
+      if(f)out.push(f);
+    }
+  }
+  return out;
+}
+
+function extraFileKey(file){
+  return `${file.name}__${file.size}__${file.lastModified}`;
+}
+
+function setExtraFileState(text,state=''){
+  const zone=$('#extraDropZone');
+  const el=$('#extraFileState');
+  if(zone){
+    zone.classList.remove('file-loading','file-success','file-error');
+    if(state==='loading')zone.classList.add('file-loading');
+    else if(state==='ok')zone.classList.add('file-success');
+    else if(state==='bad')zone.classList.add('file-error');
+  }
+  if(el){
+    el.className='file-state'+(state?' '+state:'');
+    el.textContent=text;
+  }
+}
+
+function extractReferenceProductRows(sheet,shared){
+  const out=[];
+  const max=getLastUsedRow(sheet.doc);
+  for(let r=1;r<=max;r++){
+    const product=normalizeProduct(getCellText(sheet.doc,`C${r}`,shared));
+    if(!isRealProduct(product) || product==='상품명' || product==='합계')continue;
+    if(!hasExactMerge(sheet.doc,`C${r}:E${r}`))continue;
+    const keywords={
+      fit:normalizeText(getCellText(sheet.doc,`F${r}`,shared)),
+      material:normalizeText(getCellText(sheet.doc,`H${r}`,shared)),
+      detail:normalizeText(getCellText(sheet.doc,`J${r}`,shared)),
+      feature:normalizeText(getCellText(sheet.doc,`L${r}`,shared))
+    };
+    if(!Object.values(keywords).some(Boolean))continue;
+    out.push({row:r,product,keywords});
+  }
+  return out;
+}
+
+function renderExtraFileList(){
+  const box=$('#extraFileList');
+  const clearBtn=$('#clearExtraBtn');
+  if(!box)return;
+  if(!extraKeywordFiles.length){
+    box.innerHTML='';
+    if(clearBtn)clearBtn.style.display='none';
+    setExtraFileState('추가 참고 파일은 선택사항입니다.');
+    return;
+  }
+  box.innerHTML=extraKeywordFiles.map((x,i)=>`
+    <div class="extra-file-item">
+      <div class="extra-file-main">
+        <span class="extra-file-dot"></span>
+        <span class="extra-file-name" title="${esc(x.file.name)}">${esc(x.file.name)}</span>
+        <span class="extra-file-meta">${x.productCount.toLocaleString()}개 키워드 상품</span>
+      </div>
+      <button type="button" class="extra-file-remove" data-extra-index="${i}">제거</button>
+    </div>
+  `).join('');
+  if(clearBtn)clearBtn.style.display='inline-flex';
+  const totalProducts=extraKeywordFiles.reduce((s,x)=>s+x.productCount,0);
+  setExtraFileState(`추가 참고 파일 ${extraKeywordFiles.length}개 첨부 완료 · 키워드 상품 ${totalProducts.toLocaleString()}건 검색 가능`,'ok');
+}
+
+async function handleExtraFiles(fileList){
+  const incoming=[...(fileList||[])].filter(f=>/\.xlsx$/i.test(f.name));
+  if(!incoming.length){
+    setExtraFileState('XLSX 파일만 추가 참고 파일로 사용할 수 있습니다.','bad');
+    return;
+  }
+  const existing=new Set(extraKeywordFiles.map(x=>x.key));
+  const fresh=incoming.filter(f=>!existing.has(extraFileKey(f)));
+  if(!fresh.length){
+    setExtraFileState('이미 첨부한 파일입니다. 다른 XLSX 파일을 추가해주세요.','bad');
+    return;
+  }
+
+  setExtraFileState(`추가 참고 파일 ${fresh.length}개를 읽고 있습니다...`,'loading');
+  let success=0;
+  const failures=[];
+  for(let i=0;i<fresh.length;i++){
+    const file=fresh[i];
+    try{
+      const ctx=await loadWorkbook(file);
+      let productCount=0;
+      for(const sheet of ctx.sheets)productCount+=extractReferenceProductRows(sheet,ctx.shared).length;
+      extraKeywordFiles.push({file,ctx,key:extraFileKey(file),productCount});
+      success++;
+    }catch(e){
+      console.error(e);
+      failures.push(`${file.name}: ${e.message||String(e)}`);
+    }
+    if(i%2===1)await new Promise(resolve=>setTimeout(resolve,0));
+  }
+  renderExtraFileList();
+  processedZip=null;
+  $('#downloadBtn').disabled=true;
+  if(success){
+    setStatus(`추가 키워드 참고 XLSX ${success}개를 첨부했습니다. 기존 월 탭에서 미매칭된 상품에만 보조 검색으로 사용합니다.${failures.length?` · 읽지 못한 파일 ${failures.length}개`:''}`,'ok');
+  }else{
+    setExtraFileState(`추가 파일을 읽지 못했습니다 · ${failures[0]||'파일 구조를 확인해주세요.'}`,'bad');
+    setStatus(failures.join(' / ')||'추가 참고 파일을 읽지 못했습니다.','bad');
+  }
+}
+
+function buildMonthButtons(){
+  const box=$('#monthGrid');
+  box.innerHTML=Array.from({length:12},(_,i)=>{
+    const m=i+1;
+    return `<div><input type="radio" name="month" id="m${m}" value="${m}"><label for="m${m}">${m}월</label></div>`;
+  }).join('');
+  box.addEventListener('change',e=>{
+    if(e.target.name!=='month')return;
+    selectedMonth=e.target.value;
+    sourceFile=null;salesFile=null;salesSummary=null;loadedContext=null;processedZip=null;resultRows=[];extraKeywordFiles=[];
+    $('#filePill').style.display='none';
+    $('#fileInput').value='';
+    $('#salesFileInput').value='';
+    $('#salesFilePill').style.display='none';
+    $('#extraFileInput').value='';
+    renderExtraFileList();
+    setFileState('plan','파일 선택 또는 드래그앤드롭이 가능합니다.');
+    setFileState('sales','아직 첨부된 파일이 없습니다.');
+    $('#salesDetected').style.display='none';
+    $('#rankingPreview')?.classList.remove('show');$('#rankingGrid').innerHTML='';
+    $('#detectedProducts').textContent='-';
+    $('#sheetInfo').innerHTML='';
+    $('#dropZone').classList.remove('disabled');
+    $('#dropZone').setAttribute('aria-disabled','false');
+    $('#fileInput').disabled=false;
+    updateRunReady();
+    $('#resetBtn').disabled=false;
+    $('#downloadBtn').disabled=true;
+    $('#resultPanel').classList.remove('show');
+    setStatus(`${selectedMonth}월을 작성 대상으로 선택했습니다. 이제 사업계획서 XLSX 파일을 첨부해주세요.`,'ok');
+  });
+}
+
+async function ensureJSZip(){
+  if(typeof JSZip!=='undefined')return;
+  throw new Error('엑셀 처리 라이브러리를 불러오지 못했습니다. 인터넷 연결 후 이 페이지를 다시 열어주세요.');
+}
+
+function xml(text,label){
+  const doc=new DOMParser().parseFromString(text,'application/xml');
+  const err=doc.getElementsByTagName('parsererror')[0];
+  if(err)throw new Error(`${label} XML을 읽지 못했습니다.`);
+  return doc;
+}
+
+function resolveTargetPath(target){
+  let t=String(target||'').replace(/\\/g,'/');
+  if(t.startsWith('/'))t=t.slice(1);
+  if(t.startsWith('xl/'))return t;
+  while(t.startsWith('../'))t=t.slice(3);
+  return 'xl/'+t;
+}
+
+function parseSharedStrings(doc){
+  if(!doc)return [];
+  return [...doc.getElementsByTagNameNS(NS_MAIN,'si')].map(si=>
+    [...si.getElementsByTagNameNS(NS_MAIN,'t')].map(t=>t.textContent||'').join('')
+  );
+}
+
+function cellRefCol(ref){return String(ref||'').replace(/\d+/g,'').toUpperCase();}
+function colNumber(col){let n=0;for(const ch of col){n=n*26+(ch.charCodeAt(0)-64);}return n;}
+
+function getCell(doc,ref){
+  const cells=doc.getElementsByTagNameNS(NS_MAIN,'c');
+  for(const c of cells){if(c.getAttribute('r')===ref)return c;}
+  return null;
+}
+
+function getCellText(doc,ref,shared){
+  const c=getCell(doc,ref);
+  if(!c)return '';
+  const type=c.getAttribute('t')||'';
+  if(type==='inlineStr')return [...c.getElementsByTagNameNS(NS_MAIN,'t')].map(x=>x.textContent||'').join('');
+  const v=c.getElementsByTagNameNS(NS_MAIN,'v')[0];
+  if(!v)return '';
+  const raw=v.textContent||'';
+  if(type==='s')return shared[Number(raw)]??'';
+  if(type==='b')return raw==='1'?'TRUE':'FALSE';
+  return raw;
+}
+
+function findOrCreateRow(doc,rowNo){
+  const sheetData=doc.getElementsByTagNameNS(NS_MAIN,'sheetData')[0];
+  if(!sheetData)throw new Error('워크시트의 sheetData를 찾을 수 없습니다.');
+  const rows=[...sheetData.getElementsByTagNameNS(NS_MAIN,'row')];
+  let row=rows.find(r=>Number(r.getAttribute('r'))===rowNo);
+  if(row)return row;
+  row=doc.createElementNS(NS_MAIN,'row');
+  row.setAttribute('r',String(rowNo));
+  const next=rows.find(r=>Number(r.getAttribute('r'))>rowNo);
+  if(next)sheetData.insertBefore(row,next); else sheetData.appendChild(row);
+  return row;
+}
+
+function nearestStyleFor(doc,ref){
+  const col=cellRefCol(ref); const row=Number(String(ref).replace(/\D+/g,''));
+  const same=getCell(doc,ref); if(same?.hasAttribute('s'))return same.getAttribute('s');
+  for(let d=1;d<=10;d++){
+    for(const rr of [row-d,row+d]){
+      if(rr<1)continue;
+      const c=getCell(doc,`${col}${rr}`);
+      if(c?.hasAttribute('s'))return c.getAttribute('s');
+    }
+  }
+  return '';
+}
+
+function findOrCreateCell(doc,ref){
+  let c=getCell(doc,ref);
+  if(c)return c;
+  const rowNo=Number(String(ref).replace(/\D+/g,''));
+  const row=findOrCreateRow(doc,rowNo);
+  c=doc.createElementNS(NS_MAIN,'c');
+  c.setAttribute('r',ref);
+  const style=nearestStyleFor(doc,ref);
+  if(style)c.setAttribute('s',style);
+  const targetCol=colNumber(cellRefCol(ref));
+  const existing=[...row.children].filter(x=>x.localName==='c');
+  const next=existing.find(x=>colNumber(cellRefCol(x.getAttribute('r')))>targetCol);
+  if(next)row.insertBefore(c,next); else row.appendChild(c);
+  return c;
+}
+
+function cellHasFormula(doc,ref){
+  const c=getCell(doc,ref);
+  return !!(c&&c.getElementsByTagNameNS(NS_MAIN,'f').length);
+}
+
+function hasExactMerge(doc,mergeRef){
+  const mergeCells=doc.getElementsByTagNameNS(NS_MAIN,'mergeCell');
+  return [...mergeCells].some(m=>normalizeText(m.getAttribute('ref')).toUpperCase()===mergeRef.toUpperCase());
+}
+
+function ensureCoreMerges(doc){
+  const required=['E16:J16','E17:J17','T5:U5','T6:U6','T7:U7'];
+  const missing=required.filter(ref=>!hasExactMerge(doc,ref));
+  if(missing.length)throw new Error(`작성 대상 탭의 필수 병합셀 구조가 다릅니다: ${missing.join(', ')}`);
+}
+
+function setCellText(doc,ref,value){
+  if(cellHasFormula(doc,ref))return false;
+  const c=findOrCreateCell(doc,ref);
+  const style=c.getAttribute('s');
+  while(c.firstChild)c.removeChild(c.firstChild);
+  [...c.attributes].forEach(a=>{if(!['r','s'].includes(a.name))c.removeAttribute(a.name);});
+  if(style)c.setAttribute('s',style);
+  c.setAttribute('t','inlineStr');
+  const is=doc.createElementNS(NS_MAIN,'is');
+  const t=doc.createElementNS(NS_MAIN,'t');
+  t.setAttributeNS('http://www.w3.org/XML/1998/namespace','xml:space','preserve');
+  t.textContent=String(value??'');
+  is.appendChild(t); c.appendChild(is);
+  return true;
+}
+
+function setCellNumber(doc,ref,value){
+  if(cellHasFormula(doc,ref))return false;
+  const n=Number(value);
+  if(!Number.isFinite(n))throw new Error(`${ref}에 입력할 숫자가 올바르지 않습니다.`);
+  const c=findOrCreateCell(doc,ref);
+  const style=c.getAttribute('s');
+  while(c.firstChild)c.removeChild(c.firstChild);
+  [...c.attributes].forEach(a=>{if(!['r','s'].includes(a.name))c.removeAttribute(a.name);});
+  if(style)c.setAttribute('s',style);
+  const v=doc.createElementNS(NS_MAIN,'v');
+  v.textContent=String(n);
+  c.appendChild(v);
+  return true;
+}
+
+
+function getMaxCfPriority(doc){
+  let max=0;
+  for(const rule of doc.getElementsByTagNameNS(NS_MAIN,'cfRule')){
+    const p=Number(rule.getAttribute('priority'))||0;
+    if(p>max)max=p;
+  }
+  return max;
+}
+
+function insertConditionalFormatting(doc,cf){
+  const worksheet=doc.documentElement;
+  const laterNames=new Set([
+    'dataValidations','hyperlinks','printOptions','pageMargins','pageSetup','headerFooter',
+    'rowBreaks','colBreaks','customProperties','cellWatches','ignoredErrors','smartTags',
+    'drawing','legacyDrawing','legacyDrawingHF','picture','oleObjects','controls','webPublishItems',
+    'tableParts','extLst'
+  ]);
+  const children=[...worksheet.children];
+  const next=children.find(x=>laterNames.has(x.localName));
+  if(next)worksheet.insertBefore(cf,next); else worksheet.appendChild(cf);
+}
+
+function addBlankYellowConditionalFormatting(doc,row,dxfId,priorityStart){
+  const pairs=[['F','G'],['H','I'],['J','K'],['L','M']];
+  let priority=priorityStart;
+  for(const [startCol,endCol] of pairs){
+    const cf=doc.createElementNS(NS_MAIN,'conditionalFormatting');
+    cf.setAttribute('sqref',`${startCol}${row}:${endCol}${row}`);
+    const rule=doc.createElementNS(NS_MAIN,'cfRule');
+    rule.setAttribute('type','expression');
+    rule.setAttribute('dxfId',String(dxfId));
+    rule.setAttribute('priority',String(priority++));
+    const formula=doc.createElementNS(NS_MAIN,'formula');
+    formula.textContent=`LEN(TRIM($${startCol}${row}))=0`;
+    rule.appendChild(formula);
+    cf.appendChild(rule);
+    insertConditionalFormatting(doc,cf);
+  }
+  return priority;
+}
+
+async function prepareYellowBlankDxf(zip){
+  const stylesPath='xl/styles.xml';
+  const stylesText=await zip.file(stylesPath)?.async('string');
+  if(!stylesText)throw new Error('엑셀 styles.xml을 찾지 못해 미매칭 키워드 안내색을 적용할 수 없습니다.');
+  const stylesDoc=xml(stylesText,'styles');
+
+  let dxfs=stylesDoc.getElementsByTagNameNS(NS_MAIN,'dxfs')[0];
+  if(!dxfs){
+    dxfs=stylesDoc.createElementNS(NS_MAIN,'dxfs');
+    dxfs.setAttribute('count','0');
+    const root=stylesDoc.documentElement;
+    const before=[...root.children].find(x=>['tableStyles','colors','extLst'].includes(x.localName));
+    if(before)root.insertBefore(dxfs,before); else root.appendChild(dxfs);
+  }
+
+  // 이미 동일한 노란색 dxf가 있으면 재사용합니다.
+  const existing=[...dxfs.children].filter(x=>x.localName==='dxf');
+  for(let i=0;i<existing.length;i++){
+    const fg=[...existing[i].getElementsByTagNameNS(NS_MAIN,'fgColor')][0];
+    const rgb=(fg?.getAttribute('rgb')||'').toUpperCase();
+    if(rgb==='FFFFFF00' || rgb==='FFFF00')return {stylesPath,stylesSerialized:null,dxfId:i};
+  }
+
+  const dxf=stylesDoc.createElementNS(NS_MAIN,'dxf');
+  const fill=stylesDoc.createElementNS(NS_MAIN,'fill');
+  const patternFill=stylesDoc.createElementNS(NS_MAIN,'patternFill');
+  patternFill.setAttribute('patternType','solid');
+  const fg=stylesDoc.createElementNS(NS_MAIN,'fgColor');
+  fg.setAttribute('rgb','FFFFFF00');
+  const bg=stylesDoc.createElementNS(NS_MAIN,'bgColor');
+  bg.setAttribute('indexed','64');
+  patternFill.appendChild(fg);patternFill.appendChild(bg);fill.appendChild(patternFill);dxf.appendChild(fill);
+  dxfs.appendChild(dxf);
+  const dxfId=existing.length;
+  dxfs.setAttribute('count',String(dxfId+1));
+  return {stylesPath,stylesSerialized:new XMLSerializer().serializeToString(stylesDoc),dxfId};
+}
+
+function getLastUsedRow(doc){
+  let max=0;
+  for(const row of doc.getElementsByTagNameNS(NS_MAIN,'row'))max=Math.max(max,Number(row.getAttribute('r'))||0);
+  return max;
+}
+
+function extractProductRows(sheet,shared){
+  const out=[];
+  const max=getLastUsedRow(sheet.doc);
+  for(let r=1;r<=max;r++){
+    const rank=getCellText(sheet.doc,`B${r}`,shared);
+    if(!isRealRank(rank))continue;
+    const product=normalizeProduct(getCellText(sheet.doc,`C${r}`,shared));
+    if(!isRealProduct(product))continue;
+    out.push({
+      row:r,
+      product,
+      keywords:{
+        fit:normalizeText(getCellText(sheet.doc,`F${r}`,shared)),
+        material:normalizeText(getCellText(sheet.doc,`H${r}`,shared)),
+        detail:normalizeText(getCellText(sheet.doc,`J${r}`,shared)),
+        feature:normalizeText(getCellText(sheet.doc,`L${r}`,shared))
+      }
+    });
+  }
+  return out;
+}
+
+function candidateComparator(targetIndex){
+  return (a,b)=>{
+    const ap=a.sheetIndex<targetIndex, bp=b.sheetIndex<targetIndex;
+    if(ap!==bp)return ap?-1:1;
+    if(ap)return b.sheetIndex-a.sheetIndex; // 가까운 이전 탭 우선
+    return a.sheetIndex-b.sheetIndex;       // 이전이 없으면 가까운 다음 탭 우선
+  };
+}
+
+function canonicalKeyword(v){
+  const s=normalizeText(v);
+  if(!s)return '';
+  const parts=s.split(',').map(normalizeText).filter(Boolean);
+  return parts.length>1?[...new Set(parts)].sort((a,b)=>a.localeCompare(b,'ko')).join(','):s;
+}
+
+function resolveKeywords(candidates,targetIndex){
+  const sorted=[...candidates].sort(candidateComparator(targetIndex));
+  const fields=['fit','material','detail','feature'];
+  const values={fit:'',material:'',detail:'',feature:''};
+  const fieldSource={};
+  const conflictFields=[];
+  for(const f of fields){
+    const uniques=[...new Set(sorted.map(x=>canonicalKeyword(x.keywords[f])).filter(Boolean))];
+    if(uniques.length>1)conflictFields.push(f);
+    const hit=sorted.find(x=>normalizeText(x.keywords[f]));
+    if(hit){values[f]=normalizeText(hit.keywords[f]);fieldSource[f]=hit.sheetName;}
+  }
+  return {values,fieldSource,conflictFields,sorted};
+}
+
+async function loadWorkbook(file){
+  await ensureJSZip();
+  const zip=await JSZip.loadAsync(await file.arrayBuffer());
+  const workbookText=await zip.file('xl/workbook.xml')?.async('string');
+  const relText=await zip.file('xl/_rels/workbook.xml.rels')?.async('string');
+  if(!workbookText||!relText)throw new Error('정상적인 XLSX 사업계획서 파일이 아닙니다.');
+  const workbookDoc=xml(workbookText,'workbook');
+  const relDoc=xml(relText,'workbook relationships');
+  const relMap=new Map();
+  for(const rel of relDoc.getElementsByTagNameNS(NS_PKG_REL,'Relationship')){
+    relMap.set(rel.getAttribute('Id'),resolveTargetPath(rel.getAttribute('Target')));
+  }
+  let shared=[];
+  const sharedFile=zip.file('xl/sharedStrings.xml');
+  if(sharedFile)shared=parseSharedStrings(xml(await sharedFile.async('string'),'sharedStrings'));
+
+  const sheets=[];
+  const sheetNodes=[...workbookDoc.getElementsByTagNameNS(NS_MAIN,'sheet')];
+  for(let i=0;i<sheetNodes.length;i++){
+    const node=sheetNodes[i];
+    const name=node.getAttribute('name')||`Sheet${i+1}`;
+    const rid=node.getAttributeNS(NS_REL,'id')||node.getAttribute('r:id');
+    const path=relMap.get(rid);
+    if(!path||!zip.file(path))continue;
+    const text=await zip.file(path).async('string');
+    sheets.push({index:i,name,path,doc:xml(text,name)});
+  }
+  return {zip,shared,sheets};
+}
+
+function findTargetSheet(ctx){
+  const targetName=`${selectedMonth}월`;
+  return ctx.sheets.find(s=>normalizeText(s.name)===targetName)||null;
+}
+
+function renderSheetInfo(ctx,target){
+  $('#sheetInfo').innerHTML=ctx.sheets.map((s,i)=>{
+    const cls=s===target?'sheet-chip target':'sheet-chip';
+    const suffix=i<2?' · 제외':(s===target?' · 작성대상':'');
+    return `<span class="${cls}">${esc(s.name)}${suffix}</span>`;
+  }).join('');
+}
+
+async function handleFile(file){
+  if(!selectedMonth){
+    setFileState('plan','먼저 작성할 달을 선택해주세요.','bad');
+    setStatus('작성할 달을 먼저 선택해주세요.','warn');
+    return;
+  }
+  if(!file||!/\.xlsx$/i.test(file.name)){
+    setFileState('plan','XLSX 파일만 첨부할 수 있습니다.','bad');
+    setStatus('XLSX 형식의 사업계획서 파일만 첨부할 수 있습니다.','bad');
+    return;
+  }
+  $('#filePill').style.display='inline-flex';
+  $('#filePill').textContent=`선택됨 · ${file.name} · ${fileSizeText(file.size)}`;
+  setFileState('plan',`파일 확인 중 · ${file.name}`,'loading');
+  setStatus(`사업계획서 파일을 선택했습니다. '${file.name}'의 탭 구조를 확인하고 있습니다...`);
+  try{
+    const ctx=await loadWorkbook(file);
+    if(ctx.sheets.length<3)throw new Error('첫 두 탭을 제외한 월별 탭이 없습니다.');
+    const target=findTargetSheet(ctx);
+    if(!target)throw new Error(`${selectedMonth}월 탭을 찾지 못했습니다. 파일에 '${selectedMonth}월' 시트를 먼저 생성해주세요.`);
+    if(target.index<2)throw new Error(`${selectedMonth}월 탭이 첫 번째 또는 두 번째 탭에 있어 처리 대상 구조와 맞지 않습니다.`);
+    sourceFile=file;loadedContext=ctx;processedZip=null;resultRows=[];
+    $('#filePill').style.display='inline-flex';
+    $('#filePill').textContent=`첨부 완료 · ${file.name} · ${fileSizeText(file.size)}`;
+    setFileState('plan',`첨부 완료 · ${target.name} 탭 확인됨`,'ok');
+    renderSheetInfo(ctx,target);
+    updateRunReady();$('#resetBtn').disabled=false;$('#downloadBtn').disabled=true;
+    setStatus(`${file.name} 첨부 완료. '${target.name}' 탭까지 정상 확인했습니다. 다음으로 판매자료 CSV와 작성정보를 입력해주세요.`,'ok');
+  }catch(e){
+    console.error(e);sourceFile=null;loadedContext=null;updateRunReady();$('#downloadBtn').disabled=true;
+    setFileState('plan',`파일은 선택됐지만 읽지 못했습니다 · ${e.message||String(e)}`,'bad');
+    setStatus(e.message||String(e),'bad');
+  }
+}
+
+function getReadiness(){
+  const dateOk=!!formatWriteDate($('#writeDate')?.value||'');
+  const departmentOk=!!normalizeText($('#department')?.value||'');
+  const managerOk=!!normalizeText($('#managerName')?.value||'');
+  return [
+    {key:'month',label:'작성 월',ok:!!selectedMonth},
+    {key:'plan',label:'사업계획서',ok:!!(loadedContext&&sourceFile)},
+    {key:'sales',label:'판매자료 CSV',ok:!!(salesSummary&&salesFile)},
+    {key:'date',label:'작성일',ok:dateOk},
+    {key:'department',label:'부서',ok:departmentOk},
+    {key:'manager',label:'담당자',ok:managerOk}
+  ];
+}
+
+function updateRunReady(){
+  const states=getReadiness();
+  const list=$('#readyList');
+  if(list){
+    list.innerHTML=states.map(x=>`<span class="ready-chip ${x.ok?'ok':'bad'}">${x.ok?'완료':'필요'} · ${esc(x.label)}</span>`).join('');
+  }
+  const missing=states.filter(x=>!x.ok).map(x=>x.label);
+  const help=$('#runHelp');
+  if(help){
+    help.textContent=missing.length
+      ? `아직 필요한 항목: ${missing.join(' · ')}. 실행 버튼을 눌러도 부족한 항목을 바로 안내합니다.`
+      : '모든 필수 항목이 준비되었습니다. 자동 입력 실행을 눌러주세요.';
+  }
+  const btn=$('#runBtn');
+  if(btn){
+    btn.disabled=!!isRunning;
+    btn.classList.toggle('running',!!isRunning);
+    btn.textContent=isRunning?'처리 중...':'자동 입력 실행';
+  }
+  return {states,missing,ready:missing.length===0};
+}
+
+function validateBeforeRun(){
+  const info=updateRunReady();
+  if(info.ready)return true;
+  const missingText=info.missing.join(', ');
+  setStatus(`자동 입력을 실행할 수 없습니다. 다음 항목을 확인해주세요: ${missingText}.`,'bad');
+  return false;
+}
+
+async function handleSalesFile(file){
+  if(!file||!/\.csv$/i.test(file.name)){
+    setFileState('sales','CSV 파일만 첨부할 수 있습니다.','bad');
+    setStatus('CSV 형식의 판매자료 파일만 첨부할 수 있습니다.','bad');
+    return;
+  }
+  $('#salesFilePill').style.display='inline-flex';
+  $('#salesFilePill').textContent=`선택됨 · ${file.name} · ${fileSizeText(file.size)}`;
+  setFileState('sales',`파일 확인 중 · ${file.name}`,'loading');
+  try{
+    setStatus('판매자료 CSV의 합계 판매량·판매금액을 확인하고 있습니다...');
+    const summary=await readSalesCsv(file);
+    salesFile=file;salesSummary=summary;processedZip=null;
+    $('#salesFilePill').style.display='inline-flex';
+    $('#salesFilePill').textContent=`첨부 완료 · ${file.name} · ${fileSizeText(file.size)}`;
+    setFileState('sales','첨부 완료 · 판매량/판매금액/상품별 실적 확인됨','ok');
+    $('#salesDetected').style.display='grid';
+    $('#detectedQty').textContent=formatNumber(summary.qty);
+    $('#detectedAmount').textContent=formatNumber(summary.amount);
+    $('#detectedProducts').textContent=`${summary.productSales.size.toLocaleString()}개`;
+    renderSalesRankings(summary);
+    $('#downloadBtn').disabled=true;$('#resetBtn').disabled=false;
+    updateRunReady();
+    setStatus(`CSV 확인 완료: 합계 판매량 ${formatNumber(summary.qty)}, 판매금액 ${formatNumber(summary.amount)}원 · 상품별 판매실적 ${summary.productSales.size.toLocaleString()}개 인식 · 전체/데님/팬츠/슬랙스/스커트 TOP5 판매순위를 준비했습니다.`,'ok');
+  }catch(e){
+    console.error(e);salesFile=null;salesSummary=null;$('#salesDetected').style.display='none';$('#rankingPreview')?.classList.remove('show');$('#rankingGrid').innerHTML='';updateRunReady();
+    setFileState('sales',`파일은 선택됐지만 읽지 못했습니다 · ${e.message||String(e)}`,'bad');
+    setStatus(e.message||String(e),'bad');
+  }
+}
+
+
+const RANKING_SECTIONS=[
+  {key:'overall',label:'전체',title:'2. 판매순위',fallback:[24,25,26,27,28]},
+  {key:'denim',label:'데님',title:'1) 데님',fallback:[37,38,39,40,41]},
+  {key:'pants',label:'팬츠',title:'2) 팬츠',fallback:[48,49,50,51,52]},
+  {key:'slacks',label:'슬랙스',title:'3) 슬랙스',fallback:[59,60,61,62,63]},
+  {key:'skirt',label:'스커트',title:'4) 스커트',fallback:[70,71,72,73,74]}
+];
+
+function findSectionRow(doc,shared,title){
+  const wanted=normalizeText(title);
+  const max=getLastUsedRow(doc);
+  for(let r=1;r<=max;r++){
+    for(const col of ['B','C']){
+      const v=normalizeText(getCellText(doc,`${col}${r}`,shared));
+      if(v===wanted)return r;
+    }
+  }
+  return 0;
+}
+
+function resolveRankingRows(doc,shared,section){
+  const titleRow=findSectionRow(doc,shared,section.title);
+  if(titleRow){
+    const byRank=new Map();
+    const max=Math.min(getLastUsedRow(doc),titleRow+16);
+    for(let r=titleRow+1;r<=max;r++){
+      const rank=normalizeText(getCellText(doc,`B${r}`,shared));
+      if(/^[1-5]$/.test(rank) && hasExactMerge(doc,`C${r}:E${r}`))byRank.set(Number(rank),r);
+      if(byRank.size===5)break;
+    }
+    if(byRank.size===5)return [1,2,3,4,5].map(n=>byRank.get(n));
+  }
+  // 현재 2026 사업계획서 양식의 고정 위치를 fallback으로 사용합니다.
+  if(section.fallback.every(r=>hasExactMerge(doc,`C${r}:E${r}`)))return [...section.fallback];
+  throw new Error(`${section.label} 판매순위 1~5위의 C:E 병합셀 위치를 찾지 못했습니다.`);
+}
+
+function clearRankDependentCells(doc,row){
+  // 상품명이 바뀌면 이전 상품의 키워드/판매실적이 남지 않도록 값만 비웁니다.
+  // 스타일/병합은 건드리지 않으며 수식이 있는 셀은 절대 수정하지 않습니다.
+  for(const col of ['F','H','J','L','N','T']){
+    const ref=`${col}${row}`;
+    if(cellHasFormula(doc,ref))continue;
+    setCellText(doc,ref,'');
+  }
+}
+
+function writeSalesRankingProducts(doc,shared,rankings){
+  const changedRows=new Set();
+  const written=[];
+  for(const section of RANKING_SECTIONS){
+    const rows=resolveRankingRows(doc,shared,section);
+    const items=rankings?.[section.key]||[];
+    rows.forEach((row,idx)=>{
+      // 29행은 사용자가 별도로 보호 요청한 수식행이므로 어떠한 경우에도 수정하지 않습니다.
+      if(row===29)return;
+      const mergeRef=`C${row}:E${row}`;
+      if(!hasExactMerge(doc,mergeRef))throw new Error(`${mergeRef} 병합 구조가 없어 ${section.label} 판매순위를 입력할 수 없습니다.`);
+      const nextProduct=normalizeProduct(items[idx]?.product||'');
+      const currentProduct=normalizeProduct(getCellText(doc,`C${row}`,shared));
+      if(currentProduct!==nextProduct){
+        if(cellHasFormula(doc,`C${row}`))throw new Error(`C${row}:E${row} 상품명 셀에 수식이 있어 판매순위를 덮어쓸 수 없습니다.`);
+        clearRankDependentCells(doc,row);
+        setCellText(doc,`C${row}`,nextProduct);
+        changedRows.add(row);
+      }
+      written.push({section:section.label,rank:idx+1,row,product:nextProduct,qty:items[idx]?.qty||0});
+    });
+  }
+  return {changedRows,written};
+}
+
+function getWriteMeta(){
+  const date=formatWriteDate($('#writeDate').value);
+  const department=normalizeText($('#department').value);
+  const manager=normalizeText($('#managerName').value);
+  if(!date)throw new Error('작성일을 선택해주세요.');
+  if(!department)throw new Error('부서를 입력해주세요.');
+  if(!manager)throw new Error('담당자를 입력해주세요.');
+  return {date,department,manager};
+}
+
+function writeFixedInputs(targetDoc){
+  if(!salesSummary)throw new Error('판매자료 CSV를 먼저 첨부해주세요.');
+  const meta=getWriteMeta();
+  ensureCoreMerges(targetDoc);
+  const protectedRefs=[];
+  if(!setCellNumber(targetDoc,'E16',salesSummary.qty))protectedRefs.push('E16:J16');
+  if(!setCellNumber(targetDoc,'E17',salesSummary.amount))protectedRefs.push('E17:J17');
+  if(!setCellText(targetDoc,'T5',meta.date))protectedRefs.push('T5:U5');
+  if(!setCellText(targetDoc,'T6',meta.department))protectedRefs.push('T6:U6');
+  if(!setCellText(targetDoc,'T7',meta.manager))protectedRefs.push('T7:U7');
+  if(protectedRefs.length)throw new Error(`다음 입력 대상 셀에 기존 수식이 있어 원본 수식 보호를 위해 중단했습니다: ${protectedRefs.join(', ')}`);
+  return meta;
+}
+
+async function runCopy(){
+  if(isRunning)return;
+  if(!validateBeforeRun())return;
+  isRunning=true;
+  updateRunReady();
+  try{
+    setStatus('자동 입력을 시작했습니다. 상품명과 기존 키워드 이력을 비교하고 있습니다...');
+    // 브라우저가 "처리 중" 상태를 먼저 화면에 그릴 시간을 줍니다.
+    await new Promise(resolve=>setTimeout(resolve,30));
+    const ctx=loadedContext;
+    const target=findTargetSheet(ctx);
+    if(!target)throw new Error('작성 대상 월 탭을 다시 찾지 못했습니다.');
+
+    // 실행 중 오류가 나더라도 원본으로 읽어둔 XML 객체에는 일부 입력값이 남지 않도록
+    // 작성 대상 시트를 복제한 뒤 복제본에만 값을 입력합니다.
+    const workingDoc=xml(new XMLSerializer().serializeToString(target.doc),`${target.name} 작업복사본`);
+    const meta=writeFixedInputs(workingDoc);
+    const sourceSheets=ctx.sheets.filter(s=>s.index>=2&&s!==target);
+    if(!sourceSheets.length)throw new Error('키워드를 참조할 다른 월 탭이 없습니다.');
+
+    // 판매자료의 판매량 TOP5를 먼저 작성 월의 상품명 C:E 병합셀에 입력합니다.
+    // 그 다음 새로 입력된 상품명을 기준으로 기존 월 키워드와 판매실적을 연결합니다.
+    const rankingWrite=writeSalesRankingProducts(workingDoc,ctx.shared,salesSummary.rankings);
+
+    const sourceMap=new Map();
+    for(let sheetIdx=0;sheetIdx<sourceSheets.length;sheetIdx++){
+      const sheet=sourceSheets[sheetIdx];
+      for(const item of extractProductRows(sheet,ctx.shared)){
+        const key=normalizeProduct(item.product);
+        if(!sourceMap.has(key))sourceMap.set(key,[]);
+        sourceMap.get(key).push({...item,sheetName:sheet.name,sheetIndex:sheet.index});
+      }
+      // 시트가 많은 파일에서도 화면이 멈춘 것처럼 보이지 않도록 가끔 UI에 제어권을 돌려줍니다.
+      if(sheetIdx%2===1)await new Promise(resolve=>setTimeout(resolve,0));
+    }
+
+    // 추가 참고 XLSX는 기존 월 탭에 상품명이 아예 없을 때만 사용하는 fallback 원본입니다.
+    // 첨부 순서가 빠른 파일 → 그 파일 안의 앞쪽 시트 순으로 우선 사용합니다.
+    const extraSourceMap=new Map();
+    for(let fileIdx=0;fileIdx<extraKeywordFiles.length;fileIdx++){
+      const extra=extraKeywordFiles[fileIdx];
+      for(let sheetIdx=0;sheetIdx<extra.ctx.sheets.length;sheetIdx++){
+        const sheet=extra.ctx.sheets[sheetIdx];
+        for(const item of extractReferenceProductRows(sheet,extra.ctx.shared)){
+          const key=normalizeProduct(item.product);
+          if(!extraSourceMap.has(key))extraSourceMap.set(key,[]);
+          extraSourceMap.get(key).push({
+            ...item,
+            sheetName:`${extra.file.name} › ${sheet.name}`,
+            sheetIndex:100000+(fileIdx*1000)+sheetIdx,
+            isExtra:true
+          });
+        }
+      }
+      if(fileIdx%2===1)await new Promise(resolve=>setTimeout(resolve,0));
+    }
+
+    const targetRows=extractProductRows({doc:workingDoc},ctx.shared);
+    if(!targetRows.length)throw new Error(`${target.name} 탭에서 B열 순위 + C:E 상품명 구조의 상품 행을 찾지 못했습니다.`);
+    const grouped=new Map();
+    for(const tr of targetRows){
+      if(!grouped.has(tr.product))grouped.set(tr.product,[]);
+      grouped.get(tr.product).push(tr);
+    }
+
+    const reports=[];
+    let filledRowCount=0;
+    let unmatchedCount=0;
+    let conflictCount=0;
+    const protectedKeywordCells=[];
+    const protectedSalesCells=[];
+    const salesMergeIssues=[];
+    let salesFilledRows=0;
+    let salesUnmatchedRows=0;
+    const unmatchedKeywordRows=[];
+    const writeFields={fit:'F',material:'H',detail:'J',feature:'L'};
+
+    let extraMatchedProducts=0;
+    for(const [product,locations] of grouped){
+      const primaryCandidates=sourceMap.get(product)||[];
+      const fallbackCandidates=primaryCandidates.length?[]:(extraSourceMap.get(product)||[]);
+      const usedExtra=primaryCandidates.length===0 && fallbackCandidates.length>0;
+      const candidates=primaryCandidates.length?primaryCandidates:fallbackCandidates;
+      const resolved=resolveKeywords(candidates,usedExtra?-1:target.index);
+      const hasAny=Object.values(resolved.values).some(Boolean);
+      const productNotFoundInOtherTabs=primaryCandidates.length===0 && fallbackCandidates.length===0;
+      if(usedExtra&&hasAny)extraMatchedProducts++;
+      if(!hasAny)unmatchedCount++;
+      if(resolved.conflictFields.length)conflictCount++;
+      let productFilledRows=0;
+
+      for(const loc of locations){
+        // 29행은 원본 수식 보호행: 키워드/판매실적을 포함해 어떤 셀도 수정하지 않습니다.
+        if(loc.row===29)continue;
+
+        // 상품명이 다른 월 탭 어디에도 존재하지 않는 경우, 다운로드 엑셀에서
+        // 비어 있는 키워드 병합셀(F:G / H:I / J:K / L:M)을 노란색으로 안내합니다.
+        // 조건부서식이므로 사용자가 값을 입력하거나 붙여넣으면 원래 서식으로 자동 복귀합니다.
+        if(productNotFoundInOtherTabs)unmatchedKeywordRows.push(loc.row);
+
+        let rowChanged=false;
+        for(const [field,col] of Object.entries(writeFields)){
+          const newValue=resolved.values[field];
+          if(!newValue)continue;
+          const current=normalizeText(getCellText(workingDoc,`${col}${loc.row}`,ctx.shared));
+          if(!current){
+            if(current!==newValue){
+              const wrote=setCellText(workingDoc,`${col}${loc.row}`,newValue);
+              if(wrote)rowChanged=true; else protectedKeywordCells.push(`${col}${loc.row}`);
+            }
+          }
+        }
+        if(rowChanged){filledRowCount++;productFilledRows++;}
+
+        // CSV 상품명과 C:E 상품명이 정확히 일치하면 N:O=판매량, T:U=판매금액 입력.
+        // 병합은 절대 새로 만들거나 해제하지 않고 기존 병합이 정확히 있을 때만 상단 왼쪽 셀(N/T)에 값을 씁니다.
+        const sale=salesSummary.productSales.get(product);
+        if(!sale){
+          salesUnmatchedRows++;
+          continue;
+        }
+        const qtyMerge=`N${loc.row}:O${loc.row}`;
+        const amountMerge=`T${loc.row}:U${loc.row}`;
+        if(!hasExactMerge(workingDoc,qtyMerge) || !hasExactMerge(workingDoc,amountMerge)){
+          salesMergeIssues.push(`${product} (${qtyMerge}, ${amountMerge})`);
+          continue;
+        }
+        const qtyRef=`N${loc.row}`;
+        const amountRef=`T${loc.row}`;
+        if(cellHasFormula(workingDoc,qtyRef) || cellHasFormula(workingDoc,amountRef)){
+          protectedSalesCells.push(`${qtyRef}/${amountRef}`);
+          continue;
+        }
+        const qtyWrote=setCellNumber(workingDoc,qtyRef,sale.qty);
+        const amountWrote=setCellNumber(workingDoc,amountRef,sale.amount);
+        if(qtyWrote&&amountWrote)salesFilledRows++;
+        else protectedSalesCells.push(`${qtyRef}/${amountRef}`);
+      }
+
+      const usedSources=[...new Set(Object.values(resolved.fieldSource).filter(Boolean))];
+      const locs=locations.map(x=>`C${x.row}:E${x.row}`).join(', ');
+      let status='미매칭';
+      if(hasAny&&productFilledRows>0){
+        status=usedExtra
+          ? (resolved.conflictFields.length?'추가파일 입력 완료 · 상이 이력':'추가파일 입력 완료')
+          : (resolved.conflictFields.length?'입력 완료 · 상이 이력':'입력 완료');
+      }else if(hasAny&&productFilledRows===0){
+        status=usedExtra?'추가파일 매칭 · 변경 없음':'변경 없음';
+      }
+      reports.push({product,locs,sources:usedSources,values:resolved.values,conflict:resolved.conflictFields.length>0,conflictFields:resolved.conflictFields,status,usedExtra});
+    }
+
+    // 미매칭 상품 키워드칸의 노란색은 기존 셀 스타일을 바꾸지 않고 조건부서식으로 추가합니다.
+    // 따라서 빈칸일 때만 노란색이며 값 입력 시 기존 원본 서식이 그대로 다시 보입니다.
+    let preparedStyles=null;
+    if(unmatchedKeywordRows.length){
+      preparedStyles=await prepareYellowBlankDxf(ctx.zip);
+      let nextPriority=getMaxCfPriority(workingDoc)+1;
+      for(const row of [...new Set(unmatchedKeywordRows)].sort((a,b)=>a-b)){
+        nextPriority=addBlankYellowConditionalFormatting(workingDoc,row,preparedStyles.dxfId,nextPriority);
+      }
+    }
+
+    const serialized=new XMLSerializer().serializeToString(workingDoc);
+    ctx.zip.file(target.path,serialized);
+    if(preparedStyles?.stylesSerialized)ctx.zip.file(preparedStyles.stylesPath,preparedStyles.stylesSerialized);
+    processedZip=ctx.zip;
+    const base=sourceFile.name.replace(/\.xlsx$/i,'');
+    outputName=`${base}_${selectedMonth}월_자동입력완료.xlsx`;
+    resultRows=reports;
+
+    $('#mRows').textContent=targetRows.length.toLocaleString();
+    $('#mProducts').textContent=grouped.size.toLocaleString();
+    $('#mFilled').textContent=filledRowCount.toLocaleString();
+    $('#mMiss').textContent=unmatchedCount.toLocaleString();
+    $('#mConflict').textContent=conflictCount.toLocaleString();
+    $('#resultNote').textContent=`${target.name} 탭 · 판매순위 TOP5 자동 입력 완료 · 월 합계 판매량 ${formatNumber(salesSummary.qty)} · 판매금액 ${formatNumber(salesSummary.amount)}원 · 상품별 판매실적 ${salesFilledRows.toLocaleString()}개 행 입력 · 추가 참고 XLSX ${extraKeywordFiles.length.toLocaleString()}개 / fallback 매칭 ${extraMatchedProducts.toLocaleString()}개 상품 · 최종 키워드 미매칭 노란 안내 ${[...new Set(unmatchedKeywordRows)].length.toLocaleString()}개 행 · 작성일 ${meta.date} · ${meta.department} / ${meta.manager}`;
+    renderResults(reports);
+    $('#resultPanel').classList.add('show');
+    $('#downloadBtn').disabled=false;
+    const notes=[];
+    if(protectedKeywordCells.length)notes.push(`수식 보호로 건너뛴 키워드 셀 ${protectedKeywordCells.length}개`);
+    if(protectedSalesCells.length)notes.push(`수식 보호로 건너뛴 판매실적 셀 ${protectedSalesCells.length}개`);
+    if(salesMergeIssues.length)notes.push(`N:O 또는 T:U 병합 구조가 달라 건너뛴 행 ${salesMergeIssues.length}개`);
+    if(extraKeywordFiles.length)notes.push(`추가 참고 XLSX ${extraKeywordFiles.length}개 검색 → ${extraMatchedProducts}개 상품 fallback 매칭`);
+    if(unmatchedKeywordRows.length)notes.push(`기존 월 탭 + 추가 참고 파일 모두 상품명 미매칭 → 빈 키워드칸 노란색 안내 ${[...new Set(unmatchedKeywordRows)].length}개 행`);
+    const extraNote=notes.length?` · ${notes.join(' · ')}`:'';
+    setStatus(`처리 완료: ${target.name} 전체/데님/팬츠/슬랙스/스커트 판매량 TOP5 상품명 자동 입력 · E16:J16 월 합계 판매량 ${formatNumber(salesSummary.qty)}, E17:J17 월 합계 판매금액 ${formatNumber(salesSummary.amount)}원 입력 · 상품별 N:O/T:U 판매실적 ${salesFilledRows.toLocaleString()}개 행 입력 · CSV 미매칭 판매실적 행 ${salesUnmatchedRows.toLocaleString()}개 · 29행 보호 유지 · T5:U7 작성정보 반영 · 키워드 ${filledRowCount.toLocaleString()}개 행 입력 · 키워드 미매칭 ${unmatchedCount.toLocaleString()}개${extraNote}.`,'ok');
+    $('#resultPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){
+    console.error(e);
+    processedZip=null;
+    $('#downloadBtn').disabled=true;
+    setStatus(`자동 입력 중 오류가 발생했습니다: ${e.message||String(e)}`,'bad');
+  }finally{
+    isRunning=false;
+    updateRunReady();
+  }
+}
+
+function renderResults(reports){
+  const body=$('#resultBody');
+  if(!reports.length){body.innerHTML='<tr><td colspan="8" class="empty">처리 결과가 없습니다.</td></tr>';return;}
+  body.innerHTML=reports.map(r=>{
+    const isDone=r.status.startsWith('입력 완료')||r.status.startsWith('추가파일 입력 완료');
+    const cls=isDone?(r.conflict?'b-warn':'b-ok'):(r.status==='미매칭'?'b-bad':'b-skip');
+    return `<tr>
+      <td class="product">${esc(r.product)}</td>
+      <td>${esc(r.locs)}</td>
+      <td class="source">${r.sources.length?r.sources.map(esc).join(' / '):'-'}</td>
+      <td class="keyword">${esc(r.values.fit||'-')}</td>
+      <td class="keyword">${esc(r.values.material||'-')}</td>
+      <td class="keyword">${esc(r.values.detail||'-')}</td>
+      <td class="keyword">${esc(r.values.feature||'-')}</td>
+      <td><span class="badge ${cls}" title="${esc((r.conflictFields||[]).join(', '))}">${esc(r.status)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+async function downloadResult(){
+  if(!processedZip)return;
+  try{
+    $('#downloadBtn').disabled=true;$('#downloadBtn').textContent='파일 생성 중...';
+    const blob=await processedZip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6},mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=outputName||'사업계획서_자동입력완료.xlsx';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    setStatus(`${outputName} 파일을 생성했습니다.`,'ok');
+  }catch(e){console.error(e);setStatus('다운로드 파일 생성 중 오류가 발생했습니다: '+(e.message||e),'bad');}
+  finally{$('#downloadBtn').disabled=false;$('#downloadBtn').textContent='완료 XLSX 다운로드';}
+}
+
+function resetAll(){
+  selectedMonth='';sourceFile=null;salesFile=null;salesSummary=null;loadedContext=null;processedZip=null;outputName='';resultRows=[];extraKeywordFiles=[];
+  document.querySelectorAll('input[name=month]').forEach(x=>x.checked=false);
+  $('#fileInput').value='';$('#filePill').style.display='none';$('#filePill').textContent='';$('#sheetInfo').innerHTML='';
+  $('#salesFileInput').value='';$('#salesFilePill').style.display='none';$('#salesFilePill').textContent='';$('#salesDetected').style.display='none';$('#rankingPreview')?.classList.remove('show');$('#rankingGrid').innerHTML='';$('#detectedProducts').textContent='-';
+  $('#extraFileInput').value='';renderExtraFileList();
+  setFileState('plan','먼저 작성할 달을 선택해주세요.');
+  setFileState('sales','아직 첨부된 파일이 없습니다.');
+  $('#writeDate').value='';$('#department').value='';$('#managerName').value='';
+  $('#dropZone').classList.add('disabled');$('#dropZone').setAttribute('aria-disabled','true');$('#fileInput').disabled=true;
+  isRunning=false;$('#downloadBtn').disabled=true;$('#resetBtn').disabled=true;
+  $('#resultPanel').classList.remove('show');
+  $('#resultBody').innerHTML='<tr><td colspan="8" class="empty">처리 결과가 없습니다.</td></tr>';
+  updateRunReady();
+  setStatus('1번에서 작성할 달을 선택해주세요.');
+}
+
+buildMonthButtons();
+
+const dz=$('#dropZone'),fi=$('#fileInput');
+const sdz=$('#salesDropZone'),sfi=$('#salesFileInput');
+
+// 파일을 브라우저 창 아무 곳에 잘못 놓아 페이지가 열리는 것을 방지합니다.
+// 실제 처리는 각 드롭영역의 drop 이벤트에서만 수행합니다.
+['dragover','drop'].forEach(ev=>{
+  window.addEventListener(ev,e=>{
+    const types=[...(e.dataTransfer?.types||[])];
+    if(types.includes('Files'))e.preventDefault();
+  },false);
+});
+
+// 사업계획서: 드롭영역을 클릭해도 파일 선택창이 열리고,
+// 실제 native file input을 직접 눌러도 동일하게 작동합니다.
+dz.addEventListener('click',e=>{
+  if(e.target===fi)return;
+  if(!selectedMonth){
+    e.preventDefault();
+    setFileState('plan','먼저 작성할 달을 선택해주세요.','bad');
+    return setStatus('작성할 달을 먼저 선택해주세요.','warn');
+  }
+  fi.click();
+});
+dz.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  if(e.target===fi)return;
+  e.preventDefault();
+  if(!selectedMonth){
+    setFileState('plan','먼저 작성할 달을 선택해주세요.','bad');
+    return setStatus('작성할 달을 먼저 선택해주세요.','warn');
+  }
+  fi.click();
+});
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if(selectedMonth)dz.classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  dz.classList.remove('drag');
+}));
+dz.addEventListener('drop',e=>{
+  if(!selectedMonth){
+    setFileState('plan','먼저 작성할 달을 선택해주세요.','bad');
+    return setStatus('작성할 달을 먼저 선택해주세요.','warn');
+  }
+  const file=firstDroppedFile(e.dataTransfer);
+  if(!file)return setFileState('plan','드롭한 파일을 읽지 못했습니다. 다시 시도해주세요.','bad');
+  handleFile(file);
+});
+fi.addEventListener('change',e=>{
+  const file=e.target.files?.[0];
+  if(file)handleFile(file);
+});
+
+// 판매자료 CSV도 동일한 방식으로 클릭/드래그앤드롭 지원
+sdz.addEventListener('click',e=>{
+  if(e.target===sfi)return;
+  sfi.click();
+});
+sdz.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target!==sfi){
+    e.preventDefault();sfi.click();
+  }
+});
+['dragenter','dragover'].forEach(ev=>sdz.addEventListener(ev,e=>{
+  e.preventDefault();e.stopPropagation();sdz.classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev=>sdz.addEventListener(ev,e=>{
+  e.preventDefault();e.stopPropagation();sdz.classList.remove('drag');
+}));
+sdz.addEventListener('drop',e=>{
+  const file=firstDroppedFile(e.dataTransfer);
+  if(!file)return setFileState('sales','드롭한 파일을 읽지 못했습니다. 다시 시도해주세요.','bad');
+  handleSalesFile(file);
+});
+sfi.addEventListener('change',e=>{
+  const file=e.target.files?.[0];
+  if(file)handleSalesFile(file);
+});
+
+// 추가 키워드 참고 XLSX: 여러 파일 선택/드래그앤드롭/누적 첨부 지원
+const edz=$('#extraDropZone'),efi=$('#extraFileInput');
+edz.addEventListener('click',e=>{
+  if(e.target===efi || e.target.closest('.extra-file-remove'))return;
+  efi.click();
+});
+edz.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target!==efi){
+    e.preventDefault();efi.click();
+  }
+});
+['dragenter','dragover'].forEach(ev=>edz.addEventListener(ev,e=>{
+  e.preventDefault();e.stopPropagation();edz.classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev=>edz.addEventListener(ev,e=>{
+  e.preventDefault();e.stopPropagation();edz.classList.remove('drag');
+}));
+edz.addEventListener('drop',e=>{
+  const files=droppedFiles(e.dataTransfer);
+  if(files.length)handleExtraFiles(files);
+});
+efi.addEventListener('change',async e=>{
+  const files=[...(e.target.files||[])];
+  if(files.length)await handleExtraFiles(files);
+  e.target.value='';
+});
+$('#extraFileList').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-extra-index]');
+  if(!btn)return;
+  const idx=Number(btn.dataset.extraIndex);
+  if(!Number.isInteger(idx)||idx<0||idx>=extraKeywordFiles.length)return;
+  extraKeywordFiles.splice(idx,1);
+  renderExtraFileList();
+  processedZip=null;$('#downloadBtn').disabled=true;
+  setStatus('추가 참고 파일 목록을 변경했습니다. 자동 입력을 다시 실행하면 변경된 목록으로 키워드를 찾습니다.','ok');
+});
+$('#clearExtraBtn').addEventListener('click',()=>{
+  extraKeywordFiles=[];
+  $('#extraFileInput').value='';
+  renderExtraFileList();
+  processedZip=null;$('#downloadBtn').disabled=true;
+  setStatus('추가 키워드 참고 파일을 모두 비웠습니다.','ok');
+});
+
+['#writeDate','#department','#managerName'].forEach(sel=>{
+  const el=$(sel);
+  if(el){
+    el.addEventListener('input',updateRunReady);
+    el.addEventListener('change',updateRunReady);
+  }
+});
+$('#runBtn').addEventListener('click',runCopy);
+$('#downloadBtn').addEventListener('click',downloadResult);
+$('#resetBtn').addEventListener('click',resetAll);
+updateRunReady();
+</script>
+</body>
+</html>
