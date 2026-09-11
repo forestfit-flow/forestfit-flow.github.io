@@ -7,31 +7,21 @@
 <title>포레스트핏 업무센터</title>
 
 <style>
-
-/* =========================
-   BASE
-========================= */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 *{
+  box-sizing:border-box;
   margin:0;
   padding:0;
-  box-sizing:border-box;
 }
 
 :root{
-  --bg:#F3F3EF;
-  --paper:#FAFAF7;
+  --bg:#F5F5F2;
   --white:#FFFFFF;
-
-  --ink:#17221C;
-  --deep:#153D2D;
-  --green:#345E49;
-
-  --muted:#7B837E;
-  --line:#D9DDD9;
-  --soft:#E9ECE8;
-
-  --cream:#EDE8DD;
+  --black:#111111;
+  --gray:#777777;
+  --light:#E6E6E2;
+  --blue:#4B5CFF;
 }
 
 html{
@@ -40,499 +30,416 @@ html{
 
 body{
   min-height:100vh;
-
-  font-family:
-    Pretendard,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Malgun Gothic",
-    sans-serif;
-
   background:var(--bg);
-  color:var(--ink);
-
+  color:var(--black);
+  font-family:"Pretendard",-apple-system,BlinkMacSystemFont,
+  "Segoe UI","Malgun Gothic",sans-serif;
   -webkit-font-smoothing:antialiased;
 }
 
+a{
+  color:inherit;
+}
 
-/* =========================
-   PAGE
-========================= */
+/* ===========================
+   전체 레이아웃
+=========================== */
 
 .page{
-  width:min(1380px, calc(100% - 56px));
+  width:calc(100% - 56px);
+  max-width:1480px;
   margin:0 auto;
 }
 
 
-/* =========================
+/* ===========================
    HEADER
-========================= */
+=========================== */
 
 .header{
-  height:92px;
+  height:86px;
 
   display:flex;
   align-items:center;
   justify-content:space-between;
 
-  border-bottom:1px solid rgba(23,34,28,.13);
+  border-bottom:1px solid #CFCFCA;
 }
 
 .brand{
   display:flex;
   align-items:center;
-  gap:18px;
+  gap:16px;
 }
 
-.brand-mark{
-  width:31px;
-  height:31px;
-
+.brand-symbol{
+  width:21px;
+  height:21px;
+  background:var(--black);
   position:relative;
 }
 
-.brand-mark::before{
+.brand-symbol::after{
   content:"";
   position:absolute;
 
-  width:21px;
-  height:21px;
+  width:8px;
+  height:8px;
 
-  left:0;
-  top:0;
+  right:-5px;
+  bottom:-5px;
 
-  border:2px solid var(--deep);
-}
-
-.brand-mark::after{
-  content:"";
-
-  position:absolute;
-
-  width:13px;
-  height:13px;
-
-  right:0;
-  bottom:0;
-
-  background:var(--deep);
+  background:var(--blue);
 }
 
 .brand-name{
-  font-size:18px;
-  font-weight:850;
-
-  letter-spacing:.14em;
-
-  color:var(--deep);
+  font-size:17px;
+  font-weight:900;
+  letter-spacing:.13em;
 }
 
 .header-right{
   display:flex;
   align-items:center;
-  gap:25px;
+  gap:28px;
 }
 
-.department{
+.team{
   display:flex;
   align-items:center;
-  gap:9px;
+  gap:8px;
 
   font-size:12px;
-  font-weight:700;
-
-  letter-spacing:-.01em;
-
-  color:#59635D;
+  font-weight:650;
 }
 
-.department-dot{
-  width:6px;
-  height:6px;
-
-  background:#51715E;
+.team-dot{
+  width:7px;
+  height:7px;
   border-radius:50%;
+  background:var(--blue);
 }
 
-.version{
+.system{
   font-size:10px;
-  letter-spacing:.13em;
-
-  color:#9B9F9C;
+  color:#999;
+  letter-spacing:.14em;
 }
 
 
-/* =========================
+/* ===========================
    HERO
-========================= */
+=========================== */
 
 .hero{
-  min-height:355px;
+  min-height:395px;
 
   display:grid;
-  grid-template-columns:1.4fr .6fr;
+  grid-template-columns:1.45fr .55fr;
 
-  align-items:end;
-
-  padding:72px 0 57px;
-
-  border-bottom:1px solid rgba(23,34,28,.13);
+  border-bottom:1px solid #CFCFCA;
 }
 
 .hero-left{
-  max-width:850px;
+  padding:70px 0 60px;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 }
 
-.hero-label{
+.kicker{
   display:flex;
   align-items:center;
   gap:12px;
 
-  margin-bottom:23px;
-
-  color:#768078;
-
   font-size:11px;
-  font-weight:750;
-
-  letter-spacing:.18em;
+  font-weight:700;
+  letter-spacing:.13em;
 }
 
-.hero-label::before{
-  content:"";
-
-  width:33px;
-  height:1px;
-
-  background:#738078;
+.kicker-line{
+  width:35px;
+  height:2px;
+  background:var(--blue);
 }
 
-.hero h1{
-  max-width:800px;
+.hero-title{
+  font-size:clamp(58px,7vw,96px);
+  line-height:.91;
 
-  font-size:clamp(52px,6vw,82px);
-  line-height:.98;
+  letter-spacing:-.075em;
+  font-weight:850;
+}
 
-  letter-spacing:-.065em;
-
-  font-weight:800;
-
-  color:var(--deep);
+.hero-title .accent{
+  color:var(--blue);
 }
 
 .hero-right{
+  border-left:1px solid #CFCFCA;
+
+  padding:68px 0 58px 42px;
+
   display:flex;
   flex-direction:column;
-
-  align-items:flex-start;
-  justify-content:flex-end;
-
-  padding-bottom:6px;
+  justify-content:space-between;
 }
 
-.hero-description{
-  max-width:310px;
-
-  font-size:15px;
-  line-height:1.8;
-
-  letter-spacing:-.02em;
-
-  color:#68716B;
-}
-
-.hero-meta{
-  margin-top:27px;
-
-  display:flex;
-  gap:22px;
-}
-
-.meta{
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-}
-
-.meta strong{
-  font-size:17px;
-  font-weight:700;
-
-  color:#26352D;
-}
-
-.meta span{
-  font-size:9px;
-  font-weight:700;
-
+.hero-index{
+  font-size:11px;
   letter-spacing:.15em;
+  color:#929292;
+}
 
-  color:#969D98;
+.hero-copy{
+  max-width:330px;
+}
+
+.hero-copy strong{
+  display:block;
+
+  font-size:20px;
+  line-height:1.45;
+  letter-spacing:-.035em;
+
+  margin-bottom:16px;
+}
+
+.hero-copy p{
+  font-size:13px;
+  line-height:1.75;
+  color:#777;
+}
+
+.stats{
+  display:flex;
+  gap:44px;
+}
+
+.stat strong{
+  display:block;
+  font-size:24px;
+  font-weight:800;
+}
+
+.stat span{
+  display:block;
+  margin-top:5px;
+
+  font-size:9px;
+  letter-spacing:.13em;
+  color:#999;
 }
 
 
-/* =========================
-   TOOL HEADER
-========================= */
+/* ===========================
+   TOOL TITLE
+=========================== */
 
-.tool-head{
+.section-head{
+  min-height:105px;
+
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
 
-  padding:45px 0 22px;
+  padding-bottom:24px;
 }
 
-.tool-title{
-  font-size:13px;
-  font-weight:750;
-
-  letter-spacing:.11em;
-
-  color:#34473C;
+.section-title{
+  font-size:15px;
+  font-weight:800;
 }
 
-.tool-title span{
-  color:#A0A6A2;
-  margin-left:9px;
+.section-title span{
+  margin-left:10px;
+
+  font-size:10px;
+  color:#999;
+
+  letter-spacing:.13em;
+  font-weight:600;
 }
 
-.tool-description{
-  font-size:11px;
-  color:#969D98;
+.section-info{
+  font-size:10px;
+  letter-spacing:.12em;
+  color:#999;
 }
 
 
-/* =========================
+/* ===========================
    GRID
-========================= */
+=========================== */
 
-.grid{
+.tools{
   display:grid;
-
   grid-template-columns:repeat(3,1fr);
 
-  border-top:1px solid var(--line);
-  border-left:1px solid var(--line);
+  border-top:1px solid #CECECA;
+  border-left:1px solid #CECECA;
 }
 
 
-/* =========================
+/* ===========================
    CARD
-========================= */
+=========================== */
 
-.card{
-  min-height:270px;
+.tool{
+  height:275px;
+
+  padding:27px;
 
   position:relative;
-
-  padding:28px 29px 26px;
+  overflow:hidden;
 
   display:flex;
   flex-direction:column;
 
-  color:inherit;
   text-decoration:none;
 
-  background:rgba(250,250,247,.75);
+  background:#FAFAF8;
 
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-
-  overflow:hidden;
+  border-right:1px solid #CECECA;
+  border-bottom:1px solid #CECECA;
 
   transition:
     background .28s ease,
     color .28s ease;
 }
 
-.card::before{
+.tool::after{
   content:"";
 
+  width:0;
+  height:3px;
+
   position:absolute;
+  top:0;
+  left:0;
 
-  width:220px;
-  height:220px;
+  background:var(--blue);
 
-  border-radius:50%;
-
-  right:-180px;
-  top:-160px;
-
-  background:rgba(255,255,255,.15);
-
-  transform:scale(.6);
-
-  transition:
-    transform .45s cubic-bezier(.2,.8,.2,1);
+  transition:width .35s ease;
 }
 
-.card:hover{
-  background:var(--deep);
+.tool:hover::after{
+  width:100%;
+}
+
+.tool:hover{
+  background:var(--black);
   color:#fff;
 }
 
-.card:hover::before{
-  transform:scale(2.3);
-}
 
+/* TOP */
 
-/* CARD TOP */
-
-.card-top{
-  position:relative;
-  z-index:2;
-
+.tool-top{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
 }
 
-.icon-box{
-  width:42px;
-  height:42px;
+.icon{
+  width:40px;
+  height:40px;
 
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
 
-  border:1px solid rgba(23,61,45,.17);
+  border:1px solid #CBCBC7;
 
-  color:var(--deep);
-
-  transition:.25s ease;
+  transition:.28s ease;
 }
 
-.card:hover .icon-box{
-  border-color:rgba(255,255,255,.25);
-  color:#fff;
-}
-
-.icon-box svg{
-  width:20px;
-  height:20px;
-
-  stroke:currentColor;
+.icon svg{
+  width:18px;
+  height:18px;
 
   fill:none;
+  stroke:currentColor;
 
-  stroke-width:1.6;
+  stroke-width:1.5;
   stroke-linecap:round;
   stroke-linejoin:round;
 }
 
-.card-number{
+.tool:hover .icon{
+  border-color:#444;
+}
+
+.number{
   font-size:10px;
-  font-weight:750;
-
   letter-spacing:.12em;
-
-  color:#A1A8A3;
-
-  transition:.25s ease;
-}
-
-.card:hover .card-number{
-  color:rgba(255,255,255,.48);
+  color:#999;
 }
 
 
-/* CARD CONTENT */
+/* CONTENT */
 
-.card-content{
-  position:relative;
-  z-index:2;
-
-  margin-top:48px;
+.tool-content{
+  margin-top:43px;
 }
 
-.card h2{
-  margin-bottom:11px;
-
-  font-size:21px;
+.tool h2{
+  font-size:20px;
   line-height:1.4;
 
-  font-weight:760;
+  font-weight:750;
 
   letter-spacing:-.045em;
 
-  color:var(--deep);
-
-  transition:.25s ease;
+  margin-bottom:10px;
 }
 
-.card:hover h2{
-  color:#fff;
-}
-
-.card-desc{
-  max-width:290px;
-
+.tool p{
   font-size:12px;
-  line-height:1.7;
+  line-height:1.65;
 
-  font-weight:500;
+  color:#828282;
 
-  letter-spacing:-.015em;
-
-  color:#818983;
-
-  transition:.25s ease;
+  transition:.28s ease;
 }
 
-.card:hover .card-desc{
-  color:rgba(255,255,255,.65);
+.tool:hover p{
+  color:#AAA;
 }
 
 
-/* CARD BOTTOM */
+/* BOTTOM */
 
-.card-bottom{
-  position:relative;
-  z-index:2;
-
+.tool-bottom{
   margin-top:auto;
 
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
 }
 
-.open-label{
-  font-size:10px;
+.category{
+  font-size:9px;
   font-weight:700;
+  letter-spacing:.14em;
 
-  letter-spacing:.12em;
-
-  color:#9CA39E;
-
-  transition:.25s ease;
-}
-
-.card:hover .open-label{
-  color:rgba(255,255,255,.6);
+  color:#999;
 }
 
 .arrow{
-  width:37px;
-  height:37px;
+  width:38px;
+  height:38px;
+
+  border-radius:50%;
+
+  border:1px solid #D2D2CF;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  border-radius:50%;
-
-  border:1px solid rgba(23,61,45,.15);
-
-  color:#244C39;
-
-  transition:
-    transform .25s ease,
-    background .25s ease,
-    border-color .25s ease;
+  transition:.25s ease;
 }
 
 .arrow svg{
@@ -543,74 +450,91 @@ body{
   stroke:currentColor;
 
   stroke-width:1.6;
-
-  stroke-linecap:round;
-  stroke-linejoin:round;
 }
 
-.card:hover .arrow{
-  transform:translateX(4px);
+.tool:hover .arrow{
+  background:var(--blue);
+  border-color:var(--blue);
 
-  background:#fff;
-  border-color:#fff;
-
-  color:var(--deep);
+  transform:rotate(-45deg);
 }
 
 
-/* =========================
-   SPECIAL LAST CARD
-========================= */
+/* ===========================
+   마지막 카드 포인트
+=========================== */
 
-.card.last{
-  background:#E8E9E3;
+.tool.featured{
+  background:var(--blue);
+  color:white;
 }
 
-.card.last:hover{
-  background:#2A312D;
+.tool.featured p,
+.tool.featured .category,
+.tool.featured .number{
+  color:rgba(255,255,255,.65);
+}
+
+.tool.featured .icon{
+  border-color:rgba(255,255,255,.35);
+}
+
+.tool.featured .arrow{
+  border-color:rgba(255,255,255,.4);
+}
+
+.tool.featured:hover{
+  background:#3543E8;
 }
 
 
-/* =========================
+/* ===========================
    FOOTER
-========================= */
+=========================== */
 
 .footer{
-  min-height:130px;
+  height:135px;
 
   display:flex;
   align-items:center;
   justify-content:space-between;
 
-  color:#8D948F;
+  border-top:1px solid #CECECA;
+
+  margin-top:60px;
 }
 
-.footer-logo{
+.footer-brand{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.13em;
+}
+
+.footer-right{
   font-size:10px;
-  font-weight:750;
-
-  letter-spacing:.15em;
-}
-
-.footer-copy{
-  font-size:10px;
-
-  letter-spacing:.04em;
+  letter-spacing:.1em;
+  color:#999;
 }
 
 
-/* =========================
+/* ===========================
    RESPONSIVE
-========================= */
+=========================== */
 
-@media(max-width:1000px){
+@media(max-width:950px){
 
   .hero{
     grid-template-columns:1fr;
-    gap:40px;
   }
 
-  .grid{
+  .hero-right{
+    border-left:0;
+    border-top:1px solid #CECECA;
+
+    padding:35px 0;
+  }
+
+  .tools{
     grid-template-columns:repeat(2,1fr);
   }
 
@@ -623,65 +547,57 @@ body{
   }
 
   .header{
-    height:75px;
+    height:70px;
   }
 
-  .version{
+  .system{
     display:none;
   }
 
-  .brand-name{
-    font-size:15px;
-  }
-
-  .department{
-    font-size:10px;
-  }
-
   .hero{
-    padding:55px 0 45px;
+    min-height:auto;
   }
 
-  .hero h1{
-    font-size:48px;
+  .hero-left{
+    padding:52px 0 45px;
   }
 
-  .hero-meta{
-    gap:30px;
+  .hero-title{
+    font-size:52px;
   }
 
-  .grid{
+  .hero-right{
+    gap:35px;
+  }
+
+  .tools{
     grid-template-columns:1fr;
   }
 
-  .card{
-    min-height:235px;
+  .tool{
+    height:245px;
   }
 
-  .tool-description{
+  .section-info{
     display:none;
   }
 
 }
-
 </style>
 </head>
-
 
 <body>
 
 <div class="page">
 
 
-<!-- =========================
-     HEADER
-========================= -->
+<!-- HEADER -->
 
 <header class="header">
 
   <div class="brand">
 
-    <div class="brand-mark"></div>
+    <div class="brand-symbol"></div>
 
     <div class="brand-name">
       FORESTFIT
@@ -692,16 +608,13 @@ body{
 
   <div class="header-right">
 
-    <div class="department">
-
-      <span class="department-dot"></span>
-
+    <div class="team">
+      <span class="team-dot"></span>
       판매전략팀 업무툴
-
     </div>
 
-    <div class="version">
-      WORK CENTER · 2026
+    <div class="system">
+      INTERNAL SYSTEM · 2026
     </div>
 
   </div>
@@ -710,21 +623,20 @@ body{
 
 
 
-<!-- =========================
-     HERO
-========================= -->
+<!-- HERO -->
 
 <section class="hero">
 
   <div class="hero-left">
 
-    <div class="hero-label">
-      SALES STRATEGY · WORK CENTER
+    <div class="kicker">
+      <span class="kicker-line"></span>
+      SALES STRATEGY / WORK CENTER
     </div>
 
-    <h1>
+    <h1 class="hero-title">
       포레스트핏<br>
-      업무센터
+      업무<span class="accent">센터.</span>
     </h1>
 
   </div>
@@ -732,19 +644,33 @@ body{
 
   <div class="hero-right">
 
-    <p class="hero-description">
-      반복되는 상품 운영 업무를 단순하게.<br>
-      필요한 업무 도구를 한 곳에서 빠르고 정확하게 관리합니다.
-    </p>
+    <div class="hero-index">
+      FORESTFIT / 01
+    </div>
 
-    <div class="hero-meta">
+    <div class="hero-copy">
 
-      <div class="meta">
+      <strong>
+        반복되는 업무는 더 간결하게,<br>
+        중요한 일에 더 집중할 수 있게.
+      </strong>
+
+      <p>
+        판매전략팀의 상품 운영과 반복 업무를
+        하나의 워크스페이스에서 빠르게 관리합니다.
+      </p>
+
+    </div>
+
+
+    <div class="stats">
+
+      <div class="stat">
         <strong>07</strong>
-        <span>WORK TOOLS</span>
+        <span>TOOLS</span>
       </div>
 
-      <div class="meta">
+      <div class="stat">
         <strong>01</strong>
         <span>WORKSPACE</span>
       </div>
@@ -757,77 +683,71 @@ body{
 
 
 
-<!-- =========================
-     TOOLS
-========================= -->
+<!-- SECTION HEADER -->
 
-<div class="tool-head">
+<div class="section-head">
 
-  <div class="tool-title">
+  <div class="section-title">
     업무 도구
-    <span>TOOLS</span>
+    <span>WORK TOOLS</span>
   </div>
 
-  <div class="tool-description">
-    SELECT A TOOL TO START
+  <div class="section-info">
+    SELECT A TOOL TO CONTINUE
   </div>
 
 </div>
 
 
 
-<main class="grid">
+<!-- TOOLS -->
+
+<main class="tools">
 
 
-<!-- 01 배송 -->
+<!-- 01 -->
 
-<a class="card" href="integrated-delivery.html">
+<a class="tool" href="integrated-delivery.html">
 
-  <div class="card-top">
+  <div class="tool-top">
 
-    <div class="icon-box">
-
+    <div class="icon">
       <svg viewBox="0 0 24 24">
-        <path d="M3 6h11v10H3z"/>
-        <path d="M14 9h4l3 3v4h-7z"/>
+        <path d="M3 7h11v9H3z"/>
+        <path d="M14 10h4l3 3v3h-7"/>
         <circle cx="7" cy="18" r="2"/>
         <circle cx="18" cy="18" r="2"/>
       </svg>
-
     </div>
 
-    <div class="card-number">
-      01
-    </div>
+    <span class="number">01</span>
 
   </div>
 
-
-  <div class="card-content">
+  <div class="tool-content">
 
     <h2>
       포레스트핏 통합 납기관리
     </h2>
 
-    <p class="card-desc">
+    <p>
       채널별 납기일 · 출고일정 통합 관리
     </p>
 
   </div>
 
+  <div class="tool-bottom">
 
-  <div class="card-bottom">
-
-    <span class="open-label">
+    <span class="category">
       DELIVERY
     </span>
 
-    <div class="arrow">
+    <span class="arrow">
       <svg viewBox="0 0 24 24">
         <path d="M5 12h14"/>
         <path d="m14 7 5 5-5 5"/>
       </svg>
-    </div>
+    </span>
 
   </div>
 
@@ -835,53 +755,47 @@ body{
 
 
 
-<!-- 02 재고매칭 -->
+<!-- 02 -->
 
-<a class="card" href="stock-match.html">
+<a class="tool" href="stock-match.html">
 
-  <div class="card-top">
+  <div class="tool-top">
 
-    <div class="icon-box">
+    <div class="icon">
 
       <svg viewBox="0 0 24 24">
-        <path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/>
-        <path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1"/>
+        <path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/>
+        <path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>
       </svg>
 
     </div>
 
-    <div class="card-number">
-      02
-    </div>
+    <span class="number">02</span>
 
   </div>
 
+  <div class="tool-content">
 
-  <div class="card-content">
+    <h2>재고매칭 확인</h2>
 
-    <h2>
-      재고매칭 확인
-    </h2>
-
-    <p class="card-desc">
+    <p>
       키워드 매칭 여부 확인
     </p>
 
   </div>
 
+  <div class="tool-bottom">
 
-  <div class="card-bottom">
-
-    <span class="open-label">
+    <span class="category">
       MATCHING
     </span>
 
-    <div class="arrow">
+    <span class="arrow">
       <svg viewBox="0 0 24 24">
         <path d="M5 12h14"/>
         <path d="m14 7 5 5-5 5"/>
       </svg>
-    </div>
+    </span>
 
   </div>
 
@@ -889,13 +803,13 @@ body{
 
 
 
-<!-- 03 주문취합 -->
+<!-- 03 -->
 
-<a class="card" href="order-collect.html">
+<a class="tool" href="order-collect.html">
 
-  <div class="card-top">
+  <div class="tool-top">
 
-    <div class="icon-box">
+    <div class="icon">
 
       <svg viewBox="0 0 24 24">
         <path d="m4 7 8-4 8 4-8 4z"/>
@@ -905,38 +819,32 @@ body{
 
     </div>
 
-    <div class="card-number">
-      03
-    </div>
+    <span class="number">03</span>
 
   </div>
 
+  <div class="tool-content">
 
-  <div class="card-content">
+    <h2>주문취합건</h2>
 
-    <h2>
-      주문취합건
-    </h2>
-
-    <p class="card-desc">
+    <p>
       동대문 발주 · 입고일정 · 품절요청 정리
     </p>
 
   </div>
 
+  <div class="tool-bottom">
 
-  <div class="card-bottom">
-
-    <span class="open-label">
+    <span class="category">
       ORDER
     </span>
 
-    <div class="arrow">
+    <span class="arrow">
       <svg viewBox="0 0 24 24">
         <path d="M5 12h14"/>
         <path d="m14 7 5 5-5 5"/>
       </svg>
-    </div>
+    </span>
 
   </div>
 
@@ -944,56 +852,50 @@ body{
 
 
 
-<!-- 04 재고장 -->
+<!-- 04 -->
 
-<a class="card" href="stock-center.html">
+<a class="tool" href="stock-center.html">
 
-  <div class="card-top">
+  <div class="tool-top">
 
-    <div class="icon-box">
+    <div class="icon">
 
       <svg viewBox="0 0 24 24">
-        <path d="M4 19V9"/>
-        <path d="M10 19V5"/>
-        <path d="M16 19v-7"/>
-        <path d="M22 19V3"/>
+        <path d="M4 19V10"/>
+        <path d="M9 19V6"/>
+        <path d="M14 19v-4"/>
+        <path d="M19 19V3"/>
         <path d="M2 19h20"/>
       </svg>
 
     </div>
 
-    <div class="card-number">
-      04
-    </div>
+    <span class="number">04</span>
 
   </div>
 
+  <div class="tool-content">
 
-  <div class="card-content">
+    <h2>재고장</h2>
 
-    <h2>
-      재고장
-    </h2>
-
-    <p class="card-desc">
+    <p>
       거래처별 재고장 자동 입력
     </p>
 
   </div>
 
+  <div class="tool-bottom">
 
-  <div class="card-bottom">
-
-    <span class="open-label">
+    <span class="category">
       STOCK
     </span>
 
-    <div class="arrow">
+    <span class="arrow">
       <svg viewBox="0 0 24 24">
         <path d="M5 12h14"/>
         <path d="m14 7 5 5-5 5"/>
       </svg>
-    </div>
+    </span>
 
   </div>
 
@@ -1001,13 +903,13 @@ body{
 
 
 
-<!-- 05 월별 사업계획서 -->
+<!-- 05 -->
 
-<a class="card" href="monthly-plan.html">
+<a class="tool" href="monthly-plan.html">
 
-  <div class="card-top">
+  <div class="tool-top">
 
-    <div class="icon-box">
+    <div class="icon">
 
       <svg viewBox="0 0 24 24">
         <path d="M4 19V5"/>
@@ -1017,38 +919,32 @@ body{
 
     </div>
 
-    <div class="card-number">
-      05
-    </div>
+    <span class="number">05</span>
 
   </div>
 
+  <div class="tool-content">
 
-  <div class="card-content">
+    <h2>월별 사업계획서</h2>
 
-    <h2>
-      월별 사업계획서
-    </h2>
-
-    <p class="card-desc">
+    <p>
       판매순위 · 키워드 · 판매실적 자동입력
     </p>
 
   </div>
 
+  <div class="tool-bottom">
 
-  <div class="card-bottom">
-
-    <span class="open-label">
+    <span class="category">
       PLANNING
     </span>
 
-    <div class="arrow">
+    <span class="arrow">
       <svg viewBox="0 0 24 24">
         <path d="M5 12h14"/>
         <path d="m14 7 5 5-5 5"/>
       </svg>
-    </div>
+    </span>
 
   </div>
 
@@ -1056,55 +952,49 @@ body{
 
 
 
-<!-- 06 추가발주 -->
+<!-- 06 -->
 
-<a class="card" href="additional-order.html">
+<a class="tool" href="additional-order.html">
 
-  <div class="card-top">
+  <div class="tool-top">
 
-    <div class="icon-box">
+    <div class="icon">
 
       <svg viewBox="0 0 24 24">
         <path d="M6 3h12v18H6z"/>
         <path d="M9 7h6"/>
         <path d="M9 11h6"/>
-        <path d="M9 15h3"/>
+        <path d="M9 15h4"/>
       </svg>
 
     </div>
 
-    <div class="card-number">
-      06
-    </div>
+    <span class="number">06</span>
 
   </div>
 
+  <div class="tool-content">
 
-  <div class="card-content">
+    <h2>추가발주/제작 상품</h2>
 
-    <h2>
-      추가발주/제작 상품
-    </h2>
-
-    <p class="card-desc">
+    <p>
       상품별 발주수량 · 발주서 양식 자동 생성
     </p>
 
   </div>
 
+  <div class="tool-bottom">
 
-  <div class="card-bottom">
-
-    <span class="open-label">
+    <span class="category">
       PURCHASE
     </span>
 
-    <div class="arrow">
+    <span class="arrow">
       <svg viewBox="0 0 24 24">
         <path d="M5 12h14"/>
         <path d="m14 7 5 5-5 5"/>
       </svg>
-    </div>
+    </span>
 
   </div>
 
@@ -1112,13 +1002,13 @@ body{
 
 
 
-<!-- 07 신규상품 -->
+<!-- 07 -->
 
-<a class="card last" href="new-product-upload.html">
+<a class="tool featured" href="new-product-upload.html">
 
-  <div class="card-top">
+  <div class="tool-top">
 
-    <div class="icon-box">
+    <div class="icon">
 
       <svg viewBox="0 0 24 24">
         <path d="M12 16V4"/>
@@ -1128,38 +1018,32 @@ body{
 
     </div>
 
-    <div class="card-number">
-      07
-    </div>
+    <span class="number">07</span>
 
   </div>
 
+  <div class="tool-content">
 
-  <div class="card-content">
+    <h2>신규 상품 업로드</h2>
 
-    <h2>
-      신규 상품 업로드
-    </h2>
-
-    <p class="card-desc">
+    <p>
       채널별 신규 상품 등록정보 · 엑셀 생성
     </p>
 
   </div>
 
+  <div class="tool-bottom">
 
-  <div class="card-bottom">
-
-    <span class="open-label">
-      PRODUCT
+    <span class="category">
+      NEW PRODUCT
     </span>
 
-    <div class="arrow">
+    <span class="arrow">
       <svg viewBox="0 0 24 24">
         <path d="M5 12h14"/>
         <path d="m14 7 5 5-5 5"/>
       </svg>
-    </div>
+    </span>
 
   </div>
 
@@ -1170,18 +1054,16 @@ body{
 
 
 
-<!-- =========================
-     FOOTER
-========================= -->
+<!-- FOOTER -->
 
 <footer class="footer">
 
-  <div class="footer-logo">
-    FORESTFIT · WORK CENTER
+  <div class="footer-brand">
+    FORESTFIT® WORK CENTER
   </div>
 
-  <div class="footer-copy">
-    SALES STRATEGY TEAM
+  <div class="footer-right">
+    SALES STRATEGY TEAM · INTERNAL USE
   </div>
 
 </footer>
