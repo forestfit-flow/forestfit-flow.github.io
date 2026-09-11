@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포레스트핏 재고장 업무센터</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#f7f3eb 0%,#edf3ef 100%);
+    color:#1f2a24;
+}
+
+.wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:35px 28px 60px;
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:35px;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:.08em;
+    color:#244734;
+}
+
+.badge{
+    padding:8px 14px;
+    border-radius:999px;
+    background:#ffffffcc;
+    color:#486052;
+    font-size:12px;
+    font-weight:700;
+}
+
+.hero{
+    margin-bottom:30px;
+}
+
+.hero h1{
+    font-size:38px;
+    color:#173d2b;
+    font-weight:850;
+    margin-bottom:8px;
+}
+
+.hero p{
+    font-size:15px;
+    color:#6d776f;
+    font-weight:600;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:18px;
+}
+
+.card{
+    text-decoration:none;
+    background:rgba(255,255,255,.86);
+    border-radius:22px;
+    padding:22px;
+    min-height:180px;
+    box-shadow:0 14px 35px rgba(38,49,43,.08);
+    transition:.2s ease;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.icon{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    margin-bottom:18px;
+}
+
+/* 반품리스트 제작 - 보라색 */
+.card:nth-child(1) .icon{
+    background:#f1e7ff;
+}
+
+/* 데일리 재고장 - 블루 */
+.card:nth-child(2) .icon{
+    background:#e7f0ff;
+}
+
+/* 미들웨어 재고장 연동 - 퍼플 */
+.card:nth-child(3) .icon{
+    background:#eee8ff;
+}
+
+.card h2{
+    font-size:20px;
+    line-height:1.3;
+    color:#173d2b;
+    font-weight:850;
+    margin-bottom:8px;
+}
+
+.card span{
+    display:block;
+    font-size:13px;
+    line-height:1.5;
+    color:#7c867f;
+    font-weight:600;
+}
+
+.footer{
+    text-align:center;
+    margin-top:35px;
+    color:#9aa39d;
+    font-size:12px;
+    font-weight:600;
+}
+
+@media(max-width:900px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+    <div class="top">
+        <div class="logo">FORESTFIT</div>
+        <div class="badge">상품운영팀 재고 업무툴</div>
+    </div>
+
+    <section class="hero">
+        <h1>재고장 업무센터</h1>
+        <p>재고장 생성 및 재고 업무를 관리합니다.</p>
+    </section>
+
+    <section class="grid">
+
+        <a class="card" href="stock-builder.html">
+            <div class="icon">🐙</div>
+            <h2>반품리스트<br>제작</h2>
+            <span>
+                반품리스트를 간편하게<br>
+                제작하고 관리합니다.
+            </span>
+        </a>
+
+        <a class="card" href="daily-stock.html">
+            <div class="icon">🍓</div>
+            <h2>데일리<br>재고장</h2>
+            <span>
+                일일 재고 데이터를 확인하고<br>
+                재고장 업무를 관리합니다.
+            </span>
+        </a>
+
+        <a class="card" href="middleware-stock-sync.html">
+            <div class="icon">⚙️</div>
+            <h2>미들웨어<br>재고장 연동</h2>
+            <span>
+                미들웨어 품목정보와 매칭하여<br>
+                가용재고 수량을 자동 반영합니다.
+            </span>
+        </a>
+
+    </section>
+
+    <div class="footer">
+        FORESTFIT STOCK CENTER
+    </div>
+
+</div>
+
+</body>
+</html>
