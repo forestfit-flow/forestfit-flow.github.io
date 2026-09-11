@@ -3,226 +3,1191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>포레스트핏 업무센터</title>
 
 <style>
+
+/* =========================
+   BASE
+========================= */
+
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+}
+
+:root{
+  --bg:#F3F3EF;
+  --paper:#FAFAF7;
+  --white:#FFFFFF;
+
+  --ink:#17221C;
+  --deep:#153D2D;
+  --green:#345E49;
+
+  --muted:#7B837E;
+  --line:#D9DDD9;
+  --soft:#E9ECE8;
+
+  --cream:#EDE8DD;
+}
+
+html{
+  scroll-behavior:smooth;
 }
 
 body{
   min-height:100vh;
-  background:linear-gradient(135deg,#f7f3eb 0%,#edf3ef 100%);
-  color:#1f2a24;
+
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Malgun Gothic",
+    sans-serif;
+
+  background:var(--bg);
+  color:var(--ink);
+
+  -webkit-font-smoothing:antialiased;
 }
 
-.wrap{
-  max-width:1180px;
+
+/* =========================
+   PAGE
+========================= */
+
+.page{
+  width:min(1380px, calc(100% - 56px));
   margin:0 auto;
-  padding:56px 28px 80px;
 }
 
-.top{
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+  height:92px;
+
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  margin-bottom:70px;
+  justify-content:space-between;
+
+  border-bottom:1px solid rgba(23,34,28,.13);
 }
 
-.logo{
-  font-size:24px;
-  font-weight:800;
-  letter-spacing:.08em;
-  color:#244734;
+.brand{
+  display:flex;
+  align-items:center;
+  gap:18px;
 }
 
-.badge{
-  padding:10px 16px;
-  border-radius:999px;
-  background:#ffffffcc;
-  color:#486052;
-  font-size:14px;
+.brand-mark{
+  width:31px;
+  height:31px;
+
+  position:relative;
+}
+
+.brand-mark::before{
+  content:"";
+  position:absolute;
+
+  width:21px;
+  height:21px;
+
+  left:0;
+  top:0;
+
+  border:2px solid var(--deep);
+}
+
+.brand-mark::after{
+  content:"";
+
+  position:absolute;
+
+  width:13px;
+  height:13px;
+
+  right:0;
+  bottom:0;
+
+  background:var(--deep);
+}
+
+.brand-name{
+  font-size:18px;
+  font-weight:850;
+
+  letter-spacing:.14em;
+
+  color:var(--deep);
+}
+
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:25px;
+}
+
+.department{
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  font-size:12px;
   font-weight:700;
-  box-shadow:0 8px 24px rgba(31,42,36,.06);
+
+  letter-spacing:-.01em;
+
+  color:#59635D;
 }
+
+.department-dot{
+  width:6px;
+  height:6px;
+
+  background:#51715E;
+  border-radius:50%;
+}
+
+.version{
+  font-size:10px;
+  letter-spacing:.13em;
+
+  color:#9B9F9C;
+}
+
+
+/* =========================
+   HERO
+========================= */
 
 .hero{
-  text-align:center;
-  margin-bottom:52px;
+  min-height:355px;
+
+  display:grid;
+  grid-template-columns:1.4fr .6fr;
+
+  align-items:end;
+
+  padding:72px 0 57px;
+
+  border-bottom:1px solid rgba(23,34,28,.13);
+}
+
+.hero-left{
+  max-width:850px;
+}
+
+.hero-label{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  margin-bottom:23px;
+
+  color:#768078;
+
+  font-size:11px;
+  font-weight:750;
+
+  letter-spacing:.18em;
+}
+
+.hero-label::before{
+  content:"";
+
+  width:33px;
+  height:1px;
+
+  background:#738078;
 }
 
 .hero h1{
-  font-size:54px;
-  line-height:1.15;
-  letter-spacing:-.05em;
-  color:#173d2b;
-  font-weight:850;
-  margin-bottom:16px;
+  max-width:800px;
+
+  font-size:clamp(52px,6vw,82px);
+  line-height:.98;
+
+  letter-spacing:-.065em;
+
+  font-weight:800;
+
+  color:var(--deep);
 }
 
-.hero p{
-  font-size:18px;
-  color:#6d776f;
-  font-weight:600;
+.hero-right{
+  display:flex;
+  flex-direction:column;
+
+  align-items:flex-start;
+  justify-content:flex-end;
+
+  padding-bottom:6px;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
+.hero-description{
+  max-width:310px;
+
+  font-size:15px;
+  line-height:1.8;
+
+  letter-spacing:-.02em;
+
+  color:#68716B;
+}
+
+.hero-meta{
+  margin-top:27px;
+
+  display:flex;
   gap:22px;
 }
 
+.meta{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.meta strong{
+  font-size:17px;
+  font-weight:700;
+
+  color:#26352D;
+}
+
+.meta span{
+  font-size:9px;
+  font-weight:700;
+
+  letter-spacing:.15em;
+
+  color:#969D98;
+}
+
+
+/* =========================
+   TOOL HEADER
+========================= */
+
+.tool-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+
+  padding:45px 0 22px;
+}
+
+.tool-title{
+  font-size:13px;
+  font-weight:750;
+
+  letter-spacing:.11em;
+
+  color:#34473C;
+}
+
+.tool-title span{
+  color:#A0A6A2;
+  margin-left:9px;
+}
+
+.tool-description{
+  font-size:11px;
+  color:#969D98;
+}
+
+
+/* =========================
+   GRID
+========================= */
+
+.grid{
+  display:grid;
+
+  grid-template-columns:repeat(3,1fr);
+
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+}
+
+
+/* =========================
+   CARD
+========================= */
+
 .card{
-  display:block;
+  min-height:270px;
+
+  position:relative;
+
+  padding:28px 29px 26px;
+
+  display:flex;
+  flex-direction:column;
+
+  color:inherit;
   text-decoration:none;
-  background:rgba(255,255,255,.86);
-  border:1px solid rgba(255,255,255,.9);
-  border-radius:28px;
-  padding:32px 30px;
-  min-height:190px;
-  box-shadow:0 18px 45px rgba(38,49,43,.08);
-  transition:.22s ease;
+
+  background:rgba(250,250,247,.75);
+
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+
+  overflow:hidden;
+
+  transition:
+    background .28s ease,
+    color .28s ease;
+}
+
+.card::before{
+  content:"";
+
+  position:absolute;
+
+  width:220px;
+  height:220px;
+
+  border-radius:50%;
+
+  right:-180px;
+  top:-160px;
+
+  background:rgba(255,255,255,.15);
+
+  transform:scale(.6);
+
+  transition:
+    transform .45s cubic-bezier(.2,.8,.2,1);
 }
 
 .card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 24px 60px rgba(38,49,43,.14);
+  background:var(--deep);
+  color:#fff;
 }
 
-.icon{
-  width:48px;
-  height:48px;
-  border-radius:16px;
+.card:hover::before{
+  transform:scale(2.3);
+}
+
+
+/* CARD TOP */
+
+.card-top{
+  position:relative;
+  z-index:2;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+
+.icon-box{
+  width:42px;
+  height:42px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  border:1px solid rgba(23,61,45,.17);
+
+  color:var(--deep);
+
+  transition:.25s ease;
+}
+
+.card:hover .icon-box{
+  border-color:rgba(255,255,255,.25);
+  color:#fff;
+}
+
+.icon-box svg{
+  width:20px;
+  height:20px;
+
+  stroke:currentColor;
+
+  fill:none;
+
+  stroke-width:1.6;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.card-number{
+  font-size:10px;
+  font-weight:750;
+
+  letter-spacing:.12em;
+
+  color:#A1A8A3;
+
+  transition:.25s ease;
+}
+
+.card:hover .card-number{
+  color:rgba(255,255,255,.48);
+}
+
+
+/* CARD CONTENT */
+
+.card-content{
+  position:relative;
+  z-index:2;
+
+  margin-top:48px;
+}
+
+.card h2{
+  margin-bottom:11px;
+
+  font-size:21px;
+  line-height:1.4;
+
+  font-weight:760;
+
+  letter-spacing:-.045em;
+
+  color:var(--deep);
+
+  transition:.25s ease;
+}
+
+.card:hover h2{
+  color:#fff;
+}
+
+.card-desc{
+  max-width:290px;
+
+  font-size:12px;
+  line-height:1.7;
+
+  font-weight:500;
+
+  letter-spacing:-.015em;
+
+  color:#818983;
+
+  transition:.25s ease;
+}
+
+.card:hover .card-desc{
+  color:rgba(255,255,255,.65);
+}
+
+
+/* CARD BOTTOM */
+
+.card-bottom{
+  position:relative;
+  z-index:2;
+
+  margin-top:auto;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.open-label{
+  font-size:10px;
+  font-weight:700;
+
+  letter-spacing:.12em;
+
+  color:#9CA39E;
+
+  transition:.25s ease;
+}
+
+.card:hover .open-label{
+  color:rgba(255,255,255,.6);
+}
+
+.arrow{
+  width:37px;
+  height:37px;
+
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:25px;
-  margin-bottom:28px;
+
+  border-radius:50%;
+
+  border:1px solid rgba(23,61,45,.15);
+
+  color:#244C39;
+
+  transition:
+    transform .25s ease,
+    background .25s ease,
+    border-color .25s ease;
 }
 
-/* 카드별 아이콘 배경 */
-.card:nth-child(1) .icon{background:#e3f2ed;}
-.card:nth-child(2) .icon{background:#e6f5ec;}
-.card:nth-child(3) .icon{background:#f3e9ff;}
-.card:nth-child(4) .icon{background:#e9f5ff;}
-.card:nth-child(5) .icon{background:#fff3c9;}
-.card:nth-child(6) .icon{background:#e8f3ea;}
-.card:nth-child(7) .icon{background:#ffe8e8;}
+.arrow svg{
+  width:15px;
+  height:15px;
 
-.card h2{
-  font-size:27px;
-  letter-spacing:-.04em;
-  color:#173d2b;
-  font-weight:850;
-  margin-bottom:10px;
+  fill:none;
+  stroke:currentColor;
+
+  stroke-width:1.6;
+
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
 
-.card span{
-  display:block;
-  font-size:15px;
-  color:#7c867f;
-  font-weight:600;
+.card:hover .arrow{
+  transform:translateX(4px);
+
+  background:#fff;
+  border-color:#fff;
+
+  color:var(--deep);
 }
+
+
+/* =========================
+   SPECIAL LAST CARD
+========================= */
+
+.card.last{
+  background:#E8E9E3;
+}
+
+.card.last:hover{
+  background:#2A312D;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
 
 .footer{
-  margin-top:42px;
-  text-align:center;
-  color:#9aa39d;
-  font-size:13px;
-  font-weight:600;
+  min-height:130px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  color:#8D948F;
 }
 
-@media(max-width:900px){
+.footer-logo{
+  font-size:10px;
+  font-weight:750;
+
+  letter-spacing:.15em;
+}
+
+.footer-copy{
+  font-size:10px;
+
+  letter-spacing:.04em;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1000px){
+
+  .hero{
+    grid-template-columns:1fr;
+    gap:40px;
+  }
+
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+@media(max-width:650px){
+
+  .page{
+    width:calc(100% - 30px);
+  }
+
+  .header{
+    height:75px;
+  }
+
+  .version{
+    display:none;
+  }
+
+  .brand-name{
+    font-size:15px;
+  }
+
+  .department{
+    font-size:10px;
+  }
+
+  .hero{
+    padding:55px 0 45px;
+  }
+
+  .hero h1{
+    font-size:48px;
+  }
+
+  .hero-meta{
+    gap:30px;
+  }
+
   .grid{
     grid-template-columns:1fr;
   }
 
-  .hero h1{
-    font-size:38px;
+  .card{
+    min-height:235px;
   }
 
-  .top{
-    margin-bottom:48px;
+  .tool-description{
+    display:none;
   }
+
 }
+
 </style>
 </head>
 
+
 <body>
 
-  <div class="wrap">
+<div class="page">
 
-    <div class="top">
-      <div class="logo">FORESTFIT</div>
-      <div class="badge">상품운영팀 업무툴</div>
-    </div>
 
-    <section class="hero">
-      <h1>포레스트핏 업무센터</h1>
-      <p>상품운영 업무를 더 빠르고 정확하게 관리합니다.</p>
-    </section>
+<!-- =========================
+     HEADER
+========================= -->
 
-    <section class="grid">
+<header class="header">
 
-      <!-- 포레스트핏 통합 납기관리 -->
-      <a class="card" href="integrated-delivery.html">
-        <div class="icon">🚚</div>
-        <h2>포레스트핏 통합 납기관리</h2>
-        <span>채널별 납기일 · 출고일정 통합 관리</span>
-      </a>
+  <div class="brand">
 
-      <!-- 재고매칭 확인 -->
-      <a class="card" href="stock-match.html">
-        <div class="icon">🔗</div>
-        <h2>재고매칭 확인</h2>
-        <span>키워드 매칭 여부 확인</span>
-      </a>
+    <div class="brand-mark"></div>
 
-      <!-- 주문취합건 -->
-      <a class="card" href="order-collect.html">
-        <div class="icon">📦</div>
-        <h2>주문취합건</h2>
-        <span>동대문 발주 · 입고일정 · 품절요청 정리</span>
-      </a>
-
-      <!-- 재고장 -->
-      <a class="card" href="stock-center.html">
-        <div class="icon">📊</div>
-        <h2>재고장</h2>
-        <span>거래처별 재고장 자동 입력</span>
-      </a>
-
-      <!-- 월별 사업계획서 -->
-      <a class="card" href="monthly-plan.html">
-        <div class="icon">📈</div>
-        <h2>월별 사업계획서</h2>
-        <span>판매순위 · 키워드 · 판매실적 자동입력</span>
-      </a>
-
-      <!-- 추가발주/제작 상품 -->
-      <a class="card" href="additional-order.html">
-        <div class="icon">🧾</div>
-        <h2>추가발주/제작 상품</h2>
-        <span>상품별 발주수량 · 발주서 양식 자동 생성</span>
-      </a>
-
-      <!-- 신규 상품 업로드 -->
-      <a class="card" href="new-product-upload.html">
-        <div class="icon">⬆️</div>
-        <h2>신규 상품 업로드</h2>
-        <span>채널별 신규 상품 등록정보 · 엑셀 생성</span>
-      </a>
-
-    </section>
-
-    <div class="footer">
-      FORESTFIT WORK CENTER
+    <div class="brand-name">
+      FORESTFIT
     </div>
 
   </div>
+
+
+  <div class="header-right">
+
+    <div class="department">
+
+      <span class="department-dot"></span>
+
+      판매전략팀 업무툴
+
+    </div>
+
+    <div class="version">
+      WORK CENTER · 2026
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+  <div class="hero-left">
+
+    <div class="hero-label">
+      SALES STRATEGY · WORK CENTER
+    </div>
+
+    <h1>
+      포레스트핏<br>
+      업무센터
+    </h1>
+
+  </div>
+
+
+  <div class="hero-right">
+
+    <p class="hero-description">
+      반복되는 상품 운영 업무를 단순하게.<br>
+      필요한 업무 도구를 한 곳에서 빠르고 정확하게 관리합니다.
+    </p>
+
+    <div class="hero-meta">
+
+      <div class="meta">
+        <strong>07</strong>
+        <span>WORK TOOLS</span>
+      </div>
+
+      <div class="meta">
+        <strong>01</strong>
+        <span>WORKSPACE</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- =========================
+     TOOLS
+========================= -->
+
+<div class="tool-head">
+
+  <div class="tool-title">
+    업무 도구
+    <span>TOOLS</span>
+  </div>
+
+  <div class="tool-description">
+    SELECT A TOOL TO START
+  </div>
+
+</div>
+
+
+
+<main class="grid">
+
+
+<!-- 01 배송 -->
+
+<a class="card" href="integrated-delivery.html">
+
+  <div class="card-top">
+
+    <div class="icon-box">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M3 6h11v10H3z"/>
+        <path d="M14 9h4l3 3v4h-7z"/>
+        <circle cx="7" cy="18" r="2"/>
+        <circle cx="18" cy="18" r="2"/>
+      </svg>
+
+    </div>
+
+    <div class="card-number">
+      01
+    </div>
+
+  </div>
+
+
+  <div class="card-content">
+
+    <h2>
+      포레스트핏 통합 납기관리
+    </h2>
+
+    <p class="card-desc">
+      채널별 납기일 · 출고일정 통합 관리
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="open-label">
+      DELIVERY
+    </span>
+
+    <div class="arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"/>
+        <path d="m14 7 5 5-5 5"/>
+      </svg>
+    </div>
+
+  </div>
+
+</a>
+
+
+
+<!-- 02 재고매칭 -->
+
+<a class="card" href="stock-match.html">
+
+  <div class="card-top">
+
+    <div class="icon-box">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/>
+        <path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1"/>
+      </svg>
+
+    </div>
+
+    <div class="card-number">
+      02
+    </div>
+
+  </div>
+
+
+  <div class="card-content">
+
+    <h2>
+      재고매칭 확인
+    </h2>
+
+    <p class="card-desc">
+      키워드 매칭 여부 확인
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="open-label">
+      MATCHING
+    </span>
+
+    <div class="arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"/>
+        <path d="m14 7 5 5-5 5"/>
+      </svg>
+    </div>
+
+  </div>
+
+</a>
+
+
+
+<!-- 03 주문취합 -->
+
+<a class="card" href="order-collect.html">
+
+  <div class="card-top">
+
+    <div class="icon-box">
+
+      <svg viewBox="0 0 24 24">
+        <path d="m4 7 8-4 8 4-8 4z"/>
+        <path d="M4 7v10l8 4 8-4V7"/>
+        <path d="M12 11v10"/>
+      </svg>
+
+    </div>
+
+    <div class="card-number">
+      03
+    </div>
+
+  </div>
+
+
+  <div class="card-content">
+
+    <h2>
+      주문취합건
+    </h2>
+
+    <p class="card-desc">
+      동대문 발주 · 입고일정 · 품절요청 정리
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="open-label">
+      ORDER
+    </span>
+
+    <div class="arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"/>
+        <path d="m14 7 5 5-5 5"/>
+      </svg>
+    </div>
+
+  </div>
+
+</a>
+
+
+
+<!-- 04 재고장 -->
+
+<a class="card" href="stock-center.html">
+
+  <div class="card-top">
+
+    <div class="icon-box">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M4 19V9"/>
+        <path d="M10 19V5"/>
+        <path d="M16 19v-7"/>
+        <path d="M22 19V3"/>
+        <path d="M2 19h20"/>
+      </svg>
+
+    </div>
+
+    <div class="card-number">
+      04
+    </div>
+
+  </div>
+
+
+  <div class="card-content">
+
+    <h2>
+      재고장
+    </h2>
+
+    <p class="card-desc">
+      거래처별 재고장 자동 입력
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="open-label">
+      STOCK
+    </span>
+
+    <div class="arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"/>
+        <path d="m14 7 5 5-5 5"/>
+      </svg>
+    </div>
+
+  </div>
+
+</a>
+
+
+
+<!-- 05 월별 사업계획서 -->
+
+<a class="card" href="monthly-plan.html">
+
+  <div class="card-top">
+
+    <div class="icon-box">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M4 19V5"/>
+        <path d="M4 19h16"/>
+        <path d="m7 15 4-5 3 2 5-7"/>
+      </svg>
+
+    </div>
+
+    <div class="card-number">
+      05
+    </div>
+
+  </div>
+
+
+  <div class="card-content">
+
+    <h2>
+      월별 사업계획서
+    </h2>
+
+    <p class="card-desc">
+      판매순위 · 키워드 · 판매실적 자동입력
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="open-label">
+      PLANNING
+    </span>
+
+    <div class="arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"/>
+        <path d="m14 7 5 5-5 5"/>
+      </svg>
+    </div>
+
+  </div>
+
+</a>
+
+
+
+<!-- 06 추가발주 -->
+
+<a class="card" href="additional-order.html">
+
+  <div class="card-top">
+
+    <div class="icon-box">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M6 3h12v18H6z"/>
+        <path d="M9 7h6"/>
+        <path d="M9 11h6"/>
+        <path d="M9 15h3"/>
+      </svg>
+
+    </div>
+
+    <div class="card-number">
+      06
+    </div>
+
+  </div>
+
+
+  <div class="card-content">
+
+    <h2>
+      추가발주/제작 상품
+    </h2>
+
+    <p class="card-desc">
+      상품별 발주수량 · 발주서 양식 자동 생성
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="open-label">
+      PURCHASE
+    </span>
+
+    <div class="arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"/>
+        <path d="m14 7 5 5-5 5"/>
+      </svg>
+    </div>
+
+  </div>
+
+</a>
+
+
+
+<!-- 07 신규상품 -->
+
+<a class="card last" href="new-product-upload.html">
+
+  <div class="card-top">
+
+    <div class="icon-box">
+
+      <svg viewBox="0 0 24 24">
+        <path d="M12 16V4"/>
+        <path d="m7 9 5-5 5 5"/>
+        <path d="M5 14v6h14v-6"/>
+      </svg>
+
+    </div>
+
+    <div class="card-number">
+      07
+    </div>
+
+  </div>
+
+
+  <div class="card-content">
+
+    <h2>
+      신규 상품 업로드
+    </h2>
+
+    <p class="card-desc">
+      채널별 신규 상품 등록정보 · 엑셀 생성
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="open-label">
+      PRODUCT
+    </span>
+
+    <div class="arrow">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"/>
+        <path d="m14 7 5 5-5 5"/>
+      </svg>
+    </div>
+
+  </div>
+
+</a>
+
+
+</main>
+
+
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer class="footer">
+
+  <div class="footer-logo">
+    FORESTFIT · WORK CENTER
+  </div>
+
+  <div class="footer-copy">
+    SALES STRATEGY TEAM
+  </div>
+
+</footer>
+
+
+</div>
 
 </body>
 </html>
