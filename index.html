@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포레스트핏 업무센터</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#f7f3eb 0%,#edf3ef 100%);
+  color:#1f2a24;
+}
+
+.wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:56px 28px 80px;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:70px;
+}
+
+.logo{
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:.08em;
+  color:#244734;
+}
+
+.badge{
+  padding:10px 16px;
+  border-radius:999px;
+  background:#ffffffcc;
+  color:#486052;
+  font-size:14px;
+  font-weight:700;
+  box-shadow:0 8px 24px rgba(31,42,36,.06);
+}
+
+.hero{
+  text-align:center;
+  margin-bottom:52px;
+}
+
+.hero h1{
+  font-size:54px;
+  line-height:1.15;
+  letter-spacing:-.05em;
+  color:#173d2b;
+  font-weight:850;
+  margin-bottom:16px;
+}
+
+.hero p{
+  font-size:18px;
+  color:#6d776f;
+  font-weight:600;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px;
+}
+
+.card{
+  display:block;
+  text-decoration:none;
+  background:rgba(255,255,255,.86);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:28px;
+  padding:32px 30px;
+  min-height:190px;
+  box-shadow:0 18px 45px rgba(38,49,43,.08);
+  transition:.22s ease;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 24px 60px rgba(38,49,43,.14);
+}
+
+.icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+  margin-bottom:28px;
+}
+
+/* 카드별 아이콘 배경 */
+.card:nth-child(1) .icon{background:#e3f2ed;}
+.card:nth-child(2) .icon{background:#e6f5ec;}
+.card:nth-child(3) .icon{background:#f3e9ff;}
+.card:nth-child(4) .icon{background:#e9f5ff;}
+.card:nth-child(5) .icon{background:#fff3c9;}
+.card:nth-child(6) .icon{background:#e8f3ea;}
+.card:nth-child(7) .icon{background:#ffe8e8;}
+
+.card h2{
+  font-size:27px;
+  letter-spacing:-.04em;
+  color:#173d2b;
+  font-weight:850;
+  margin-bottom:10px;
+}
+
+.card span{
+  display:block;
+  font-size:15px;
+  color:#7c867f;
+  font-weight:600;
+}
+
+.footer{
+  margin-top:42px;
+  text-align:center;
+  color:#9aa39d;
+  font-size:13px;
+  font-weight:600;
+}
+
+@media(max-width:900px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .hero h1{
+    font-size:38px;
+  }
+
+  .top{
+    margin-bottom:48px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+  <div class="wrap">
+
+    <div class="top">
+      <div class="logo">FORESTFIT</div>
+      <div class="badge">상품운영팀 업무툴</div>
+    </div>
+
+    <section class="hero">
+      <h1>포레스트핏 업무센터</h1>
+      <p>상품운영 업무를 더 빠르고 정확하게 관리합니다.</p>
+    </section>
+
+    <section class="grid">
+
+      <!-- 포레스트핏 통합 납기관리 -->
+      <a class="card" href="integrated-delivery.html">
+        <div class="icon">🚚</div>
+        <h2>포레스트핏 통합 납기관리</h2>
+        <span>채널별 납기일 · 출고일정 통합 관리</span>
+      </a>
+
+      <!-- 재고매칭 확인 -->
+      <a class="card" href="stock-match.html">
+        <div class="icon">🔗</div>
+        <h2>재고매칭 확인</h2>
+        <span>키워드 매칭 여부 확인</span>
+      </a>
+
+      <!-- 주문취합건 -->
+      <a class="card" href="order-collect.html">
+        <div class="icon">📦</div>
+        <h2>주문취합건</h2>
+        <span>동대문 발주 · 입고일정 · 품절요청 정리</span>
+      </a>
+
+      <!-- 재고장 -->
+      <a class="card" href="stock-center.html">
+        <div class="icon">📊</div>
+        <h2>재고장</h2>
+        <span>거래처별 재고장 자동 입력</span>
+      </a>
+
+      <!-- 월별 사업계획서 -->
+      <a class="card" href="monthly-plan.html">
+        <div class="icon">📈</div>
+        <h2>월별 사업계획서</h2>
+        <span>판매순위 · 키워드 · 판매실적 자동입력</span>
+      </a>
+
+      <!-- 추가발주/제작 상품 -->
+      <a class="card" href="additional-order.html">
+        <div class="icon">🧾</div>
+        <h2>추가발주/제작 상품</h2>
+        <span>상품별 발주수량 · 발주서 양식 자동 생성</span>
+      </a>
+
+      <!-- 신규 상품 업로드 -->
+      <a class="card" href="new-product-upload.html">
+        <div class="icon">⬆️</div>
+        <h2>신규 상품 업로드</h2>
+        <span>채널별 신규 상품 등록정보 · 엑셀 생성</span>
+      </a>
+
+    </section>
+
+    <div class="footer">
+      FORESTFIT WORK CENTER
+    </div>
+
+  </div>
+
+</body>
+</html>
