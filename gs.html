@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GS 패널티 사전 관리 v1.0 | GS 전용</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+<style>
+body{font-family:Arial,"Noto Sans KR",sans-serif;margin:0;background:#EEF5FF;color:#1F2A44}
+.wrap{max-width:1100px;margin:0 auto;padding:28px}
+h1{font-size:28px;margin:0 0 8px}
+.desc{color:#666;line-height:1.5;margin-bottom:22px}
+.card{background:#FFFFFF;border-radius:14px;border:1px solid #D7E6FF;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(31,42,68,.08)}
+label{display:block;font-weight:bold;margin-bottom:8px}
+input,select,textarea,button{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px}
+textarea{min-height:96px;resize:vertical}
+button{cursor:pointer;border:0;background:#1F4E79;color:#fff;font-weight:bold}
+button.secondary{background:#2F75B5}
+.small{font-size:13px;color:#777;line-height:1.5}
+.pill{display:inline-block;padding:5px 10px;border-radius:999px;background:#E3F0FF;margin:3px;font-size:12px}
+.guide{margin:14px 0 12px;padding:14px;background:#EAF3FF;border:1px solid #BFD9FF;border-radius:10px;color:#1F4E79}
+.table-wrap{max-height:500px;overflow:auto;border:1px solid #ddd;border-radius:12px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border:1px solid #e5e5e5;padding:7px;white-space:nowrap}
+th{background:#D9EAF7;font-weight:bold;text-align:center;position:sticky;top:0;z-index:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>GS 패널티 사전 관리 v1.0</h1><div style="display:inline-block;background:#1F4E79;color:#fff;padding:6px 12px;border-radius:999px;font-size:13px;margin-bottom:14px;">GS 전용 관리 사이트</div>
+<div class="desc">
+GS 패널티 사전 관리용 파일을 업로드하면 지정된 컬럼 구조로 결과 파일을 생성합니다.<br>
+결과 파일 1행은 회색 배경 + 굵은 글씨로 출력됩니다.
+</div>
+
+<div class="card">
+<label>1. 파일 업로드</label>
+<input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+<label>시트 선택</label>
+<select id="sheetSelect"></select>
+<div class="small">아래 조건으로 조회한 파일을 업로드해 주시기 바랍니다.<br><br>
+<b>[경로]</b><br>
+셀메이트 → 주문관리 → 판매처분류 : GS / GS더소재<br><br>
+<b>[조회조건]</b><br>
+- 판매처분류 : GS / GS더소재<br>
+- 조회기간 : 임의기간 [ 3개월 전 ~ 조회일 기준 평일 2일 전 ]<br>
+- 확장필터 : 출고불가 필터 적용</div>
+</div>
+
+<div class="card">
+<label>2. 공휴일 입력</label>
+<textarea id="holidays" placeholder="예시&#10;2026-05-25&#10;2026-06-03"></textarea>
+<div class="small">한 줄에 하나씩 입력하세요. 납기일 계산 시 주말과 공휴일은 제외됩니다.</div>
+</div>
+
+<div class="card">
+<label>결과 파일 컬럼</label>
+<span class="pill">A 주문번호</span>
+<span class="pill">B 주문일자</span>
+<span class="pill">C 공급처명</span>
+<span class="pill">D 지연일</span>
+<span class="pill">E 사입상품명</span>
+<span class="pill">F 판매상품명</span>
+<span class="pill">G 옵션</span>
+<span class="pill">H 입고예정일</span>
+<span class="pill">I 납기일</span>
+<span class="pill">J 납기 가능 여부</span>
+<span class="pill">K 처리내용</span>
+<span class="pill">L 메모1</span>
+<span class="pill">M 메모2</span>
+<br><br>
+<button onclick="processFile()">계산 실행</button>
+
+<div class="guide">
+<b>결과 파일 사용 방법</b><br><br>
+J열 수식이 삭제되었거나 정상적으로 적용되지 않은 경우, 아래 수식을 J2 셀에 입력한 후 마지막 행까지 채워서 사용해 주시기 바랍니다.<br><br>
+<code>=IF(OR(H2="",I2="",I2="취소확인요망"),"",IF(INT(IFERROR(DATEVALUE(TRIM(H2)),H2))&gt;INT(IFERROR(DATEVALUE(TRIM(I2)),I2)),"출고 불가",""))</code>
+</div>
+
+<button class="secondary" onclick="downloadResult()">결과 엑셀 다운로드</button>
+</div>
+
+<div class="card">
+<label>결과 미리보기</label>
+<div id="summary" class="small"></div>
+<div class="table-wrap" id="tableWrap"></div>
+</div>
+</div>
+
+<script>
+let workbook=null;
+let resultRows=[];
+
+const OUT_HEADERS=[
+ "주문번호","주문일자","공급처명","지연일","사입상품명","판매상품명","옵션","입고예정일","납기일","납기 가능 여부","처리내용","메모1","메모2"
+];
+
+function txt(v){return v==null?"":String(v).trim();}
+
+function toDate(v){
+ if(v==null||v===""||v===0||v==="0")return null;
+ if(v instanceof Date&&!isNaN(v))return new Date(v.getFullYear(),v.getMonth(),v.getDate());
+ if(typeof v==="number"){
+   if(v<=1)return null;
+   const d=XLSX.SSF.parse_date_code(v);
+   return d?new Date(d.y,d.m-1,d.d):null;
+ }
+ let s=String(v).trim();
+ if(!s)return null;
+ let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+ if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+ m=s.match(/(?:(\d{4})\s*년\s*)?(\d{1,2})\s*월\s*(\d{1,2})\s*일?/);
+ if(m)return new Date(m[1]?+m[1]:new Date().getFullYear(),+m[2]-1,+m[3]);
+ s=s.replace(/\./g,"-").replace(/\//g,"-").replace(/\s+/g,"");
+ m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+ if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+ m=s.match(/^(\d{1,2})-(\d{1,2})-(\d{2})$/);
+ if(m)return new Date(2000+ +m[3],+m[1]-1,+m[2]);
+ m=s.match(/^(\d{1,2})-(\d{1,2})$/);
+ if(m)return new Date(new Date().getFullYear(),+m[1]-1,+m[2]);
+ return null;
+}
+
+function dateKey(d){
+ if(!d)return"";
+ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function isWeekend(d){return d.getDay()===0||d.getDay()===6;}
+
+function parseHolidays(){
+ return new Set(
+   document.getElementById("holidays").value
+     .split(/\n+/)
+     .map(x=>dateKey(toDate(x.trim())))
+     .filter(Boolean)
+ );
+}
+
+function addWorkdays(date,days,holidays){
+ const d=new Date(date);
+ let count=0;
+ while(count<days){
+   d.setDate(d.getDate()+1);
+   if(!isWeekend(d)&&!holidays.has(dateKey(d)))count++;
+ }
+ return d;
+}
+
+// 엑셀 수식과 동일한 납기일 계산:
+// IF(B2="","",
+// IF(OR(
+// WEEKDAY(WORKDAY(B2,7,공휴일!$A$1:$A$100),2)=5,
+// COUNTIF(공휴일!$A$1:$A$100,WORKDAY(B2,7,공휴일!$A$1:$A$100)+1)>0
+// ),
+// WORKDAY(B2,7,공휴일!$A$1:$A$100),
+// WORKDAY(B2,8,공휴일!$A$1:$A$100)
+// ))
+function calcDueDate(orderDate,holidays){
+ const b=toDate(orderDate);
+ if(!b)return"";
+
+ const workday7=addWorkdays(b,7,holidays);
+ const nextDay=new Date(workday7);
+ nextDay.setDate(nextDay.getDate()+1);
+
+ // WEEKDAY(...,2)=5 → 금요일
+ // 또는 +7영업일 다음날이 공휴일
+ if(workday7.getDay()===5 || holidays.has(dateKey(nextDay))){
+   return workday7;
+ }
+
+ return addWorkdays(b,8,holidays);
+}
+
+function calcPossible(inbound,due){
+ if(inbound===""||due===""||due==="취소확인요망")return"";
+ const h=toDate(inbound);
+ const i=toDate(due);
+ if(h&&i&&h.getTime()>i.getTime())return"출고 불가";
+ return"";
+}
+
+function getRows(){
+ const sheetName=document.getElementById("sheetSelect").value;
+ return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,raw:false,defval:"",blankrows:false});
+}
+
+function processFile(){
+ if(!workbook)return alert("파일을 업로드해주세요.");
+
+ const rows=getRows();
+ const holidays=parseHolidays();
+
+ resultRows=[OUT_HEADERS];
+
+ for(let i=1;i<rows.length;i++){
+   const r=rows[i]||[];
+
+   // 원본 파일 기준:
+   // A 판매처주문번호 / B 주문일자 / C 공급처명 / D 배송지연일
+   // E 사입상품명 / F 상품명(상품매칭) / G 옵션내용 / H 입고예정일
+   const orderNo=r[0]??"";
+   const orderDate=r[1]??"";
+   const supplier=r[2]??"";
+   const delay=r[3]??"";
+   const buyName=r[4]??"";
+   const product=r[5]??"";
+   const option=r[6]??"";
+   const inbound=r[7]??"";
+
+   if([orderNo,orderDate,supplier,delay,buyName,product,option,inbound].every(x=>txt(x)===""))continue;
+
+   const due=calcDueDate(orderDate,holidays);
+   const dueText=due?dateKey(due):"";
+   const possible=calcPossible(inbound,dueText);
+
+   resultRows.push([
+     orderNo,
+     orderDate,
+     supplier,
+     delay,
+     buyName,
+     product,
+     option,
+     inbound,
+     dueText,
+     possible,
+     "",
+     "",
+     ""
+   ]);
+ }
+
+ renderTable(resultRows.slice(0,101));
+ document.getElementById("summary").innerHTML=`총 ${resultRows.length-1}건 생성 완료`;
+}
+
+function renderTable(rows){
+ if(!rows.length)return;
+ let html="<table><thead><tr>";
+ rows[0].forEach(h=>html+=`<th>${h}</th>`);
+ html+="</tr></thead><tbody>";
+ for(let i=1;i<rows.length;i++){
+   html+="<tr>";
+   rows[i].forEach((v,idx)=>{
+     let val=v;
+     if([1,7,8].includes(idx)){
+       const d=toDate(v);
+       if(d)val=dateKey(d);
+     }
+     
+if(idx===9 && i>0){
+  html+=`<td style="color:#d60000;font-weight:600">${val??""}</td>`;
+}else{
+  html+=`<td>${val??""}</td>`;
+}
+
+   });
+   html+="</tr>";
+ }
+ html+="</tbody></table>";
+ document.getElementById("tableWrap").innerHTML=html;
+}
+
+function downloadResult(){
+ if(!resultRows.length)return alert("계산 실행을 먼저 눌러주세요.");
+
+ const outputRows=resultRows.map(row=>row.slice());
+ const ws=XLSX.utils.aoa_to_sheet(outputRows);
+ const range=XLSX.utils.decode_range(ws["!ref"]);
+
+ // Header style: gray fill + bold font
+ for(let c=range.s.c;c<=range.e.c;c++){
+   const addr=XLSX.utils.encode_cell({r:0,c});
+   if(!ws[addr])continue;
+   ws[addr].s={
+     fill:{patternType:"solid",fgColor:{rgb:"D9D9D9"}},
+     font:{bold:true,color:{rgb:"000000"}},
+     alignment:{horizontal:"center",vertical:"center"},
+     border:{
+       top:{style:"thin",color:{rgb:"999999"}},
+       bottom:{style:"thin",color:{rgb:"999999"}},
+       left:{style:"thin",color:{rgb:"999999"}},
+       right:{style:"thin",color:{rgb:"999999"}}
+     }
+   };
+ }
+
+ // Date columns: B, H, I
+ for(let r=1;r<=range.e.r;r++){
+   [1,7,8].forEach(c=>{
+     const addr=XLSX.utils.encode_cell({r,c});
+     if(ws[addr]){
+       const d=toDate(ws[addr].v);
+       if(d){
+         ws[addr].v=d;
+         ws[addr].t="d";
+         ws[addr].z="yyyy-mm-dd";
+       }
+     }
+   });
+
+   // J열 납기 가능 여부: 결과 파일에서 H/I열 수정 시 자동 계산되도록 수식 입력
+   const rowNum = r + 1;
+   const jAddr = XLSX.utils.encode_cell({r:r,c:9});
+   ws[jAddr] = {
+     t:"s",
+     f:`IF(OR(H${rowNum}="",I${rowNum}="",I${rowNum}="취소확인요망"),"",IF(INT(IFERROR(DATEVALUE(TRIM(H${rowNum})),H${rowNum}))>INT(IFERROR(DATEVALUE(TRIM(I${rowNum})),I${rowNum})),"출고 불가",""))`,
+     v:""
+   };
+   ws[jAddr].s = {
+     font:{color:{rgb:"D60000"},bold:true}
+   };
+ }
+
+ ws["!cols"]=[
+   {wch:18},{wch:12},{wch:16},{wch:10},{wch:24},{wch:40},{wch:20},
+   {wch:12},{wch:12},{wch:16},{wch:20},{wch:20},{wch:20}
+ ];
+
+ 
+ // 전체 셀 가운데 정렬
+ for(let r=0;r<=range.e.r;r++){
+   for(let c=0;c<=range.e.c;c++){
+     const addr=XLSX.utils.encode_cell({r,c});
+     if(!ws[addr]) continue;
+     ws[addr].s = ws[addr].s || {};
+     ws[addr].s.alignment = {horizontal:"center",vertical:"center"};
+   }
+ }
+
+ // 1행 높이 30
+ ws["!rows"] = ws["!rows"] || [];
+ ws["!rows"][0] = {hpx:30};
+
+ ws["!autofilter"]={ref:ws["!ref"]};
+
+
+ const wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,ws,"GS패널티관리");
+ XLSX.writeFile(wb,"GS_패널티_사전관리_결과_v4.xlsx");
+}
+
+document.getElementById("fileInput").addEventListener("change",e=>{
+ const file=e.target.files[0];
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=evt=>{
+   workbook=XLSX.read(new Uint8Array(evt.target.result),{type:"array",cellDates:true,cellStyles:true});
+   const select=document.getElementById("sheetSelect");
+   select.innerHTML="";
+   workbook.SheetNames.forEach((name,idx)=>{
+     select.add(new Option(name,name));
+     if(idx===0)select.value=name;
+   });
+ };
+ reader.readAsArrayBuffer(file);
+});
+</script>
+</body>
+</html>
