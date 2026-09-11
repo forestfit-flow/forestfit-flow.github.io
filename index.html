@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>포레스트핏 업무센터</title>
+<title>FORESTFIT WORKROOM</title>
 
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -16,18 +16,32 @@
 }
 
 :root{
-  --bg:#f4f4f0;
-  --paper:#fafaf7;
+  --bg:#f7f7f5;
+  --white:#ffffff;
   --black:#111111;
   --gray:#767676;
-  --light:#d8d8d2;
-  --accent:#7f1d1d;
+  --muted:#9a9a96;
+  --line:#ddddda;
+  --soft:#eeeeeb;
+}
+
+html{
+  scroll-behavior:smooth;
 }
 
 body{
+  min-height:100vh;
   background:var(--bg);
   color:var(--black);
-  font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+  font-family:
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Malgun Gothic",
+    sans-serif;
+
   -webkit-font-smoothing:antialiased;
 }
 
@@ -36,302 +50,621 @@ a{
   text-decoration:none;
 }
 
+button,
+input{
+  font:inherit;
+}
+
+
+/* =========================
+   PAGE
+========================= */
+
 .page{
-  width:calc(100% - 56px);
-  max-width:1440px;
+  width:calc(100% - 64px);
+  max-width:1480px;
   margin:0 auto;
 }
 
 
-/* HEADER */
+/* =========================
+   HEADER
+========================= */
 
 .header{
-  height:78px;
-  border-bottom:1px solid var(--light);
+  height:82px;
 
   display:flex;
   align-items:center;
   justify-content:space-between;
+
+  border-bottom:1px solid var(--line);
 }
 
-.logo{
-  font-size:16px;
-  font-weight:800;
-  letter-spacing:.15em;
-}
-
-.header-meta{
+.brand{
   display:flex;
-  gap:28px;
+  align-items:center;
+  gap:14px;
+}
 
-  font-size:10px;
-  font-weight:600;
-  letter-spacing:.12em;
-  color:#777;
+.brand-mark{
+  width:18px;
+  height:18px;
+
+  background:var(--black);
+  position:relative;
+}
+
+.brand-mark::after{
+  content:"";
+
+  position:absolute;
+
+  width:7px;
+  height:7px;
+
+  right:-5px;
+  bottom:-5px;
+
+  background:#8c8c88;
+}
+
+.brand-name{
+  font-size:15px;
+  font-weight:850;
+  letter-spacing:.14em;
+}
+
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:28px;
 }
 
 .team{
-  color:var(--black);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.02em;
+}
+
+.internal{
+  font-size:9px;
+  font-weight:650;
+  color:var(--muted);
+  letter-spacing:.14em;
 }
 
 
-/* HERO */
+/* =========================
+   HERO
+========================= */
 
 .hero{
-  padding:82px 0 76px;
+  padding:72px 0 62px;
 
-  display:grid;
-  grid-template-columns:1.4fr .6fr;
-  gap:80px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
 
-  border-bottom:1px solid var(--light);
+  border-bottom:1px solid var(--line);
 }
 
-.hero-kicker{
-  margin-bottom:30px;
+.hero-left{
+  flex:1;
+}
+
+.kicker{
+  margin-bottom:24px;
 
   font-size:10px;
   font-weight:700;
-  letter-spacing:.17em;
-  color:#777;
+
+  letter-spacing:.16em;
+  color:#7d7d79;
 }
 
 .hero h1{
-  font-size:clamp(48px,6vw,82px);
-  line-height:1.04;
-  letter-spacing:-.065em;
+  font-size:clamp(58px,7vw,92px);
+  line-height:.9;
 
-  font-weight:700;
+  letter-spacing:-.065em;
+  font-weight:800;
+}
+
+.hero h1 span{
+  display:block;
 }
 
 .hero-right{
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
+  width:310px;
+
+  padding-bottom:5px;
 }
 
-.hero-right strong{
+.hero-meta{
+  display:flex;
+  gap:38px;
+}
+
+.meta strong{
   display:block;
 
-  margin-bottom:18px;
-
-  font-size:18px;
-  line-height:1.55;
-
-  font-weight:650;
-  letter-spacing:-.03em;
+  font-size:21px;
+  font-weight:750;
 }
 
-.hero-right p{
-  max-width:320px;
+.meta span{
+  display:block;
 
-  font-size:13px;
-  line-height:1.75;
-  color:#777;
+  margin-top:5px;
+
+  font-size:9px;
+  color:var(--muted);
+
+  font-weight:700;
+  letter-spacing:.13em;
 }
 
 
-/* SECTION */
+/* =========================
+   TOOL BAR
+========================= */
 
-.section-head{
-  padding:36px 0 18px;
+.toolbar{
+  min-height:104px;
 
   display:flex;
+  align-items:flex-end;
   justify-content:space-between;
-  align-items:center;
+
+  padding-bottom:20px;
 }
 
-.section-title{
+.toolbar-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.toolbar-title{
   font-size:12px;
-  font-weight:750;
+  font-weight:800;
   letter-spacing:.08em;
 }
 
-.section-count{
-  font-size:10px;
-  color:#999;
-  letter-spacing:.12em;
+.toolbar-count{
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:.13em;
 }
 
 
-/* TOOL LIST */
+/* =========================
+   SEARCH
+========================= */
 
-.tools{
-  border-top:1px solid var(--black);
-}
+.search{
+  width:330px;
+  height:44px;
 
-.tool{
-  min-height:118px;
-
-  display:grid;
-
-  grid-template-columns:90px 1.15fr 1fr 130px;
-
+  display:flex;
   align-items:center;
 
-  border-bottom:1px solid var(--light);
+  border-bottom:1px solid #9c9c98;
 
-  transition:
-    background .22s ease,
-    color .22s ease,
-    padding .22s ease;
+  transition:border-color .2s ease;
 }
 
-.tool:hover{
-  background:var(--black);
-  color:white;
-
-  padding-left:20px;
-  padding-right:20px;
+.search:focus-within{
+  border-color:var(--black);
 }
 
-.no{
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.12em;
+.search-icon{
+  width:17px;
+  height:17px;
 
-  color:#999;
+  margin-right:10px;
 
-  transition:.22s ease;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.6;
+  stroke-linecap:round;
 }
 
-.tool:hover .no{
-  color:#888;
-}
+.search input{
+  flex:1;
 
-.tool-name{
-  font-size:23px;
-  line-height:1.3;
+  height:100%;
 
-  font-weight:650;
-  letter-spacing:-.045em;
-}
+  border:0;
+  outline:0;
 
-.tool-desc{
+  background:transparent;
+
   font-size:12px;
-  line-height:1.6;
-
-  color:#777;
-
-  transition:.22s ease;
+  color:var(--black);
 }
 
-.tool:hover .tool-desc{
+.search input::placeholder{
   color:#aaa;
 }
 
-.tool-side{
+.search-key{
+  font-size:9px;
+  color:#aaa;
+
+  border:1px solid #d3d3cf;
+  padding:3px 6px;
+}
+
+.clear{
+  display:none;
+
+  margin-left:8px;
+
+  border:0;
+  background:none;
+
+  font-size:18px;
+  line-height:1;
+
+  color:#777;
+
+  cursor:pointer;
+}
+
+
+/* =========================
+   GRID
+========================= */
+
+.tools{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+
+  border-top:1px solid var(--black);
+  border-left:1px solid var(--line);
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.tool-card{
+  position:relative;
+
+  min-height:245px;
+
+  padding:28px;
+
+  display:flex;
+  flex-direction:column;
+
+  background:var(--white);
+
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+
+  overflow:hidden;
+
+  transition:
+    background .25s ease,
+    color .25s ease;
+}
+
+.tool-card::before{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  width:0;
+  height:3px;
+
+  background:var(--black);
+
+  transition:width .3s ease;
+}
+
+.tool-card:hover::before{
+  width:100%;
+}
+
+.tool-card:hover{
+  background:var(--black);
+  color:white;
+}
+
+
+/* CARD TOP */
+
+.card-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+}
+
+.card-no{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.13em;
+
+  color:#999;
+
+  transition:.25s ease;
+}
+
+.card-category{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.15em;
+
+  color:#8b8b88;
+
+  transition:.25s ease;
+}
+
+.tool-card:hover .card-no,
+.tool-card:hover .card-category{
+  color:#888;
+}
+
+
+/* CARD CONTENT */
+
+.card-content{
+  margin-top:50px;
+}
+
+.card-title{
+  font-size:25px;
+  line-height:1.35;
+
+  font-weight:700;
+  letter-spacing:-.04em;
+
+  margin-bottom:11px;
+}
+
+.card-desc{
+  max-width:360px;
+
+  font-size:12px;
+  line-height:1.7;
+
+  color:#777;
+
+  transition:.25s ease;
+}
+
+.tool-card:hover .card-desc{
+  color:#aaa;
+}
+
+
+/* CARD BOTTOM */
+
+.card-bottom{
+  margin-top:auto;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
 }
 
-.category{
+.card-action{
   font-size:9px;
   font-weight:700;
+  letter-spacing:.13em;
 
-  letter-spacing:.14em;
+  color:#aaa;
 
-  color:#999;
+  opacity:0;
+  transform:translateY(3px);
+
+  transition:.25s ease;
+}
+
+.tool-card:hover .card-action{
+  opacity:1;
+  transform:translateY(0);
 }
 
 .arrow{
-  width:34px;
-  height:34px;
+  width:38px;
+  height:38px;
 
-  border:1px solid #c9c9c4;
+  border:1px solid #d2d2ce;
   border-radius:50%;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  font-size:15px;
-
-  transition:.22s ease;
+  transition:
+    background .25s ease,
+    color .25s ease,
+    border-color .25s ease,
+    transform .25s ease;
 }
 
-.tool:hover .arrow{
-  background:white;
-  color:black;
-  border-color:white;
+.arrow svg{
+  width:15px;
+  height:15px;
+
+  fill:none;
+  stroke:currentColor;
+
+  stroke-width:1.6;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.tool-card:hover .arrow{
+  background:#fff;
+  color:#111;
+  border-color:#fff;
 
   transform:rotate(-45deg);
 }
 
 
-/* 포인트 줄 */
+/* 7번째는 전체 폭 */
 
-.tool:hover::before{
-  content:"";
-  position:absolute;
+.tool-card.full{
+  grid-column:1 / -1;
+
+  min-height:205px;
+}
+
+.tool-card.full .card-content{
+  margin-top:36px;
 }
 
 
-/* FOOTER */
+/* =========================
+   EMPTY SEARCH
+========================= */
+
+.no-results{
+  display:none;
+
+  grid-column:1 / -1;
+
+  padding:80px 20px;
+
+  text-align:center;
+
+  background:#fff;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+
+.no-results strong{
+  display:block;
+
+  font-size:20px;
+  font-weight:650;
+
+  margin-bottom:8px;
+}
+
+.no-results span{
+  font-size:12px;
+  color:#888;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
 
 .footer{
-  min-height:130px;
+  height:125px;
 
   display:flex;
   align-items:center;
   justify-content:space-between;
+}
 
+.footer-brand{
   font-size:10px;
-  letter-spacing:.1em;
-  color:#888;
+  font-weight:800;
+  letter-spacing:.14em;
 }
 
-.footer strong{
-  color:#222;
-  font-weight:700;
+.footer-text{
+  font-size:9px;
+  color:#999;
+  letter-spacing:.12em;
 }
 
 
-/* MOBILE */
+/* =========================
+   RESPONSIVE
+========================= */
 
-@media(max-width:850px){
+@media(max-width:900px){
 
   .hero{
-    grid-template-columns:1fr;
-    gap:40px;
+    align-items:flex-start;
+    flex-direction:column;
+
+    gap:45px;
   }
 
-  .tool{
-    grid-template-columns:52px 1fr 60px;
-    padding:24px 0;
-  }
-
-  .tool-desc{
-    display:none;
-  }
-
-  .category{
-    display:none;
-  }
-
-  .tool-name{
-    font-size:18px;
+  .hero-right{
+    width:auto;
   }
 
 }
 
-@media(max-width:600px){
+@media(max-width:720px){
 
   .page{
-    width:calc(100% - 28px);
+    width:calc(100% - 30px);
   }
 
-  .header-meta span:last-child{
+  .header{
+    height:68px;
+  }
+
+  .internal{
     display:none;
   }
 
+  .team{
+    font-size:10px;
+  }
+
   .hero{
-    padding:55px 0;
+    padding:55px 0 45px;
   }
 
   .hero h1{
-    font-size:45px;
+    font-size:52px;
+  }
+
+  .toolbar{
+    align-items:flex-start;
+    flex-direction:column;
+
+    gap:20px;
+
+    padding:28px 0 18px;
+  }
+
+  .search{
+    width:100%;
+  }
+
+  .tools{
+    grid-template-columns:1fr;
+  }
+
+  .tool-card{
+    min-height:220px;
+  }
+
+  .tool-card.full{
+    grid-column:auto;
+  }
+
+  .card-title{
+    font-size:22px;
+  }
+
+  .footer{
+    height:100px;
+
+    align-items:flex-start;
+    justify-content:center;
+    flex-direction:column;
+
+    gap:8px;
   }
 
 }
@@ -344,32 +677,54 @@ a{
 <div class="page">
 
 
+<!-- =========================
+     HEADER
+========================= -->
+
 <header class="header">
 
-  <div class="logo">
-    FORESTFIT
+  <div class="brand">
+
+    <div class="brand-mark"></div>
+
+    <div class="brand-name">
+      FORESTFIT
+    </div>
+
   </div>
 
-  <div class="header-meta">
-    <span class="team">판매전략팀 업무툴</span>
-    <span>INTERNAL / 2026</span>
+
+  <div class="header-right">
+
+    <div class="team">
+      판매전략팀
+    </div>
+
+    <div class="internal">
+      INTERNAL WORKSPACE · 2026
+    </div>
+
   </div>
 
 </header>
 
 
 
+<!-- =========================
+     HERO
+========================= -->
+
 <section class="hero">
 
-  <div>
+  <div class="hero-left">
 
-    <div class="hero-kicker">
-      SALES STRATEGY · WORK CENTER
+    <div class="kicker">
+      SALES STRATEGY / INTERNAL TOOLS
     </div>
 
     <h1>
-      포레스트핏<br>
-      업무센터
+      <span>FORESTFIT</span>
+      <span>WORKROOM</span>
     </h1>
 
   </div>
@@ -377,16 +732,19 @@ a{
 
   <div class="hero-right">
 
-    <strong>
-      반복 업무는 단순하게.<br>
-      필요한 업무는 한 곳에서.
-    </strong>
+    <div class="hero-meta">
 
-    <p>
-      판매전략팀의 상품 운영 및 반복 업무를
-      보다 빠르고 정확하게 관리하기 위한
-      내부 워크스페이스입니다.
-    </p>
+      <div class="meta">
+        <strong>07</strong>
+        <span>TOOLS</span>
+      </div>
+
+      <div class="meta">
+        <strong>01</strong>
+        <span>WORKSPACE</span>
+      </div>
+
+    </div>
 
   </div>
 
@@ -394,45 +752,111 @@ a{
 
 
 
-<div class="section-head">
+<!-- =========================
+     TOOLBAR + SEARCH
+========================= -->
 
-  <div class="section-title">
-    WORK TOOLS
+<section class="toolbar">
+
+  <div class="toolbar-left">
+
+    <div class="toolbar-title">
+      WORK TOOLS
+    </div>
+
+    <div class="toolbar-count">
+      <span id="resultCount">07</span> / 07
+    </div>
+
   </div>
 
-  <div class="section-count">
-    07 TOOLS
+
+  <div class="search">
+
+    <svg class="search-icon" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="6"></circle>
+      <path d="m16 16 4 4"></path>
+    </svg>
+
+    <input
+      id="toolSearch"
+      type="text"
+      placeholder="업무 검색"
+      autocomplete="off"
+      aria-label="업무 검색"
+    >
+
+    <span class="search-key">/</span>
+
+    <button
+      class="clear"
+      id="clearSearch"
+      type="button"
+      aria-label="검색 초기화"
+    >
+      ×
+    </button>
+
   </div>
 
-</div>
+</section>
 
 
 
-<main class="tools">
+<!-- =========================
+     WORK TOOLS
+========================= -->
+
+<main class="tools" id="tools">
 
 
-<a class="tool" href="integrated-delivery.html">
+<!-- 01 -->
 
-  <div class="no">
-    01
-  </div>
+<a
+  class="tool-card"
+  href="integrated-delivery.html"
+  data-search="포레스트핏 통합 납기관리 납기 배송 출고 출고일정 채널 delivery schedule shipping"
+>
 
-  <div class="tool-name">
-    포레스트핏 통합 납기관리
-  </div>
+  <div class="card-top">
 
-  <div class="tool-desc">
-    채널별 납기일 · 출고일정 통합 관리
-  </div>
+    <span class="card-no">
+      01
+    </span>
 
-  <div class="tool-side">
-
-    <span class="category">
+    <span class="card-category">
       DELIVERY
     </span>
 
+  </div>
+
+
+  <div class="card-content">
+
+    <h2 class="card-title">
+      통합 납기관리
+    </h2>
+
+    <p class="card-desc">
+      채널별 납기일 · 출고일정 통합 관리
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="card-action">
+      OPEN TOOL
+    </span>
+
     <span class="arrow">
-      →
+
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+
     </span>
 
   </div>
@@ -441,28 +865,53 @@ a{
 
 
 
-<a class="tool" href="stock-match.html">
+<!-- 02 -->
 
-  <div class="no">
-    02
+<a
+  class="tool-card"
+  href="stock-match.html"
+  data-search="재고매칭 확인 재고 매칭 키워드 stock matching keyword"
+>
+
+  <div class="card-top">
+
+    <span class="card-no">
+      02
+    </span>
+
+    <span class="card-category">
+      STOCK MATCH
+    </span>
+
   </div>
 
-  <div class="tool-name">
-    재고매칭 확인
+
+  <div class="card-content">
+
+    <h2 class="card-title">
+      재고매칭 확인
+    </h2>
+
+    <p class="card-desc">
+      키워드 기준 재고 매칭 여부 확인
+    </p>
+
   </div>
 
-  <div class="tool-desc">
-    키워드 기준 재고 매칭 여부 확인
-  </div>
 
-  <div class="tool-side">
+  <div class="card-bottom">
 
-    <span class="category">
-      MATCHING
+    <span class="card-action">
+      OPEN TOOL
     </span>
 
     <span class="arrow">
-      →
+
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+
     </span>
 
   </div>
@@ -471,28 +920,53 @@ a{
 
 
 
-<a class="tool" href="order-collect.html">
+<!-- 03 -->
 
-  <div class="no">
-    03
-  </div>
+<a
+  class="tool-card"
+  href="order-collect.html"
+  data-search="주문취합건 주문 취합 동대문 발주 입고일정 품절요청 order collect"
+>
 
-  <div class="tool-name">
-    주문취합건
-  </div>
+  <div class="card-top">
 
-  <div class="tool-desc">
-    동대문 발주 · 입고일정 · 품절요청 정리
-  </div>
+    <span class="card-no">
+      03
+    </span>
 
-  <div class="tool-side">
-
-    <span class="category">
+    <span class="card-category">
       ORDER
     </span>
 
+  </div>
+
+
+  <div class="card-content">
+
+    <h2 class="card-title">
+      주문취합건
+    </h2>
+
+    <p class="card-desc">
+      동대문 발주 · 입고일정 · 품절요청 정리
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="card-action">
+      OPEN TOOL
+    </span>
+
     <span class="arrow">
-      →
+
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+
     </span>
 
   </div>
@@ -501,28 +975,53 @@ a{
 
 
 
-<a class="tool" href="stock-center.html">
+<!-- 04 -->
 
-  <div class="no">
-    04
-  </div>
+<a
+  class="tool-card"
+  href="stock-center.html"
+  data-search="재고장 거래처 재고 자동입력 재고관리 stock inventory"
+>
 
-  <div class="tool-name">
-    재고장
-  </div>
+  <div class="card-top">
 
-  <div class="tool-desc">
-    거래처별 재고장 자동 입력
-  </div>
+    <span class="card-no">
+      04
+    </span>
 
-  <div class="tool-side">
-
-    <span class="category">
+    <span class="card-category">
       STOCK
     </span>
 
+  </div>
+
+
+  <div class="card-content">
+
+    <h2 class="card-title">
+      재고장
+    </h2>
+
+    <p class="card-desc">
+      거래처별 재고장 자동 입력
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="card-action">
+      OPEN TOOL
+    </span>
+
     <span class="arrow">
-      →
+
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+
     </span>
 
   </div>
@@ -531,28 +1030,53 @@ a{
 
 
 
-<a class="tool" href="monthly-plan.html">
+<!-- 05 -->
 
-  <div class="no">
-    05
-  </div>
+<a
+  class="tool-card"
+  href="monthly-plan.html"
+  data-search="월별 사업계획서 사업계획 월별 판매순위 키워드 판매실적 planning monthly plan"
+>
 
-  <div class="tool-name">
-    월별 사업계획서
-  </div>
+  <div class="card-top">
 
-  <div class="tool-desc">
-    판매순위 · 키워드 · 판매실적 자동입력
-  </div>
+    <span class="card-no">
+      05
+    </span>
 
-  <div class="tool-side">
-
-    <span class="category">
+    <span class="card-category">
       PLANNING
     </span>
 
+  </div>
+
+
+  <div class="card-content">
+
+    <h2 class="card-title">
+      월별 사업계획서
+    </h2>
+
+    <p class="card-desc">
+      판매순위 · 키워드 · 판매실적 자동입력
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="card-action">
+      OPEN TOOL
+    </span>
+
     <span class="arrow">
-      →
+
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+
     </span>
 
   </div>
@@ -561,28 +1085,53 @@ a{
 
 
 
-<a class="tool" href="additional-order.html">
+<!-- 06 -->
 
-  <div class="no">
-    06
-  </div>
+<a
+  class="tool-card"
+  href="additional-order.html"
+  data-search="추가발주 제작 상품 발주 추가 발주수량 발주서 purchase production order"
+>
 
-  <div class="tool-name">
-    추가발주/제작 상품
-  </div>
+  <div class="card-top">
 
-  <div class="tool-desc">
-    상품별 발주수량 · 발주서 양식 자동 생성
-  </div>
+    <span class="card-no">
+      06
+    </span>
 
-  <div class="tool-side">
-
-    <span class="category">
+    <span class="card-category">
       PURCHASE
     </span>
 
+  </div>
+
+
+  <div class="card-content">
+
+    <h2 class="card-title">
+      추가발주 / 제작 상품
+    </h2>
+
+    <p class="card-desc">
+      상품별 발주수량 · 발주서 양식 자동 생성
+    </p>
+
+  </div>
+
+
+  <div class="card-bottom">
+
+    <span class="card-action">
+      OPEN TOOL
+    </span>
+
     <span class="arrow">
-      →
+
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+
     </span>
 
   </div>
@@ -591,53 +1140,251 @@ a{
 
 
 
-<a class="tool" href="new-product-upload.html">
+<!-- 07 -->
 
-  <div class="no">
-    07
+<a
+  class="tool-card full"
+  href="new-product-upload.html"
+  data-search="신규 상품 업로드 상품등록 등록정보 엑셀 엑셀생성 new product upload excel"
+>
+
+  <div class="card-top">
+
+    <span class="card-no">
+      07
+    </span>
+
+    <span class="card-category">
+      PRODUCT UPLOAD
+    </span>
+
   </div>
 
-  <div class="tool-name">
-    신규 상품 업로드
+
+  <div class="card-content">
+
+    <h2 class="card-title">
+      신규 상품 업로드
+    </h2>
+
+    <p class="card-desc">
+      채널별 신규 상품 등록정보 · 엑셀 생성
+    </p>
+
   </div>
 
-  <div class="tool-desc">
-    채널별 신규 상품 등록정보 · 엑셀 생성
-  </div>
 
-  <div class="tool-side">
+  <div class="card-bottom">
 
-    <span class="category">
-      PRODUCT
+    <span class="card-action">
+      OPEN TOOL
     </span>
 
     <span class="arrow">
-      →
+
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h14"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+
     </span>
 
   </div>
 
 </a>
+
+
+
+<!-- 검색 결과 없음 -->
+
+<div class="no-results" id="noResults">
+
+  <strong>
+    검색 결과가 없습니다.
+  </strong>
+
+  <span>
+    다른 업무명이나 키워드로 검색해보세요.
+  </span>
+
+</div>
 
 
 </main>
 
 
 
+<!-- =========================
+     FOOTER
+========================= -->
+
 <footer class="footer">
 
-  <strong>
+  <div class="footer-brand">
     FORESTFIT
-  </strong>
+  </div>
 
-  <span>
+  <div class="footer-text">
     SALES STRATEGY TEAM · INTERNAL WORKSPACE
-  </span>
+  </div>
 
 </footer>
 
 
 </div>
+
+
+
+<!-- =========================
+     SEARCH SCRIPT
+========================= -->
+
+<script>
+
+const searchInput =
+  document.getElementById("toolSearch");
+
+const clearButton =
+  document.getElementById("clearSearch");
+
+const cards =
+  document.querySelectorAll(".tool-card");
+
+const resultCount =
+  document.getElementById("resultCount");
+
+const noResults =
+  document.getElementById("noResults");
+
+const searchKey =
+  document.querySelector(".search-key");
+
+
+function runSearch(){
+
+  const keyword =
+    searchInput
+      .value
+      .toLowerCase()
+      .trim();
+
+  let visible = 0;
+
+
+  cards.forEach(card => {
+
+    const searchableText =
+      (
+        card.dataset.search +
+        " " +
+        card.innerText
+      ).toLowerCase();
+
+
+    const isMatch =
+      searchableText.includes(keyword);
+
+
+    if(isMatch){
+
+      card.style.display = "";
+
+      visible++;
+
+    }else{
+
+      card.style.display = "none";
+
+    }
+
+  });
+
+
+  resultCount.textContent =
+    String(visible).padStart(2,"0");
+
+
+  if(keyword){
+
+    clearButton.style.display = "block";
+    searchKey.style.display = "none";
+
+  }else{
+
+    clearButton.style.display = "none";
+    searchKey.style.display = "inline-block";
+
+  }
+
+
+  if(visible === 0){
+
+    noResults.style.display = "block";
+
+  }else{
+
+    noResults.style.display = "none";
+
+  }
+
+}
+
+
+searchInput.addEventListener(
+  "input",
+  runSearch
+);
+
+
+clearButton.addEventListener(
+  "click",
+  function(){
+
+    searchInput.value = "";
+
+    runSearch();
+
+    searchInput.focus();
+
+  }
+);
+
+
+/* 키보드 / 누르면 검색창 포커스 */
+
+document.addEventListener(
+  "keydown",
+  function(event){
+
+    if(
+      event.key === "/" &&
+      document.activeElement !== searchInput
+    ){
+
+      event.preventDefault();
+
+      searchInput.focus();
+
+    }
+
+    if(
+      event.key === "Escape" &&
+      document.activeElement === searchInput
+    ){
+
+      searchInput.value = "";
+
+      runSearch();
+
+      searchInput.blur();
+
+    }
+
+  }
+);
+
+</script>
+
 
 </body>
 </html>
