@@ -1,1091 +1,346 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FORESTFIT WORKROOM</title>
-
-  <style>
-    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
-
-    :root{
-      --bg:#f7f5f2;
-      --paper:#ffffff;
-      --ink:#111111;
-      --muted:#7d7d78;
-      --line:#e7e3dc;
-
-      --sky:#9bb8e8;
-      --orange:#d86a2e;
-      --sand:#efe4d7;
-      --blush:#f4ece9;
-
-      --radius:0px;
-      --shadow:0 12px 30px rgba(17,17,17,.05);
-    }
-
-    html{
-      scroll-behavior:smooth;
-    }
-
-    body{
-      min-height:100vh;
-      background:linear-gradient(180deg,#faf8f5 0%, #f5f1eb 100%);
-      color:var(--ink);
-      font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;
-      -webkit-font-smoothing:antialiased;
-    }
-
-    a{
-      color:inherit;
-      text-decoration:none;
-    }
-
-    button,input{
-      font:inherit;
-    }
-
-    .page{
-      width:min(1440px, calc(100% - 48px));
-      margin:0 auto;
-    }
-
-    /* header */
-    .header{
-      min-height:76px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid var(--line);
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .brand-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:var(--orange);
-    }
-
-    .brand-name{
-      font-size:14px;
-      font-weight:900;
-      letter-spacing:.16em;
-    }
-
-    .header-nav{
-      display:flex;
-      align-items:center;
-      gap:26px;
-      font-size:10px;
-      letter-spacing:.14em;
-      font-weight:700;
-      color:#7f7a73;
-      text-transform:uppercase;
-    }
-
-    .header-nav strong{
-      color:var(--ink);
-      font-weight:800;
-    }
-
-    /* hero */
-    .hero{
-      padding:28px 0 34px;
-      display:grid;
-      grid-template-columns: 160px 1.15fr .85fr;
-      gap:28px;
-      align-items:start;
-      border-bottom:1px solid var(--line);
-    }
-
-    .hero-side-note{
-      min-height:460px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .hero-side-note span{
-      writing-mode:vertical-rl;
-      transform:rotate(180deg);
-      font-size:10px;
-      letter-spacing:.18em;
-      line-height:1.9;
-      color:#7e7a75;
-      text-transform:uppercase;
-      font-weight:700;
-    }
-
-    .hero-main{
-      min-height:460px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      padding-top:10px;
-    }
-
-    .hero-kicker{
-      font-size:9px;
-      font-weight:700;
-      letter-spacing:.18em;
-      color:#86817a;
-      text-transform:uppercase;
-    }
-
-    .hero-title{
-      margin-top:18px;
-      font-size:clamp(58px, 8vw, 104px);
-      line-height:.88;
-      font-weight:900;
-      letter-spacing:-.075em;
-      max-width:700px;
-    }
-
-    .hero-title span{
-      display:block;
-    }
-
-    .hero-copy{
-      max-width:470px;
-      margin-top:26px;
-      font-size:14px;
-      line-height:1.9;
-      color:#5f5b56;
-      font-weight:500;
-    }
-
-    .hero-copy strong{
-      color:var(--ink);
-      font-weight:800;
-    }
-
-    .hero-meta{
-      margin-top:28px;
-      display:flex;
-      gap:34px;
-      align-items:flex-end;
-    }
-
-    .meta-item strong{
-      display:block;
-      font-size:26px;
-      line-height:1;
-      font-weight:900;
-    }
-
-    .meta-item span{
-      display:block;
-      margin-top:6px;
-      font-size:9px;
-      letter-spacing:.16em;
-      color:#88837d;
-      text-transform:uppercase;
-      font-weight:700;
-    }
-
-    .hero-visual{
-      min-height:460px;
-      display:grid;
-      grid-template-rows: 1.2fr .75fr;
-      gap:16px;
-    }
-
-    .visual-main{
-      position:relative;
-      overflow:hidden;
-      background:
-        linear-gradient(180deg, #92afdc 0%, #7f9fd4 64%, #d7c0aa 64.5%, #d7c0aa 100%);
-      box-shadow:var(--shadow);
-    }
-
-    .visual-main::before{
-      content:"";
-      position:absolute;
-      width:120px;
-      height:170px;
-      background:var(--orange);
-      left:50%;
-      top:46%;
-      transform:translate(-50%,-50%) rotate(8deg);
-      clip-path:polygon(50% 0%, 100% 45%, 78% 100%, 22% 100%, 0% 45%);
-      filter:drop-shadow(0 10px 20px rgba(0,0,0,.12));
-    }
-
-    .visual-main::after{
-      content:"SS26";
-      position:absolute;
-      right:18px;
-      top:16px;
-      font-size:10px;
-      font-weight:800;
-      letter-spacing:.18em;
-      color:#ffffffdd;
-    }
-
-    .visual-caption{
-      position:absolute;
-      left:18px;
-      bottom:14px;
-      font-size:10px;
-      line-height:1.7;
-      letter-spacing:.12em;
-      font-weight:700;
-      color:#ffffffea;
-      text-transform:uppercase;
-    }
-
-    .visual-subgrid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-    }
-
-    .sub-card{
-      position:relative;
-      background:var(--paper);
-      overflow:hidden;
-      box-shadow:var(--shadow);
-      min-height:156px;
-    }
-
-    .sub-card.orange{
-      background:linear-gradient(180deg,#f7f1eb 0%, #f8ede1 100%);
-    }
-
-    .sub-card.blush{
-      background:linear-gradient(180deg,#faf7f5 0%, #f4ece6 100%);
-    }
-
-    .sub-card::before{
-      content:"";
-      position:absolute;
-      inset:14px;
-      background:rgba(255,255,255,.44);
-      border:1px solid rgba(17,17,17,.06);
-    }
-
-    .sub-card.orange::after{
-      content:"";
-      position:absolute;
-      width:82px;
-      height:82px;
-      border-radius:50%;
-      background:var(--orange);
-      right:18px;
-      bottom:18px;
-      opacity:.88;
-    }
-
-    .sub-card.blush::after{
-      content:"";
-      position:absolute;
-      width:78px;
-      height:78px;
-      background:var(--sky);
-      left:18px;
-      bottom:18px;
-      opacity:.9;
-    }
-
-    .sub-card-label{
-      position:absolute;
-      left:20px;
-      top:18px;
-      font-size:9px;
-      letter-spacing:.16em;
-      font-weight:800;
-      color:#78736d;
-      text-transform:uppercase;
-    }
-
-    /* toolbar */
-    .toolbar{
-      padding:22px 0 26px;
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:24px;
-    }
-
-    .toolbar-left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .toolbar-title{
-      font-size:12px;
-      font-weight:850;
-      letter-spacing:.09em;
-      text-transform:uppercase;
-    }
-
-    .toolbar-count{
-      font-size:9px;
-      font-weight:700;
-      letter-spacing:.14em;
-      color:#908b84;
-      text-transform:uppercase;
-    }
-
-    .search{
-      width:360px;
-      height:42px;
-      display:flex;
-      align-items:center;
-      border-bottom:1px solid #bdb7b0;
-      transition:.2s ease;
-      background:transparent;
-    }
-
-    .search:focus-within{
-      border-color:var(--ink);
-    }
-
-    .search svg{
-      width:16px;
-      height:16px;
-      fill:none;
-      stroke:#7c7771;
-      stroke-width:1.6;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-      flex-shrink:0;
-    }
-
-    .search input{
-      flex:1;
-      height:100%;
-      border:0;
-      outline:0;
-      background:transparent;
-      padding:0 10px;
-      font-size:12px;
-      color:var(--ink);
-    }
-
-    .search input::placeholder{
-      color:#9c9690;
-    }
-
-    .search-key{
-      font-size:9px;
-      font-weight:700;
-      letter-spacing:.12em;
-      color:#9a948d;
-      text-transform:uppercase;
-    }
-
-    .clear-btn{
-      display:none;
-      border:0;
-      background:none;
-      font-size:18px;
-      color:#77726d;
-      cursor:pointer;
-    }
-
-    /* tools editorial board */
-    .tools{
-      display:grid;
-      grid-template-columns:repeat(12, 1fr);
-      grid-auto-rows:112px;
-      gap:14px;
-      padding-bottom:20px;
-    }
-
-    .tool{
-      position:relative;
-      background:rgba(255,255,255,.88);
-      border:1px solid rgba(17,17,17,.06);
-      padding:22px;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-      transition:
-        transform .22s ease,
-        box-shadow .22s ease,
-        border-color .22s ease;
-      box-shadow:0 8px 20px rgba(17,17,17,.03);
-    }
-
-    .tool:hover{
-      transform:translateY(-4px);
-      box-shadow:0 18px 32px rgba(17,17,17,.08);
-      border-color:rgba(17,17,17,.14);
-    }
-
-    .tool:nth-child(1){
-      grid-column:span 5;
-      grid-row:span 3;
-      background:linear-gradient(180deg,#faf5ef 0%, #f5e8da 100%);
-    }
-
-    .tool:nth-child(2){
-      grid-column:span 3;
-      grid-row:span 3;
-    }
-
-    .tool:nth-child(3){
-      grid-column:span 4;
-      grid-row:span 3;
-      background:linear-gradient(180deg,#f8f5f2 0%, #f2ece6 100%);
-    }
-
-    .tool:nth-child(4){
-      grid-column:span 4;
-      grid-row:span 3;
-    }
-
-    .tool:nth-child(5){
-      grid-column:span 4;
-      grid-row:span 3;
-      background:linear-gradient(180deg,#f2f6fc 0%, #e9f0fb 100%);
-    }
-
-    .tool:nth-child(6){
-      grid-column:span 4;
-      grid-row:span 3;
-    }
-
-    .tool:nth-child(7){
-      grid-column:span 12;
-      grid-row:span 2;
-      min-height:0;
-      background:linear-gradient(90deg,#fcfbf8 0%, #f6f2ec 100%);
-    }
-
-    .tool-top{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .tool-no{
-      font-size:9px;
-      letter-spacing:.16em;
-      font-weight:800;
-      color:#918b84;
-      text-transform:uppercase;
-    }
-
-    .tool-tag{
-      font-size:8px;
-      letter-spacing:.18em;
-      font-weight:800;
-      color:#6f6a64;
-      text-transform:uppercase;
-    }
-
-    .tool-body{
-      margin-top:auto;
-      margin-bottom:18px;
-    }
-
-    .tool-title{
-      font-size:clamp(24px, 2vw, 33px);
-      line-height:1.08;
-      letter-spacing:-.05em;
-      font-weight:820;
-      margin-bottom:10px;
-      max-width:420px;
-    }
-
-    .tool-desc{
-      font-size:12px;
-      line-height:1.7;
-      color:#696560;
-      max-width:360px;
-    }
-
-    .tool-bottom{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-    }
-
-    .tool-caption{
-      font-size:8px;
-      letter-spacing:.16em;
-      font-weight:800;
-      text-transform:uppercase;
-      color:#98928c;
-    }
-
-    .tool-arrow{
-      font-size:18px;
-      font-weight:700;
-      color:#1a1a1a;
-      transition:transform .2s ease;
-    }
-
-    .tool:hover .tool-arrow{
-      transform:translate(4px,-4px);
-    }
-
-    .tool-art{
-      position:absolute;
-      right:22px;
-      top:20px;
-      width:86px;
-      height:118px;
-      background:linear-gradient(180deg,#8eaee2 0%, #789bd7 63%, #d9c6b2 63.5%, #d9c6b2 100%);
-      opacity:.95;
-    }
-
-    .tool-art::after{
-      content:"";
-      position:absolute;
-      width:32px;
-      height:52px;
-      background:var(--orange);
-      left:50%;
-      top:45%;
-      transform:translate(-50%,-50%) rotate(10deg);
-      clip-path:polygon(50% 0%, 100% 40%, 78% 100%, 22% 100%, 0% 40%);
-    }
-
-    .tool-dot{
-      position:absolute;
-      right:22px;
-      bottom:22px;
-      width:76px;
-      height:76px;
-      background-color:#111;
-      background-image:radial-gradient(circle,#fff 0 2px,transparent 2.5px);
-      background-size:12px 12px;
-      opacity:.95;
-    }
-
-    .tool-line{
-      position:absolute;
-      left:0;
-      top:0;
-      width:0;
-      height:2px;
-      background:var(--orange);
-      transition:width .25s ease;
-    }
-
-    .tool:hover .tool-line{
-      width:100%;
-    }
-
-    .tool:nth-child(5)::after{
-      content:"05";
-      position:absolute;
-      right:16px;
-      bottom:-8px;
-      font-size:100px;
-      line-height:.9;
-      font-weight:900;
-      color:rgba(255,255,255,.55);
-      letter-spacing:-.08em;
-      pointer-events:none;
-    }
-
-    .tool:nth-child(7)::after{
-      content:"07";
-      position:absolute;
-      right:22px;
-      bottom:-22px;
-      font-size:120px;
-      line-height:.8;
-      font-weight:900;
-      color:#ece7df;
-      letter-spacing:-.08em;
-      pointer-events:none;
-    }
-
-    /* no results */
-    .no-results{
-      display:none;
-      grid-column:1 / -1;
-      min-height:220px;
-      background:rgba(255,255,255,.9);
-      border:1px solid rgba(17,17,17,.06);
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      gap:8px;
-      box-shadow:0 8px 20px rgba(17,17,17,.03);
-    }
-
-    .no-results strong{
-      font-size:20px;
-      font-weight:800;
-    }
-
-    .no-results span{
-      font-size:12px;
-      color:#8a857e;
-    }
-
-    /* footer */
-    .footer{
-      min-height:96px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-      border-top:1px solid var(--line);
-      font-size:9px;
-      letter-spacing:.15em;
-      font-weight:700;
-      color:#8d877f;
-      text-transform:uppercase;
-    }
-
-    .footer strong{
-      color:var(--ink);
-    }
-
-    /* responsive */
-    @media (max-width: 1100px){
-      .hero{
-        grid-template-columns:1fr;
-      }
-
-      .hero-side-note{
-        display:none;
-      }
-
-      .hero-main,
-      .hero-visual{
-        min-height:auto;
-      }
-
-      .hero-visual{
-        grid-template-columns:1fr;
-      }
-
-      .visual-subgrid{
-        grid-template-columns:1fr 1fr;
-      }
-
-      .tools{
-        grid-template-columns:repeat(2,1fr);
-        grid-auto-rows:auto;
-      }
-
-      .tool{
-        grid-column:auto !important;
-        grid-row:auto !important;
-        min-height:260px;
-      }
-
-      .tool:nth-child(7){
-        grid-column:1 / -1 !important;
-      }
-    }
-
-    @media (max-width: 760px){
-      .page{
-        width:calc(100% - 26px);
-      }
-
-      .header{
-        min-height:68px;
-      }
-
-      .header-nav{
-        gap:14px;
-        font-size:9px;
-      }
-
-      .header-nav span:last-child{
-        display:none;
-      }
-
-      .hero{
-        padding:20px 0 24px;
-      }
-
-      .hero-title{
-        font-size:56px;
-      }
-
-      .hero-copy{
-        font-size:13px;
-      }
-
-      .hero-meta{
-        gap:22px;
-      }
-
-      .visual-subgrid{
-        grid-template-columns:1fr;
-      }
-
-      .toolbar{
-        align-items:flex-start;
-        flex-direction:column;
-      }
-
-      .search{
-        width:100%;
-      }
-
-      .tools{
-        grid-template-columns:1fr;
-      }
-
-      .tool,
-      .tool:nth-child(7){
-        grid-column:auto !important;
-        min-height:220px;
-      }
-
-      .tool-title{
-        font-size:25px;
-      }
-
-      .footer{
-        min-height:auto;
-        padding:24px 0 32px;
-        flex-direction:column;
-        align-items:flex-start;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORESTFIT WORKROOM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f7fb;
+  --surface:rgba(255,255,255,.74);
+  --surface-strong:rgba(255,255,255,.92);
+  --ink:#171b2a;
+  --muted:#7b8296;
+  --line:rgba(30,36,58,.10);
+  --blue:#5868ff;
+  --violet:#7a63ff;
+  --mint:#1b948c;
+  --rose:#a75883;
+  --orange:#bc7742;
+  --lav:#7b69cf;
+}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  color:var(--ink);
+  font-family:"Pretendard","Manrope",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(circle at 4% 10%, rgba(92,112,255,.13), transparent 24%),
+    radial-gradient(circle at 88% 8%, rgba(165,126,255,.11), transparent 22%),
+    radial-gradient(circle at 82% 72%, rgba(86,196,191,.08), transparent 25%),
+    linear-gradient(180deg,#fbfcff 0%,#f4f7fb 55%,#f7f9fc 100%);
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:-3;opacity:.26;
+  background-image:
+    linear-gradient(rgba(50,58,88,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(50,58,88,.03) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom,#000,rgba(0,0,0,.55) 55%,transparent);
+}
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:-2;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(28px);opacity:.55;animation:float 12s ease-in-out infinite alternate}
+.orb.one{width:320px;height:320px;left:-110px;top:180px;background:rgba(93,111,255,.12)}
+.orb.two{width:260px;height:260px;right:-70px;top:380px;background:rgba(156,106,255,.09);animation-delay:-4s}
+@keyframes float{to{transform:translate3d(26px,-20px,0) scale(1.04)}}
+.cursor-glow{position:fixed;width:360px;height:360px;border-radius:50%;pointer-events:none;z-index:-1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(88,104,255,.065),transparent 68%);filter:blur(3px)}
+
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+.wrap{width:min(1360px,calc(100% - 64px));margin:0 auto}
+
+.header{
+  height:78px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+.logo{
+  font:800 15px/1 "Inter Tight",sans-serif;
+  letter-spacing:.16em;
+  color:#20253a;
+}
+.logo em{font-style:normal;color:var(--blue)}
+.header-right{
+  display:flex;align-items:center;gap:18px;
+  color:#7d8498;
+  font:700 10px/1 "Inter Tight",sans-serif;
+  letter-spacing:.11em;text-transform:uppercase
+}
+.status{display:flex;align-items:center;gap:7px;color:#596177}
+.status::before{content:"";width:6px;height:6px;border-radius:50%;background:#7080ff;box-shadow:0 0 0 5px rgba(112,128,255,.12)}
+
+.hero{padding:68px 0 56px;position:relative}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:40px;align-items:end}
+.eyebrow{
+  display:flex;align-items:center;gap:10px;margin-bottom:20px;
+  font:700 10px/1 "Inter Tight",sans-serif;
+  letter-spacing:.14em;text-transform:uppercase;color:#8d94a7
+}
+.eyebrow::before{content:"";width:28px;height:1px;background:#6d7cff}
+.hero-title{max-width:920px}
+.hero-title .forestfit{
+  display:block;
+  font:800 clamp(56px,7vw,108px)/.88 "Inter Tight",sans-serif;
+  letter-spacing:-.07em;
+  color:transparent;
+  background:linear-gradient(100deg,#20253b 0%,#3948c9 42%,#6855e8 74%,#252a40 100%);
+  -webkit-background-clip:text;background-clip:text;
+}
+.hero-title .workroom{
+  display:flex;align-items:center;gap:18px;margin-top:14px;
+  font:700 clamp(24px,2.7vw,42px)/1 "Inter Tight",sans-serif;
+  letter-spacing:-.05em;color:#79809a
+}
+.hero-title .workroom i{font-style:normal;color:var(--blue)}
+.hero-title .workroom::after{content:"";height:1px;flex:1;max-width:200px;background:linear-gradient(90deg,#6c7afe,transparent)}
+.hero-side{display:flex;flex-direction:column;align-items:flex-end;gap:10px;padding-bottom:6px}
+.hero-count{font:800 68px/.85 "Inter Tight",sans-serif;letter-spacing:-.07em;color:#5868eb}
+.hero-side small{font:700 10px/1 "Inter Tight",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#9096a8}
+.hero-side .ghost{font:700 10px/1.5 "Inter Tight",sans-serif;color:#a4a9b8;text-align:right;letter-spacing:.08em}
+
+.nav-shell{position:sticky;top:0;z-index:30;padding:12px 0;background:linear-gradient(180deg,rgba(245,247,251,.95),rgba(245,247,251,.78) 72%,rgba(245,247,251,0));backdrop-filter:blur(18px)}
+.navbar{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:center;padding:12px 0 14px;border-bottom:1px solid var(--line)}
+.filter-row{display:flex;flex-wrap:wrap;align-items:center;gap:0}
+.filter-chip{appearance:none;border:0;background:none;position:relative;padding:10px 15px;cursor:pointer;color:#868ea2;transition:.22s ease}
+.filter-chip:first-child{padding-left:0}
+.filter-chip span{font:700 12px/1 "Pretendard",sans-serif;letter-spacing:-.015em}
+.filter-chip:not(:last-child)::after{content:"";position:absolute;right:0;top:50%;width:2px;height:2px;border-radius:50%;background:#c5c9d4}
+.filter-chip:hover{color:#5360dd}
+.filter-chip.active{color:#4957d8}
+.filter-chip.active::before{content:"";position:absolute;left:15px;right:15px;bottom:0;height:2px;border-radius:99px;background:linear-gradient(90deg,#5666ff,#9b6aff)}
+.filter-chip:first-child.active::before{left:0}
+.search{height:44px;display:flex;align-items:center;border-bottom:1px solid #ccd2df;transition:.25s ease}
+.search:focus-within{border-color:#6774f2}
+.search svg{width:15px;height:15px;fill:none;stroke:#7f8798;stroke-width:1.7}
+.search input{flex:1;height:100%;border:0;outline:0;background:transparent;padding:0 10px;color:#41485b;font-size:13px}
+.search input::placeholder{color:#a0a6b3}
+.search-key{font:700 8px/1 "Inter Tight",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#a4a9b5}
+.clear-btn{display:none;border:0;background:none;color:#7e8593;font-size:18px;cursor:pointer}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:34px 0 16px;border-bottom:1px solid var(--line)}
+.section-head strong{font:800 10px/1 "Inter Tight",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#596175}
+.section-head span{font:700 10px/1 "Inter Tight",sans-serif;letter-spacing:.12em;color:#98a0b0}
+
+.tools{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;padding:18px 0 54px}
+.card{
+  --accent:#5868ff;--soft:#edf0ff;--deep:#4352ca;--mx:50%;--my:50%;
+  position:relative;display:flex;flex-direction:column;min-height:238px;padding:22px 24px;grid-column:span 6;overflow:hidden;isolation:isolate;
+  border:1px solid rgba(44,52,81,.08);border-radius:28px;
+  background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(248,250,255,.82));
+  box-shadow:0 16px 44px rgba(36,43,72,.055);backdrop-filter:blur(12px);
+  transition:transform .36s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease,border-color .35s ease;
+}
+.card.delivery{--accent:#5367f6;--soft:#eef1ff;--deep:#4758d5}
+.card.stock{--accent:#1f938b;--soft:#eaf8f5;--deep:#17786f}
+.card.order{--accent:#a85782;--soft:#faedf3;--deep:#8a4267}
+.card.planning{--accent:#7e65cf;--soft:#f1edfb;--deep:#6a54b4}
+.card.purchase{--accent:#bc7846;--soft:#fbf1e9;--deep:#a46536}
+.card.product{--accent:#6a62ff;--soft:#efedff;--deep:#544ed0}
+.card:nth-child(1){grid-column:span 7;min-height:274px}
+.card:nth-child(2){grid-column:span 5;min-height:274px}
+.card:nth-child(3),.card:nth-child(4),.card:nth-child(5){grid-column:span 4;min-height:210px}
+.card:nth-child(6){grid-column:span 5;min-height:250px}
+.card:nth-child(7){grid-column:span 7;min-height:250px}
+.card::before{
+  content:"";position:absolute;inset:0;z-index:-1;opacity:.82;
+  background:
+    radial-gradient(340px circle at var(--mx) var(--my),color-mix(in srgb,var(--accent) 11%,transparent),transparent 46%),
+    linear-gradient(145deg,rgba(255,255,255,.24),transparent 64%);
+}
+.card::after{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 28%,white),transparent 76%);opacity:.78}
+.card:hover{transform:translateY(-8px);border-color:color-mix(in srgb,var(--accent) 32%,transparent);box-shadow:0 30px 64px rgba(37,43,72,.11)}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;position:relative;z-index:2}
+.card-index{display:flex;align-items:center;gap:9px}
+.mini-no{font:800 9px/1 "Inter Tight",sans-serif;letter-spacing:.14em;color:#a0a7b3}
+.category{font:800 9px/1 "Inter Tight",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.card-arrow{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);background:rgba(255,255,255,.58);color:var(--accent);font-size:13px;transition:.28s ease;backdrop-filter:blur(8px)}
+.card:hover .card-arrow{transform:translate(2px,-2px) rotate(45deg);background:var(--accent);color:#fff;border-color:var(--accent)}
+.card-body{margin-top:auto;padding-top:44px;position:relative;z-index:2}
+.tool-name{font:700 clamp(24px,2vw,34px)/1.08 "Pretendard",sans-serif;letter-spacing:-.04em;color:var(--deep);max-width:88%}
+.card:nth-child(3) .tool-name,.card:nth-child(4) .tool-name,.card:nth-child(5) .tool-name{font-size:20px;line-height:1.14}
+.card:nth-child(6) .tool-name,.card:nth-child(7) .tool-name{font-size:22px}
+.card-label{display:inline-flex;margin-top:16px;align-items:center;gap:8px;font:800 8px/1 "Inter Tight",sans-serif;letter-spacing:.15em;text-transform:uppercase;color:#9ba0af}
+.card-label::before{content:"";width:18px;height:1px;background:var(--accent)}
+.card-watermark{position:absolute;right:18px;bottom:-12px;z-index:0;font:800 96px/.8 "Inter Tight",sans-serif;letter-spacing:-.08em;color:var(--soft);user-select:none;transition:.4s ease}
+.card:hover .card-watermark{transform:translate3d(-8px,-6px,0);color:color-mix(in srgb,var(--soft) 82%,var(--accent))}
+
+.card.product-feature{
+  background:
+    radial-gradient(circle at 82% 18%,rgba(126,114,255,.24),transparent 28%),
+    linear-gradient(125deg,#21263d 0%,#282d48 58%,#31365d 100%);
+  border-color:rgba(255,255,255,.06);
+  box-shadow:0 26px 68px rgba(28,31,53,.18)
+}
+.card.product-feature::after{background:linear-gradient(90deg,#8e86ff,#65a3ff,transparent 82%)}
+.card.product-feature .mini-no{color:#8f95ae}
+.card.product-feature .category{color:#a9a6ff}
+.card.product-feature .tool-name{color:#eef0ff}
+.card.product-feature .card-label{color:#aeb3ca}
+.card.product-feature .card-arrow{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#d7d9ff}
+.card.product-feature:hover .card-arrow{background:white;color:#272b46}
+.card.product-feature .card-watermark{color:rgba(255,255,255,.05)}
+
+.hidden{display:none!important}
+.empty{display:none;grid-column:1/-1;min-height:170px;place-items:center;border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.72);color:#8b91a0;font-size:13px}
+.footer{min-height:92px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);font:800 8px/1 "Inter Tight",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#99a0ae}
+.footer strong{color:#5f667a}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .62s ease,transform .62s cubic-bezier(.2,.8,.2,1)}
+.reveal.show{opacity:1;transform:none}
+
+@media(max-width:980px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-side{align-items:flex-start}
+  .hero-side .ghost{text-align:left}
+  .navbar{grid-template-columns:1fr}
+  .search{width:100%}
+  .card,.card:nth-child(n){grid-column:span 6}
+  .tool-name,.card:nth-child(n) .tool-name{font-size:24px}
+}
+@media(max-width:680px){
+  .wrap{width:calc(100% - 28px)}
+  .header-right span:last-child{display:none}
+  .hero{padding:46px 0 34px}
+  .hero-title .forestfit{font-size:58px}
+  .hero-title .workroom{font-size:26px}
+  .hero-count{font-size:54px}
+  .filter-row{overflow-x:auto;flex-wrap:nowrap}
+  .filter-chip{flex:0 0 auto}
+  .navbar{gap:10px}
+  .card,.card:nth-child(n){grid-column:span 12;min-height:220px}
+  .tool-name,.card:nth-child(n) .tool-name{font-size:24px}
+  .card-watermark{font-size:84px}
+  .footer{flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:18px 0}
+}
+</style>
 </head>
 <body>
-  <div class="page">
+<div class="ambient"><span class="orb one"></span><span class="orb two"></span></div>
+<div class="cursor-glow" id="cursorGlow"></div>
 
-    <header class="header">
-      <div class="brand">
-        <span class="brand-dot"></span>
-        <span class="brand-name">FORESTFIT</span>
+<div class="wrap">
+  <header class="header">
+    <div class="logo">FOREST<em>FIT</em></div>
+    <div class="header-right"><span class="status">ONLINE</span><span>SALES STRATEGY</span><span>2026</span></div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="reveal">
+        <div class="eyebrow">Internal Commerce Workspace</div>
+        <h1 class="hero-title">
+          <span class="forestfit">FORESTFIT</span>
+          <span class="workroom">WORKROOM <i>26</i></span>
+        </h1>
       </div>
-
-      <div class="header-nav">
-        <strong>Sales Strategy</strong>
-        <span>Internal Workspace</span>
-        <span>Issue 01 / 2026</span>
+      <div class="hero-side reveal">
+        <strong class="hero-count" id="resultCountHero">07</strong>
+        <small>Visible tools</small>
+        <div class="ghost">INTERNAL / COMMERCE OPS</div>
       </div>
-    </header>
+    </div>
+  </section>
+</div>
 
-    <section class="hero">
-      <div class="hero-side-note">
-        <span>
-          FORESTFIT WORKROOM · SALES STRATEGY TEAM · INTERNAL TOOLS INDEX
-        </span>
+<div class="nav-shell">
+  <div class="wrap">
+    <div class="navbar">
+      <div class="filter-row">
+        <button class="filter-chip active" data-filter="all" type="button"><span>전체</span></button>
+        <button class="filter-chip" data-filter="delivery" type="button"><span>납기</span></button>
+        <button class="filter-chip" data-filter="stock" type="button"><span>재고</span></button>
+        <button class="filter-chip" data-filter="order" type="button"><span>주문</span></button>
+        <button class="filter-chip" data-filter="planning" type="button"><span>계획</span></button>
+        <button class="filter-chip" data-filter="purchase" type="button"><span>발주</span></button>
+        <button class="filter-chip" data-filter="product" type="button"><span>상품등록</span></button>
       </div>
-
-      <div class="hero-main">
-        <div>
-          <div class="hero-kicker">FORESTFIT / SALES STRATEGY / WORKROOM</div>
-
-          <h1 class="hero-title">
-            <span>FOR THE FLOW</span>
-            <span>OF WORK</span>
-          </h1>
-
-          <p class="hero-copy">
-            판매전략팀의 반복 업무를 더 빠르고 정확하게 처리할 수 있도록 구성한
-            <strong>내부 업무 워크룸</strong>입니다.
-            자주 사용하는 기능을 한 화면에서 찾고 바로 이동할 수 있게 정리했습니다.
-          </p>
-        </div>
-
-        <div class="hero-meta">
-          <div class="meta-item">
-            <strong>07</strong>
-            <span>Work Tools</span>
-          </div>
-
-          <div class="meta-item">
-            <strong>01</strong>
-            <span>Workspace</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="hero-visual">
-        <div class="visual-main">
-          <div class="visual-caption">
-            FORESTFIT WORKROOM<br>
-            SALES STRATEGY · INTERNAL USE
-          </div>
-        </div>
-
-        <div class="visual-subgrid">
-          <div class="sub-card orange">
-            <div class="sub-card-label">Editorial Note</div>
-          </div>
-
-          <div class="sub-card blush">
-            <div class="sub-card-label">Workspace Index</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="toolbar">
-      <div class="toolbar-left">
-        <div class="toolbar-title">Work Tools</div>
-        <div class="toolbar-count"><span id="resultCount">07</span> / 07</div>
-      </div>
-
       <div class="search">
-        <svg viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="6"></circle>
-          <path d="m16 16 4 4"></path>
-        </svg>
-
-        <input
-          id="toolSearch"
-          type="text"
-          placeholder="Search work tools"
-          autocomplete="off"
-          aria-label="업무 검색"
-        />
-
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path></svg>
+        <input id="toolSearch" type="text" placeholder="업무 검색" autocomplete="off">
         <span class="search-key">Press /</span>
-
-        <button class="clear-btn" id="clearSearch" type="button" aria-label="검색 초기화">×</button>
+        <button id="clearSearch" class="clear-btn" type="button">×</button>
       </div>
-    </section>
-
-    <main class="tools">
-
-      <a
-        class="tool"
-        href="integrated-delivery.html"
-        data-search="통합 납기관리 납기 배송 출고 출고일정 delivery schedule shipping"
-      >
-        <span class="tool-line"></span>
-        <div class="tool-top">
-          <span class="tool-no">001</span>
-          <span class="tool-tag">Delivery</span>
-        </div>
-
-        <div class="tool-art"></div>
-
-        <div class="tool-body">
-          <h2 class="tool-title">통합 납기관리</h2>
-          <p class="tool-desc">채널별 납기일 · 출고일정 통합 관리</p>
-        </div>
-
-        <div class="tool-bottom">
-          <span class="tool-caption">Channel Schedule Management</span>
-          <span class="tool-arrow">↗</span>
-        </div>
-      </a>
-
-      <a
-        class="tool"
-        href="stock-match.html"
-        data-search="재고매칭 확인 재고 매칭 키워드 stock matching keyword"
-      >
-        <span class="tool-line"></span>
-        <div class="tool-top">
-          <span class="tool-no">002</span>
-          <span class="tool-tag">Stock Match</span>
-        </div>
-
-        <div class="tool-body">
-          <h2 class="tool-title">재고매칭 확인</h2>
-          <p class="tool-desc">키워드 기준 재고 매칭 여부 확인</p>
-        </div>
-
-        <div class="tool-bottom">
-          <span class="tool-caption">Keyword Matching Check</span>
-          <span class="tool-arrow">↗</span>
-        </div>
-      </a>
-
-      <a
-        class="tool"
-        href="order-collect.html"
-        data-search="주문취합건 주문 취합 동대문 발주 입고일정 품절요청 order collect"
-      >
-        <span class="tool-line"></span>
-        <div class="tool-top">
-          <span class="tool-no">003</span>
-          <span class="tool-tag">Order</span>
-        </div>
-
-        <div class="tool-dot"></div>
-
-        <div class="tool-body">
-          <h2 class="tool-title">주문취합건</h2>
-          <p class="tool-desc">동대문 발주 · 입고일정 · 품절요청 정리</p>
-        </div>
-
-        <div class="tool-bottom">
-          <span class="tool-caption">Order Collect Sheet</span>
-          <span class="tool-arrow">↗</span>
-        </div>
-      </a>
-
-      <a
-        class="tool"
-        href="stock-center.html"
-        data-search="재고장 거래처 재고 자동입력 재고관리 stock inventory"
-      >
-        <span class="tool-line"></span>
-        <div class="tool-top">
-          <span class="tool-no">004</span>
-          <span class="tool-tag">Stock</span>
-        </div>
-
-        <div class="tool-body">
-          <h2 class="tool-title">재고장</h2>
-          <p class="tool-desc">거래처별 재고장 자동 입력</p>
-        </div>
-
-        <div class="tool-bottom">
-          <span class="tool-caption">Inventory Entry Center</span>
-          <span class="tool-arrow">↗</span>
-        </div>
-      </a>
-
-      <a
-        class="tool"
-        href="monthly-plan.html"
-        data-search="월별 사업계획서 사업계획 판매순위 키워드 판매실적 monthly planning"
-      >
-        <span class="tool-line"></span>
-        <div class="tool-top">
-          <span class="tool-no">005</span>
-          <span class="tool-tag">Planning</span>
-        </div>
-
-        <div class="tool-body">
-          <h2 class="tool-title">월별 사업계획서</h2>
-          <p class="tool-desc">판매순위 · 키워드 · 판매실적 자동입력</p>
-        </div>
-
-        <div class="tool-bottom">
-          <span class="tool-caption">Monthly Planning Sheet</span>
-          <span class="tool-arrow">↗</span>
-        </div>
-      </a>
-
-      <a
-        class="tool"
-        href="additional-order.html"
-        data-search="추가발주 제작 상품 발주 발주수량 발주서 purchase production order"
-      >
-        <span class="tool-line"></span>
-        <div class="tool-top">
-          <span class="tool-no">006</span>
-          <span class="tool-tag">Purchase</span>
-        </div>
-
-        <div class="tool-body">
-          <h2 class="tool-title">추가발주 / 제작 상품</h2>
-          <p class="tool-desc">상품별 발주수량 · 발주서 양식 자동 생성</p>
-        </div>
-
-        <div class="tool-bottom">
-          <span class="tool-caption">Purchase / Production</span>
-          <span class="tool-arrow">↗</span>
-        </div>
-      </a>
-
-      <a
-        class="tool"
-        href="new-product-upload.html"
-        data-search="신규 상품 업로드 상품등록 등록정보 엑셀 엑셀생성 new product upload excel"
-      >
-        <span class="tool-line"></span>
-        <div class="tool-top">
-          <span class="tool-no">007</span>
-          <span class="tool-tag">Product Upload</span>
-        </div>
-
-        <div class="tool-body">
-          <h2 class="tool-title">신규 상품 업로드</h2>
-          <p class="tool-desc">채널별 신규 상품 등록정보 · 엑셀 생성</p>
-        </div>
-
-        <div class="tool-bottom">
-          <span class="tool-caption">New Product Register</span>
-          <span class="tool-arrow">↗</span>
-        </div>
-      </a>
-
-      <div class="no-results" id="noResults">
-        <strong>검색 결과가 없습니다.</strong>
-        <span>다른 업무명이나 키워드로 검색해보세요.</span>
-      </div>
-    </main>
-
-    <footer class="footer">
-      <strong>FORESTFIT WORKROOM</strong>
-      <span>Sales Strategy Team · Internal Use Only</span>
-    </footer>
+    </div>
   </div>
+</div>
 
-  <script>
-    const searchInput = document.getElementById("toolSearch");
-    const clearButton = document.getElementById("clearSearch");
-    const cards = document.querySelectorAll(".tool");
-    const resultCount = document.getElementById("resultCount");
-    const noResults = document.getElementById("noResults");
-    const searchKey = document.querySelector(".search-key");
+<div class="wrap">
+  <div class="section-head"><strong>Work Index</strong><span><span id="resultCount">07</span> / 07</span></div>
 
-    function runSearch(){
-      const keyword = searchInput.value.toLowerCase().trim();
-      let visible = 0;
+  <main class="tools">
+    <a class="card delivery reveal" href="integrated-delivery.html" data-category="delivery" data-search="통합 납기관리 납기 배송 출고 delivery schedule">
+      <div class="card-top"><div class="card-index"><span class="mini-no">001</span><span class="category">Delivery</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">통합 납기관리</h2><span class="card-label">Open tool</span></div><span class="card-watermark">01</span>
+    </a>
 
-      cards.forEach(card => {
-        const searchableText = (card.dataset.search + " " + card.innerText).toLowerCase();
-        const match = searchableText.includes(keyword);
+    <a class="card stock reveal" href="stock-match.html" data-category="stock" data-search="재고매칭 확인 재고 매칭 키워드 stock matching">
+      <div class="card-top"><div class="card-index"><span class="mini-no">002</span><span class="category">Stock Match</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">재고매칭 확인</h2><span class="card-label">Open tool</span></div><span class="card-watermark">02</span>
+    </a>
 
-        card.style.display = match ? "" : "none";
-        if(match) visible++;
-      });
+    <a class="card order reveal" href="order-collect.html" data-category="order" data-search="주문취합건 주문 취합 발주 입고 품절 order collect">
+      <div class="card-top"><div class="card-index"><span class="mini-no">003</span><span class="category">Order</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">주문취합건</h2><span class="card-label">Open tool</span></div><span class="card-watermark">03</span>
+    </a>
 
-      resultCount.textContent = String(visible).padStart(2,"0");
+    <a class="card stock reveal" href="stock-center.html" data-category="stock" data-search="재고장 거래처 재고 자동입력 stock inventory">
+      <div class="card-top"><div class="card-index"><span class="mini-no">004</span><span class="category">Stock</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">재고장</h2><span class="card-label">Open tool</span></div><span class="card-watermark">04</span>
+    </a>
 
-      if(keyword){
-        clearButton.style.display = "block";
-        searchKey.style.display = "none";
-      }else{
-        clearButton.style.display = "none";
-        searchKey.style.display = "inline";
-      }
+    <a class="card planning reveal" href="monthly-plan.html" data-category="planning" data-search="월별 사업계획서 사업계획 판매순위 키워드 판매실적 planning monthly">
+      <div class="card-top"><div class="card-index"><span class="mini-no">005</span><span class="category">Planning</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">월별 사업계획서</h2><span class="card-label">Open tool</span></div><span class="card-watermark">05</span>
+    </a>
 
-      noResults.style.display = visible === 0 ? "flex" : "none";
-    }
+    <a class="card purchase reveal" href="additional-order.html" data-category="purchase" data-search="추가발주 제작 상품 발주 발주수량 발주서 purchase production">
+      <div class="card-top"><div class="card-index"><span class="mini-no">006</span><span class="category">Purchase</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">추가발주 / 제작 상품</h2><span class="card-label">Open tool</span></div><span class="card-watermark">06</span>
+    </a>
 
-    searchInput.addEventListener("input", runSearch);
+    <a class="card product product-feature reveal" href="new-product-upload.html" data-category="product" data-search="신규 상품 업로드 상품등록 등록정보 엑셀 new product upload excel">
+      <div class="card-top"><div class="card-index"><span class="mini-no">007</span><span class="category">Product Upload</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">신규 상품 업로드</h2><span class="card-label">Open tool</span></div><span class="card-watermark">07</span>
+    </a>
 
-    clearButton.addEventListener("click", function(){
-      searchInput.value = "";
-      runSearch();
-      searchInput.focus();
-    });
+    <div class="empty" id="emptyState">검색 결과가 없습니다.</div>
+  </main>
 
-    document.addEventListener("keydown", function(event){
-      if(event.key === "/" && document.activeElement !== searchInput){
-        event.preventDefault();
-        searchInput.focus();
-      }
+  <footer class="footer"><strong>FORESTFIT WORKROOM</strong><span>Sales Strategy · Internal Use Only</span></footer>
+</div>
 
-      if(event.key === "Escape" && document.activeElement === searchInput){
-        searchInput.value = "";
-        runSearch();
-        searchInput.blur();
-      }
-    });
-  </script>
+<script>
+const observer=new IntersectionObserver((entries)=>{entries.forEach((entry,i)=>{if(entry.isIntersecting){setTimeout(()=>entry.target.classList.add('show'),i*45);observer.unobserve(entry.target)}})},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+const input=document.getElementById('toolSearch');
+const clearBtn=document.getElementById('clearSearch');
+const searchKey=document.querySelector('.search-key');
+const cards=[...document.querySelectorAll('.card')];
+const emptyState=document.getElementById('emptyState');
+const resultCount=document.getElementById('resultCount');
+const resultCountHero=document.getElementById('resultCountHero');
+const chips=[...document.querySelectorAll('.filter-chip')];
+let currentFilter='all';
+function applyFilters(){
+  const q=input.value.toLowerCase().trim();let visible=0;
+  cards.forEach(card=>{const category=card.dataset.category;const text=(card.dataset.search+' '+card.innerText).toLowerCase();const show=(currentFilter==='all'||category===currentFilter)&&text.includes(q);card.classList.toggle('hidden',!show);if(show)visible++});
+  resultCount.textContent=String(visible).padStart(2,'0');resultCountHero.textContent=String(visible).padStart(2,'0');clearBtn.style.display=q?'block':'none';searchKey.style.display=q?'none':'inline';emptyState.style.display=visible===0?'grid':'none';
+}
+chips.forEach(chip=>chip.addEventListener('click',()=>{chips.forEach(c=>c.classList.remove('active'));chip.classList.add('active');currentFilter=chip.dataset.filter;applyFilters()}));
+input.addEventListener('input',applyFilters);clearBtn.addEventListener('click',()=>{input.value='';applyFilters();input.focus()});
+document.addEventListener('keydown',(e)=>{if(e.key==='/'&&document.activeElement!==input){e.preventDefault();input.focus()}if(e.key==='Escape'&&document.activeElement===input){input.value='';applyFilters();input.blur()}});
+
+cards.forEach(card=>{
+  card.addEventListener('pointermove',(e)=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',`${e.clientX-r.left}px`);card.style.setProperty('--my',`${e.clientY-r.top}px`)});
+});
+const glow=document.getElementById('cursorGlow');
+window.addEventListener('pointermove',(e)=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px'});
+applyFilters();
+</script>
 </body>
 </html>
