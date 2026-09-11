@@ -1,0 +1,3335 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>
+FORESTFIT 장기지연 납기 자동 관리 시스템 V64 FINAL11 FIX3
+</title>
+
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+
+
+
+<style>
+
+
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+
+    margin:0;
+
+    padding:0;
+
+    background:#f5f6f3;
+
+    font-family:"Noto Sans KR",Arial,sans-serif;
+
+    color:#222;
+
+}
+
+
+
+.container{
+
+    width:920px;
+
+    margin:40px auto 80px;
+
+}
+
+
+
+.header{
+
+    background:#222;
+
+    color:white;
+
+    border-radius:20px;
+
+    padding:35px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+.brand{
+
+    font-size:14px;
+
+    letter-spacing:2px;
+
+    opacity:0.7;
+
+}
+
+
+
+.header h1{
+
+    margin:12px 0;
+
+    font-size:30px;
+
+}
+
+
+
+.version{
+
+    font-size:18px;
+
+    opacity:0.6;
+
+}
+
+
+
+.header p{
+
+    margin:0;
+
+    color:#ddd;
+
+}
+
+
+
+.card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:25px;
+
+    margin-bottom:18px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,0.06);
+
+}
+
+
+
+.step{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.step-number{
+
+    width:34px;
+
+    height:34px;
+
+    background:#222;
+
+    color:white;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-weight:bold;
+
+}
+
+
+
+.step-title{
+
+    font-size:18px;
+
+    font-weight:bold;
+
+}
+
+
+
+.file-box{
+
+    border:2px dashed #ddd;
+
+    border-radius:14px;
+
+    padding:18px;
+
+    background:#fafafa;
+
+}
+
+
+
+input[type=file],
+input[type=date],
+textarea{
+
+    width:100%;
+
+    padding:12px;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+}
+
+
+
+.file-name{
+
+    margin-top:10px;
+
+    color:#555;
+
+}
+
+
+
+.guide{
+
+    margin-top:15px;
+
+    padding:15px;
+
+    background:#f6f6f6;
+
+    border-radius:12px;
+
+    font-size:14px;
+
+    line-height:1.7;
+
+}
+
+
+
+.guide summary{
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+
+
+.btn{
+
+    width:100%;
+
+    padding:16px;
+
+    margin-top:12px;
+
+    border:0;
+
+    border-radius:12px;
+
+    background:#222;
+
+    color:white;
+
+    font-weight:bold;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+}
+
+
+
+.status{
+
+    margin-top:15px;
+
+    padding:15px;
+
+    background:#f5f5f5;
+
+    border-radius:10px;
+
+    font-weight:bold;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<div class="header">
+
+
+<div class="brand">
+FORESTFIT INTERNAL TOOL
+</div>
+
+
+
+<h1>
+
+장기지연 납기 자동 관리 시스템
+
+<span class="version">
+
+V64 FINAL11 FIX3
+
+</span>
+
+</h1>
+
+
+
+<p>
+
+셀메이트 주문과 출고준수일 데이터를 자동 매칭합니다.
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<div class="step">
+
+<div class="step-number">
+1
+</div>
+
+
+<div class="step-title">
+
+셀메이트 파일 업로드
+
+</div>
+
+
+</div>
+
+
+
+<div class="file-box">
+
+
+<input 
+type="file"
+id="cellmateFile"
+accept=".xlsx,.xls"
+>
+
+
+<div class="file-name" id="cellmateName">
+
+선택된 파일 없음
+
+</div>
+
+
+
+<details class="guide">
+
+
+<summary>
+
+📌 셀메이트 첨부 파일 다운로드 방법
+
+</summary>
+
+
+<div>
+
+
+1. 셀메이트 접속
+
+<br>
+
+2. 주문관리 메뉴 클릭
+
+<br>
+
+3. 판매처분류에서 GS 제외 전 채널 선택
+
+<br><br>
+
+
+선택 채널
+
+<br>
+
+- 네이버
+
+<br>
+
+- 롯데온
+
+<br>
+
+- 비플로우
+
+<br>
+
+- 와디즈
+
+<br>
+
+- 카카오톡스토어
+
+<br>
+
+- 퀸잇
+
+<br>
+
+- 하프클럽
+
+
+<br><br>
+
+
+4. 조회기간 설정
+
+<br>
+
+- 시작일 : 3개월 전
+
+<br>
+
+- 종료일 : 조회일 기준 평일 2~5일 전
+
+
+<br><br>
+
+
+5. 확장필터 → 출고불가 적용
+
+
+<br><br>
+
+
+6. [장기지연건] 양식 다운로드
+
+
+<br><br>
+
+
+7. 다운로드 파일 첨부
+
+
+</div>
+
+
+</details>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<div class="step">
+
+
+<div class="step-number">
+2
+</div>
+
+
+<div class="step-title">
+
+비플로우 파일 업로드
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="file-box">
+
+
+<input
+type="file"
+id="bflowFile"
+accept=".xlsx,.xls"
+>
+
+
+<div class="file-name" id="bflowName">
+
+선택된 파일 없음
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+
+<div class="step">
+
+
+<div class="step-number">
+3
+</div>
+
+
+<div class="step-title">
+
+비플로우(더소재) 파일 업로드 (선택)
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="file-box">
+
+
+<input
+type="file"
+id="theSojeFile"
+accept=".xlsx,.xls"
+>
+
+
+<div class="file-name" id="theSojeName">
+
+선택된 파일 없음
+
+</div>
+
+
+
+
+
+<details class="guide">
+
+
+<summary>
+
+📌 비플로우(더소재) 첨부 파일 다운로드 방법
+
+</summary>
+
+
+<div>
+
+
+※ 셀메이트 C열 판매처가 "비플로우(더소재)"인 경우 해당 파일에서 주문번호를 찾습니다.
+
+
+<br><br>
+
+
+1. 비플로우 접속
+
+<br>
+
+2. 판매관리 메뉴 클릭
+
+<br>
+
+3. 주문조회 클릭
+
+
+<br><br>
+
+
+4. 주문상태 선택
+
+<br>
+
+- 배송지연
+
+<br>
+
+- 배송준비
+
+
+<br><br>
+
+
+5. 조회기간 설정
+
+<br>
+
+- 시작일 : 3개월 전
+
+<br>
+
+- 종료일 : 조회일 기준 평일 2~5일 전
+
+
+<br><br>
+
+
+6. 검색 버튼 클릭
+
+<br>
+
+7. 파일 다운로드
+
+<br>
+
+8. 다운로드한 파일 첨부
+
+
+</div>
+
+
+</details>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<div class="step">
+
+
+<div class="step-number">
+📅
+</div>
+
+
+<div class="step-title">
+
+오늘 날짜 설정
+
+</div>
+
+
+</div>
+
+
+
+<input
+type="date"
+id="todayDate"
+>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<div class="step">
+
+
+<div class="step-number">
+📌
+</div>
+
+
+<div class="step-title">
+
+공휴일 설정
+
+</div>
+
+
+</div>
+
+
+
+
+<textarea
+
+id="holiday"
+
+placeholder="예시)
+2026-07-17
+2026-08-15
+
+※ 날짜 형식 : YYYY-MM-DD
+※ 공휴일은 한 줄씩 입력해주세요."
+
+></textarea>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<button
+class="btn"
+onclick="calculate()"
+>
+
+결과 계산
+
+</button>
+
+
+
+
+
+<button
+class="btn"
+onclick="downloadFinalExcel()"
+>
+
+최종 계산 다운로드
+
+</button>
+
+
+
+
+
+<div
+class="status"
+id="status"
+>
+
+대기 중
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+let wbCellmate=null;
+
+
+let wbBflow=null;
+
+
+let wbTheSoje=null;
+
+
+let resultData=[];
+
+
+
+
+
+
+
+document
+
+.getElementById("cellmateFile")
+
+.addEventListener(
+
+"change",
+
+async e=>{
+
+
+let file=e.target.files[0];
+
+
+if(!file)
+
+return;
+
+
+
+document
+
+.getElementById("cellmateName")
+
+.innerText=file.name;
+
+
+
+
+wbCellmate=
+
+XLSX.read(
+
+await file.arrayBuffer(),
+
+{
+
+type:"array",
+
+cellDates:true
+
+}
+
+);
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+document
+
+.getElementById("bflowFile")
+
+.addEventListener(
+
+"change",
+
+async e=>{
+
+
+let file=e.target.files[0];
+
+
+if(!file)
+
+return;
+
+
+
+document
+
+.getElementById("bflowName")
+
+.innerText=file.name;
+
+
+
+
+wbBflow=
+
+XLSX.read(
+
+await file.arrayBuffer(),
+
+{
+
+type:"array",
+
+cellDates:true
+
+}
+
+);
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+document
+
+.getElementById("theSojeFile")
+
+.addEventListener(
+
+"change",
+
+async e=>{
+
+
+let file=e.target.files[0];
+
+
+if(!file)
+
+return;
+
+
+
+document
+
+.getElementById("theSojeName")
+
+.innerText=file.name;
+
+
+
+
+wbTheSoje=
+
+XLSX.read(
+
+await file.arrayBuffer(),
+
+{
+
+type:"array",
+
+cellDates:true
+
+}
+
+);
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+function getTodayDate(){
+
+
+let value=
+
+document
+
+.getElementById("todayDate")
+
+.value;
+
+
+
+return value
+
+?
+
+safeDate(value)
+
+:
+
+null;
+
+
+}
+
+
+
+
+
+
+
+
+
+function getHoliday(){
+
+
+return document
+
+.getElementById("holiday")
+
+.value
+
+.split("\n")
+
+.map(v=>v.trim())
+
+.map(v=>v.replace(/\./g,"-"))
+
+.filter(v=>v);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function dateString(d){
+
+
+if(!(d instanceof Date))
+
+return "";
+
+
+
+return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
+
+}
+
+
+
+
+
+
+
+
+
+function isWeekend(d){
+
+
+return d.getDay()===0 || d.getDay()===6;
+
+
+}
+
+
+
+
+
+
+
+
+
+function isHoliday(d){
+
+
+return getHoliday()
+
+.includes(
+
+dateString(d)
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+function addBusinessDays(date,days){
+
+
+if(!date)
+
+return null;
+
+
+
+let d=new Date(date);
+
+
+let count=0;
+
+
+
+while(count<days){
+
+
+d.setDate(
+
+d.getDate()+1
+
+);
+
+
+
+if(
+
+!isWeekend(d)
+
+&&
+
+!isHoliday(d)
+
+){
+
+
+count++;
+
+}
+
+
+
+}
+
+
+
+return d;
+
+
+}
+
+
+
+
+
+
+
+
+
+function safeDate(value){
+
+
+if(
+
+value===null ||
+
+value===undefined ||
+
+value===""
+
+)
+
+return null;
+
+
+
+
+
+
+
+if(value instanceof Date){
+
+
+return isNaN(value.getTime())
+
+?
+
+null
+
+:
+
+value;
+
+
+}
+
+
+
+
+
+
+
+if(typeof value==="number"){
+
+
+let x=
+
+XLSX.SSF.parse_date_code(value);
+
+
+
+if(x){
+
+
+return new Date(
+
+x.y,
+
+x.m-1,
+
+x.d
+
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+let text=
+
+String(value).trim();
+
+
+
+
+
+
+
+let match=
+
+text.match(
+
+/^(\d{4})-(\d{2})-(\d{2})$/
+
+);
+
+
+
+if(match){
+
+
+
+let d=
+
+new Date(
+
+Number(match[1]),
+
+Number(match[2])-1,
+
+Number(match[3])
+
+);
+
+
+
+return isNaN(d.getTime())
+
+?
+
+null
+
+:
+
+d;
+
+
+
+}
+
+
+
+return null;
+
+
+}
+
+
+function extractBracket(value){
+
+
+let result=
+
+String(value||"")
+
+.match(/\(([^()]*)\)/);
+
+
+
+return result
+
+?
+
+result[1]
+
+:
+
+"";
+
+
+}
+
+
+
+
+
+
+
+
+
+function cleanOption(value){
+
+
+if(!value)
+
+return "";
+
+
+
+return String(value)
+
+.replace(/\s/g,"")
+
+.replace(/\//g,",")
+
+.replace(/_/g,"")
+
+.replace(/기본옵션:옵션/g,"")
+
+.replace(/-/g,"")
+
+.replace(/[A-Za-z]+\d+/g,"");
+
+
+}
+
+
+
+
+
+
+
+
+
+// 출고준수일 파일 데이터 생성
+
+function createShippingData(wb){
+
+
+let data=[];
+
+
+
+if(!wb)
+
+return data;
+
+
+
+
+
+
+
+let sheet=
+
+wb.Sheets[wb.SheetNames[0]];
+
+
+
+
+
+
+
+let rows=
+
+XLSX.utils.sheet_to_json(
+
+sheet,
+
+{
+
+header:1,
+
+defval:"",
+
+raw:true
+
+}
+
+);
+
+
+
+
+
+
+
+for(let i=1;i<rows.length;i++){
+
+
+
+let r=rows[i];
+
+
+
+if(!r || !r[1])
+
+continue;
+
+
+
+
+
+
+
+data.push({
+
+
+
+orderNo:String(r[1]).trim(),
+
+
+
+channel:String(r[4]||"").trim(),
+
+
+
+product:extractBracket(r[10]),
+
+
+
+option:cleanOption(r[11]),
+
+
+
+shipDate:safeDate(r[19])
+
+
+
+});
+
+
+
+}
+
+
+
+return data;
+
+
+}
+
+
+
+
+
+
+
+
+
+// 주문번호 + 상품 + 옵션 매칭
+
+function findShippingData(
+
+orderNo,
+
+product,
+
+option,
+
+data
+
+){
+
+
+
+let result=
+
+data.filter(v=>
+
+
+
+String(v.orderNo)
+
+===
+
+String(orderNo)
+
+
+
+);
+
+
+
+
+
+
+
+if(result.length===0)
+
+return null;
+
+
+
+
+
+
+
+if(result.length===1)
+
+return result[0];
+
+
+
+
+
+
+
+return result.find(v=>
+
+
+
+v.product===product
+
+&&
+
+v.option===option
+
+
+
+)
+
+|| null;
+
+
+}
+
+
+
+
+
+
+
+
+
+// 판매채널 기준 L열 생성
+
+function makeProgress(
+
+channel,
+
+jDate,
+
+orderDate
+
+){
+
+
+
+if(
+
+!channel
+
+||
+
+!jDate
+
+)
+
+return "";
+
+
+
+
+
+
+
+let delayDay=
+
+getBusinessDayCount(orderDate);
+
+
+
+
+
+
+
+// 6영업일 이상이면 공백
+
+if(delayDay>5)
+
+return "";
+
+
+
+
+
+
+
+let extendDate=null;
+
+
+
+
+
+
+
+if(
+
+channel==="지마켓"
+
+||
+
+channel==="옥션"
+
+||
+
+channel==="SSG"
+
+){
+
+
+
+extendDate=
+
+addBusinessDays(
+
+jDate,
+
+14
+
+);
+
+
+
+}
+
+
+
+else if(
+
+channel==="카카오스타일"
+
+){
+
+
+
+extendDate=
+
+addBusinessDays(
+
+jDate,
+
+7
+
+);
+
+
+
+}
+
+
+
+else if(
+
+channel==="CJ몰"
+
+){
+
+
+
+extendDate=
+
+addBusinessDays(
+
+jDate,
+
+3
+
+);
+
+
+
+}
+
+
+
+else if(
+
+channel==="롯데I몰"
+
+||
+
+channel==="홈앤쇼핑"
+
+){
+
+
+
+return `${channel} 출고예정일 연장 불가`;
+
+
+
+}
+
+
+
+else{
+
+
+return "";
+
+}
+
+
+
+return `${channel} 출고준수일 연장전 / 연장시 ${dateString(extendDate)}`;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// 주문일 기준 영업일 계산
+
+function getBusinessDayCount(orderDate){
+
+
+
+let today=
+
+getTodayDate();
+
+
+
+if(
+
+!orderDate
+
+||
+
+!today
+
+)
+
+return 0;
+
+
+
+
+
+
+
+let temp=
+
+new Date(orderDate);
+
+
+let count=0;
+
+
+
+
+
+
+
+while(temp < today){
+
+
+
+temp.setDate(
+
+temp.getDate()+1
+
+);
+
+
+
+if(
+
+!isWeekend(temp)
+
+&&
+
+!isHoliday(temp)
+
+){
+
+
+
+count++;
+
+}
+
+
+
+}
+
+
+
+return count;
+
+
+}
+
+
+
+
+
+
+
+
+
+function calculate(){
+
+
+if(!wbCellmate){
+
+
+alert("셀메이트 파일을 업로드해주세요.");
+
+return;
+
+
+}
+
+
+
+
+
+
+
+let bflowData=
+
+createShippingData(wbBflow);
+
+
+
+let theSojeData=
+
+createShippingData(wbTheSoje);
+
+
+
+
+
+
+
+let sheet=
+
+wbCellmate.Sheets[wbCellmate.SheetNames[0]];
+
+
+
+
+
+
+
+let rows=
+
+XLSX.utils.sheet_to_json(
+
+sheet,
+
+{
+
+header:1,
+
+defval:"",
+
+raw:true
+
+}
+
+);
+
+
+
+
+
+
+
+resultData=[];
+
+
+
+
+
+
+
+resultData.push([
+
+
+
+"주문일자",
+
+"지연일",
+
+"판매처명",
+
+"주문번호",
+
+"공급처명",
+
+"사입상품명",
+
+"판매처상품명",
+
+"옵션",
+
+"입고예정일",
+
+"출고준수일",
+
+"출고불가 여부",
+
+"진행상황",
+
+"처리결과"
+
+
+
+]);
+
+
+
+
+
+
+
+
+
+for(let i=1;i<rows.length;i++){
+
+
+
+let r=rows[i];
+
+
+
+if(!r)
+
+continue;
+
+
+
+
+
+
+
+let orderDate=
+
+safeDate(r[0]);
+
+
+
+
+
+
+
+let seller=
+
+String(r[2]||"").trim();
+
+
+
+
+
+
+
+let orderNo=
+
+r[3];
+
+
+
+
+
+
+
+let product=
+
+extractBracket(r[6]);
+
+
+
+
+
+
+
+let option=
+
+cleanOption(r[7]);
+
+
+
+
+
+
+
+let jDate=null;
+
+
+let lValue="";
+
+
+
+
+
+
+
+// 비플로우
+
+if(seller==="비플로우"){
+
+
+
+let match=
+
+findShippingData(
+
+orderNo,
+
+product,
+
+option,
+
+bflowData
+
+);
+
+
+
+
+
+
+
+if(match){
+
+
+
+jDate=match.shipDate;
+
+
+
+lValue=
+
+makeProgress(
+
+match.channel,
+
+jDate,
+
+orderDate
+
+);
+
+
+
+}
+
+else{
+
+
+lValue="취소/출고 확인 요망";
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// 비플로우(더소재)
+
+else if(seller==="비플로우(더소재)"){
+
+
+
+let match=
+
+findShippingData(
+
+orderNo,
+
+product,
+
+option,
+
+theSojeData
+
+);
+
+
+
+
+
+
+
+if(match){
+
+
+
+jDate=match.shipDate;
+
+
+
+lValue=
+
+makeProgress(
+
+match.channel,
+
+jDate,
+
+orderDate
+
+);
+
+
+
+}
+
+else{
+
+
+lValue="취소/출고 확인 요망";
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// 퀸잇 / 퀸잇(더소재)
+
+else if(
+
+seller==="퀸잇"
+
+||
+
+seller==="퀸잇(더소재)"
+
+){
+
+
+
+jDate=
+
+addBusinessDays(
+
+orderDate,
+
+21
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// 하프클럽
+
+else if(
+
+seller==="하프클럽"
+
+){
+
+
+
+jDate=
+
+addBusinessDays(
+
+orderDate,
+
+15
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// 네이버 / 롯데ON / 카카오톡스토어
+
+else if(
+
+seller==="네이버"
+
+||
+
+seller==="네이버 스마트스토어"
+
+||
+
+seller==="롯데ON"
+
+||
+
+seller==="카카오톡스토어"
+
+){
+
+
+
+if(orderDate){
+
+
+
+jDate=
+
+new Date(orderDate);
+
+
+
+jDate.setMonth(
+
+jDate.getMonth()+1
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+let inboundDate=
+
+safeDate(r[8]);
+
+
+
+
+
+
+
+let iValue=
+
+inboundDate
+
+?
+
+inboundDate
+
+:
+
+"입고일 기입 요망";
+
+
+
+
+
+
+
+resultData.push([
+
+
+
+orderDate,
+
+r[1],
+
+seller,
+
+orderNo,
+
+r[4],
+
+r[5],
+
+product,
+
+r[7],
+
+iValue,
+
+jDate,
+
+"",
+
+lValue,
+
+""
+
+
+
+]);
+
+
+
+}
+
+
+
+
+
+
+
+document
+
+.getElementById("status")
+
+.innerText=
+
+`계산 완료 : ${resultData.length-1}건`;
+
+
+
+}
+
+
+
+function downloadFinalExcel(){
+
+
+if(resultData.length===0){
+
+
+alert("결과 계산 먼저 실행해주세요.");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+let ws=
+
+XLSX.utils.aoa_to_sheet(
+
+resultData
+
+);
+
+
+
+
+
+
+
+applyDateFormat(ws);
+
+
+
+applyFormulaK(ws);
+
+
+
+applyExcelStyle(ws);
+
+
+
+applyInputDateStyle(ws);
+
+
+
+applyKRedStyle(ws);
+
+
+
+applyLRedStyle(ws);
+
+
+
+
+
+
+
+let wb=
+
+XLSX.utils.book_new();
+
+
+
+
+
+
+
+XLSX.utils.book_append_sheet(
+
+wb,
+
+ws,
+
+"최종결과"
+
+);
+
+
+
+
+
+
+
+XLSX.writeFile(
+
+wb,
+
+"장기지연_최종계산_V64_FINAL11_FIX3.xlsx"
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// 날짜 표시 처리
+
+// B열은 원본 유지
+
+
+function applyDateFormat(ws){
+
+
+
+let range=
+
+XLSX.utils.decode_range(
+
+ws["!ref"]
+
+);
+
+
+
+
+
+
+
+for(
+
+let r=1;
+
+r<=range.e.r;
+
+r++
+
+){
+
+
+
+let row=r+1;
+
+
+
+
+
+
+
+setDateCell(
+
+ws,
+
+"A"+row,
+
+ws["A"+row]?.v
+
+);
+
+
+
+
+
+
+
+setDateCell(
+
+ws,
+
+"I"+row,
+
+ws["I"+row]?.v
+
+);
+
+
+
+
+
+
+
+setDateCell(
+
+ws,
+
+"J"+row,
+
+ws["J"+row]?.v
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// K열 출고불가 계산
+
+function applyFormulaK(ws){
+
+
+
+let range=
+
+XLSX.utils.decode_range(
+
+ws["!ref"]
+
+);
+
+
+
+
+
+
+
+for(
+
+let r=1;
+
+r<=range.e.r;
+
+r++
+
+){
+
+
+
+let row=r+1;
+
+
+
+
+
+
+
+ws["K"+row]={
+
+
+
+t:"str",
+
+
+
+f:
+
+
+
+`IF(ISNUMBER(SEARCH("연장시",L${row})),
+
+IF(OR(ISTEXT(I${row}),I${row}>DATEVALUE(MID(L${row},FIND("연장시",L${row})+4,10))),
+
+"출고불가",
+
+""),
+
+IF(OR(ISTEXT(I${row}),I${row}>J${row}),
+
+"출고불가",
+
+""))`
+
+
+
+};
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function applyExcelStyle(ws){
+
+
+
+let headerStyle={
+
+
+
+fill:{
+
+
+
+fgColor:{
+
+
+
+rgb:"FFD9D9D9"
+
+
+
+}
+
+
+
+},
+
+
+
+font:{
+
+
+
+bold:true,
+
+
+
+sz:12
+
+
+
+},
+
+
+
+alignment:{
+
+
+
+horizontal:"center",
+
+
+
+vertical:"center"
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+for(let c=0;c<13;c++){
+
+
+
+let cell=
+
+XLSX.utils.encode_cell({
+
+
+
+r:0,
+
+
+
+c:c
+
+
+
+});
+
+
+
+
+
+
+
+if(ws[cell]){
+
+
+
+ws[cell].s=
+
+headerStyle;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+Object.keys(ws).forEach(key=>{
+
+
+
+if(key==="!ref")
+
+return;
+
+
+
+
+
+
+
+if(!ws[key].s)
+
+ws[key].s={};
+
+
+
+
+
+
+
+ws[key].s.alignment={
+
+
+
+horizontal:"center",
+
+
+
+vertical:"center"
+
+
+
+};
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// I열 입고일 기입 요망 빨간색
+
+function applyInputDateStyle(ws){
+
+
+
+let range=
+
+XLSX.utils.decode_range(
+
+ws["!ref"]
+
+);
+
+
+
+
+
+
+
+for(let r=1;r<=range.e.r;r++){
+
+
+
+let cell=
+
+ws["I"+(r+1)];
+
+
+
+
+
+
+
+if(
+
+cell &&
+
+cell.v==="입고일 기입 요망"
+
+){
+
+
+
+cell.s={
+
+
+
+font:{
+
+
+
+color:{
+
+
+
+rgb:"FFFF0000"
+
+
+
+},
+
+
+
+bold:true
+
+
+
+},
+
+
+
+alignment:{
+
+
+
+horizontal:"center",
+
+
+
+vertical:"center"
+
+
+
+}
+
+
+
+};
+
+
+
+}
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// K열 빨간색
+
+function applyKRedStyle(ws){
+
+
+
+let range=
+
+XLSX.utils.decode_range(
+
+ws["!ref"]
+
+);
+
+
+
+
+
+
+
+for(let r=1;r<=range.e.r;r++){
+
+
+
+let cell=
+
+ws["K"+(r+1)];
+
+
+
+
+
+
+
+if(!cell)
+
+continue;
+
+
+
+
+
+
+
+cell.s={
+
+
+
+font:{
+
+
+
+color:{
+
+
+
+rgb:"FFFF0000"
+
+
+
+},
+
+
+
+bold:true
+
+
+
+},
+
+
+
+alignment:{
+
+
+
+horizontal:"center",
+
+
+
+vertical:"center"
+
+
+
+}
+
+
+
+};
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// L열 취소/출고 확인 요망 빨간색
+
+function applyLRedStyle(ws){
+
+
+
+let range=
+
+XLSX.utils.decode_range(
+
+ws["!ref"]
+
+);
+
+
+
+
+
+
+
+for(let r=1;r<=range.e.r;r++){
+
+
+
+let cell=
+
+ws["L"+(r+1)];
+
+
+
+
+
+
+
+if(
+
+cell &&
+
+cell.v==="취소/출고 확인 요망"
+
+){
+
+
+
+cell.s={
+
+
+
+font:{
+
+
+
+color:{
+
+
+
+rgb:"FFFF0000"
+
+
+
+},
+
+
+
+bold:true
+
+
+
+},
+
+
+
+alignment:{
+
+
+
+horizontal:"center",
+
+
+
+vertical:"center"
+
+
+
+}
+
+
+
+};
+
+
+
+}
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function setDateCell(
+
+ws,
+
+address,
+
+value
+
+){
+
+
+
+let cell=
+
+ws[address];
+
+
+
+
+
+
+
+if(!cell)
+
+return;
+
+
+
+
+
+
+
+if(
+
+value==="입고일 기입 요망"
+
+){
+
+
+
+cell.t="s";
+
+cell.v=value;
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+if(
+
+value instanceof Date
+
+&&
+
+!isNaN(value.getTime())
+
+){
+
+
+
+cell.t="d";
+
+cell.v=value;
+
+cell.z="yyyy-mm-dd";
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+let d=
+
+safeDate(value);
+
+
+
+
+
+
+
+if(d){
+
+
+
+cell.t="d";
+
+cell.v=d;
+
+cell.z="yyyy-mm-dd";
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+cell.t="s";
+
+cell.v=value || "";
+
+
+
+}
+
+
+
+</script>
+
+
+</body>
+
+
+</html>
