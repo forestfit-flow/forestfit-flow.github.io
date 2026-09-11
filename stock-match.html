@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>포레스트핏 재고매칭 확인 - 옵션 예외조건 개선</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
+<style>
+*{box-sizing:border-box;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif}
+body{margin:0;background:linear-gradient(135deg,#f7f3eb 0%,#edf3ef 100%);color:#1f2a24}
+.wrap{max-width:1180px;margin:0 auto;padding:48px 28px 80px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px}
+.logo{font-size:22px;font-weight:850;letter-spacing:.08em;color:#244734}
+.badge{padding:9px 15px;border-radius:999px;background:#ffffffcc;color:#486052;font-size:13px;font-weight:750;box-shadow:0 8px 24px rgba(31,42,36,.06)}
+h1{font-size:38px;letter-spacing:-.05em;color:#173d2b;margin:0 0 12px;font-weight:900}
+.desc{font-size:15px;color:#6d776f;line-height:1.65;margin-bottom:24px;font-weight:600}
+.card{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.95);border-radius:24px;padding:24px;margin-bottom:18px;box-shadow:0 18px 45px rgba(38,49,43,.08)}
+label{display:block;font-size:16px;font-weight:850;margin-bottom:10px;color:#173d2b}
+input,select,button{width:100%;padding:12px 14px;border:1px solid #d8dfdb;border-radius:12px;font-size:14px;background:#fff;margin-bottom:14px}
+button{border:0;background:#244734;color:#fff;font-weight:850;cursor:pointer;transition:.18s ease}
+button:hover{filter:brightness(.96);transform:translateY(-1px)}
+button.secondary{background:#7b8b82}
+.pill{display:inline-block;padding:6px 10px;background:#e6f5ec;color:#244734;border-radius:999px;font-size:12px;font-weight:750;margin:3px}
+.small{font-size:13px;color:#7c867f;line-height:1.6}
+.table-wrap{max-height:520px;overflow:auto;background:#fff;border:1px solid #d9e1dd;border-radius:16px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid #e6ece9;padding:8px 10px;white-space:nowrap;text-align:center;vertical-align:middle}
+th{background:#e6f5ec;color:#173d2b;font-weight:850;position:sticky;top:0}
+td.warn{color:#d60000;font-weight:850}
+td.status-warn{color:#d60000;font-weight:850;background:#fff2f2}
+td.status-ok{color:#177245;font-weight:850;background:#eefaf3}
+td.reason-cell{color:#6b3d00;font-weight:750;background:#fff8dc}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">FORESTFIT</div>
+    <div class="badge">상품운영팀 업무툴</div>
+  </div>
+
+  <h1>재고매칭 확인</h1>
+  <div class="desc">
+    상품명/옵션 매칭을 확인합니다. 묶음상품은 같은 일련번호 안에서 예상 옵션 세트와 실제 작업자 옵션 세트를 비교합니다.<br>
+    기본2XL, 빈티지중청2XL처럼 붙어 있는 옵션을 분리하고, 단일색상·기본기장·공통 FREE 생략과 추가구매 색상 표기를 함께 인식합니다.
+  </div>
+
+  <div class="card">
+    <label>1. 파일 업로드</label>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+    <label>시트 선택</label>
+    <select id="sheetSelect"></select>
+    <div class="small">결과 구조: A=상태 / B=기존 B / C=기존 D / D=상품명 확인 / E=기존 C / F=기존 E / G=옵션 확인 / H=확인 사유</div>
+  </div>
+
+  <div class="card">
+    <label>결과 파일 컬럼</label>
+    <span class="pill">A 상태</span>
+    <span class="pill">B 상품명(상품매칭)</span>
+    <span class="pill">C 작업자 재고매칭 상품명</span>
+    <span class="pill">D 상품명 매칭 확인</span>
+    <span class="pill">E 원본 옵션</span>
+    <span class="pill">F 작업자 옵션</span>
+    <span class="pill">G 옵션 매칭 확인</span>
+    <span class="pill">H 확인 사유</span>
+    <span class="pill">I 재고매칭 설정수량</span>
+    <span class="pill">J 일련번호</span>
+    <span class="pill">K 등록일자</span>
+    <span class="pill">L 작업자</span>
+    <br><br>
+    <button onclick="processFile()">매칭 확인 실행</button>
+    <button class="secondary" onclick="downloadResult()">결과 엑셀 다운로드</button>
+  </div>
+
+  <div class="card">
+    <label>결과 미리보기</label>
+    <div id="summary" class="small"></div>
+    <div class="table-wrap" id="tableWrap"></div>
+  </div>
+</div>
+
+<script>
+let workbook=null;
+let resultRows=[];
+const GENERIC_TITLE="[포레스트핏] 여름 BEST & 신상 팬츠 / 쿨링 / 냉감 / 반바지 / 데님 / 밴딩 팬츠";
+
+function txt(v){return v==null?"":String(v).trim();}
+function norm(v){return txt(v).replace(/\u00A0/g," ").replace(/\s+/g,"").replace(/，/g,",").trim();}
+function clean(v){return norm(v).replace(/[()\[\]{}]/g,"").replace(/[^가-힣a-zA-Z0-9]/g,"").toLowerCase();}
+
+
+
+const SIZE_ORDER=["5xl","4xl","3xl","2xl","xl","free","f4","f3","f2","f1","xs","s","m","l"];
+const LENGTH_ORDER=["10부","9부","8부","7부","숏","기본","롱","short","basic","long"];
+
+function stripSizeParen(v){
+  return txt(v).replace(/\b(5XL|4XL|3XL|2XL|XL|FREE|F4|F3|F2|F1|XS|S|M|L|F)\s*\(\s*\d+(?:\s*[-~]\s*\d+)?\s*\)/gi,"$1");
+}
+
+function preSplitOption(v){
+  let s=stripSizeParen(v);
+
+  // 기장+사이즈 붙은 경우 강제 분리
+  // 기본2XL → 기본,2XL / 숏XL → 숏,XL
+  s=s.replace(/(10부|9부|8부|7부|숏|기본|롱)(5XL|4XL|3XL|2XL|XL|FREE|F4|F3|F2|F1|XS|S|M|L|F)\b/gi,"$1,$2");
+
+  // 색상+사이즈 붙은 경우 강제 분리
+  // 빈티지중청2XL → 빈티지중청,2XL / 진청XL → 진청,XL
+  s=s.replace(/([가-힣a-zA-Z]+)(5XL|4XL|3XL|2XL|XL|FREE|F4|F3|F2|F1|XS|S|M|L|F)\b/gi,(m,color,size)=>{
+    if(/^(10부|9부|8부|7부|숏|기본|롱)$/i.test(color)) return m;
+    if(color.length<2) return m;
+    return color + "," + size;
+  });
+
+  return s;
+}
+
+function canon(v){
+  let x=norm(v).replace(/[()\[\]{}]/g,"").replace(/[^가-힣a-zA-Z0-9]/g,"").toLowerCase();
+  if(!x)return"";
+  if(x==="f")return"free";
+
+  // 색상 앞·뒤의 시즌 표기는 비교에서 제외: 여름블랙 / 블랙여름 → 블랙
+  if(x.startsWith("여름")&&x.length>2)x=x.replace(/^여름/,"");
+  if(x.endsWith("여름")&&x.length>2)x=x.replace(/여름$/,"");
+  return x;
+}
+
+function isSizeValue(x){
+  x=canon(x);
+  return SIZE_ORDER.includes(x);
+}
+
+function isLengthValue(x){
+  x=canon(x);
+  return LENGTH_ORDER.includes(x);
+}
+
+function isIgnorableValue(x){
+  x=canon(x);
+  if(!x)return true;
+  if(/^\d+$/.test(x))return true;
+  if(/^\d+\-\d+$/.test(x))return true;
+  return ["옵션","기본옵션","컬러","색상","기장","사이즈","품명"].includes(x);
+}
+
+function cleanInputToken(token){
+  let s=txt(token).replace(/^\s*\+\s*\d+\s*/,"").trim();
+  // +1 카키가 구분 과정에서 1 카키로 남은 경우도 추가구매 순번 제거
+  s=s.replace(/^\s*\d+\s+(?=[가-힣a-zA-Z])/,"").trim();
+  // 2XL, 3XL 같은 사이즈와 7부~10부 같은 기장의 앞 숫자는 순번으로 제거하지 않음
+  if(isSizeValue(s)||isLengthValue(s))return s;
+  return s.replace(/^\d+(?=[가-힣a-zA-Z])/,"").trim();
+}
+
+function isColorAliasCandidate(v){
+  const raw=txt(v);
+  const c=canon(raw);
+  if(!c || isIgnorableValue(c) || isSizeValue(c) || isLengthValue(c))return false;
+  // XL(66후~77), S(26~27) 등의 괄호 안 치수 설명을 색상으로 오인하지 않음
+  if(/\d/.test(raw) || /(?:후|전|대|cm|인치|호|~)/i.test(raw))return false;
+  return true;
+}
+
+function addTokenToSets(sets, token){
+  token=cleanInputToken(token);
+  if(!token)return;
+
+  // 베이지(브라운), 소라(연그레이) → 바깥색·괄호색을 모두 별칭으로 인정
+  // 단, XL(66후~77) 같은 사이즈 설명 괄호는 색상으로 추가하지 않음
+  const paren=token.match(/^(.+?)\(([^()]*)\)$/);
+  if(paren){
+    const outside=txt(paren[1]);
+    const inside=txt(paren[2]);
+
+    if(isSizeValue(outside)){
+      sets.sizes.add(canon(outside)==="f"?"free":canon(outside));
+      return;
+    }
+    if(isLengthValue(outside)){
+      sets.lengths.add(canon(outside));
+      return;
+    }
+
+    [outside,inside].forEach(v=>{
+      if(isColorAliasCandidate(v))sets.colors.add(canon(v));
+    });
+    return;
+  }
+
+  const c=canon(token);
+  if(!c || isIgnorableValue(c))return;
+
+  if(isSizeValue(c)){
+    sets.sizes.add(c==="f"?"free":c);
+    return;
+  }
+
+  if(isLengthValue(c)){
+    sets.lengths.add(c);
+    return;
+  }
+
+  sets.colors.add(c);
+}
+
+function cleanOptionString(v){
+  let s=preSplitOption(v);
+  // 추가구매 표기만 제거: 민트 / +1 연그레이 → 민트 / 연그레이
+  // 일반 색상 구분자인 블랙+브라운의 +는 그대로 유지
+  s=s.replace(/\+\s*\d+\s*/g," ");
+  s=s.replace(/기본\s*옵션\s*:\s*옵션-_F\d+_?/gi," ");
+  s=s.replace(/기본\s*옵션\s*:\s*옵션-/gi," ");
+  s=s.replace(/옵션-_F\d+_?/gi," ");
+  s=s.replace(/옵션-/gi," ");
+  s=s.replace(/_F\d+_?/gi," ");
+  s=s.replace(/품명\/[^,]+/gi," ");
+  s=s.replace(/색상\//gi," ");
+  s=s.replace(/사이즈\//gi," ");
+  // 라벨형 옵션 정리: 색상-연청 / 색상:연청 / 색상=연청 모두 지원
+  s=s.replace(/컬러\s*[-:=]\s*/gi," ");
+  s=s.replace(/색상\s*[-:=]\s*/gi," ");
+  s=s.replace(/기장\s*[-:=]\s*/gi," ");
+  s=s.replace(/사이즈\s*[-:=]\s*/gi," ");
+  s=s.replace(/1\+1\s*컬러\s*:/gi," ");
+  return s;
+}
+
+function parseOpt(v){
+  const sets={colors:new Set(),sizes:new Set(),lengths:new Set()};
+  const s=cleanOptionString(v);
+
+  // 콤마, 슬래시, +, |를 옵션 구분자로 사용
+  // 한 구간 안에 "롱 L", "진청 롱 L"처럼 공백으로 기장/사이즈가 붙으면 각각 분리
+  s.split(/[,\/+|]+/).forEach(seg=>{
+    const t=txt(seg);
+    if(!t)return;
+
+    const pieces=/\([^()]*\)/.test(t)?[t]:t.split(/\s+/).filter(Boolean);
+    const hasKnown=pieces.some(piece=>isSizeValue(piece)||isLengthValue(piece));
+
+    if(hasKnown){
+      const colorPieces=[];
+      pieces.forEach(piece=>{
+        if(isSizeValue(piece)||isLengthValue(piece)) addTokenToSets(sets,piece);
+        else colorPieces.push(piece);
+      });
+      if(colorPieces.length) addTokenToSets(sets,colorPieces.join(" "));
+    }else{
+      addTokenToSets(sets,t);
+    }
+  });
+
+  const colors=[...sets.colors].filter(x=>!isIgnorableValue(x));
+  const sizes=[...sets.sizes].filter(Boolean);
+  const lengths=[...sets.lengths].filter(Boolean);
+
+  return {
+    tokens:[...new Set([...colors,...sizes,...lengths])],
+    colors,
+    sizes,
+    lengths
+  };
+}
+
+function inter(a,b){return a.some(x=>b.includes(x));}
+
+function extractKeyword(value){
+  const s=txt(value);
+  let m=s.match(/\(([^()]*)\)/);
+  if(m&&m[1])return m[1].trim();
+  const brackets=[...s.matchAll(/\[([^\[\]]*)\]/g)].map(x=>x[1].trim()).filter(Boolean);
+  return brackets.find(b=>b!=="포레스트핏")||"";
+}
+
+function isProductMatched(a,b,d){
+  a=txt(a);b=txt(b);d=txt(d);
+  if(!a||!b)return false;
+  const ka=extractKeyword(a),kb=extractKeyword(b);
+  if(!ka&&kb&&d&&clean(d).includes(clean(kb)))return true;
+  if(a.includes(GENERIC_TITLE)){
+    if(!kb)return false;
+    return clean(a).includes(clean(kb))||clean(d).includes(clean(kb));
+  }
+  if(ka&&kb)return clean(ka)===clean(kb);
+  if(ka&&!kb)return clean(b).includes(clean(ka));
+  if(!ka&&kb)return clean(a).includes(clean(kb))||clean(d).includes(clean(kb));
+  const ca=clean(a),cb=clean(b);
+  return ca===cb||ca.includes(cb)||cb.includes(ca);
+}
+
+function productReason(a,b,d){
+  if(isProductMatched(a,b,d))return"";
+  const ka=extractKeyword(a),kb=extractKeyword(b);
+  if(!ka&&kb)return`상품명 확인 필요: 작업자 상품 키워드(${kb})가 원본/옵션에서 확인되지 않음`;
+  if(ka&&!kb)return`상품명 확인 필요: 원본 상품 키워드(${ka})가 작업자 상품명에서 확인되지 않음`;
+  if(ka&&kb)return`상품명 키워드 불일치: 원본(${ka}) / 작업자(${kb})`;
+  return"상품명 키워드 확인 필요";
+}
+
+/*
+  번호형 묶음상품 분석
+  - 묶음상품은 "1.옵션 1 (...) / 2.옵션 2 (...)"처럼 번호형 옵션 블록이 2개 이상일 때만 인정합니다.
+  - "색상-연청, 기장-숏, 사이즈-M"은 쉼표가 있어도 일반상품 1개로 처리합니다.
+*/
+function parseNamedOptionFields(value){
+  const parsed=parseOpt(value);
+  return {
+    colorAliases:[...parsed.colors],
+    sizes:[...parsed.sizes],
+    lengths:[...parsed.lengths]
+  };
+}
+
+function parseNumberedOptions(value){
+  const text=txt(value);
+  const result=[];
+  // 예: 1.옵션 1 (색상-진청, 기장-숏, 사이즈-S)
+  const regex=/(?:^|[,\s])\s*\d+\s*\.\s*옵션\s*\d*\s*\(([^()]*)\)/gi;
+  let match;
+  while((match=regex.exec(text))!==null){
+    const item=parseNamedOptionFields(match[1]);
+    if(item.colorAliases.length || item.sizes.length || item.lengths.length){
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function delimitedColorBundleItems(value){
+  // 번호형이 아닌 "블랙+브라운,FREE", "민트 / +1 연그레이" 형태
+  // 색상이 2개 이상일 때 색상별 상품으로 펼치고 공통 기장·사이즈를 적용합니다.
+  if(parseNumberedOptions(value).length>=2)return [];
+  const parsed=parseOpt(value);
+  if(parsed.colors.length<2)return [];
+  return parsed.colors.map(color=>({
+    colorAliases:[color],
+    sizes:[...parsed.sizes],
+    lengths:[...parsed.lengths]
+  }));
+}
+
+function bundleMode(v){
+  if(parseNumberedOptions(v).length>=2)return "numbered";
+  return delimitedColorBundleItems(v).length>=2 ? "color-list" : "";
+}
+
+function isBundleOption(v){return bundleMode(v)!=="";}
+
+function expectedBundleItems(originalOption){
+  const numbered=parseNumberedOptions(originalOption);
+  return numbered.length>=2 ? numbered : delimitedColorBundleItems(originalOption);
+}
+
+function actualItem(workerOption){
+  const p=parseOpt(workerOption);
+  return {colors:p.colors,sizes:p.sizes,lengths:p.lengths,raw:txt(workerOption)};
+}
+
+function itemMatch(actual,expected){
+  if(expected.colorAliases.length>0){
+    if(actual.colors.length===0)return false;
+    if(!inter(expected.colorAliases,actual.colors))return false;
+  }
+
+  if(expected.sizes.length>0){
+    // 원본 묶음 전체에 공통 사이즈가 하나뿐이면 작업자 옵션의 사이즈 생략 허용
+    if(actual.sizes.length>0 && !inter(expected.sizes,actual.sizes))return false;
+  }
+
+  if(expected.lengths.length>0){
+    // 기본 기장은 작업자 옵션에서 생략 가능
+    const onlyBasic=expected.lengths.length===1&&expected.lengths[0]==="기본";
+    if(actual.lengths.length===0 && !onlyBasic)return false;
+    if(actual.lengths.length>0 && !inter(expected.lengths,actual.lengths))return false;
+  }
+  return true;
+}
+
+function matchSet(expected,actual){
+  const used=new Array(actual.length).fill(false);
+  function dfs(i){
+    if(i>=expected.length)return true;
+    for(let j=0;j<actual.length;j++){
+      if(used[j])continue;
+      if(itemMatch(actual[j],expected[i])){
+        used[j]=true;
+        if(dfs(i+1))return true;
+        used[j]=false;
+      }
+    }
+    return false;
+  }
+  return dfs(0);
+}
+
+function bundleKeyFromRow(row){
+  const preferred=[row[6],row[7],row[8],row[0]].map(v=>txt(v)).filter(Boolean);
+  for(const v of preferred){
+    const n=v.replace(/\D/g,"");
+    if(/^\d{5,8}$/.test(n))return n;
+  }
+  const nums=[];
+  row.forEach(v=>{
+    const m=txt(v).match(/\d{5,8}/g);
+    if(m)m.forEach(n=>nums.push(n));
+  });
+  return nums.length?nums[nums.length-1]:(preferred[0]||"");
+}
+
+function normalOptionOk(original,worker){
+  const s=parseOpt(original),w=parseOpt(worker);
+  if(s.tokens.length===0||w.tokens.length===0)return false;
+
+  // 색상 비교
+  // 1) 양쪽 모두 색상 없음 → 색상 비교 생략
+  // 2) 원본 단일 색상 + 작업자 색상 생략 → 단일색상 생략으로 허용
+  // 3) 원본 복수 색상 + 작업자 색상 없음 → 확인 필요
+  if(s.colors.length>0&&w.colors.length>0){
+    if(!inter(s.colors,w.colors))return false;
+  }else if(s.colors.length>1&&w.colors.length===0){
+    return false;
+  }
+
+  // 원본에 사이즈가 하나뿐이면 작업자 사이즈 생략을 공통 사이즈 생략으로 허용
+  if(s.sizes.length>0){
+    if(w.sizes.length===0){
+      if(s.sizes.length!==1)return false;
+    }else if(!inter(s.sizes,w.sizes))return false;
+  }
+
+  // 원본 기장이 기본 하나뿐이면 작업자 기장 생략 허용
+  if(s.lengths.length>0){
+    if(w.lengths.length===0){
+      const onlyBasic=s.lengths.length===1&&s.lengths[0]==="기본";
+      if(!onlyBasic)return false;
+    }else if(!inter(s.lengths,w.lengths))return false;
+  }
+  return true;
+}
+
+function optionReason(original,worker){
+  const s=parseOpt(original),w=parseOpt(worker);
+  const r=[];
+
+  if(s.colors.length>0&&w.colors.length>0){
+    if(!inter(s.colors,w.colors))r.push(`색상 불일치: 원본(${s.colors.join(", ")}) / 작업자(${w.colors.join(", ")})`);
+  }else if(s.colors.length>1&&w.colors.length===0){
+    r.push("작업자 색상 누락: 원본에 복수 색상이 존재함");
+  }
+
+  if(s.sizes.length>0){
+    if(w.sizes.length===0){
+      if(s.sizes.length!==1)r.push("작업자 사이즈 누락");
+    }else if(!inter(s.sizes,w.sizes)){
+      r.push(`사이즈 불일치: 원본(${s.sizes.join(", ")}) / 작업자(${w.sizes.join(", ")})`);
+    }
+  }
+
+  if(s.lengths.length>0){
+    if(w.lengths.length===0){
+      const onlyBasic=s.lengths.length===1&&s.lengths[0]==="기본";
+      if(!onlyBasic)r.push(`작업자 기장 누락: 원본(${s.lengths.join(", ")})`);
+    }else if(!inter(s.lengths,w.lengths)){
+      r.push(`기장 불일치: 원본(${s.lengths.join(", ")}) / 작업자(${w.lengths.join(", ")})`);
+    }
+  }
+  return r.join(" / ");
+}
+
+function optionText(item){
+  const color=item.colorAliases?.[0]||"-";
+  const len=item.lengths?.[0]||"";
+  const size=item.sizes?.[0]||"";
+  return [color,len,size].filter(Boolean).join(",");
+}
+
+function getRows(){
+  const sheetName=document.getElementById("sheetSelect").value;
+  return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,raw:false,defval:"",blankrows:false});
+}
+
+function processFile(){
+  if(!workbook){alert("파일을 업로드해주세요.");return;}
+  const rows=getRows();
+  const temp=[];
+
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const productName=r[1]??"";
+    const stockName=r[3]??"";
+    const originalOption=r[2]??"";
+    const workerOption=r[4]??"";
+
+    if([productName,stockName,originalOption,workerOption].every(v=>txt(v)===""))continue;
+
+    temp.push({
+      row:r,
+      productName,
+      stockName,
+      originalOption,
+      workerOption,
+      bundleMode:bundleMode(originalOption),
+      serial:txt(r[0]),
+      // 주문수량 / 2개 / 3개 / 주문수량 X 2개 모두 인식
+      orderQty:(()=>{const m=txt(r[5]).match(/(\d+)\s*개/);return m?Math.max(1,Number(m[1])):1;})(),
+      productOk:isProductMatched(productName,stockName,originalOption),
+      optionOk:normalOptionOk(originalOption,workerOption),
+      isBundle:isBundleOption(originalOption),
+      bundleReason:""
+    });
+  }
+
+  const groups=new Map();
+  temp.forEach((item,idx)=>{
+    if(!item.isBundle||!item.serial)return;
+    const groupKey=item.bundleMode+"||"+item.serial;
+    if(!groups.has(groupKey))groups.set(groupKey,[]);
+    groups.get(groupKey).push({idx,item});
+  });
+
+  temp.forEach((item,idx)=>{
+    if(!item.isBundle)return;
+    const expected=expectedBundleItems(item.originalOption);
+    if(expected.length===0)return;
+    const groupKey=item.bundleMode+"||"+item.serial;
+    const group=groups.get(groupKey)||[{idx,item}];
+    const actual=[];
+    group.forEach(g=>{
+      const one=actualItem(g.item.workerOption);
+      for(let q=0;q<g.item.orderQty;q++) actual.push({...one});
+    });
+    const groupOk=actual.length===expected.length&&matchSet(expected,actual);
+    const rowActual=actualItem(item.workerOption);
+    const rowOk=expected.some(exp=>itemMatch(rowActual,exp));
+    item.optionOk=groupOk&&rowOk;
+    if(!item.optionOk){
+      const expectedText=expected.map(optionText).join(" / ");
+      const actualText=actual.map(a=>a.raw).join(" / ")||"-";
+      item.bundleReason=`묶음상품 확인 필요: 예상(${expectedText}) / 같은 일련번호 작업자(${actualText})`;
+    }
+  });
+
+  resultRows=[["상태","상품명(상품매칭)","작업자 재고매칭 상품명","상품명 매칭 확인","원본 옵션","작업자 옵션","옵션 매칭 확인","확인 사유","재고매칭 설정수량","일련번호","등록일자","작업자"]];
+
+  temp.forEach(item=>{
+    const r=item.row;
+    const status=(item.productOk&&item.optionOk)?"정상":"확인필요";
+    const reasons=[
+      productReason(item.productName,item.stockName,item.originalOption),
+      item.optionOk?"":(item.bundleReason||optionReason(item.originalOption,item.workerOption))
+    ].filter(Boolean).join(" / ");
+
+    resultRows.push([
+      status,
+      item.productName,
+      item.stockName,
+      item.productOk?"":"재확인 요망",
+      item.originalOption,
+      item.workerOption,
+      item.optionOk?"":"재확인 요망",
+      reasons,
+      r[5]??"",
+      r[0]??"",
+      r[6]??"",  // 첨부파일 G열 → 결과파일 K열(등록일자)
+      r[7]??""   // 첨부파일 H열 → 결과파일 L열(작업자)
+    ]);
+  });
+
+  renderTable(resultRows.slice(0,101));
+  const total=resultRows.length-1;
+  const productWarn=resultRows.filter((r,i)=>i>0&&r[3]==="재확인 요망").length;
+  const optionWarn=resultRows.filter((r,i)=>i>0&&r[6]==="재확인 요망").length;
+  document.getElementById("summary").innerHTML=`총 ${total}건 / 상품명 재확인 ${productWarn}건 / 옵션 재확인 ${optionWarn}건`;
+}
+
+function renderTable(rows){
+  if(!rows.length)return;
+  let html="<table><thead><tr>";
+  rows[0].forEach(h=>html+=`<th>${h}</th>`);
+  html+="</tr></thead><tbody>";
+  for(let i=1;i<rows.length;i++){
+    html+="<tr>";
+    rows[i].forEach((v,c)=>{
+      let cls="";
+      if((c===3||c===6)&&v==="재확인 요망")cls="warn";
+      if(c===0&&v==="확인필요")cls="status-warn";
+      if(c===0&&v==="정상")cls="status-ok";
+      if(c===7&&v)cls="reason-cell";
+      html+=`<td class="${cls}">${v??""}</td>`;
+    });
+    html+="</tr>";
+  }
+  html+="</tbody></table>";
+  document.getElementById("tableWrap").innerHTML=html;
+}
+
+function downloadResult(){
+  if(!resultRows.length){alert("매칭 확인 실행을 먼저 눌러주세요.");return;}
+
+  const ws=XLSX.utils.aoa_to_sheet(resultRows);
+  const range=XLSX.utils.decode_range(ws["!ref"]);
+
+  for(let r=0;r<=range.e.r;r++){
+    for(let c=0;c<=range.e.c;c++){
+      const addr=XLSX.utils.encode_cell({r,c});
+      if(!ws[addr])ws[addr]={t:"s",v:""};
+      ws[addr].s=ws[addr].s||{};
+      ws[addr].s.alignment={horizontal:"center",vertical:"center"};
+      ws[addr].s.font=ws[addr].s.font||{};
+      ws[addr].s.font.sz=11;
+
+      if(r===0){
+        ws[addr].s.fill={patternType:"solid",fgColor:{rgb:"E6F5EC"}};
+        ws[addr].s.font={bold:true,color:{rgb:"173D2B"},sz:12};
+      }
+
+      if(r>0){
+        const productWarn=ws[XLSX.utils.encode_cell({r,c:3})]?.v==="재확인 요망";
+        const optionWarn=ws[XLSX.utils.encode_cell({r,c:6})]?.v==="재확인 요망";
+
+        if(c===0&&ws[addr].v==="확인필요"){
+          ws[addr].s.fill={patternType:"solid",fgColor:{rgb:"FFF2F2"}};
+          ws[addr].s.font={bold:true,color:{rgb:"D60000"},sz:11};
+        }
+        if(c===0&&ws[addr].v==="정상"){
+          ws[addr].s.fill={patternType:"solid",fgColor:{rgb:"EEF8F1"}};
+          ws[addr].s.font={bold:true,color:{rgb:"177245"},sz:11};
+        }
+        if(productWarn&&c>=1&&c<=3)ws[addr].s.fill={patternType:"solid",fgColor:{rgb:"FFF2A8"}};
+        if(optionWarn&&c>=4&&c<=7)ws[addr].s.fill={patternType:"solid",fgColor:{rgb:"FFE2E2"}};
+        if((c===3||c===6)&&ws[addr].v==="재확인 요망")ws[addr].s.font={bold:true,color:{rgb:"D60000"},sz:11};
+        if(c===7&&ws[addr].v){
+          ws[addr].s.fill={patternType:"solid",fgColor:{rgb:"FFF8DC"}};
+          ws[addr].s.font={bold:true,color:{rgb:"7A4A00"},sz:10};
+        }
+      }
+    }
+  }
+
+  ws["!rows"]=ws["!rows"]||[];
+  ws["!rows"][0]={hpx:30};
+  ws["!cols"]=[
+    {wch:12},{wch:48},{wch:48},{wch:18},{wch:48},{wch:32},{wch:18},{wch:70},{wch:24},{wch:18},{wch:18},{wch:18}
+  ];
+  ws["!autofilter"]={ref:ws["!ref"]};
+
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"재고매칭확인");
+  XLSX.writeFile(wb,"재고매칭_확인결과.xlsx");
+}
+
+document.getElementById("fileInput").addEventListener("change",e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=evt=>{
+    workbook=XLSX.read(new Uint8Array(evt.target.result),{type:"array",cellDates:true,cellStyles:true});
+    const select=document.getElementById("sheetSelect");
+    select.innerHTML="";
+    workbook.SheetNames.forEach((name,idx)=>{
+      select.add(new Option(name,name));
+      if(idx===0)select.value=name;
+    });
+  };
+  reader.readAsArrayBuffer(file);
+});
+</script>
+</body>
+</html>
