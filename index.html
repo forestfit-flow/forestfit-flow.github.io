@@ -4,11 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>FORESTFIT / WORKROOM</title>
+<title>FORESTFIT WORKROOM</title>
 
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
 
 *{
   margin:0;
@@ -17,18 +16,15 @@
 }
 
 :root{
-  --bg:#eeeeee;
-  --paper:#ffffff;
-  --ink:#111111;
-  --muted:#88888c;
-  --line:#e4e4e4;
-
-  --blue:#bfdde8;
-  --pink:#efb7c8;
-  --black:#111111;
-  --soft:#f7f7f7;
-
-  --editor-blue:#5357ff;
+  --bg:#F0F0ED;
+  --paper:#FCFCFA;
+  --paper2:#F7F7F4;
+  --black:#151515;
+  --gray:#858580;
+  --light-gray:#A9A9A3;
+  --line:#E2E2DD;
+  --accent:#B8C98A;
+  --accent-dark:#8FA35C;
 }
 
 html{
@@ -37,14 +33,16 @@ html{
 
 body{
   min-height:100vh;
+
   background:var(--bg);
-  color:var(--ink);
+  color:var(--black);
 
   font-family:
     "Pretendard",
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
+    "Malgun Gothic",
     sans-serif;
 
   -webkit-font-smoothing:antialiased;
@@ -61,298 +59,239 @@ input{
 }
 
 
-/* ================================
+/* ==================================
    PAGE
-================================ */
+================================== */
 
 .page{
-  width:min(1460px,calc(100% - 52px));
+  width:min(1480px, calc(100% - 54px));
   margin:0 auto;
 }
 
 
-/* ================================
+/* ==================================
    HEADER
-================================ */
+================================== */
 
 .header{
-  height:78px;
+  min-height:92px;
 
-  display:flex;
+  display:grid;
+  grid-template-columns:1fr auto;
+
   align-items:center;
-  justify-content:space-between;
+
+  border-bottom:1px solid rgba(21,21,21,.13);
 }
 
 .brand{
   display:flex;
   align-items:center;
-  gap:13px;
-}
-
-.brand-dot{
-  width:13px;
-  height:13px;
-
-  border-radius:50%;
-  background:var(--pink);
+  gap:16px;
 }
 
 .brand-name{
-  font-size:14px;
+  font-size:18px;
   font-weight:900;
-  letter-spacing:.16em;
+  letter-spacing:-.02em;
+}
+
+.brand-sub{
+  font-size:9px;
+  font-weight:700;
+
+  letter-spacing:.15em;
+
+  color:var(--gray);
 }
 
 .header-right{
   display:flex;
   align-items:center;
-  gap:27px;
+  gap:30px;
+
+  font-size:9px;
+  font-weight:700;
+
+  letter-spacing:.14em;
 }
 
-.team{
-  font-size:11px;
-  font-weight:750;
+.header-right .team{
+  color:var(--black);
+}
+
+.header-right .year{
+  color:var(--gray);
+}
+
+
+/* ==================================
+   MASTHEAD
+================================== */
+
+.masthead{
+  min-height:275px;
+
+  display:grid;
+  grid-template-columns:1.45fr .55fr;
+
+  border-bottom:1px solid rgba(21,21,21,.13);
+}
+
+.masthead-left{
+  padding:48px 0 38px;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 }
 
 .issue{
   font-size:9px;
   font-weight:700;
 
-  color:#999;
+  letter-spacing:.17em;
 
-  letter-spacing:.14em;
+  color:var(--gray);
 }
 
-
-/* ================================
-   EDITORIAL HERO
-================================ */
-
-.hero{
-  position:relative;
-
-  min-height:430px;
-
-  display:grid;
-  grid-template-columns:1.35fr .65fr;
-
-  background:var(--paper);
-
-  overflow:hidden;
-}
-
-.hero-main{
-  position:relative;
-
-  padding:42px;
-
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-
-.hero-top{
-  display:flex;
-  justify-content:space-between;
-
-  font-size:9px;
-  font-weight:750;
-  letter-spacing:.14em;
-
-  color:#888;
-}
-
-.hero-title-wrap{
-  position:relative;
-  z-index:2;
-}
-
-.hero-title{
-  font-size:clamp(68px,8vw,120px);
+.main-title{
+  font-size:clamp(64px,8vw,118px);
   line-height:.8;
 
-  font-weight:900;
+  font-weight:850;
+
   letter-spacing:-.075em;
 }
 
-.hero-title span{
+.main-title span{
   display:block;
 }
 
-.hero-script{
-  margin-top:18px;
+.masthead-right{
+  padding:46px 0 38px 38px;
 
-  font-family:"DM Serif Display",Georgia,serif;
-  font-style:italic;
-
-  font-size:clamp(34px,4vw,58px);
-
-  color:#818181;
-}
-
-.hero-side{
-  position:relative;
-
-  display:grid;
-  grid-template-rows:1fr 1fr 1fr;
-
-  gap:8px;
-
-  padding:14px;
-
-  background:#f4f4f4;
-}
-
-.swatch{
-  padding:20px;
+  border-left:1px solid rgba(21,21,21,.13);
 
   display:flex;
   flex-direction:column;
   justify-content:space-between;
 }
 
-.swatch.blue{
-  background:var(--blue);
+.workroom{
+  font-size:13px;
+  font-weight:800;
+
+  letter-spacing:.08em;
 }
 
-.swatch.pink{
-  background:var(--pink);
-}
+.workroom span{
+  display:block;
 
-.swatch.black{
-  background:#111;
-  color:white;
-}
+  margin-top:5px;
 
-.swatch-title{
-  font-size:11px;
-  font-weight:900;
-
-  letter-spacing:.04em;
-}
-
-.swatch-code{
   font-size:9px;
-  line-height:1.5;
+  font-weight:650;
 
-  opacity:.6;
+  letter-spacing:.14em;
+
+  color:var(--gray);
+}
+
+.meta-row{
+  display:flex;
+  gap:44px;
+}
+
+.meta-item strong{
+  display:block;
+
+  font-size:22px;
+  font-weight:800;
+}
+
+.meta-item span{
+  display:block;
+
+  margin-top:5px;
+
+  font-size:8px;
+  font-weight:700;
+
+  letter-spacing:.15em;
+
+  color:var(--gray);
 }
 
 
-/* 큰 매거진 장식 */
-
-.hero-number{
-  position:absolute;
-
-  right:44px;
-  bottom:28px;
-
-  font-size:142px;
-  font-weight:900;
-
-  color:#f0f0f0;
-
-  line-height:.8;
-
-  letter-spacing:-.08em;
-
-  pointer-events:none;
-}
-
-.hero-square{
-  position:absolute;
-
-  right:34px;
-  top:34px;
-
-  width:86px;
-  height:86px;
-
-  background-color:#111;
-
-  background-image:
-    radial-gradient(circle,#fff 0 2px,transparent 2.5px);
-
-  background-size:12px 12px;
-
-  opacity:.9;
-}
-
-
-/* ================================
+/* ==================================
    TOOLBAR
-================================ */
+================================== */
 
 .toolbar{
-  padding:32px 0 20px;
+  min-height:105px;
 
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
 
-  gap:24px;
-}
+  padding-bottom:22px;
 
-.toolbar-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
+  gap:30px;
 }
 
 .toolbar-title{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.toolbar-title strong{
   font-size:12px;
   font-weight:850;
-  letter-spacing:.09em;
+
+  letter-spacing:.08em;
 }
 
 .toolbar-count{
-  font-size:9px;
-  color:#aaa;
+  font-size:8px;
+  font-weight:700;
 
-  letter-spacing:.14em;
+  letter-spacing:.15em;
+
+  color:var(--gray);
 }
 
 
-/* ================================
+/* ==================================
    SEARCH
-================================ */
+================================== */
 
 .search{
-  width:365px;
-  height:46px;
+  width:370px;
+  height:42px;
 
   display:flex;
   align-items:center;
 
-  padding:0 14px;
-
-  background:rgba(255,255,255,.82);
-
-  border:1px solid rgba(0,0,0,.08);
-
-  transition:.2s ease;
+  border-bottom:1px solid #AFAFAA;
 }
 
 .search:focus-within{
-  background:#fff;
-
-  border-color:#b7b7b7;
-
-  box-shadow:
-    0 0 0 3px rgba(83,87,255,.06);
+  border-color:var(--black);
 }
 
 .search svg{
-  width:16px;
-  height:16px;
-
-  flex-shrink:0;
+  width:15px;
+  height:15px;
 
   fill:none;
+  stroke:var(--black);
 
-  stroke:#777;
   stroke-width:1.6;
   stroke-linecap:round;
+
+  flex-shrink:0;
 }
 
 .search input{
@@ -360,51 +299,47 @@ input{
 
   height:100%;
 
-  padding:0 10px;
+  padding:0 11px;
 
   border:0;
   outline:0;
 
   background:transparent;
 
-  font-size:12px;
+  font-size:11px;
+  color:var(--black);
 }
 
 .search input::placeholder{
-  color:#aaa;
+  color:#9B9B96;
 }
 
 .search-key{
-  width:24px;
-  height:24px;
+  font-size:8px;
+  font-weight:700;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  color:#94948E;
 
-  background:#f4f4f4;
-
-  color:#999;
-
-  font-size:9px;
+  letter-spacing:.08em;
 }
 
-.clear-btn{
+.clear{
   display:none;
 
   border:0;
   background:none;
 
-  color:#777;
+  font-size:17px;
 
-  font-size:18px;
   cursor:pointer;
+
+  color:#777;
 }
 
 
-/* ================================
+/* ==================================
    LOOKBOOK GRID
-================================ */
+================================== */
 
 .tools{
   display:grid;
@@ -413,299 +348,308 @@ input{
 
   grid-auto-rows:92px;
 
-  gap:12px;
+  gap:10px;
 }
 
 
-/* ================================
-   COMMON TOOL CARD
-================================ */
+/* ==================================
+   TOOL
+================================== */
 
 .tool{
   position:relative;
+
   overflow:hidden;
 
-  padding:24px;
+  padding:22px 22px 20px;
 
   display:flex;
   flex-direction:column;
 
   background:var(--paper);
 
-  border:1px solid rgba(0,0,0,.045);
+  outline:1px solid rgba(21,21,21,.035);
 
   transition:
     transform .22s ease,
     box-shadow .22s ease,
-    outline .15s ease;
+    background .22s ease;
 }
 
 .tool:hover{
   transform:translateY(-3px);
 
   box-shadow:
-    0 16px 40px rgba(0,0,0,.07);
-
-  outline:
-    1.5px solid var(--editor-blue);
+    0 14px 30px rgba(20,20,20,.065);
 }
 
 
-/* 편집기 핸들 */
-
-.handle{
-  position:absolute;
-
-  width:8px;
-  height:8px;
-
-  background:var(--editor-blue);
-
-  opacity:0;
-
-  transition:.15s ease;
-}
-
-.tool:hover .handle{
-  opacity:1;
-}
-
-.handle.tl{
-  top:-1px;
-  left:-1px;
-}
-
-.handle.tr{
-  top:-1px;
-  right:-1px;
-}
-
-.handle.bl{
-  bottom:-1px;
-  left:-1px;
-}
-
-.handle.br{
-  bottom:-1px;
-  right:-1px;
-}
-
-
-/* ================================
-   MOSAIC SIZE
-================================ */
+/* ==================================
+   DIFFERENT SIZES
+================================== */
 
 .tool:nth-child(1){
-  grid-column:span 7;
-  grid-row:span 3;
+  grid-column:span 4;
+  grid-row:span 4;
 
-  background:var(--pink);
+  background:var(--accent);
 }
 
 .tool:nth-child(2){
-  grid-column:span 5;
-  grid-row:span 3;
+  grid-column:span 3;
+  grid-row:span 4;
 }
 
 .tool:nth-child(3){
-  grid-column:span 4;
-  grid-row:span 3;
+  grid-column:span 5;
+  grid-row:span 4;
 
-  background:#111;
-  color:#fff;
+  background:#E5E5E1;
 }
 
 .tool:nth-child(4){
-  grid-column:span 4;
+  grid-column:span 5;
   grid-row:span 3;
-
-  background:var(--blue);
 }
 
 .tool:nth-child(5){
-  grid-column:span 4;
+  grid-column:span 3;
   grid-row:span 3;
+
+  background:#EDEDE9;
 }
 
 .tool:nth-child(6){
-  grid-column:span 5;
+  grid-column:span 4;
   grid-row:span 3;
 }
 
 .tool:nth-child(7){
-  grid-column:span 7;
+  grid-column:span 12;
   grid-row:span 3;
 
-  background:#f6f6f6;
+  background:var(--paper2);
 }
 
 
-/* ================================
-   CARD ELEMENTS
-================================ */
+/* ==================================
+   CARD TOP
+================================== */
 
 .card-top{
   display:flex;
-  justify-content:space-between;
   align-items:flex-start;
+  justify-content:space-between;
 }
 
 .number{
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:.14em;
-
-  opacity:.55;
-}
-
-.category{
-  font-size:9px;
-  font-weight:800;
-
-  letter-spacing:.12em;
-
-  text-transform:uppercase;
-}
-
-.card-body{
-  margin-top:auto;
-  margin-bottom:24px;
-}
-
-.card-title{
-  font-size:30px;
-  line-height:1.08;
-
-  font-weight:850;
-  letter-spacing:-.055em;
-
-  margin-bottom:11px;
-}
-
-.card-desc{
-  max-width:390px;
-
-  font-size:12px;
-  line-height:1.65;
-
-  opacity:.58;
-}
-
-.card-bottom{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.open{
   font-size:9px;
   font-weight:800;
 
   letter-spacing:.13em;
 
-  opacity:.55;
+  color:rgba(21,21,21,.55);
+}
+
+.category{
+  font-size:8px;
+  font-weight:800;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+
+  color:rgba(21,21,21,.65);
+}
+
+
+/* ==================================
+   CARD CONTENT
+================================== */
+
+.card-content{
+  margin-top:auto;
+
+  padding-top:25px;
+}
+
+.card-title{
+  max-width:500px;
+
+  font-size:clamp(22px,2vw,33px);
+  line-height:1.08;
+
+  font-weight:780;
+
+  letter-spacing:-.05em;
+
+  margin-bottom:10px;
+}
+
+.card-desc{
+  max-width:430px;
+
+  font-size:11px;
+  line-height:1.65;
+
+  color:rgba(21,21,21,.5);
+}
+
+
+/* ==================================
+   CARD BOTTOM
+================================== */
+
+.card-bottom{
+  margin-top:25px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.caption{
+  font-size:8px;
+  font-weight:750;
+
+  letter-spacing:.14em;
+
+  color:rgba(21,21,21,.45);
 }
 
 .arrow{
-  width:38px;
-  height:38px;
+  width:34px;
+  height:34px;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  border-radius:50%;
-
-  background:rgba(255,255,255,.7);
-
-  color:#111;
+  font-size:17px;
 
   transition:
     transform .2s ease,
     background .2s ease;
 }
 
-.arrow svg{
-  width:14px;
-  height:14px;
-
-  fill:none;
-  stroke:currentColor;
-
-  stroke-width:1.7;
-
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-
 .tool:hover .arrow{
-  transform:rotate(-45deg);
-
-  background:#fff;
+  transform:translate(3px,-3px);
 }
 
 
-/* ================================
-   CARD DECORATIONS
-================================ */
+/* ==================================
+   ACCENT DETAIL
+================================== */
 
 .tool:nth-child(1)::after{
   content:"";
 
   position:absolute;
 
-  width:118px;
-  height:118px;
+  width:76px;
+  height:76px;
 
-  right:28px;
-  top:62px;
+  right:22px;
+  top:58px;
 
-  background-color:#111;
+  border-radius:50%;
 
-  background-image:
-    radial-gradient(circle,#fff 0 3px,transparent 3.5px);
-
-  background-size:18px 18px;
+  background:rgba(255,255,255,.35);
 }
 
-.tool:nth-child(4)::after{
+.tool:nth-child(3)::after{
+  content:"03";
+
+  position:absolute;
+
+  right:16px;
+  bottom:-17px;
+
+  font-size:118px;
+  line-height:1;
+
+  font-weight:900;
+
+  letter-spacing:-.08em;
+
+  color:rgba(255,255,255,.55);
+
+  pointer-events:none;
+}
+
+.tool:nth-child(5)::before{
   content:"";
 
   position:absolute;
 
-  right:-35px;
-  bottom:-35px;
+  width:70px;
+  height:70px;
 
-  width:120px;
-  height:120px;
+  right:18px;
+  bottom:18px;
 
-  border-radius:50%;
+  background-color:#171717;
 
-  background:rgba(255,255,255,.45);
+  background-image:
+    radial-gradient(
+      circle,
+      #fff 0 2px,
+      transparent 2.3px
+    );
+
+  background-size:11px 11px;
+
+  opacity:.9;
 }
 
-.tool:nth-child(7)::before{
+.tool:nth-child(7)::after{
   content:"07";
 
   position:absolute;
 
-  right:30px;
-  bottom:14px;
+  right:28px;
+  bottom:-24px;
 
-  font-size:108px;
-  line-height:.8;
+  font-size:130px;
 
   font-weight:900;
 
-  color:#e8e8e8;
+  letter-spacing:-.08em;
 
-  letter-spacing:-.07em;
+  color:#E7E7E3;
+
+  pointer-events:none;
 }
 
 
-/* ================================
-   SEARCH EMPTY
-================================ */
+/* ==================================
+   HOVER EDITORIAL LINE
+================================== */
+
+.tool::before{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  width:0;
+  height:2px;
+
+  background:var(--accent-dark);
+
+  transition:width .28s ease;
+}
+
+.tool:hover::before{
+  width:100%;
+}
+
+
+/* ==================================
+   EMPTY SEARCH
+================================== */
 
 .no-results{
   display:none;
@@ -719,59 +663,51 @@ input{
   justify-content:center;
   flex-direction:column;
 
-  gap:8px;
-
   min-height:180px;
+
+  gap:7px;
 }
 
 .no-results strong{
-  font-size:20px;
+  font-size:18px;
+  font-weight:700;
 }
 
 .no-results span{
-  font-size:12px;
+  font-size:11px;
   color:#888;
 }
 
 
-/* ================================
+/* ==================================
    FOOTER
-================================ */
+================================== */
 
 .footer{
-  min-height:120px;
+  min-height:115px;
 
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
 
-  font-size:9px;
+  font-size:8px;
   font-weight:750;
 
-  letter-spacing:.13em;
+  letter-spacing:.14em;
 
-  color:#999;
+  color:var(--gray);
 }
 
 .footer strong{
-  color:#111;
+  color:var(--black);
 }
 
 
-/* ================================
+/* ==================================
    RESPONSIVE
-================================ */
+================================== */
 
-@media(max-width:980px){
-
-  .hero{
-    grid-template-columns:1fr;
-  }
-
-  .hero-side{
-    grid-template-columns:repeat(3,1fr);
-    grid-template-rows:auto;
-  }
+@media(max-width:1050px){
 
   .tools{
     grid-template-columns:repeat(2,1fr);
@@ -782,51 +718,49 @@ input{
     grid-column:auto !important;
     grid-row:auto !important;
 
-    min-height:230px;
+    min-height:250px;
+  }
+
+  .tool:nth-child(7){
+    grid-column:1 / -1 !important;
   }
 
 }
 
-
-@media(max-width:680px){
+@media(max-width:760px){
 
   .page{
-    width:calc(100% - 26px);
+    width:calc(100% - 28px);
   }
 
-  .issue{
+  .header{
+    min-height:70px;
+  }
+
+  .year{
     display:none;
   }
 
-  .hero-main{
-    min-height:320px;
-    padding:28px;
-  }
-
-  .hero-title{
-    font-size:56px;
-  }
-
-  .hero-script{
-    font-size:36px;
-  }
-
-  .hero-square{
-    width:62px;
-    height:62px;
-  }
-
-  .hero-number{
-    font-size:90px;
-  }
-
-  .hero-side{
+  .masthead{
     grid-template-columns:1fr;
+  }
+
+  .masthead-right{
+    border-left:0;
+    border-top:1px solid rgba(21,21,21,.13);
+
+    padding:28px 0;
+  }
+
+  .main-title{
+    font-size:64px;
   }
 
   .toolbar{
     align-items:flex-start;
     flex-direction:column;
+
+    padding:28px 0 18px;
   }
 
   .search{
@@ -837,8 +771,11 @@ input{
     grid-template-columns:1fr;
   }
 
-  .card-title{
-    font-size:25px;
+  .tool,
+  .tool:nth-child(7){
+    grid-column:auto !important;
+
+    min-height:220px;
   }
 
   .footer{
@@ -847,10 +784,11 @@ input{
 
     gap:8px;
 
-    padding:30px 0;
+    padding:28px 0;
   }
 
 }
+
 </style>
 </head>
 
@@ -860,19 +798,21 @@ input{
 <div class="page">
 
 
-<!-- ================================
+<!-- ==================================
      HEADER
-================================ -->
+================================== -->
 
 <header class="header">
 
   <div class="brand">
 
-    <span class="brand-dot"></span>
-
-    <span class="brand-name">
+    <div class="brand-name">
       FORESTFIT
-    </span>
+    </div>
+
+    <div class="brand-sub">
+      SALES STRATEGY
+    </div>
 
   </div>
 
@@ -880,11 +820,11 @@ input{
   <div class="header-right">
 
     <span class="team">
-      SALES STRATEGY
+      WORKROOM
     </span>
 
-    <span class="issue">
-      INTERNAL / ISSUE 01 / 2026
+    <span class="year">
+      INTERNAL / 2026
     </span>
 
   </div>
@@ -893,124 +833,98 @@ input{
 
 
 
-<!-- ================================
-     HERO
-================================ -->
+<!-- ==================================
+     MASTHEAD
+================================== -->
 
-<section class="hero">
+<section class="masthead">
 
-  <div class="hero-main">
 
-    <div class="hero-top">
+  <div class="masthead-left">
+
+    <div class="issue">
+      FORESTFIT · SALES STRATEGY · WORK INDEX
+    </div>
+
+
+    <h1 class="main-title">
 
       <span>
-        FORESTFIT / INTERNAL WORKSPACE
+        WORK
       </span>
 
       <span>
-        VOL.01
+        ROOM
       </span>
 
-    </div>
-
-
-    <div class="hero-title-wrap">
-
-      <h1 class="hero-title">
-
-        <span>
-          WORK
-        </span>
-
-        <span>
-          ROOM
-        </span>
-
-      </h1>
-
-
-      <div class="hero-script">
-        sales strategy
-      </div>
-
-    </div>
-
-
-    <div class="hero-square"></div>
-
-    <div class="hero-number">
-      01
-    </div>
+    </h1>
 
   </div>
 
 
-  <div class="hero-side">
+  <div class="masthead-right">
 
 
-    <div class="swatch blue">
+    <div class="workroom">
 
-      <div class="swatch-title">
-        COOLING BLUE
-      </div>
+      INTERNAL TOOLS
 
-      <div class="swatch-code">
-        FF / COLOR 01<br>
-        WORKROOM PALETTE
-      </div>
+      <span>
+        FORESTFIT SALES STRATEGY
+      </span>
 
     </div>
 
 
-    <div class="swatch pink">
+    <div class="meta-row">
 
-      <div class="swatch-title">
-        FLUSH PINK
+      <div class="meta-item">
+
+        <strong>07</strong>
+
+        <span>
+          TOOLS
+        </span>
+
       </div>
 
-      <div class="swatch-code">
-        FF / COLOR 02<br>
-        WORKROOM PALETTE
-      </div>
 
-    </div>
+      <div class="meta-item">
 
+        <strong>01</strong>
 
-    <div class="swatch black">
+        <span>
+          INDEX
+        </span>
 
-      <div class="swatch-title">
-        JET BLACK
-      </div>
-
-      <div class="swatch-code">
-        FF / COLOR 03<br>
-        CORE COLOR
       </div>
 
     </div>
 
 
   </div>
+
 
 </section>
 
 
 
-<!-- ================================
+<!-- ==================================
      TOOLBAR
-================================ -->
+================================== -->
 
 <section class="toolbar">
 
-  <div class="toolbar-left">
 
-    <div class="toolbar-title">
+  <div class="toolbar-title">
+
+    <strong>
       WORK TOOLS
-    </div>
+    </strong>
 
-    <div class="toolbar-count">
+    <span class="toolbar-count">
       <span id="resultCount">07</span> / 07
-    </div>
+    </span>
 
   </div>
 
@@ -1018,43 +932,52 @@ input{
   <div class="search">
 
     <svg viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="6"></circle>
-      <path d="m16 16 4 4"></path>
+
+      <circle
+        cx="11"
+        cy="11"
+        r="6"
+      ></circle>
+
+      <path
+        d="m16 16 4 4"
+      ></path>
+
     </svg>
 
 
     <input
       id="toolSearch"
       type="text"
-      placeholder="업무 검색"
+      placeholder="Search work tools"
       autocomplete="off"
       aria-label="업무 검색"
     >
 
 
     <span class="search-key">
-      /
+      PRESS /
     </span>
 
 
     <button
-      class="clear-btn"
       id="clearSearch"
+      class="clear"
       type="button"
-      aria-label="검색 초기화"
     >
       ×
     </button>
 
   </div>
 
+
 </section>
 
 
 
-<!-- ================================
-     TOOLS
-================================ -->
+<!-- ==================================
+     TOOL GRID
+================================== -->
 
 <main class="tools">
 
@@ -1066,12 +989,6 @@ input{
   href="integrated-delivery.html"
   data-search="통합 납기관리 포레스트핏 납기 배송 출고 출고일정 delivery schedule"
 >
-
-  <span class="handle tl"></span>
-  <span class="handle tr"></span>
-  <span class="handle bl"></span>
-  <span class="handle br"></span>
-
 
   <div class="card-top">
 
@@ -1086,7 +1003,7 @@ input{
   </div>
 
 
-  <div class="card-body">
+  <div class="card-content">
 
     <h2 class="card-title">
       통합 납기관리
@@ -1101,15 +1018,12 @@ input{
 
   <div class="card-bottom">
 
-    <span class="open">
-      OPEN TOOL
+    <span class="caption">
+      DELIVERY MANAGEMENT
     </span>
 
     <span class="arrow">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12h14"></path>
-        <path d="m14 7 5 5-5 5"></path>
-      </svg>
+      ↗
     </span>
 
   </div>
@@ -1126,12 +1040,6 @@ input{
   data-search="재고매칭 확인 재고 매칭 키워드 stock matching keyword"
 >
 
-  <span class="handle tl"></span>
-  <span class="handle tr"></span>
-  <span class="handle bl"></span>
-  <span class="handle br"></span>
-
-
   <div class="card-top">
 
     <span class="number">
@@ -1145,7 +1053,7 @@ input{
   </div>
 
 
-  <div class="card-body">
+  <div class="card-content">
 
     <h2 class="card-title">
       재고매칭 확인
@@ -1160,15 +1068,12 @@ input{
 
   <div class="card-bottom">
 
-    <span class="open">
-      OPEN TOOL
+    <span class="caption">
+      STOCK MATCHING
     </span>
 
     <span class="arrow">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12h14"></path>
-        <path d="m14 7 5 5-5 5"></path>
-      </svg>
+      ↗
     </span>
 
   </div>
@@ -1185,12 +1090,6 @@ input{
   data-search="주문취합건 주문 취합 동대문 발주 입고일정 품절요청 order collect"
 >
 
-  <span class="handle tl"></span>
-  <span class="handle tr"></span>
-  <span class="handle bl"></span>
-  <span class="handle br"></span>
-
-
   <div class="card-top">
 
     <span class="number">
@@ -1204,7 +1103,7 @@ input{
   </div>
 
 
-  <div class="card-body">
+  <div class="card-content">
 
     <h2 class="card-title">
       주문취합건
@@ -1219,15 +1118,12 @@ input{
 
   <div class="card-bottom">
 
-    <span class="open">
-      OPEN TOOL
+    <span class="caption">
+      ORDER COLLECT
     </span>
 
     <span class="arrow">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12h14"></path>
-        <path d="m14 7 5 5-5 5"></path>
-      </svg>
+      ↗
     </span>
 
   </div>
@@ -1244,12 +1140,6 @@ input{
   data-search="재고장 거래처 재고 자동입력 재고관리 stock inventory"
 >
 
-  <span class="handle tl"></span>
-  <span class="handle tr"></span>
-  <span class="handle bl"></span>
-  <span class="handle br"></span>
-
-
   <div class="card-top">
 
     <span class="number">
@@ -1263,7 +1153,7 @@ input{
   </div>
 
 
-  <div class="card-body">
+  <div class="card-content">
 
     <h2 class="card-title">
       재고장
@@ -1278,15 +1168,12 @@ input{
 
   <div class="card-bottom">
 
-    <span class="open">
-      OPEN TOOL
+    <span class="caption">
+      STOCK CENTER
     </span>
 
     <span class="arrow">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12h14"></path>
-        <path d="m14 7 5 5-5 5"></path>
-      </svg>
+      ↗
     </span>
 
   </div>
@@ -1303,12 +1190,6 @@ input{
   data-search="월별 사업계획서 사업계획 판매순위 키워드 판매실적 monthly planning"
 >
 
-  <span class="handle tl"></span>
-  <span class="handle tr"></span>
-  <span class="handle bl"></span>
-  <span class="handle br"></span>
-
-
   <div class="card-top">
 
     <span class="number">
@@ -1322,7 +1203,7 @@ input{
   </div>
 
 
-  <div class="card-body">
+  <div class="card-content">
 
     <h2 class="card-title">
       월별 사업계획서
@@ -1337,15 +1218,12 @@ input{
 
   <div class="card-bottom">
 
-    <span class="open">
-      OPEN TOOL
+    <span class="caption">
+      MONTHLY PLAN
     </span>
 
     <span class="arrow">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12h14"></path>
-        <path d="m14 7 5 5-5 5"></path>
-      </svg>
+      ↗
     </span>
 
   </div>
@@ -1359,14 +1237,8 @@ input{
 <a
   class="tool"
   href="additional-order.html"
-  data-search="추가발주 제작 상품 발주 발주수량 발주서 purchase production"
+  data-search="추가발주 제작 상품 발주 발주수량 발주서 purchase production order"
 >
-
-  <span class="handle tl"></span>
-  <span class="handle tr"></span>
-  <span class="handle bl"></span>
-  <span class="handle br"></span>
-
 
   <div class="card-top">
 
@@ -1381,7 +1253,7 @@ input{
   </div>
 
 
-  <div class="card-body">
+  <div class="card-content">
 
     <h2 class="card-title">
       추가발주 / 제작 상품
@@ -1396,15 +1268,12 @@ input{
 
   <div class="card-bottom">
 
-    <span class="open">
-      OPEN TOOL
+    <span class="caption">
+      PURCHASE / PRODUCTION
     </span>
 
     <span class="arrow">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12h14"></path>
-        <path d="m14 7 5 5-5 5"></path>
-      </svg>
+      ↗
     </span>
 
   </div>
@@ -1418,14 +1287,8 @@ input{
 <a
   class="tool"
   href="new-product-upload.html"
-  data-search="신규 상품 업로드 상품등록 등록정보 엑셀 엑셀생성 new product upload"
+  data-search="신규 상품 업로드 상품등록 등록정보 엑셀 엑셀생성 new product upload excel"
 >
-
-  <span class="handle tl"></span>
-  <span class="handle tr"></span>
-  <span class="handle bl"></span>
-  <span class="handle br"></span>
-
 
   <div class="card-top">
 
@@ -1434,13 +1297,13 @@ input{
     </span>
 
     <span class="category">
-      PRODUCT
+      PRODUCT UPLOAD
     </span>
 
   </div>
 
 
-  <div class="card-body">
+  <div class="card-content">
 
     <h2 class="card-title">
       신규 상품 업로드
@@ -1455,15 +1318,12 @@ input{
 
   <div class="card-bottom">
 
-    <span class="open">
-      OPEN TOOL
+    <span class="caption">
+      NEW PRODUCT
     </span>
 
     <span class="arrow">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12h14"></path>
-        <path d="m14 7 5 5-5 5"></path>
-      </svg>
+      ↗
     </span>
 
   </div>
@@ -1472,9 +1332,12 @@ input{
 
 
 
-<!-- 검색 결과 없음 -->
+<!-- SEARCH EMPTY -->
 
-<div class="no-results" id="noResults">
+<div
+  class="no-results"
+  id="noResults"
+>
 
   <strong>
     검색 결과가 없습니다.
@@ -1491,9 +1354,9 @@ input{
 
 
 
-<!-- ================================
+<!-- ==================================
      FOOTER
-================================ -->
+================================== -->
 
 <footer class="footer">
 
@@ -1502,7 +1365,7 @@ input{
   </strong>
 
   <span>
-    SALES STRATEGY · INTERNAL USE ONLY
+    SALES STRATEGY · INTERNAL USE
   </span>
 
 </footer>
@@ -1514,7 +1377,7 @@ input{
 
 <script>
 
-const searchInput =
+const input =
   document.getElementById("toolSearch");
 
 const clearButton =
@@ -1533,19 +1396,19 @@ const searchKey =
   document.querySelector(".search-key");
 
 
-function runSearch(){
+function searchTools(){
 
   const keyword =
-    searchInput.value
+    input.value
       .toLowerCase()
       .trim();
 
   let visible = 0;
 
 
-  cards.forEach(card=>{
+  cards.forEach(card => {
 
-    const searchableText =
+    const text =
       (
         card.dataset.search +
         " " +
@@ -1554,7 +1417,7 @@ function runSearch(){
 
 
     const match =
-      searchableText.includes(keyword);
+      text.includes(keyword);
 
 
     card.style.display =
@@ -1572,12 +1435,23 @@ function runSearch(){
     String(visible).padStart(2,"0");
 
 
-  clearButton.style.display =
-    keyword ? "block" : "none";
+  if(keyword){
 
+    clearButton.style.display =
+      "block";
 
-  searchKey.style.display =
-    keyword ? "none" : "flex";
+    searchKey.style.display =
+      "none";
+
+  }else{
+
+    clearButton.style.display =
+      "none";
+
+    searchKey.style.display =
+      "inline";
+
+  }
 
 
   noResults.style.display =
@@ -1588,21 +1462,21 @@ function runSearch(){
 }
 
 
-searchInput.addEventListener(
+input.addEventListener(
   "input",
-  runSearch
+  searchTools
 );
 
 
 clearButton.addEventListener(
   "click",
-  ()=>{
+  function(){
 
-    searchInput.value="";
+    input.value="";
 
-    runSearch();
+    searchTools();
 
-    searchInput.focus();
+    input.focus();
 
   }
 );
@@ -1610,30 +1484,30 @@ clearButton.addEventListener(
 
 document.addEventListener(
   "keydown",
-  e=>{
+  function(event){
 
     if(
-      e.key === "/" &&
-      document.activeElement !== searchInput
+      event.key === "/" &&
+      document.activeElement !== input
     ){
 
-      e.preventDefault();
+      event.preventDefault();
 
-      searchInput.focus();
+      input.focus();
 
     }
 
 
     if(
-      e.key === "Escape" &&
-      document.activeElement === searchInput
+      event.key === "Escape" &&
+      document.activeElement === input
     ){
 
-      searchInput.value="";
+      input.value="";
 
-      runSearch();
+      searchTools();
 
-      searchInput.blur();
+      input.blur();
 
     }
 
