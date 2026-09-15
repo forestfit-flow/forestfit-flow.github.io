@@ -106,9 +106,9 @@ button,input{font:inherit}
 .nav-shell{position:relative;z-index:30;padding:4px 0 10px;background:transparent;backdrop-filter:none}
 .navbar{display:grid;grid-template-columns:minmax(0,1fr) auto 300px;gap:18px;align-items:center;padding:10px 0 14px;border-bottom:1px solid rgba(72,57,47,.08)}
 .filter-row{display:flex;flex-wrap:wrap;align-items:center;gap:0}
-.filter-chip{appearance:none;border:0;background:none;position:relative;padding:10px 15px;cursor:pointer;color:#93867d;transition:.22s ease}
+.filter-chip{appearance:none;border:0;background:none;position:relative;padding:10px 22px;cursor:pointer;color:#93867d;transition:.22s ease}
 .filter-chip:first-child{padding-left:0}
-.filter-chip span{font:700 12px/1 "Pretendard",sans-serif;letter-spacing:-.015em}
+.filter-chip span{font:700 13px/1 "Pretendard",sans-serif;letter-spacing:-.02em}
 .filter-chip:not(:last-child)::after{content:"";position:absolute;right:0;top:50%;width:2px;height:2px;border-radius:50%;background:#c9c0b9}
 .filter-chip:hover{color:#6678ea}
 .filter-chip.active{color:#6678ea}
@@ -148,6 +148,7 @@ button,input{font:inherit}
 .card.delivery{--accent:#6a75de;--soft:#efefff;--deep:#475081}
 .card.stock{--accent:#7ea293;--soft:#edf6f2;--deep:#446a60}
 .card.order{--accent:#b27f90;--soft:#fbf0f3;--deep:#8d596b}
+.card.event{--accent:#9b7f72;--soft:#f7f0ec;--deep:#6f574d}
 .card.planning{--accent:#9a84cf;--soft:#f3effc;--deep:#695798}
 .card.purchase{--accent:#ca9a74;--soft:#fcf2ea;--deep:#8e6040}
 .card.product{--accent:#7b75dc;--soft:#f1efff;--deep:#504a9b}
@@ -156,6 +157,7 @@ button,input{font:inherit}
 .card:nth-child(3),.card:nth-child(4),.card:nth-child(5){grid-column:span 4;min-height:210px}
 .card:nth-child(6){grid-column:span 5;min-height:250px}
 .card:nth-child(7){grid-column:span 7;min-height:250px}
+.card:nth-child(8){grid-column:span 12;min-height:220px}
 .card::before{
   content:"";position:absolute;inset:0;z-index:-1;opacity:.82;
   background:
@@ -262,13 +264,10 @@ button,input{font:inherit}
   <div class="wrap">
     <div class="navbar">
       <div class="filter-row">
-        <button class="filter-chip active" data-filter="all" type="button"><span>전체</span></button>
-        <button class="filter-chip" data-filter="delivery" type="button"><span>납기</span></button>
-        <button class="filter-chip" data-filter="stock" type="button"><span>재고</span></button>
-        <button class="filter-chip" data-filter="order" type="button"><span>주문</span></button>
-        <button class="filter-chip" data-filter="planning" type="button"><span>계획</span></button>
-        <button class="filter-chip" data-filter="purchase" type="button"><span>발주</span></button>
-        <button class="filter-chip" data-filter="product" type="button"><span>상품등록</span></button>
+        <button class="filter-chip active" data-filter="sales" type="button"><span>판매</span></button>
+        <button class="filter-chip" data-filter="supply" type="button"><span>공급</span></button>
+        <button class="filter-chip" data-filter="product-upload" type="button"><span>상품 업로드</span></button>
+        <button class="filter-chip" data-filter="order" type="button"><span>오더</span></button>
       </div>
       <a class="sellmate-link" href="https://forestfit.sellmate.co.kr/main.asp" target="_blank" rel="noopener noreferrer">셀메이트 바로가기</a>
       <div class="search">
@@ -282,42 +281,47 @@ button,input{font:inherit}
 </div>
 
 <div class="wrap">
-  <div class="section-head"><strong>Work Index</strong><span><span id="resultCount">07</span> / 07</span></div>
+  <div class="section-head"><strong>Work Index</strong><span><span id="resultCount">04</span> / 08</span></div>
 
   <main class="tools">
-    <a class="card delivery reveal" href="integrated-delivery.html" data-category="delivery" data-search="통합 납기관리 납기 배송 출고 delivery schedule">
+    <a class="card delivery reveal" href="integrated-delivery.html" data-category="delivery" data-groups="supply" data-search="통합 납기관리 납기 배송 출고 delivery schedule">
       <div class="card-top"><div class="card-index"><span class="mini-no">001</span><span class="category">Delivery</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">통합 납기관리</h2><span class="card-label">Open tool</span></div><span class="card-watermark">01</span>
     </a>
 
-    <a class="card stock reveal" href="stock-match.html" data-category="stock" data-search="재고매칭 확인 재고 매칭 키워드 stock matching">
+    <a class="card stock reveal" href="stock-match.html" data-category="stock" data-groups="supply" data-search="재고매칭 확인 재고 매칭 키워드 stock matching">
       <div class="card-top"><div class="card-index"><span class="mini-no">002</span><span class="category">Stock Match</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">재고매칭 확인</h2><span class="card-label">Open tool</span></div><span class="card-watermark">02</span>
     </a>
 
-    <a class="card order reveal" href="order-collect.html" data-category="order" data-search="주문취합건 주문 취합 발주 입고 품절 order collect">
+    <a class="card order reveal" href="order-collect.html" data-category="order" data-groups="supply" data-search="주문취합건 주문 취합 발주 입고 품절 order collect">
       <div class="card-top"><div class="card-index"><span class="mini-no">003</span><span class="category">Order</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">주문취합건</h2><span class="card-label">Open tool</span></div><span class="card-watermark">03</span>
     </a>
 
-    <a class="card stock reveal" href="stock-center.html" data-category="stock" data-search="재고장 거래처 재고 자동입력 stock inventory">
+    <a class="card stock reveal" href="stock-center.html" data-category="stock" data-groups="supply sales" data-search="재고장 거래처 재고 자동입력 stock inventory">
       <div class="card-top"><div class="card-index"><span class="mini-no">004</span><span class="category">Stock</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">재고장</h2><span class="card-label">Open tool</span></div><span class="card-watermark">04</span>
     </a>
 
-    <a class="card planning reveal" href="monthly-plan.html" data-category="planning" data-search="월별 사업계획서 사업계획 판매순위 키워드 판매실적 planning monthly">
+    <a class="card planning reveal" href="monthly-plan.html" data-category="planning" data-groups="sales" data-search="월별 사업계획서 사업계획 판매순위 키워드 판매실적 planning monthly">
       <div class="card-top"><div class="card-index"><span class="mini-no">005</span><span class="category">Planning</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">월별 사업계획서</h2><span class="card-label">Open tool</span></div><span class="card-watermark">05</span>
     </a>
 
-    <a class="card purchase reveal" href="additional-order.html" data-category="purchase" data-search="추가발주 제작 상품 발주 발주수량 발주서 purchase production">
+    <a class="card purchase reveal" href="additional-order.html" data-category="purchase" data-groups="order" data-search="추가발주 제작 상품 발주 발주수량 발주서 purchase production">
       <div class="card-top"><div class="card-index"><span class="mini-no">006</span><span class="category">Purchase</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">추가발주 / 제작 상품</h2><span class="card-label">Open tool</span></div><span class="card-watermark">06</span>
     </a>
 
-    <a class="card product product-feature reveal" href="new-product-upload.html" data-category="product" data-search="신규 상품 업로드 상품등록 등록정보 엑셀 new product upload excel">
+    <a class="card product product-feature reveal" href="new-product-upload.html" data-category="product" data-groups="sales product-upload" data-search="신규 상품 업로드 상품등록 등록정보 엑셀 new product upload excel">
       <div class="card-top"><div class="card-index"><span class="mini-no">007</span><span class="category">Product Upload</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">신규 상품 업로드</h2><span class="card-label">Open tool</span></div><span class="card-watermark">07</span>
+    </a>
+
+    <a class="card event reveal" href="sales-event.html" data-category="event" data-groups="sales" data-search="행사 판매팀 프로모션 행사리스트 톡딜 기획전 이벤트 sales event promotion deal">
+      <div class="card-top"><div class="card-index"><span class="mini-no">008</span><span class="category">Sales · Event</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">행사</h2><span class="card-label">Sales Team · Open tool</span></div><span class="card-watermark">08</span>
     </a>
 
     <div class="empty" id="emptyState">검색 결과가 없습니다.</div>
@@ -338,10 +342,10 @@ const emptyState=document.getElementById('emptyState');
 const resultCount=document.getElementById('resultCount');
 const resultCountHero=document.getElementById('resultCountHero');
 const chips=[...document.querySelectorAll('.filter-chip')];
-let currentFilter='all';
+let currentFilter='sales';
 function applyFilters(){
   const q=input.value.toLowerCase().trim();let visible=0;
-  cards.forEach(card=>{const category=card.dataset.category;const text=(card.dataset.search+' '+card.innerText).toLowerCase();const show=(currentFilter==='all'||category===currentFilter)&&text.includes(q);card.classList.toggle('hidden',!show);if(show)visible++});
+  cards.forEach(card=>{const groups=(card.dataset.groups||'').split(/\s+/).filter(Boolean);const text=(card.dataset.search+' '+card.innerText).toLowerCase();const show=groups.includes(currentFilter)&&text.includes(q);card.classList.toggle('hidden',!show);if(show)visible++});
   resultCount.textContent=String(visible).padStart(2,'0');if(resultCountHero){resultCountHero.textContent=String(visible).padStart(2,'0');}clearBtn.style.display=q?'block':'none';searchKey.style.display=q?'none':'inline';emptyState.style.display=visible===0?'grid':'none';
 }
 chips.forEach(chip=>chip.addEventListener('click',()=>{chips.forEach(c=>c.classList.remove('active'));chip.classList.add('active');currentFilter=chip.dataset.filter;applyFilters()}));
