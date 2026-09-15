@@ -196,6 +196,8 @@
   .channel-tab{border:1px solid #c7cbd0;background:#fff;border-radius:5px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;min-width:76px}
   .channel-tab-item.done .channel-tab:not(.active){background:#eef8f1;border-color:#6fa57d;color:#25633c}
   .channel-tab-item.done .channel-done{color:#237044}
+  .channel-tab-item.is-excluded{display:none!important}
+  .channel-panel.is-excluded{display:none!important}
   .channel-tab.active{background:#202326;color:#fff;border-color:#202326}
   .channel-group-wrap{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 14px}
   .channel-group{border:1px solid #d6d9dd;background:#fafbfc;border-radius:7px;padding:10px 12px}
@@ -333,7 +335,106 @@
   .naver-ai-box strong{font-size:13px}.naver-ai-box span{font-size:11px;color:#e14c4c}
   .attr-guide{line-height:1.75}
   .recommend-state{background:#6c8ff5;color:#fff;padding:3px 7px;border-radius:10px}
+  .naver-reserve-wrap{display:flex;flex-direction:column;gap:12px}
+  .naver-reserve-note{color:#03c75a;font-size:12px;font-weight:700;line-height:1.5}
+  .naver-reserve-table{display:flex;flex-direction:column;gap:10px}
+  .naver-reserve-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .naver-reserve-caption{min-width:74px;color:#333;font-size:13px;font-weight:700}
+  .naver-reserve-boxes{display:flex;align-items:center;flex-wrap:wrap;gap:0}
+  .naver-reserve-cell{height:40px;display:flex;align-items:center;padding:0 12px;border:1px solid #cfd6de;background:#fff;font-size:13px;color:#333}
+  .naver-reserve-cell + .naver-reserve-cell{margin-left:-1px}
+  .naver-reserve-label{background:#f7f7f8;min-width:118px;justify-content:flex-start;color:#666}
+  .naver-reserve-input{min-width:130px;justify-content:flex-end;font-weight:700}
+  .naver-reserve-unit{min-width:48px;justify-content:center;background:#fafafa;color:#666}
+  .naver-reserve-discount{min-width:96px;justify-content:center;font-weight:700}
+  .naver-reserve-date-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .naver-reserve-datebox{min-width:222px;justify-content:space-between;padding-right:10px}
+  .naver-reserve-datevalue{font-weight:600;color:#333}
+  .naver-reserve-calendar{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1px solid #d2d8de;background:#fff;border-radius:2px;font-size:14px;color:#707780;line-height:1}
+  .naver-reserve-dash{color:#98a0aa;font-weight:700}
+  .naver-reserve-placeholder{color:#9aa1aa;font-weight:500}
+  .naver-discount-confirm-row{background:#fffaf4}
+  .naver-discount-confirm-box{padding:2px 0 3px}
+  .naver-discount-confirm-box .post-task-warning{margin:0 0 10px}
+  .naver-discount-confirm-box .post-task-checks{margin-top:0;padding-top:10px}
+  .naver-discount-confirm-box .post-task-check{color:#9a430d}
   .naver-total-copy{margin-top:14px;background:#fff}
+
+  /* v47: 채널별 필수 후속작업 경고 / 체크리스트 */
+  .workflow-warning{margin:0 0 12px;padding:12px 14px;border:2px solid #e14b4b;background:#fff5f5;color:#a52222;font-size:13px;font-weight:900;line-height:1.55}
+  .workflow-warning.is-complete{display:none}
+  .workflow-check-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .workflow-check{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:800;cursor:pointer}
+  .workflow-check input{width:17px;height:17px;margin:0;accent-color:#18864b}
+  .workflow-check-note{font-size:12px;color:#66717c;line-height:1.55;margin-top:6px}
+  .market-create-box{margin:14px 0 0;border:2px solid #9537ee;background:#fbf8ff}
+  .market-create-head{padding:13px 15px;border-bottom:1px solid #e3d8ef;font-size:14px;font-weight:900;color:#5d239c}
+  .market-create-body{padding:13px 15px}
+  .market-create-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin-top:10px}
+  .market-create-item{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border:1px solid #ded3ea;background:#fff;font-size:13px;line-height:1.45;cursor:pointer}
+  .market-create-item input{width:17px;height:17px;margin:1px 0 0;accent-color:#9537ee;flex:0 0 auto}
+  .market-create-item strong{font-weight:900}
+
+  /* v48: 등록 완료 후 확인사항은 각 채널 최하단의 주의 박스로 통일 */
+  .post-task-card{margin:18px 0 0;border:2px solid #e07a32;background:#fff8ef;box-shadow:0 2px 8px rgba(160,82,20,.08)}
+  .post-task-head{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#fff0dd;border-bottom:1px solid #efc89d;color:#9a430d;font-size:14px;font-weight:900}
+  .post-task-head::before{content:'⚠';font-size:17px}
+  .post-task-body{padding:14px 16px;font-size:13px;line-height:1.65;color:#3f342b}
+  .post-task-warning{margin:0 0 12px;padding:10px 12px;border:1px solid #e25b52;background:#fff3f2;color:#b42318;font-weight:900;line-height:1.55}
+  .post-task-warning.is-complete{display:none}
+  .post-task-list{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+  .post-task-list li{position:relative;padding-left:16px}
+  .post-task-list li::before{content:'•';position:absolute;left:2px;color:#d46720;font-weight:900}
+  .post-task-checks{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;padding-top:12px;border-top:1px dashed #e6b985}
+  .post-task-check{display:inline-flex;align-items:flex-start;gap:8px;font-weight:900;color:#7b3511;cursor:pointer}
+  .post-task-check input{width:18px;height:18px;margin:1px 0 0;accent-color:#d9661f;flex:0 0 auto}
+  .post-task-path{margin-top:10px;display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px;align-items:center}
+  .post-task-market-list{margin:9px 0 0;padding:10px 12px;border:1px solid #ecd0ae;background:#fffdf9;font-weight:800;color:#5f4938;line-height:1.75}
+  .post-task-accent{color:#b42318;font-weight:900}
+
+  /* 판매처 업로드 진입 경로 */
+  .upload-route-card{margin:14px 0;border:2px solid #3f6fa5;background:#f7fbff;box-shadow:0 2px 8px rgba(38,91,145,.08)}
+  .upload-route-head{display:flex;align-items:center;gap:8px;padding:11px 13px;background:#eaf4ff;border-bottom:1px solid #b9d3ed;color:#244f78;font-size:14px;font-weight:900}
+  .upload-route-head::before{content:'↗';display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#3f6fa5;color:#fff;font-size:13px}
+  .upload-route-body{padding:12px 14px}
+  .upload-route-path{margin-bottom:10px;padding:10px 12px;border:1px solid #c7d9ea;background:#fff;color:#2b3d4e;font-size:13px;font-weight:800;line-height:1.55}
+  .upload-route-grid{display:grid;grid-template-columns:145px minmax(0,1fr);border-top:1px solid #d7e2ec;border-left:1px solid #d7e2ec}
+  .upload-route-label,.upload-route-value{padding:10px 12px;border-right:1px solid #d7e2ec;border-bottom:1px solid #d7e2ec;font-size:13px;line-height:1.55}
+  .upload-route-label{background:#f3f7fb;font-weight:900;color:#425466}
+  .upload-route-value{background:#fff;color:#20252b}
+  .upload-route-value strong{color:#174d7d}
+  .upload-route-alert{margin-top:10px;padding:10px 12px;border:1px solid #e5685f;background:#fff4f3;color:#b42318;font-size:12px;font-weight:900;line-height:1.6}
+  .upload-route-chip{display:inline-flex;align-items:center;padding:4px 8px;margin:2px 5px 2px 0;border-radius:999px;background:#e8f2fc;color:#2e5f8d;font-size:11px;font-weight:900}
+  @media(max-width:760px){.upload-route-grid{grid-template-columns:1fr}.upload-route-label{padding-bottom:5px}.upload-route-value{padding-top:7px}}
+
+  /* GS SHOP 6% 상시쿠폰 입력 가이드 */
+  .gs-coupon-copy-card{margin-top:12px;border:1px solid #d8dee8;background:#fff;padding:0}
+  .gs-coupon-copy-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#f5f7fa;border-bottom:1px solid #d8dee8;font-size:13px;font-weight:900;color:#28323d}
+  .gs-coupon-copy-title span:last-child{font-size:11px;font-weight:700;color:#697581}
+  .gs-coupon-grid{display:grid;grid-template-columns:145px minmax(0,1fr);border-top:0}
+  .gs-coupon-label{display:flex;align-items:center;padding:10px 12px;background:#fafbfc;border-right:1px solid #e0e5eb;border-bottom:1px solid #e0e5eb;font-size:12px;font-weight:800;color:#333}
+  .gs-coupon-value{display:flex;align-items:center;gap:7px;padding:8px 10px;border-bottom:1px solid #e0e5eb;min-width:0}
+  .gs-coupon-value input{height:36px;border:1px solid #cbd3dd;background:#fff;padding:0 10px;font:inherit;font-size:13px;color:#20252b;min-width:0}
+  .gs-coupon-value input[readonly]{background:#fff}
+  .gs-coupon-value .wide{flex:1}
+  .gs-coupon-value .short{width:120px}
+  .gs-coupon-value .date{width:190px}
+  .gs-coupon-range{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .gs-coupon-range .tilde{color:#717b86;font-weight:800}
+  .gs-coupon-value .mini-btn{flex:0 0 auto}
+  .gs-coupon-note{padding:10px 12px;background:#fff8ef;color:#9a430d;font-size:12px;font-weight:800;line-height:1.55}
+
+  @media(max-width:760px){
+    .market-create-grid{grid-template-columns:1fr}
+    .post-task-path{grid-template-columns:1fr}
+    .post-task-checks{flex-direction:column;gap:9px}
+    .gs-coupon-grid{grid-template-columns:1fr}
+    .gs-coupon-label{border-right:0;padding-bottom:4px}
+    .gs-coupon-value{padding-top:4px;flex-wrap:wrap}
+    .gs-coupon-value .wide,.gs-coupon-value .short,.gs-coupon-value .date{width:100%;flex:1 1 100%}
+    .gs-coupon-range{width:100%}
+  }
+
   .gs-admin-wrap{background:#f3f5f8;padding:14px}
   .gs-step{background:#fff;border:1px solid #d7dde5;margin-bottom:14px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
   .gs-step-title{display:flex;align-items:center;gap:10px;padding:15px 18px;border-top:2px solid #0b7bea;border-bottom:1px solid #dfe5ec;font-weight:800;font-size:16px;color:#0b72d9;background:#fff}
@@ -368,7 +469,7 @@
   .gs-admin-wrap .gs-note{color:#53677d}
 
   @media(max-width:760px){.gs-row{grid-template-columns:1fr}.gs-label{padding-bottom:2px}.gs-value{padding:8px 10px 12px}.gs-category-grid,.gs-category-grid.display{grid-template-columns:1fr 1fr}.gs-admin-wrap{padding:8px}}
-  @media(max-width:760px){.naver-admin-wrap{padding:8px}.naver-field-row{grid-template-columns:1fr}.naver-field-label{padding-bottom:4px}.naver-catalog-row{align-items:stretch;flex-direction:column}.naver-catalog-row select{min-width:0;width:100%}.naver-card-title{padding:13px 12px}.naver-card-body{padding:0 12px}}
+  @media(max-width:760px){.naver-admin-wrap{padding:8px}.naver-field-row{grid-template-columns:1fr}.naver-field-label{padding-bottom:4px}.naver-catalog-row{align-items:stretch;flex-direction:column}.naver-catalog-row select{min-width:0;width:100%}.naver-card-title{padding:13px 12px}.naver-card-body{padding:0 12px}.naver-reserve-input,.naver-reserve-label,.naver-reserve-discount,.naver-reserve-datebox{min-width:0;width:100%}.naver-reserve-boxes,.naver-reserve-date-row{width:100%}.naver-reserve-line{align-items:stretch}.naver-reserve-date-row{gap:8px}.naver-reserve-dash{display:none}}
 
   .naver-option-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   .naver-option-board{border:1px solid #d8dde4;background:#fafbfc;padding:14px}
@@ -442,7 +543,7 @@
   font-weight:900;
   margin-bottom:8px;
 }
-#panel-queen .channel-body,#panel-halfclub .channel-body,#panel-lotteon .channel-body{display:flex;flex-direction:column;}
+#panel-queenit .channel-body,#panel-halfclub .channel-body,#panel-lotteon .channel-body{display:flex;flex-direction:column;}
 .paper-top-note{margin:0 0 18px;padding:14px 16px;border:1px solid #d9dde2;background:#f8f9fa;font-size:13px;line-height:1.6;color:#4b5056}
 .paper-form-table{margin-top:0}
 .paper-form-table th{background:#f5f6f7}
@@ -734,7 +835,7 @@
         </div>
 
         <div class="half-note" style="margin-top:12px;margin-bottom:12px">
-          <strong>공통 판매자 상품코드</strong> · 네이버 품번 / GS 협력사상품코드 / 비플로우 판매자 상품번호 / 하프클럽 C5 / 퀸잇 C4 / 롯데온 A3에 동일하게 사용합니다.
+          <strong>공통 판매자 상품코드</strong> · 네이버 품번 / GS 협력사상품코드 / 비플로우 판매자 상품번호 / 하프클럽 C5 / 퀸잇 C4 / 롯데온 A3(여성 상품만)에 동일하게 사용합니다.
           <div class="half-control" style="margin-top:9px">
             <span class="half-auto" id="sellerCodeFinal">상품명 입력 후 자동 생성</span>
             <button type="button" class="mini-btn" data-copy-target="sellerCodeFinal">복사</button>
@@ -783,7 +884,16 @@
               <div class="naver-card-body">
                 <div class="naver-field-row"><div class="naver-field-label">판매가</div><div class="naver-field-content"><div class="copy-line"><div class="guide-value" id="naverPrice">입력값 없음</div><button type="button" class="mini-btn" data-copy-target="naverPrice">복사</button></div></div></div>
                 <div class="naver-field-row"><div class="naver-field-label">즉시할인</div><div class="naver-field-content"><span class="naver-choice on">설정함</span></div></div>
-                <div class="naver-field-row"><div class="naver-field-label">예약할인</div><div class="naver-field-content"><div class="guide-value strong-guide">판매가에서 10%<br>할인 기간: 일주일</div></div></div>
+                <div class="naver-field-row"><div class="naver-field-label">예약할인</div><div class="naver-field-content"><div class="naver-reserve-wrap"><div class="naver-reserve-note">예약할인은 기본할인보다 우선 적용되며, 할인 기간 종료 후에는 기본할인 또는 판매가 기준으로 적용됩니다.</div><div class="naver-reserve-table"><div class="naver-reserve-line"><div class="naver-reserve-boxes"><div class="naver-reserve-cell naver-reserve-label">판매가에서</div><div class="naver-reserve-cell naver-reserve-input" id="naverReserveBasePrice"><span class="naver-reserve-placeholder">판매가 입력</span></div><div class="naver-reserve-cell naver-reserve-unit">원</div><div class="naver-reserve-cell naver-reserve-discount" id="naverReserveDiscountRate">10% 할인</div></div></div><div class="naver-reserve-line"><div class="naver-reserve-caption">할인 기간</div><div class="naver-reserve-date-row"><div class="naver-reserve-cell naver-reserve-datebox"><span class="naver-reserve-datevalue" id="naverReserveStart">자동 입력</span><span class="naver-reserve-calendar" aria-hidden="true">📅</span></div><span class="naver-reserve-dash">~</span><div class="naver-reserve-cell naver-reserve-datebox"><span class="naver-reserve-datevalue" id="naverReserveEnd">자동 입력</span><span class="naver-reserve-calendar" aria-hidden="true">📅</span></div></div></div></div></div></div></div>
+                <div class="naver-field-row naver-discount-confirm-row">
+                  <div class="naver-field-label">할인 등록 확인</div>
+                  <div class="naver-field-content">
+                    <div class="naver-discount-confirm-box">
+                      <div class="post-task-warning" id="naverDiscountWarning">⚠ 네이버 할인 등록이 아직 완료되지 않았습니다. 상품 등록 후 이 화면에서 즉시할인 / 예약할인을 실제로 설정해 주세요.</div>
+                      <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="naverDiscountDone"> 즉시할인 / 예약할인 등록 완료</label></div>
+                    </div>
+                  </div>
+                </div>
                 <div class="naver-field-row"><div class="naver-field-label">부가세</div><div class="naver-field-content"><span class="naver-choice on">과세상품</span></div></div>
               </div>
             </section>
@@ -850,9 +960,11 @@
             </section>
 
             <section class="naver-card open">
-              <button type="button" class="naver-card-title"><span>검색설정</span><span class="naver-state">태그 추천</span><span class="naver-arrow">⌃</span></button>
+              <button type="button" class="naver-card-title"><span>검색설정</span><span class="naver-state">SEO · 태그 자동</span><span class="naver-arrow">⌃</span></button>
               <div class="naver-card-body">
-                <div class="naver-field-row"><div class="naver-field-label">태그</div><div class="naver-field-content"><div class="naver-tag-box"><textarea id="naverTagsInput" placeholder="상품정보 입력 후 최대 10개 자동 추천"></textarea><div class="naver-tag-actions"><button type="button" class="mini-btn" data-copy-target="naverTagsInput">복사</button><button type="button" class="mini-btn naver-green-btn" id="refreshNaverTagsBtn">태그 다시 추천</button></div></div><div class="naver-help">상품명·컬러·핏·밴딩·신축성·계절·혼용률·기능성·디테일을 조합해 네이버 고객 검색어 형태의 태그를 최대 10개 자동 추천합니다. 추천 후 직접 수정도 가능합니다. ※ 단독 HTML에서는 네이버 실시간 검색량/연관검색어를 직접 수집하지 않고 입력 상품정보를 기반으로 추천합니다.</div></div></div>
+                <div class="naver-field-row"><div class="naver-field-label">태그</div><div class="naver-field-content"><div class="naver-tag-box"><textarea id="naverTagsInput" placeholder="상품명·혼용률 기준 최대 10개 자동 추천"></textarea><div class="naver-tag-actions"><button type="button" class="mini-btn" data-copy-target="naverTagsInput">복사</button><button type="button" class="mini-btn naver-green-btn" id="refreshNaverTagsBtn">태그 다시 추천</button></div></div><div class="naver-help">판매 상품명과 혼용률에 실제로 입력된 정보만 조합해 최대 10개를 추천합니다. 입력되지 않은 컬러·핏·기능성·계절 등은 임의로 만들지 않습니다. 단, 성별 표현은 남성 상품에서 남성·남자·맨즈를 함께 활용하고, 남성 키워드가 없는 상품은 여성·여자를 검색어 조합에 활용합니다. 남성 상품에는 여성·여자 태그를 절대 넣지 않습니다.</div></div></div>
+                <div class="naver-field-row"><div class="naver-field-label">Page Title</div><div class="naver-field-content"><div class="copy-line"><div class="guide-value" id="naverPageTitle">상위 상품명 자동 입력</div><button type="button" class="mini-btn" data-copy-target="naverPageTitle">복사</button></div><div class="naver-help">상위 상품명과 동일하게 자동 입력합니다.</div></div></div>
+                <div class="naver-field-row"><div class="naver-field-label">Meta description</div><div class="naver-field-content"><div class="copy-line"><div class="guide-value" id="naverMetaDescription">상위 상품명, 포레스트핏</div><button type="button" class="mini-btn" data-copy-target="naverMetaDescription">복사</button></div><div class="naver-help">기본: 상위 상품명, 포레스트핏 · 상품명에 남자/맨즈/남성이 있으면 포레스트핏 맨즈로 자동 변경합니다.</div></div></div>
               </div>
             </section>
 
@@ -873,6 +985,7 @@
             </section>
 
             <div class="channel-copybox naver-total-copy"><textarea id="naverAllText" readonly></textarea><div class="channel-copy-actions"><button type="button" id="copyNaverAllBtn">네이버 전체 복사</button></div></div>
+
           </div>
         </div>
 
@@ -941,22 +1054,56 @@
               </div>
             </section>
 
-            <section class="gs-step">
-              <div class="gs-step-title"><span class="gs-step-no">6</span>등록 후 필수 작업</div>
-              <div class="gs-step-body">
-                <div class="gs-alert">
-                  <strong>⚠ 상품 등록이 끝나면 3% 상시 할인등록을 반드시 진행하세요.</strong><br>
-                  상품 등록만 하고 종료하면 안 됩니다. <strong>위드넷 → 프로모션/매장관리 → 프로모션/가격 관리</strong>에서 아래 내용으로 설정합니다.
-                </div>
-                <div class="gs-row"><div class="gs-label">3% 상시쿠폰 설정</div><div class="gs-value"><div class="copy-line gs-copy-block"><div class="guide-value" id="gsDiscount">진입 경로: 위드넷 → 프로모션/매장관리 → 프로모션/가격 관리</div><button type="button" class="mini-btn" data-copy-target="gsDiscount">복사</button></div></div></div>
-                <div class="gs-row"><div class="gs-label">완료 확인</div><div class="gs-value"><label style="font-weight:800;color:#d71920"><input type="checkbox" id="gsDiscountDone"> 3% 상시 할인등록 완료</label></div></div>
-              </div>
-            </section>
-
             <div class="channel-copybox">
               <textarea id="gsAllText" readonly></textarea>
               <div class="channel-copy-actions"><button type="button" id="copyGsAllBtn">GS SHOP 전체 복사</button></div>
             </div>
+
+            <section class="post-task-card" id="gsPostTaskCard">
+              <div class="post-task-head">상품 등록 후 반드시 확인 · GS SHOP</div>
+              <div class="post-task-body">
+                <div class="post-task-warning" id="gsDiscountWarning">6% 상시쿠폰 등록이 아직 완료되지 않았습니다. 상품 등록 후 반드시 쿠폰 설정을 진행해 주세요.</div>
+                <ul class="post-task-list">
+                  <li><strong>위드넷 → 프로모션/매장관리 → 프로모션/가격 관리</strong>에서 <strong>6% 상시쿠폰</strong>을 등록합니다.</li>
+                  <li>부담률은 <strong>GS 부담 3% / 협력사 부담 3%</strong>로 입력합니다.</li>
+                </ul>
+
+                <div class="gs-coupon-copy-card">
+                  <div class="gs-coupon-copy-title"><span>쿠폰 등록 입력값</span><span>각 항목의 복사 버튼을 눌러 GS 화면에 붙여넣기</span></div>
+                  <div class="gs-coupon-grid">
+                    <div class="gs-coupon-label">적용항목</div>
+                    <div class="gs-coupon-value"><input class="wide" id="gsCouponApplyItem" type="text" value="쿠폰" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponApplyItem">복사</button></div>
+
+                    <div class="gs-coupon-label">할인 방식</div>
+                    <div class="gs-coupon-value"><input class="wide" id="gsCouponType" type="text" value="정률" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponType">복사</button></div>
+
+                    <div class="gs-coupon-label">GS 부담</div>
+                    <div class="gs-coupon-value"><input class="short" id="gsCouponGsShare" type="text" value="3" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponGsShare">복사</button><span class="gs-note" style="margin:0">숫자만 입력</span></div>
+
+                    <div class="gs-coupon-label">협력사 부담</div>
+                    <div class="gs-coupon-value"><input class="short" id="gsCouponPartnerShare" type="text" value="3" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponPartnerShare">복사</button><span class="gs-note" style="margin:0">숫자만 입력</span></div>
+
+                    <div class="gs-coupon-label">적용기간</div>
+                    <div class="gs-coupon-value">
+                      <div class="gs-coupon-range">
+                        <input class="date" id="gsCouponStart" type="text" readonly>
+                        <button type="button" class="mini-btn" data-copy-target="gsCouponStart">복사</button>
+                        <span class="tilde">~</span>
+                        <input class="date" id="gsCouponEnd" type="text" value="2999-12-31 23:59" readonly>
+                        <button type="button" class="mini-btn" data-copy-target="gsCouponEnd">복사</button>
+                      </div>
+                    </div>
+
+                    <div class="gs-coupon-label">변경사유</div>
+                    <div class="gs-coupon-value"><input class="wide" id="gsCouponReason" type="text" value="6% 상시쿠폰" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponReason">복사</button></div>
+                  </div>
+                  <div class="gs-coupon-note">※ 변경사유는 <strong>“6% 상시쿠폰”</strong>으로 입력합니다.</div>
+                </div>
+
+                <div class="post-task-path"><b>진입 경로</b><div class="copy-line"><div class="guide-value" id="gsDiscount">위드넷 → 프로모션/매장관리 → 프로모션/가격 관리</div><button type="button" class="mini-btn" data-copy-target="gsDiscount">복사</button></div></div>
+                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="gsDiscountDone"> GS SHOP 6% 상시쿠폰 등록 완료</label></div>
+              </div>
+            </section>
           </div>
         </div>
 
@@ -980,28 +1127,71 @@
                 <div class="half-control">
                   <select id="queenCategory">
                     <option value="">상품정보 기준 자동 추천</option>
-                    <optgroup label="주사용 카테고리 (노란색 표시 기준)">
-                      <option value="long-cotton">의류 &gt; 바지 &gt; 긴바지 &gt; 면바지 (여성)</option>
-                      <option value="long-slacks">의류 &gt; 바지 &gt; 긴바지 &gt; 슬랙스 (여성)</option>
-                      <option value="long-denim">의류 &gt; 바지 &gt; 긴바지 &gt; 청바지 (여성)</option>
-                      <option value="long-training">의류 &gt; 바지 &gt; 긴바지 &gt; 트레이닝팬츠 (여성)</option>
+                    <optgroup label="긴바지">
+                      <option value="long-other-female">의류 &gt; 바지 &gt; 긴바지 &gt; 기타 (여성)</option>
+                      <option value="long-other-male">의류 &gt; 바지 &gt; 긴바지 &gt; 기타 (남성)</option>
+                      <option value="long-other-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 기타 (남여공용)</option>
+                      <option value="long-knit-female">의류 &gt; 바지 &gt; 긴바지 &gt; 니트팬츠 (여성)</option>
+                      <option value="long-knit-male">의류 &gt; 바지 &gt; 긴바지 &gt; 니트팬츠 (남성)</option>
+                      <option value="long-knit-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 니트팬츠 (남여공용)</option>
+                      <option value="long-cotton-female">의류 &gt; 바지 &gt; 긴바지 &gt; 면바지 (여성)</option>
+                      <option value="long-cotton-male">의류 &gt; 바지 &gt; 긴바지 &gt; 면바지 (남성)</option>
+                      <option value="long-cotton-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 면바지 (남여공용)</option>
+                      <option value="long-slacks-female">의류 &gt; 바지 &gt; 긴바지 &gt; 슬랙스 (여성)</option>
+                      <option value="long-slacks-male">의류 &gt; 바지 &gt; 긴바지 &gt; 슬랙스 (남성)</option>
+                      <option value="long-slacks-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 슬랙스 (남여공용)</option>
+                      <option value="long-suit-female">의류 &gt; 바지 &gt; 긴바지 &gt; 정장팬츠 (여성)</option>
+                      <option value="long-suit-male">의류 &gt; 바지 &gt; 긴바지 &gt; 정장팬츠 (남성)</option>
+                      <option value="long-suit-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 정장팬츠 (남여공용)</option>
+                      <option value="long-jogger-female">의류 &gt; 바지 &gt; 긴바지 &gt; 조거팬츠 (여성)</option>
+                      <option value="long-jogger-male">의류 &gt; 바지 &gt; 긴바지 &gt; 조거팬츠 (남성)</option>
+                      <option value="long-jogger-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 조거팬츠 (남여공용)</option>
+                      <option value="long-denim-female">의류 &gt; 바지 &gt; 긴바지 &gt; 청바지 (여성)</option>
+                      <option value="long-denim-male">의류 &gt; 바지 &gt; 긴바지 &gt; 청바지 (남성)</option>
+                      <option value="long-denim-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 청바지 (남여공용)</option>
+                      <option value="long-training-female">의류 &gt; 바지 &gt; 긴바지 &gt; 트레이닝팬츠 (여성)</option>
+                      <option value="long-training-male">의류 &gt; 바지 &gt; 긴바지 &gt; 트레이닝팬츠 (남성)</option>
+                      <option value="long-training-unisex">의류 &gt; 바지 &gt; 긴바지 &gt; 트레이닝팬츠 (남여공용)</option>
                     </optgroup>
-                    <optgroup label="긴바지 기타 분류">
-                      <option value="long-other">의류 &gt; 바지 &gt; 긴바지 &gt; 기타 (여성)</option>
-                      <option value="long-knit">의류 &gt; 바지 &gt; 긴바지 &gt; 니트팬츠 (여성)</option>
-                      <option value="long-suit">의류 &gt; 바지 &gt; 긴바지 &gt; 정장팬츠 (여성)</option>
-                      <option value="long-jogger">의류 &gt; 바지 &gt; 긴바지 &gt; 조거팬츠 (여성)</option>
-                      <option value="leggings">의류 &gt; 바지 &gt; 레깅스 (여성)</option>
+                    <optgroup label="레깅스">
+                      <option value="leggings-male">의류 &gt; 바지 &gt; 레깅스 (남성)</option>
+                      <option value="leggings-unisex">의류 &gt; 바지 &gt; 레깅스 (남여공용)</option>
+                      <option value="leggings-female">의류 &gt; 바지 &gt; 레깅스 (여성)</option>
                     </optgroup>
-                    <optgroup label="반바지 분류">
-                      <option value="short-other">의류 &gt; 바지 &gt; 반바지 &gt; 기타 (여성)</option>
-                      <option value="short-knit">의류 &gt; 바지 &gt; 반바지 &gt; 니트팬츠 (여성)</option>
-                      <option value="short-cotton">의류 &gt; 바지 &gt; 반바지 &gt; 면바지 (여성)</option>
-                      <option value="short-slacks">의류 &gt; 바지 &gt; 반바지 &gt; 슬랙스 (여성)</option>
-                      <option value="short-suit">의류 &gt; 바지 &gt; 반바지 &gt; 정장팬츠 (여성)</option>
-                      <option value="short-jogger">의류 &gt; 바지 &gt; 반바지 &gt; 조거팬츠 (여성)</option>
-                      <option value="short-denim">의류 &gt; 바지 &gt; 반바지 &gt; 청바지 (여성)</option>
-                      <option value="short-training">의류 &gt; 바지 &gt; 반바지 &gt; 트레이닝팬츠 (여성)</option>
+                    <optgroup label="반바지">
+                      <option value="short-other-female">의류 &gt; 바지 &gt; 반바지 &gt; 기타 (여성)</option>
+                      <option value="short-other-male">의류 &gt; 바지 &gt; 반바지 &gt; 기타 (남성)</option>
+                      <option value="short-other-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 기타 (남여공용)</option>
+                      <option value="short-knit-female">의류 &gt; 바지 &gt; 반바지 &gt; 니트팬츠 (여성)</option>
+                      <option value="short-knit-male">의류 &gt; 바지 &gt; 반바지 &gt; 니트팬츠 (남성)</option>
+                      <option value="short-knit-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 니트팬츠 (남여공용)</option>
+                      <option value="short-cotton-female">의류 &gt; 바지 &gt; 반바지 &gt; 면바지 (여성)</option>
+                      <option value="short-cotton-male">의류 &gt; 바지 &gt; 반바지 &gt; 면바지 (남성)</option>
+                      <option value="short-cotton-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 면바지 (남여공용)</option>
+                      <option value="short-slacks-female">의류 &gt; 바지 &gt; 반바지 &gt; 슬랙스 (여성)</option>
+                      <option value="short-slacks-male">의류 &gt; 바지 &gt; 반바지 &gt; 슬랙스 (남성)</option>
+                      <option value="short-slacks-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 슬랙스 (남여공용)</option>
+                      <option value="short-suit-female">의류 &gt; 바지 &gt; 반바지 &gt; 정장팬츠 (여성)</option>
+                      <option value="short-suit-male">의류 &gt; 바지 &gt; 반바지 &gt; 정장팬츠 (남성)</option>
+                      <option value="short-suit-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 정장팬츠 (남여공용)</option>
+                      <option value="short-jogger-female">의류 &gt; 바지 &gt; 반바지 &gt; 조거팬츠 (여성)</option>
+                      <option value="short-jogger-male">의류 &gt; 바지 &gt; 반바지 &gt; 조거팬츠 (남성)</option>
+                      <option value="short-jogger-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 조거팬츠 (남여공용)</option>
+                      <option value="short-denim-female">의류 &gt; 바지 &gt; 반바지 &gt; 청바지 (여성)</option>
+                      <option value="short-denim-male">의류 &gt; 바지 &gt; 반바지 &gt; 청바지 (남성)</option>
+                      <option value="short-denim-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 청바지 (남여공용)</option>
+                      <option value="short-training-female">의류 &gt; 바지 &gt; 반바지 &gt; 트레이닝팬츠 (여성)</option>
+                      <option value="short-training-male">의류 &gt; 바지 &gt; 반바지 &gt; 트레이닝팬츠 (남성)</option>
+                      <option value="short-training-unisex">의류 &gt; 바지 &gt; 반바지 &gt; 트레이닝팬츠 (남여공용)</option>
+                    </optgroup>
+                    <optgroup label="스커트">
+                      <option value="skirt-long-female">의류 &gt; 스커트 &gt; 롱 스커트 (여성)</option>
+                      <option value="skirt-mini-female">의류 &gt; 스커트 &gt; 미니 스커트 (여성)</option>
+                      <option value="skirt-midi-female">의류 &gt; 스커트 &gt; 미디 스커트 (여성)</option>
+                    </optgroup>
+                    <optgroup label="점프수트">
+                      <option value="jumpsuit-female">의류 &gt; 점프수트 (여성)</option>
+                      <option value="jumpsuit-male">의류 &gt; 점프수트 (남성)</option>
                     </optgroup>
                   </select>
                 </div>
@@ -1027,17 +1217,24 @@
               </div>
               <button type="button" id="downloadQueenBtn" class="half-download">퀸잇 엑셀 다운로드</button>
             </div>
-
-            <div class="post-download-guide">
-              <strong class="head">엑셀 다운로드 후 확인</strong>
-              <div class="post-copy-line"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="queenThumbPathPost">복사</button><div class="guide-value" id="queenThumbPathPost">입력값 없음</div></div></div>
+            <div class="upload-route-card">
+              <div class="upload-route-head">퀸잇 엑셀 업로드</div>
+              <div class="upload-route-body">
+                <div class="upload-route-grid">
+                  <div class="upload-route-label">엑셀 업로드</div>
+                  <div class="upload-route-value">위의 <strong>퀸잇 엑셀 다운로드</strong>로 생성한 업로드 파일을 첨부합니다.</div>
+                </div>
+              </div>
             </div>
-
-            <div class="half-post-check" style="border-width:2px">
-              <strong>아주 중요 · 퀸잇 상품 업로드 후 출고지연일수 +21일 설정</strong><br>
-              엑셀 업로드가 끝난 뒤 상품의 <strong>출고지연일수를 반드시 +21일</strong>로 변경해 주세요.<br>
-              <label><input type="checkbox" id="queenDelayDone"> 출고지연일수 +21일 설정 완료</label>
-            </div>
+            <section class="post-task-card" id="queenPostTaskCard">
+              <div class="post-task-head">상품 업로드 후 반드시 확인 · 퀸잇</div>
+              <div class="post-task-body">
+                <div class="post-task-warning" id="queenThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 엑셀 업로드 후 상품 썸네일을 실제 이미지로 변경해 주세요.</div>
+                <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="queenThumbPathPost">복사</button><div class="guide-value" id="queenThumbPathPost">입력값 없음</div></div></div>
+                <ul class="post-task-list"><li>상품 썸네일을 실제 이미지로 변경합니다.</li><li><span class="post-task-accent">출고지연일수를 +21일</span>로 설정합니다.</li></ul>
+                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="queenThumbDone"> 썸네일 변경 완료</label><label class="post-task-check"><input type="checkbox" id="queenDelayDone"> 출고지연일수 +21일 설정 완료</label></div>
+              </div>
+            </section>
           </div>
         </div>
         <div class="channel-panel" id="panel-halfclub">
@@ -1089,8 +1286,30 @@
                     <option value="101009001">팬츠 · 밴딩 · 101009001</option>
                     <option value="101009012">팬츠 · 배기 · 101009012</option>
                   </optgroup>
+                  <optgroup label="맨즈 팬츠 · 하프클럽 실제 아이템">
+                    <option value="102009001">남성의류 · 팬츠 · 면/치노 · 102009001</option>
+                    <option value="102009002">남성의류 · 팬츠 · 반바지 · 102009002</option>
+                    <option value="102009003">남성의류 · 팬츠 · 기모/모직 · 102009003</option>
+                    <option value="102009004">남성의류 · 팬츠 · 슬랙스 · 102009004</option>
+                    <option value="102009005">남성의류 · 팬츠 · 카고/밀리터리 · 102009005</option>
+                    <option value="102009007">남성의류 · 팬츠 · 배기/조거 · 102009007</option>
+                  </optgroup>
+                  <optgroup label="맨즈 데님팬츠 · 하프클럽 실제 아이템">
+                    <option value="102010001">남성의류 · 데님팬츠 · 스트레이트 · 102010001</option>
+                    <option value="102010002">남성의류 · 데님팬츠 · 반바지 · 102010002</option>
+                    <option value="102010003">남성의류 · 데님팬츠 · 스키니진 · 102010003</option>
+                    <option value="102010004">남성의류 · 데님팬츠 · 기본 · 102010004</option>
+                    <option value="102010005">남성의류 · 데님팬츠 · 와이드/통 · 102010005</option>
+                    <option value="102010006">남성의류 · 데님팬츠 · 기타 · 102010006</option>
+                  </optgroup>
                 </select>
                 <span id="halfStandardLabel" class="half-auto">선택 전</span>
+              </div>
+
+              <div class="guide-label">AC5 고시항목 코드</div>
+              <div>
+                <div class="copy-line"><div class="guide-value" id="halfNoticeCodePreview">NO101</div><button type="button" class="mini-btn" data-copy-target="halfNoticeCodePreview">복사</button></div>
+                <div class="half-season-help">첨부해주신 하프클럽 화면 기준 의류 고시항목 코드는 NO101로 파일 AC5에 입력합니다.</div>
               </div>
 
               <div class="guide-label">K5 전시아이템</div>
@@ -1164,17 +1383,35 @@
                 <button type="button" id="downloadHalfBtn" class="half-download">하프클럽 엑셀 다운로드</button>
               </div>
             </div>
+            <div class="upload-route-card" id="halfUploadRouteCard">
+              <div class="upload-route-head">하프클럽 업로드 진입 경로</div>
+              <div class="upload-route-body">
+                <div class="upload-route-path">상품관리 → 상품관리 → <strong>상품일괄등록</strong></div>
+                <div class="upload-route-grid">
+                  <div class="upload-route-label">사이트</div>
+                  <div class="upload-route-value"><strong>하프클럽</strong></div>
 
-            <div class="post-download-guide">
-              <strong class="head">하프클럽 상품 파일 다운로드 이후 필수 작업</strong>
-              <div class="post-copy-line"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="halfThumbPathPost">복사</button><div class="guide-value" id="halfThumbPathPost">입력값 없음</div></div></div>
-              <div style="margin-top:10px">① 상품 업로드 후 <strong>생산년도(판매년도)를 0으로 수정</strong>해 주세요.</div>
-              <label style="display:block;margin-top:6px"><input type="checkbox" id="halfYearDone"> 생산년도 0 수정 완료</label>
-              <div style="margin-top:10px">② 사계절 상품은 시즌에서 <strong>봄 + 가을 + 사계절</strong>을 모두 체크해 주세요.</div>
-              <label style="display:inline-block;margin:6px 10px 0 0"><input type="checkbox" id="halfSpringDone"> 봄</label>
-              <label style="display:inline-block;margin:6px 10px 0 0"><input type="checkbox" id="halfAutumnDone"> 가을</label>
-              <label style="display:inline-block;margin:6px 10px 0 0"><input type="checkbox" id="halfAllSeasonDone"> 사계절</label>
+                  <div class="upload-route-label">상세브랜드</div>
+                  <div class="upload-route-value"><strong id="halfUploadBrand">포레스트핏</strong><br><span style="font-size:11px;color:#66717c">남성/남자/맨즈 상품이면 자동으로 ‘포레스트핏 맨즈’로 표시됩니다.</span></div>
+
+                  <div class="upload-route-label">엑셀 업로드</div>
+                  <div class="upload-route-value">위의 <strong>하프클럽 엑셀 다운로드</strong>로 생성한 <strong>상품일괄등록 엑셀 파일</strong>을 첨부합니다.</div>
+
+                  <div class="upload-route-label">이미지 업로드</div>
+                  <div class="upload-route-value">위의 <strong>하프클럽 이미지 ZIP 다운로드</strong>로 생성한 <strong>ZIP 파일</strong>을 첨부합니다.</div>
+                </div>
+                <div class="upload-route-alert">엑셀 파일과 이미지 ZIP을 모두 준비한 뒤 상품일괄등록 화면에서 각각 해당 업로드 칸에 첨부해 주세요.</div>
+              </div>
             </div>
+            <section class="post-task-card" id="halfPostTaskCard">
+              <div class="post-task-head">상품 업로드 후 반드시 확인 · 하프클럽</div>
+              <div class="post-task-body">
+                <div class="post-task-warning" id="halfThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 상품 업로드 후 썸네일을 실제 이미지로 변경해 주세요.</div>
+                <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="halfThumbPathPost">복사</button><div class="guide-value" id="halfThumbPathPost">입력값 없음</div></div></div>
+                <ul class="post-task-list"><li>상품 썸네일을 실제 이미지로 변경합니다.</li><li>원산지에서 <strong>상세페이지 참조</strong>를 체크합니다.</li><li>생산년도(판매년도)를 <span class="post-task-accent">0으로 수정</span>합니다.</li><li>사계절 상품은 시즌에서 <strong>봄 + 가을 + 사계절</strong>을 모두 체크합니다.</li></ul>
+                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="halfThumbDone"> 썸네일 변경 완료</label><label class="post-task-check"><input type="checkbox" id="halfOriginDetailDone"> 원산지 ‘상세페이지 참조’ 체크 완료</label><label class="post-task-check"><input type="checkbox" id="halfYearDone"> 생산년도 0 수정 완료</label><label class="post-task-check"><input type="checkbox" id="halfSpringDone"> 봄</label><label class="post-task-check"><input type="checkbox" id="halfAutumnDone"> 가을</label><label class="post-task-check"><input type="checkbox" id="halfAllSeasonDone"> 사계절</label></div>
+              </div>
+            </section>
           </div>
         </div>
         <div class="channel-panel" id="panel-lotteon">
@@ -1249,21 +1486,28 @@
                 <button type="button" id="downloadLotteBtn" class="half-download">롯데온 엑셀 다운로드</button>
               </div>
             </div>
+            <div class="upload-route-card" id="lotteUploadRouteCard">
+              <div class="upload-route-head">롯데ON 업로드 진입 경로</div>
+              <div class="upload-route-body">
+                <div class="upload-route-path">상품관리 → <strong>상품일괄등록</strong></div>
+                <div class="upload-route-grid">
+                  <div class="upload-route-label">양식 등록 방식</div>
+                  <div class="upload-route-value">
+                    <span class="upload-route-chip">롯데ON 양식 등록</span>
+                    <strong>롯데ON 양식 등록</strong>을 선택합니다.
+                  </div>
 
-            <div class="post-download-guide">
-              <strong class="head">파일 다운로드 이후</strong>
-              <div class="post-copy-line"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="lotteThumbPathPost">복사</button><div class="guide-value" id="lotteThumbPathPost">입력값 없음</div></div></div>
-              <div style="margin-top:10px"><b>자동등록 후 필수 확인</b><br>① 상품 썸네일 이미지를 등록합니다.<br>② <b>속성정보설정</b>에서 아래 항목은 사이트가 자동으로 선택해 둡니다.<br>자동 선택값은 위에서 입력한 상품명·혼용률·신축성·핏·기장·기능성 키워드를 기준으로 생성됩니다. 실제 상품과 다르면 직접 수정해주세요.</div>
-            </div>
+                  <div class="upload-route-label">업로드 버튼</div>
+                  <div class="upload-route-value"><strong>롯데ON 양식 업로드</strong>를 눌러 위에서 생성한 롯데온 엑셀 파일을 첨부합니다.</div>
 
-            <div class="lotte-post-wrap">
-              <div class="lotte-post-head">
-                <span>롯데온 자동등록 후 확인</span>
-                <div class="lotte-post-checks">
-                  <label><input type="checkbox" id="lotteThumbDone"> 썸네일 등록 완료</label>
-                  <label><input type="checkbox" id="lotteAttrDone"> 속성정보 설정 완료</label>
+                  <div class="upload-route-label">업로드 파일</div>
+                  <div class="upload-route-value">위의 <strong>롯데온 엑셀 다운로드</strong>로 생성한 파일을 사용합니다.</div>
                 </div>
+                <div class="upload-route-alert">⚠ <strong>N사 양식 등록이 아닙니다.</strong> 반드시 <strong>롯데ON 양식 등록 → 롯데ON 양식 업로드</strong>로 진행해 주세요.</div>
               </div>
+            </div>
+            <div class="lotte-post-wrap">
+              <div class="lotte-post-head"><span>롯데온 자동등록 후 속성정보 확인</span></div>
 
               <div class="lotte-attr-note">
                 <strong>자동등록 후 필수 확인</strong><br>
@@ -1370,6 +1614,16 @@
               <div class="lotte-attr-summary" id="lotteAttrSummary">상품정보를 입력하면 속성정보가 자동으로 선택됩니다.</div>
             </div>
 
+            <section class="post-task-card" id="lottePostTaskCard">
+              <div class="post-task-head">상품 업로드 후 반드시 확인 · 롯데온</div>
+              <div class="post-task-body">
+                <div class="post-task-warning" id="lotteThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 자동등록 후 상품 썸네일을 실제 이미지로 변경해 주세요.</div>
+                <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="lotteThumbPathPost">복사</button><div class="guide-value" id="lotteThumbPathPost">입력값 없음</div></div></div>
+                <ul class="post-task-list"><li>상품 썸네일을 실제 이미지로 변경합니다.</li><li>위 속성정보 자동선택값을 실제 상품과 비교한 뒤 최종 확인합니다.</li></ul>
+                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="lotteThumbDone"> 썸네일 변경 완료</label><label class="post-task-check"><input type="checkbox" id="lotteAttrDone"> 속성정보 설정 완료</label></div>
+              </div>
+            </section>
+
           </div>
         </div>
         <div class="channel-panel" id="panel-brich">
@@ -1383,7 +1637,7 @@
             <section class="manual-admin-section bflow-purple">
               <div class="manual-admin-title"><span class="step">1</span> 기본 정보</div>
               <div class="manual-admin-body">
-                <div class="manual-row"><div class="manual-label">카테고리 *</div><div class="manual-value"><div class="catalog-row"><select id="bflowCategory"></select><button type="button" class="mini-btn" id="bflowSuggestBtn">상품명 기준 자동 추천</button></div><div class="bflow-note" id="bflowCategoryReason">상품명을 입력하면 자동 추천합니다.</div></div></div>
+                <div class="manual-row"><div class="manual-label">카테고리 *</div><div class="manual-value"><div class="catalog-row"><select id="bflowCategory"></select><button type="button" class="mini-btn" id="bflowSuggestBtn">상품명·핏 기준 자동 추천</button></div><div class="bflow-note" id="bflowCategoryReason">상품명과 핏을 입력하면 자동 추천합니다.</div></div></div>
                 <div class="manual-row"><div class="manual-label">브랜드 *</div><div class="manual-value"><span class="purple-pill">포레스트핏</span></div></div>
                 <div class="manual-row"><div class="manual-label">오리지널 상품명 *</div><div class="manual-value"><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="bflowOriginalName">복사</button><div class="guide-value" id="bflowOriginalName">입력값 없음</div></div></div></div>
                 <div class="manual-row"><div class="manual-label">대표태그</div><div class="manual-value"><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="bflowTags">복사</button><div class="guide-value" id="bflowTags">자동 추천 대기</div></div><div class="bflow-note">상품명·핏·밴딩·소재·기능성 기준으로 검색 태그를 추천합니다.</div></div></div>
@@ -1435,6 +1689,16 @@
             </section>
 
             <div class="channel-copybox"><textarea id="bflowAllText" readonly></textarea><div class="channel-copy-actions"><button type="button" id="copyBflowAllBtn">비플로우 전체 복사</button></div></div>
+
+            <section class="post-task-card" id="bflowPostTaskCard">
+              <div class="post-task-head">상품 등록 후 반드시 확인 · 비플로우</div>
+              <div class="post-task-body">
+                <div class="post-task-warning" id="bflowMarketWarning">마켓상품생성 확인이 아직 완료되지 않았습니다. 아래 8개 마켓을 모두 생성한 뒤 한 번만 체크해 주세요.</div>
+                <div>비플로우 상품 등록이 끝난 뒤 아래 마켓에 <strong>마켓상품생성</strong>을 진행하고, 각 마켓의 목록을 <strong>포레스트핏</strong>으로 지정합니다.</div>
+                <div class="post-task-market-list">지마켓 · 옥션 · SSG · 롯데i몰 · 카카오스타일 · CJ몰 · 카카오쇼핑하기 · 홈앤쇼핑<br><span class="post-task-accent">모든 마켓의 목록: 포레스트핏</span></div>
+                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="bflowMarketDone"> 8개 마켓상품생성 및 목록 ‘포레스트핏’ 지정 완료</label></div>
+              </div>
+            </section>
           </div>
         </div>
       </div>
@@ -1538,6 +1802,28 @@
       .trim();
   }
 
+  // 성별 공통 판정: 모든 채널 태그에서 남성 상품에 여성/여자 태그가 섞이지 않도록 사용
+  function isMaleProductName(name=val('#productName')){
+    return /(남자|남성|맨즈|menz|men\b)/i.test(String(name || ''));
+  }
+
+  function sanitizeGenderTags(tagText, productName=val('#productName'), limit=10){
+    const male = isMaleProductName(productName);
+    const seen = [];
+    String(tagText || '').split(',').map(v=>v.trim()).filter(Boolean).forEach(tag=>{
+      // '기타:커브드데님팬츠' → '커브드데님팬츠'
+      tag = tag.replace(/^기타\s*:\s*/,'').trim();
+      if(!tag) return;
+      if(male && /(여성|여자)/.test(tag)) return;
+      if(!seen.includes(tag)) seen.push(tag);
+    });
+    return seen.slice(0,limit).join(',');
+  }
+
+  function getNaverMetaBrand(name=val('#productName')){
+    return isMaleProductName(name) ? '포레스트핏 맨즈' : '포레스트핏';
+  }
+
   function getSellerProductCodeInfo(){
     const manual = val('#sellerCodeManual').replace(/\s+/g,'').toUpperCase();
     const name = val('#productName');
@@ -1620,12 +1906,14 @@
     return true;
   }
 
-  const NAVER_CATEGORIES = [
+  // 네이버 카테고리는 상품명 성별 키워드에 맞춰 노출합니다.
+  // 남자/남성/맨즈 상품은 사용 빈도가 높은 하의 3개 분류만 사용합니다.
+  const NAVER_MALE_CATEGORIES = [
     ['50000836','패션의류 > 남성의류 > 바지'],
-    ['50008960','패션의류 > 남성의류 > 점프슈트'],
-    ['50000840','패션의류 > 남성의류 > 정장세트'],
     ['50000835','패션의류 > 남성의류 > 청바지'],
-    ['50000841','패션의류 > 남성의류 > 트레이닝복'],
+    ['50000841','패션의류 > 남성의류 > 트레이닝복']
+  ];
+  const NAVER_FEMALE_CATEGORIES = [
     ['50000812','패션의류 > 여성의류 > 레깅스'],
     ['50000810','패션의류 > 여성의류 > 바지'],
     ['50000804','패션의류 > 여성의류 > 블라우스/셔츠'],
@@ -1637,15 +1925,28 @@
     ['50000818','패션의류 > 여성의류 > 트레이닝복'],
     ['50000803','패션의류 > 여성의류 > 티셔츠']
   ];
+  const NAVER_CATEGORIES = [...NAVER_MALE_CATEGORIES, ...NAVER_FEMALE_CATEGORIES];
+
+  function getNaverCategoryOptions(){
+    return isMaleProductName(val('#productName')) ? NAVER_MALE_CATEGORIES : NAVER_FEMALE_CATEGORIES;
+  }
 
   function renderNaverCategories(){
     const sel = $('#naverCategory');
     if(!sel) return;
     const current = sel.value;
-    sel.innerHTML = '<option value="">카테고리 선택</option>' + NAVER_CATEGORIES.map(([code,path]) =>
+    const categories = getNaverCategoryOptions();
+    sel.innerHTML = '<option value="">카테고리 선택</option>' + categories.map(([code,path]) =>
       `<option value="${code}">${code} · ${path}</option>`
     ).join('');
-    if(current && NAVER_CATEGORIES.some(([code]) => code===current)) sel.value=current;
+
+    // 현재 선택값이 같은 성별 카테고리면 유지하고, 성별이 바뀌어 무효가 되면 새로 추천합니다.
+    if(current && categories.some(([code]) => code===current)){
+      sel.value=current;
+    }else{
+      const suggested = suggestNaverCategoryCode();
+      if(categories.some(([code]) => code===suggested)) sel.value=suggested;
+    }
   }
 
   function suggestNaverCategoryCode(){
@@ -1656,10 +1957,14 @@
     const male = /맨즈|menz|men\b|남성|남자/i.test(text);
 
     if(male){
-      if(/점프수트|점프슈트/.test(text)) return '50008960';
-      if(/정장세트|수트세트|셋업/.test(text)) return '50000840';
-      if(/트레이닝|스웨트|저지팬츠/.test(text)) return '50000841';
-      if(/데님|청바지|노컷진|따숩진|라이크라|진\b|jean/i.test(text)) return '50000835';
+      // 남성/맨즈 상품 카테고리 우선순위
+      // 1) 상품명에 청바지/데님 계열 키워드가 있으면 '남성의류 > 청바지'
+      // 2) 상품명에 슬랙스가 있으면 네이버 공식 상위 카테고리인 '남성의류 > 바지'를 사용하되
+      //    화면 가이드에서는 슬랙스 상품임을 별도로 표시합니다.
+      // 3) 트레이닝 계열이면 '남성의류 > 트레이닝복'
+      if(/데님|청바지|노컷진|따숩진|라이크라|진\b|jean/i.test(productName)) return '50000835';
+      if(/슬랙스|슬렉스/i.test(productName)) return '50000836';
+      if(/트레이닝|스웨트|저지팬츠|조거트레이닝/.test(text)) return '50000841';
       return '50000836';
     }
 
@@ -1685,7 +1990,13 @@
   function naverCategoryLabel(){
     const code = $('#naverCategory') ? $('#naverCategory').value : '';
     const found = NAVER_CATEGORIES.find(([c]) => c===code);
-    return found ? `${found[0]} · ${found[1]}` : '';
+    if(!found) return '';
+    const productName = val('#productName');
+    const male = isMaleProductName(productName);
+    if(male && code === '50000836' && /슬랙스|슬렉스/i.test(productName)){
+      return `${found[0]} · ${found[1]} (슬랙스)`;
+    }
+    return `${found[0]} · ${found[1]}`;
   }
 
   function buildNaverAttributes(){
@@ -1808,6 +2119,8 @@
   }
 
   function refreshNaver(){
+    // 상품명 성별 키워드 변경 시 카테고리 목록도 즉시 남성/여성용으로 전환합니다.
+    renderNaverCategories();
     const sellerCode = getSellerProductCodeInfo().code;
     const fullName = val('#productName');
     const topName = stripParentheses(fullName);
@@ -1823,6 +2136,11 @@
     $('#naverSellerCode').textContent = sellerCode || '직접 입력 필요';
     $('#naverTopName').textContent = topName || '판매 상품명을 입력해 주세요.';
     $('#naverPrice').textContent = price || '입력값 없음';
+    const reserveInfo = getNaverReservationDiscountInfo(price);
+    if($('#naverReserveBasePrice')) $('#naverReserveBasePrice').textContent = reserveInfo.amount || '판매가 입력';
+    if($('#naverReserveDiscountRate')) $('#naverReserveDiscountRate').textContent = reserveInfo.discountLabel;
+    if($('#naverReserveStart')) $('#naverReserveStart').textContent = reserveInfo.start;
+    if($('#naverReserveEnd')) $('#naverReserveEnd').textContent = reserveInfo.end;
     $('#naverThumbnailPath').textContent = thumb || '입력값 없음';
     $('#naverDetailHtml').textContent = detailHtml || '입력값 없음';
     $('#naverCatalogAuto').textContent = topName || '판매 상품명을 입력해 주세요.';
@@ -1830,7 +2148,16 @@
     $('#naverVendorCode').textContent = vendorCode || '거래처명, 사입상품명 입력 필요';
     if($('#naverOrigin')) $('#naverOrigin').textContent = checkedValue('country') || (/(동대문)/.test(val('#vendorName')+' '+val('#purchaseName')) ? '한국' : '제조국 선택 필요');
     $('#naverSmartstoreFullName').textContent = fullName || '판매 상품명을 입력해 주세요.';
+
+    const pageTitle = topName || '판매 상품명을 입력해 주세요.';
+    const metaBrand = getNaverMetaBrand(fullName);
+    const metaDescription = topName ? `${topName}, ${metaBrand}` : `상위 상품명, ${metaBrand}`;
+    if($('#naverPageTitle')) $('#naverPageTitle').textContent = pageTitle;
+    if($('#naverMetaDescription')) $('#naverMetaDescription').textContent = metaDescription;
+
     if($('#naverTagsInput') && !naverTagsTouched) $('#naverTagsInput').value = generateNaverTags();
+    // 남성 상품으로 바뀐 뒤 수동 태그가 남아 있어도 여성/여자 단어는 즉시 제거
+    if($('#naverTagsInput')) $('#naverTagsInput').value = sanitizeGenderTags($('#naverTagsInput').value, fullName, 10);
     const optionPairs=[];
     if(colors) optionPairs.push(['컬러', colors]);
     if(lengths) optionPairs.push(['기장', lengths]);
@@ -1858,6 +2185,8 @@
       '[품번]', sellerCode || '직접 입력 필요','',
       '[상품 속성 자동 추천]', buildNaverAttributes(),'',
       '[검색설정 태그]', ($('#naverTagsInput') ? $('#naverTagsInput').value : generateNaverTags()),'',
+      '[Page Title]', pageTitle,'',
+      '[Meta description]', metaDescription,'',
       '[판매자 코드]', vendorCode || '거래처명, 사입상품명 입력 필요','',
       '[스마트스토어 전체 상품명]', fullName
     ].join('\n');
@@ -1883,6 +2212,26 @@
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
+  }
+
+  function getDateOffsetText(days=0){
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function getNaverReservationDiscountInfo(priceText=''){
+    const raw = String(priceText || '').replace(/[^0-9.-]/g, '');
+    const amount = raw !== '' && Number.isFinite(Number(raw)) ? Number(raw).toLocaleString('ko-KR') : '';
+    return {
+      amount,
+      discountLabel: '10% 할인',
+      start: getDateOffsetText(0),
+      end: getDateOffsetText(6)
+    };
   }
 
   function getGsCategorySuggestion(){
@@ -1932,14 +2281,16 @@
     const composition = val('#composition');
     const origin = checkedValue('country') || (/(동대문)/.test(val('#vendorName')+' '+val('#purchaseName')) ? '한국' : '');
     const cat = getGsCategorySuggestion();
+    const gsCouponStartText = `${getTodayText()} 00:00`;
+    const gsCouponEndText = '2999-12-31 23:59';
     const discountText = [
       '진입 경로: 위드넷 → 프로모션/매장관리 → 프로모션/가격 관리',
-      `기간: ${getTodayText()} ~ 2999-12-31`,
-      '쿠폰',
-      '정률',
-      '3%',
-      '협력사 부담: 0',
-      '사유: 3% 상시쿠폰'
+      `적용기간: ${gsCouponStartText} ~ ${gsCouponEndText}`,
+      '적용항목: 쿠폰',
+      '할인 방식: 정률',
+      'GS 부담: 3',
+      '협력사 부담: 3',
+      '변경사유: 6% 상시쿠폰'
     ].join('\n');
 
     renderGsCategoryBoxes('#gsDisplayCategoryBoxes',cat.displayParts);
@@ -1959,6 +2310,8 @@
     $('#gsCommonColor').textContent = colors || '입력값 없음';
     $('#gsDimensions').textContent = sizes || '입력값 없음';
     if($('#gsOrigin')) $('#gsOrigin').textContent = origin || '제조국 선택 필요';
+    if($('#gsCouponStart')) $('#gsCouponStart').value = gsCouponStartText;
+    if($('#gsCouponEnd')) $('#gsCouponEnd').value = gsCouponEndText;
     $('#gsDiscount').textContent = discountText;
     $('#gsAllText').value = [
       '[1. 기본정보]',
@@ -1999,7 +2352,7 @@
       'A/S 책임자와 전화번호: 상세페이지참고',
       '품질보증기준: 상세페이지참고',
       '',
-      '★★★ [6. 등록 후 반드시 3% 상시 할인등록] ★★★',
+      '★★★ [6. 등록 후 반드시 총 6% 쿠폰 등록 · GS 3% + 당사 3%] ★★★',
       discountText
     ].join('\n');
   }
@@ -2019,13 +2372,14 @@
     '여성의류 > 스커트 > 롱스커트',
     '여성의류 > 스커트 > 미디스커트',
     '여성의류 > 스커트 > 미니스커트',
-    '남성의류 > 바지 > 슬랙스',
-    '남성의류 > 바지 > 청바지',
-    '남성의류 > 바지 > 면바지/밴딩팬츠',
-    '남성의류 > 바지 > 트레이닝팬츠',
-    '남성의류 > 바지 > 조거팬츠',
-    '남성의류 > 바지 > 반바지',
-    '남성의류 > 바지 > 기타팬츠'
+    '남성패션 > 의류 > 팬츠/진 > 슬랙스',
+    '남성패션 > 의류 > 팬츠/진 > 치노팬츠',
+    '남성패션 > 의류 > 팬츠/진 > 카고팬츠',
+    '남성패션 > 의류 > 팬츠/진 > 반바지',
+    '남성패션 > 의류 > 팬츠/진 > 레귤러&스트레이트',
+    '남성패션 > 의류 > 팬츠/진 > 와이드',
+    '남성패션 > 의류 > 팬츠/진 > 테이퍼드',
+    '남성패션 > 의류 > 팬츠/진 > 트레이닝'
   ];
 
   function renderBflowCategories(){
@@ -2038,27 +2392,58 @@
 
   function suggestBflowCategory(){
     const name=val('#productName');
-    const fitBase=checkedValue('fit');
-    const fit=fitBase==='기타' ? val('#fitOther') : fitBase;
+    const fitValues=checkedValues('fit');
+    const fitText=fitValues.includes('기타') && val('#fitOther')
+      ? fitValues.map(v=>v==='기타'?val('#fitOther'):v).join(' ')
+      : fitValues.join(' ');
     const band=selectedText('band',' ');
-    const text=`${name} ${fit} ${band}`;
-    const male=/맨즈|menz|\bmen\b|남성|남자/i.test(text);
-    const root=male?'남성의류':'여성의류';
-    let leaf='기타팬츠', reason='일반 팬츠 키워드';
+    const text=`${name} ${fitText} ${band}`;
+    const male=/맨즈|menz|\bmen\b|남성|남자/i.test(name);
 
-    if(!male && /스커트|치마/.test(text)){
+    // 남성 상품은 비플로우 실제 남성패션 > 의류 > 팬츠/진 분류를 사용합니다.
+    // 1차는 상품 종류가 명확한 키워드, 2차는 핏 정보를 우선해 분류합니다.
+    if(male){
+      const root='남성패션 > 의류 > 팬츠/진';
+      let leaf='레귤러&스트레이트';
+      let reason='남성 상품 · 별도 종류/핏 키워드 없음 → 레귤러&스트레이트 기본 분류';
+
+      if(/슬랙스|슬렉스/i.test(name)){
+        leaf='슬랙스'; reason='상품명에 슬랙스 키워드';
+      }else if(/치노|치노팬츠/i.test(name)){
+        leaf='치노팬츠'; reason='상품명에 치노 키워드';
+      }else if(/카고|카고팬츠/i.test(name)){
+        leaf='카고팬츠'; reason='상품명에 카고 키워드';
+      }else if(/반바지|버뮤다|쇼츠|숏팬츠/i.test(name) || fitValues.includes('반바지')){
+        leaf='반바지'; reason='상품명 또는 핏에 반바지/버뮤다/쇼츠 키워드';
+      }else if(/트레이닝|스웨트|저지|조거/i.test(name) || fitValues.includes('조거')){
+        leaf='트레이닝'; reason='상품명 또는 핏에 트레이닝/스웨트/저지/조거 키워드';
+      }else if(/테이퍼드/i.test(text) || fitValues.includes('테이퍼드')){
+        leaf='테이퍼드'; reason='핏 또는 상품명에 테이퍼드 키워드';
+      }else if(/메가와이드|세미와이드|와이드/i.test(text) || fitValues.some(v=>['메가와이드','세미와이드','와이드'].includes(v))){
+        leaf='와이드'; reason='핏 또는 상품명에 와이드 계열 키워드';
+      }else if(/스트레이트|레귤러|일자/i.test(text) || fitValues.some(v=>['스트레이트','일자'].includes(v))){
+        leaf='레귤러&스트레이트'; reason='핏 또는 상품명에 레귤러/스트레이트/일자 키워드가 명확함';
+      }else if(/데님|청바지|노컷진|따숩진|라이크라|\bjean/i.test(name)){
+        leaf='와이드'; reason='남성 데님/청바지 상품이며 핏이 명확하지 않아 와이드로 우선 분류';
+      }
+      return {category:`${root} > ${leaf}`,reason};
+    }
+
+    // 여성 상품은 기존 비플로우 분류 규칙을 유지합니다.
+    let leaf='기타팬츠', reason='일반 팬츠 키워드';
+    if(/스커트|치마/.test(text)){
       if(/미니|숏/.test(text)) return {category:'여성의류 > 스커트 > 미니스커트',reason:'상품명에 스커트/치마 + 미니/숏 키워드'};
       if(/미디/.test(text)) return {category:'여성의류 > 스커트 > 미디스커트',reason:'상품명에 스커트/치마 + 미디 키워드'};
       return {category:'여성의류 > 스커트 > 롱스커트',reason:'상품명에 스커트/치마 키워드'};
     }
-    if(/레깅스/.test(text) && !male) { leaf='레깅스'; reason='상품명에 레깅스 키워드'; }
+    if(/레깅스/.test(text)) { leaf='레깅스'; reason='상품명에 레깅스 키워드'; }
     else if(/데님|청바지|노컷진|따숩진|라이크라|\bjean/i.test(text)) { leaf='청바지'; reason='데님/청바지/진 시리즈 키워드'; }
-    else if(/슬랙스/.test(text)) { leaf='슬랙스'; reason='상품명에 슬랙스 키워드'; }
+    else if(/슬랙스|슬렉스/.test(text)) { leaf='슬랙스'; reason='상품명에 슬랙스 키워드'; }
     else if(/트레이닝|스웨트|저지팬츠/.test(text)) { leaf='트레이닝팬츠'; reason='트레이닝/스웨트/저지 키워드'; }
     else if(/조거/.test(text)) { leaf='조거팬츠'; reason='상품명 또는 핏에 조거 키워드'; }
-    else if(/반바지|버뮤다|쇼츠|숏팬츠/.test(text) || fit==='반바지') { leaf='반바지'; reason='반바지/버뮤다/쇼츠 키워드'; }
+    else if(/반바지|버뮤다|쇼츠|숏팬츠/.test(text) || fitValues.includes('반바지')) { leaf='반바지'; reason='반바지/버뮤다/쇼츠 키워드'; }
     else if(/면바지|코튼|밴딩/.test(text) || (band && band!=='없음')) { leaf='면바지/밴딩팬츠'; reason='코튼/면바지/밴딩 정보'; }
-    return {category:`${root} > 바지 > ${leaf}`,reason};
+    return {category:`여성의류 > 바지 > ${leaf}`,reason};
   }
 
   function applyBflowCategorySuggestion(){
@@ -2119,7 +2504,19 @@
     {group:'팬츠', use:'슬랙스', label:'슬랙스/정장', code:'101009015'},
     {group:'팬츠', use:'반바지', label:'반바지', code:'101009007'},
     {group:'팬츠', use:'밴딩', label:'밴딩', code:'101009001'},
-    {group:'팬츠', use:'배기', label:'배기', code:'101009012'}
+    {group:'팬츠', use:'배기', label:'배기', code:'101009012'},
+    {group:'맨즈팬츠', use:'면/치노', label:'면/치노', code:'102009001'},
+    {group:'맨즈팬츠', use:'반바지', label:'반바지', code:'102009002'},
+    {group:'맨즈팬츠', use:'기모/모직', label:'기모/모직', code:'102009003'},
+    {group:'맨즈팬츠', use:'슬랙스', label:'슬랙스', code:'102009004'},
+    {group:'맨즈팬츠', use:'카고/밀리터리', label:'카고/밀리터리', code:'102009005'},
+    {group:'맨즈팬츠', use:'배기/조거', label:'배기/조거', code:'102009007'},
+    {group:'맨즈데님팬츠', use:'스트레이트', label:'스트레이트', code:'102010001'},
+    {group:'맨즈데님팬츠', use:'반바지', label:'반바지', code:'102010002'},
+    {group:'맨즈데님팬츠', use:'스키니진', label:'스키니진', code:'102010003'},
+    {group:'맨즈데님팬츠', use:'기본', label:'기본', code:'102010004'},
+    {group:'맨즈데님팬츠', use:'와이드/통', label:'와이드/통', code:'102010005'},
+    {group:'맨즈데님팬츠', use:'기타', label:'기타', code:'102010006'}
   ];
 
   const HALF_NOTICE_DETAIL = `1. 제품 소재 (섬유의 조성 또는 혼용률을 백분율로 표시, 기능성인 경우 성적서 또는 허가서):상세페이지 참조
@@ -2200,42 +2597,106 @@
 
 
   const QUEEN_CATEGORIES = {
-    'long-other':['의류','바지','긴바지','기타 (여성)'],
-    'long-knit':['의류','바지','긴바지','니트팬츠 (여성)'],
-    'long-cotton':['의류','바지','긴바지','면바지 (여성)'],
-    'long-slacks':['의류','바지','긴바지','슬랙스 (여성)'],
-    'long-suit':['의류','바지','긴바지','정장팬츠 (여성)'],
-    'long-jogger':['의류','바지','긴바지','조거팬츠 (여성)'],
-    'long-denim':['의류','바지','긴바지','청바지 (여성)'],
-    'long-training':['의류','바지','긴바지','트레이닝팬츠 (여성)'],
-    'leggings':['의류','바지','레깅스 (여성)',''],
-    'short-other':['의류','바지','반바지','기타 (여성)'],
-    'short-knit':['의류','바지','반바지','니트팬츠 (여성)'],
-    'short-cotton':['의류','바지','반바지','면바지 (여성)'],
-    'short-slacks':['의류','바지','반바지','슬랙스 (여성)'],
-    'short-suit':['의류','바지','반바지','정장팬츠 (여성)'],
-    'short-jogger':['의류','바지','반바지','조거팬츠 (여성)'],
-    'short-denim':['의류','바지','반바지','청바지 (여성)'],
-    'short-training':['의류','바지','반바지','트레이닝팬츠 (여성)']
+    'long-other-female':['의류','바지','긴바지','기타 (여성)'],
+    'long-other-male':['의류','바지','긴바지','기타 (남성)'],
+    'long-other-unisex':['의류','바지','긴바지','기타 (남여공용)'],
+    'long-knit-female':['의류','바지','긴바지','니트팬츠 (여성)'],
+    'long-knit-male':['의류','바지','긴바지','니트팬츠 (남성)'],
+    'long-knit-unisex':['의류','바지','긴바지','니트팬츠 (남여공용)'],
+    'long-cotton-female':['의류','바지','긴바지','면바지 (여성)'],
+    'long-cotton-male':['의류','바지','긴바지','면바지 (남성)'],
+    'long-cotton-unisex':['의류','바지','긴바지','면바지 (남여공용)'],
+    'long-slacks-female':['의류','바지','긴바지','슬랙스 (여성)'],
+    'long-slacks-male':['의류','바지','긴바지','슬랙스 (남성)'],
+    'long-slacks-unisex':['의류','바지','긴바지','슬랙스 (남여공용)'],
+    'long-suit-female':['의류','바지','긴바지','정장팬츠 (여성)'],
+    'long-suit-male':['의류','바지','긴바지','정장팬츠 (남성)'],
+    'long-suit-unisex':['의류','바지','긴바지','정장팬츠 (남여공용)'],
+    'long-jogger-female':['의류','바지','긴바지','조거팬츠 (여성)'],
+    'long-jogger-male':['의류','바지','긴바지','조거팬츠 (남성)'],
+    'long-jogger-unisex':['의류','바지','긴바지','조거팬츠 (남여공용)'],
+    'long-denim-female':['의류','바지','긴바지','청바지 (여성)'],
+    'long-denim-male':['의류','바지','긴바지','청바지 (남성)'],
+    'long-denim-unisex':['의류','바지','긴바지','청바지 (남여공용)'],
+    'long-training-female':['의류','바지','긴바지','트레이닝팬츠 (여성)'],
+    'long-training-male':['의류','바지','긴바지','트레이닝팬츠 (남성)'],
+    'long-training-unisex':['의류','바지','긴바지','트레이닝팬츠 (남여공용)'],
+    'short-other-female':['의류','바지','반바지','기타 (여성)'],
+    'short-other-male':['의류','바지','반바지','기타 (남성)'],
+    'short-other-unisex':['의류','바지','반바지','기타 (남여공용)'],
+    'short-knit-female':['의류','바지','반바지','니트팬츠 (여성)'],
+    'short-knit-male':['의류','바지','반바지','니트팬츠 (남성)'],
+    'short-knit-unisex':['의류','바지','반바지','니트팬츠 (남여공용)'],
+    'short-cotton-female':['의류','바지','반바지','면바지 (여성)'],
+    'short-cotton-male':['의류','바지','반바지','면바지 (남성)'],
+    'short-cotton-unisex':['의류','바지','반바지','면바지 (남여공용)'],
+    'short-slacks-female':['의류','바지','반바지','슬랙스 (여성)'],
+    'short-slacks-male':['의류','바지','반바지','슬랙스 (남성)'],
+    'short-slacks-unisex':['의류','바지','반바지','슬랙스 (남여공용)'],
+    'short-suit-female':['의류','바지','반바지','정장팬츠 (여성)'],
+    'short-suit-male':['의류','바지','반바지','정장팬츠 (남성)'],
+    'short-suit-unisex':['의류','바지','반바지','정장팬츠 (남여공용)'],
+    'short-jogger-female':['의류','바지','반바지','조거팬츠 (여성)'],
+    'short-jogger-male':['의류','바지','반바지','조거팬츠 (남성)'],
+    'short-jogger-unisex':['의류','바지','반바지','조거팬츠 (남여공용)'],
+    'short-denim-female':['의류','바지','반바지','청바지 (여성)'],
+    'short-denim-male':['의류','바지','반바지','청바지 (남성)'],
+    'short-denim-unisex':['의류','바지','반바지','청바지 (남여공용)'],
+    'short-training-female':['의류','바지','반바지','트레이닝팬츠 (여성)'],
+    'short-training-male':['의류','바지','반바지','트레이닝팬츠 (남성)'],
+    'short-training-unisex':['의류','바지','반바지','트레이닝팬츠 (남여공용)'],
+    'leggings-male':['의류','바지','레깅스 (남성)',''],
+    'leggings-unisex':['의류','바지','레깅스 (남여공용)',''],
+    'leggings-female':['의류','바지','레깅스 (여성)',''],
+    'skirt-long-female':['의류','스커트','롱 스커트 (여성)',''],
+    'skirt-mini-female':['의류','스커트','미니 스커트 (여성)',''],
+    'skirt-midi-female':['의류','스커트','미디 스커트 (여성)',''],
+    'jumpsuit-female':['의류','점프수트 (여성)','',''],
+    'jumpsuit-male':['의류','점프수트 (남성)','','']
   };
   let queenCategoryTouched = false;
 
+  function getQueenGenderKey(){
+    const name=val('#productName');
+    // 사용자가 제공한 퀸잇 분류 기준: 남여공용 명시가 최우선, 그 다음 남성, 나머지는 여성 기본값.
+    if(/남녀공용|남여공용|유니섹스|unisex|공용/i.test(name)) return 'unisex';
+    if(/남자|남성|맨즈|mens?\b|men\b/i.test(name)) return 'male';
+    return 'female';
+  }
+
   function suggestQueenCategoryKey(){
     const name=val('#productName').replace(/\([^)]*\)/g,' ');
-    const fit=checkedValue('fit') === '기타' ? val('#fitOther') : checkedValue('fit');
+    const fits=selectedText('fit',' ');
     const band=selectedText('band',' ');
-    const text=`${name} ${fit} ${band}`;
-    if(/레깅스/.test(text)) return 'leggings';
-    const shorts=/반바지|쇼츠|버뮤다|하프팬츠/.test(text) || fit==='반바지';
-    const p=shorts ? 'short-' : 'long-';
-    if(/데님|청바지|노컷진|따숩진|라이크라|진\b|JEAN/i.test(text)) return p+'denim';
-    if(/슬랙스/.test(text)) return p+'slacks';
-    if(/정장팬츠|정장바지/.test(text)) return p+'suit';
-    if(/조거/.test(text)) return p+'jogger';
-    if(/트레이닝|스웨트|스웻|저지팬츠/.test(text)) return p+'training';
-    if(/니트팬츠|니트바지/.test(text)) return p+'knit';
-    if(/면바지|코튼|면\s*팬츠|밴딩|팬츠|바지/.test(text)) return p+'cotton';
-    return p+'other';
+    const text=`${name} ${fits} ${band}`;
+    const gender=getQueenGenderKey();
+
+    // 스커트는 제공 카테고리에 여성만 있으므로 여성 분류로 처리.
+    if(/스커트|치마/.test(text)){
+      if(/미니|초미니|숏스커트/.test(text)) return 'skirt-mini-female';
+      if(/미디|미들|무릎/.test(text)) return 'skirt-midi-female';
+      return 'skirt-long-female';
+    }
+
+    // 점프수트는 제공 카테고리에 여성/남성만 존재. 남성 키워드가 아니면 여성 기본값.
+    if(/점프수트|점프슈트/.test(text)) return gender==='male' ? 'jumpsuit-male' : 'jumpsuit-female';
+
+    if(/레깅스/.test(text)) return `leggings-${gender}`;
+
+    const shorts=/반바지|쇼츠|버뮤다|하프팬츠|숏팬츠/.test(text) || /(^|\s)반바지($|\s)/.test(fits);
+    const lengthKey=shorts ? 'short' : 'long';
+
+    // 상품 종류가 명확한 키워드를 먼저 보고 1차 분류합니다.
+    let type='other';
+    if(/데님|청바지|노컷진|따숩진|라이크라|진\b|jeans?\b/i.test(text)) type='denim';
+    else if(/슬랙스|슬렉스/.test(text)) type='slacks';
+    else if(/정장팬츠|정장바지|수트팬츠|수트바지/.test(text)) type='suit';
+    else if(/조거/.test(text)) type='jogger';
+    else if(/트레이닝|스웨트|스웻|저지팬츠|츄리닝/.test(text)) type='training';
+    else if(/니트팬츠|니트바지|니트\s*팬츠/.test(text)) type='knit';
+    else if(/면바지|코튼팬츠|코튼바지|면\s*팬츠|치노팬츠|치노/.test(text)) type='cotton';
+
+    return `${lengthKey}-${type}-${gender}`;
   }
 
   function applyQueenSuggestion(){
@@ -2807,6 +3268,10 @@
   }
 
   async function downloadLotteXlsx(){
+    if(isMaleProductName(val('#productName'))){
+      alert('맨즈 상품은 롯데온 업로드 대상이 아닙니다.');
+      return;
+    }
     refreshLotteOn();
     const values=getLotteRowValues();
     if(!values.A3){ alert('판매자 상품코드를 확인해 주세요. 자동 변환이 안 되면 공통 판매자 상품코드에 직접 입력해 주세요.'); return; }
@@ -2909,8 +3374,11 @@
     syncHalfDisplayWithStandard();
     makeHalfTags(true);
     refreshHalfClub();
-    refreshLotteOn();
-    applyLotteAttributeSuggestion();
+    if(!isMaleProductName(val('#productName'))){
+      refreshLotteOn();
+      applyLotteAttributeSuggestion();
+    }
+    refreshRequiredWarnings();
   }
 
   function detectHalfSeason(){
@@ -2933,9 +3401,9 @@
     const item = getItem(val('#halfStandardItem'));
     if(item){
       if(item.group === '스커트') return '스커트';
-      if(item.group === '데님팬츠') return '데님';
-      if(item.code === '101009015') return '슬랙스';
-      if(item.code === '101009007') return '반바지';
+      if(item.group === '데님팬츠' || item.group === '맨즈데님팬츠') return '데님';
+      if(['101009015','102009004'].includes(item.code)) return '슬랙스';
+      if(['101009007','101010005','102009002','102010002'].includes(item.code)) return '반바지';
       return '팬츠';
     }
     const name = val('#productName');
@@ -2957,119 +3425,106 @@
   }
 
   function generateNaverTags(){
-    const name = val('#productName').replace(/\([^)]*\)/g,' ').trim();
-    const garment = getHalfGarmentKeyword();
-    const season = halfSeasonName(getHalfSeasonCode());
-    const fits = checkedValues('fit').filter(v=>v!=='기타');
-    const otherFit = val('#fitOther');
-    if(checkedValues('fit').includes('기타') && otherFit) fits.push(otherFit);
-    const bands = checkedValues('band').filter(v=>v!=='없음');
-    const stretches = checkedValues('stretch').filter(v=>v!=='없음');
-    const features = checkedValues('feature');
-    const material = val('#composition');
-    const colors = splitCommaValues(val('#colors')).slice(0,4);
-    const text = `${name} ${material} ${features.join(' ')}`;
+    const productName = stripParentheses(val('#productName'));
+    const composition = val('#composition');
+    const male = isMaleProductName(productName);
     const candidates = [];
+
+    // 네이버 검색태그는 "실제로 사람이 검색할 만한 짧은 검색어"를 우선합니다.
+    // 긴 상품명 전체를 한 덩어리로 붙이거나, 입력되지 않은 특징을 임의로 만들지 않습니다.
     const push = raw => {
-      const tag=String(raw||'')
+      let tag = String(raw || '')
         .replace(/^#+/,'')
         .replace(/\s+/g,'')
         .replace(/[(),/]/g,'')
         .replace(/[^0-9A-Za-z가-힣]/g,'');
-      if(tag && tag.length>=2 && tag.length<=20 && !candidates.includes(tag)) candidates.push(tag);
+      if(male && /(여성|여자)/.test(tag)) return;
+      if(!tag || tag.length < 2 || tag.length > 14) return;
+      if(!candidates.includes(tag)) candidates.push(tag);
     };
 
-    let base=garment||'팬츠';
-    if(/슬랙스/.test(name)) base='슬랙스';
-    else if(/청바지|데님|진\b/.test(name)) base='청바지';
-    else if(/반바지|버뮤다|쇼츠/.test(name)) base='반바지';
-    else if(/조거/.test(name)) base='조거팬츠';
-    else if(/트레이닝|스웨트/.test(name)) base='트레이닝팬츠';
-    else if(/스커트|치마/.test(name)) base='스커트';
-    else if(base==='데님') base='청바지';
+    // 상품명에 '실제로 적혀 있는' 검색 핵심어만 추출합니다.
+    // 순서는 구체적인 표현을 먼저 두어 '배기핏'이 '배기'보다 우선되도록 합니다.
+    const keywordDefs = [
+      '남성','남자','맨즈','여성','여자',
+      '메가와이드','세미와이드','와이드핏','부츠컷','스트레이트','배기핏','테이퍼드','스키니','조거핏','일자핏',
+      '와이드','배기','조거','일자',
+      '히든밴딩','사이드밴딩','인밴딩','뒷밴딩','올밴딩','허리스판','밴딩','스판',
+      '10부','9부','8부','7부','6부','5부','4부','3부','숏','롱',
+      '투핀턱','원핀턱','핀턱','원턱','카고','플리츠','주름','레직기','이지',
+      '데님팬츠','버뮤다팬츠','조거팬츠','트레이닝팬츠','청바지','슬랙스','반바지','버뮤다','스커트','치마','레깅스','팬츠','바지',
+      '리오셀','텐셀','린넨','리넨','코튼','데님'
+    ];
 
-    const fitMap={
-      '메가와이드':'와이드','와이드':'와이드','세미와이드':'세미와이드',
-      '부츠컷':'부츠컷','배기핏':'배기','테이퍼드':'테이퍼드',
-      '스트레이트':'스트레이트','일자':'일자','스키니':'스키니',
-      '반바지':'반바지','조거':'조거'
-    };
-    const fitWords = [...new Set(fits.map(f=>fitMap[f]||f).filter(Boolean))];
-    const mainFit = fitWords[0] || (/와이드/.test(name)?'와이드':/부츠컷/.test(name)?'부츠컷':/일자|스트레이트/.test(name)?'일자':'');
-
-    fitWords.slice(0,3).forEach(f=>{
-      if(f==='반바지') push('여성반바지');
-      else {
-        push(`${f}${base}`);
-        push(`여성${f}${base}`);
+    const lowerName = productName.toLowerCase();
+    const nameWords = [];
+    keywordDefs.forEach(k=>{
+      if(lowerName.includes(k.toLowerCase()) && !nameWords.some(w=>w.includes(k) || k.includes(w))){
+        nameWords.push(k);
       }
     });
-    if(mainFit==='와이드') push(`와이드핏${base}`);
-    if(mainFit==='세미와이드') push(`세미와이드핏${base}`);
 
-    bands.slice(0,3).forEach(b=>{
-      const bw = b==='올밴딩'?'밴딩':b;
-      push(`${bw}${base}`);
-      if(mainFit) push(`${bw}${mainFit}${base}`);
+    // 상품 종류는 상품명에 실제로 존재하는 단어만 사용합니다.
+    const baseDefs = ['데님팬츠','버뮤다팬츠','조거팬츠','트레이닝팬츠','청바지','슬랙스','반바지','버뮤다','스커트','치마','레깅스','팬츠','바지'];
+    const base = baseDefs.find(k=>productName.includes(k)) || '';
+
+    // 혼용률에서 실제로 적혀 있는 소재만 추출합니다.
+    const materialDefs = [
+      [/리오셀|lyocell/i,'리오셀'],[/텐셀|tencel/i,'텐셀'],[/코튼|cotton/i,'코튼'],
+      [/(^|[^가-힣])면(?=\s*\d|\s*%|\s*[,/] |\s*$)/,'면'],
+      [/린넨|linen/i,'린넨'],[/리넨/i,'리넨'],[/폴리에스터|polyester/i,'폴리에스터'],[/폴리에스테르/i,'폴리에스테르'],
+      [/나일론|nylon/i,'나일론'],[/레이온|rayon/i,'레이온'],[/비스코스|viscose/i,'비스코스'],[/모달|modal/i,'모달'],
+      [/아크릴|acrylic/i,'아크릴'],[/폴리우레탄|polyurethane/i,'폴리우레탄'],[/스판덱스|spandex/i,'스판덱스'],
+      [/엘라스테인|elastane/i,'엘라스테인'],[/캐시미어|cashmere/i,'캐시미어'],[/울|wool/i,'울'],[/데님|denim/i,'데님']
+    ];
+    const materials=[];
+    materialDefs.forEach(([re,label])=>{ if(re.test(composition) && !materials.includes(label)) materials.push(label); });
+
+    // 성별 표현은 예외적으로 동의어 확장을 허용합니다.
+    // 남자/남성/맨즈 중 하나라도 상품명에 있으면 세 표현을 검색 태그 조합에 사용할 수 있고,
+    // 남성 키워드가 전혀 없는 상품은 여성/여자 표현을 조합할 수 있습니다.
+    const genders = male ? ['남성','남자','맨즈'] : ['여성','여자'];
+    const genderWordsInName = nameWords.filter(w=>/^(남성|남자|맨즈|여성|여자)$/.test(w));
+    let descriptors = nameWords.filter(w=>!genderWordsInName.includes(w) && w!==base && !materials.includes(w));
+
+    // 짧은 포함어 중복 제거: 배기핏+배기, 데님팬츠+팬츠 같은 중복 방지
+    descriptors = descriptors.filter((w,i,arr)=>
+      !arr.some((other,j)=>j!==i && other.length>w.length && other.includes(w)) &&
+      !(base && base.includes(w))
+    );
+
+    // 1. 가장 자연스러운 단일/2단어 검색어
+    if(base) push(base);
+    genders.forEach(g=>{ if(base) push(`${g}${base}`); });
+    descriptors.forEach(w=>{ if(base) push(`${w}${base}`); else push(w); });
+    materials.forEach(m=>{ if(base) push(`${m}${base}`); else push(m); });
+
+    // 2. 성별 + 핵심 특징 + 상품종류 (실제 상품명에 성별이 있을 때만)
+    genders.forEach(g=>{
+      descriptors.forEach(w=>{ if(base) push(`${g}${w}${base}`); });
+      materials.forEach(m=>{ if(base) push(`${g}${m}${base}`); });
     });
-    if(/밴딩/.test(name) && !bands.length){
-      push(`밴딩${base}`);
-      if(mainFit) push(`밴딩${mainFit}${base}`);
+
+    // 3. 핵심 특징 2개 + 상품종류. 너무 긴 조합은 push에서 자동 제외됩니다.
+    for(let i=0;i<descriptors.length && candidates.length<10;i++){
+      for(let j=i+1;j<descriptors.length && candidates.length<10;j++){
+        if(base) push(`${descriptors[i]}${descriptors[j]}${base}`);
+      }
     }
 
-    if(stretches.length){
-      const stretchWord = stretches.includes('울트라') ? '울트라스판' : '스판';
-      push(`${stretchWord}${base}`);
-      if(mainFit) push(`${stretchWord}${mainFit}${base}`);
-    } else if(/스판|스트레치|스트레치/.test(name)){
-      push(`스판${base}`);
+    // 4. 소재 + 핵심특징 + 상품종류
+    for(const m of materials){
+      for(const w of descriptors){
+        if(candidates.length>=10) break;
+        if(base) push(`${m}${w}${base}`);
+      }
+      if(candidates.length>=10) break;
     }
 
-    const colorMap={
-      '검정':'블랙','검정색':'블랙','블랙':'블랙','회색':'그레이','그레이':'그레이',
-      '진청':'진청','중청':'중청','연청':'연청','청':'데님','네이비':'네이비',
-      '베이지':'베이지','아이보리':'아이보리','화이트':'화이트','흰색':'화이트',
-      '차콜':'차콜','브라운':'브라운','카키':'카키','핑크':'핑크','옐로우':'옐로우'
-    };
-    colors.slice(0,2).forEach(c=>{
-      const cw=colorMap[c]||c;
-      push(`${cw}${base}`);
-      if(mainFit) push(`${cw}${mainFit}${base}`);
-    });
+    // 5. 정보가 적으면 실제 입력된 단어 자체로 보충. 없는 정보는 절대 생성하지 않음.
+    [...descriptors, ...materials, ...genders].forEach(push);
 
-    if(season && season!=='사계절'){
-      push(`${season}${base}`);
-      if(mainFit) push(`${season}${mainFit}${base}`);
-    }
-    if(/면|코튼|cotton/i.test(text)) push(`코튼${base}`);
-    if(/린넨|리넨|마\b/i.test(text)) push(`린넨${base}`);
-    if(/텐셀|리오셀/i.test(text)) push(`리오셀${base}`);
-    if(/데님|청바지/.test(text) && base!=='청바지') push(`데님${base}`);
-    if(/폴리우레탄|스판덱스|spandex|elastane/i.test(text)) push(`스판${base}`);
-    if(features.includes('냉감소재')) push(`냉감${base}`);
-    if(features.some(x=>/기모|피치/.test(x))) push(`기모${base}`);
-    if(features.includes('링클프리')) push(`링클프리${base}`);
-    if(features.includes('논페이드')) push(`논페이드${base}`);
-    if(/투핀턱|2핀턱/.test(name)){ push(`투핀턱${base}`); push(`핀턱${base}`); }
-    else if(/핀턱|원턱/.test(name)) push(`핀턱${base}`);
-    if(/카고/.test(name)) push(`카고${base}`);
-    if(/플리츠|주름/.test(name)) push(`플리츠${base}`);
-    if(/레직기/.test(name)) push(`레직기${base}`);
-
-    push(`여성${base}`);
-    if(mainFit) push(`여자${mainFit}${base}`);
-    push(`데일리${base}`);
-    if(base==='슬랙스'){
-      push('여성슬랙스'); push('여자슬랙스'); push('데일리슬랙스'); push('출근룩슬랙스'); push('정장슬랙스');
-    } else if(base==='청바지'){
-      push('여성청바지'); push('여자청바지'); push('데일리청바지'); push('여성데님팬츠'); push('데님팬츠');
-    } else if(base==='팬츠'){
-      push('여성팬츠'); push('여자팬츠'); push('데일리팬츠'); push('편한바지'); push('여성바지');
-    } else {
-      push(`여성${base}`); push(`여자${base}`); push(`데일리${base}`);
-    }
-
-    return candidates.slice(0,10).join(',');
+    return sanitizeGenderTags(candidates.slice(0,10).join(','), productName, 10);
   }
 
   function generateHalfTags(){
@@ -3390,16 +3845,75 @@
     el.textContent=label;
   }
 
+  function refreshLotteEligibility(){
+    const excluded=isMaleProductName(val('#productName'));
+    const lotteTab=$('.channel-tab[data-channel="lotteon"]');
+    const lotteItem=lotteTab ? lotteTab.closest('.channel-tab-item') : null;
+    const lottePanel=$('#panel-lotteon');
+
+    if(lotteItem) lotteItem.classList.toggle('is-excluded', excluded);
+    if(lottePanel) lottePanel.classList.toggle('is-excluded', excluded);
+
+    if(excluded && lotteTab && lotteTab.classList.contains('active')){
+      lotteTab.classList.remove('active');
+      if(lottePanel) lottePanel.classList.remove('active');
+      const naverTab=$('.channel-tab[data-channel="naver"]');
+      const naverPanel=$('#panel-naver');
+      if(naverTab) naverTab.classList.add('active');
+      if(naverPanel) naverPanel.classList.add('active');
+    }
+    return !excluded;
+  }
+
+  function refreshRequiredWarnings(){
+    const syncSingle=(checkSel, warningSel)=>{
+      const check=$(checkSel), warning=$(warningSel);
+      if(!warning) return;
+      const done=!!(check && check.checked);
+      warning.classList.toggle('is-complete', done);
+    };
+
+    syncSingle('#naverDiscountDone','#naverDiscountWarning');
+    syncSingle('#gsDiscountDone','#gsDiscountWarning');
+    syncSingle('#queenThumbDone','#queenThumbWarning');
+
+    // 하프클럽 필수 후처리: 썸네일 + 원산지 '상세페이지 참조'
+    const halfWarning=$('#halfThumbWarning');
+    const halfThumbDone=!!($('#halfThumbDone') && $('#halfThumbDone').checked);
+    const halfOriginDone=!!($('#halfOriginDetailDone') && $('#halfOriginDetailDone').checked);
+    if(halfWarning){
+      const missing=[];
+      if(!halfThumbDone) missing.push('썸네일 변경');
+      if(!halfOriginDone) missing.push('원산지 ‘상세페이지 참조’ 체크');
+      halfWarning.classList.toggle('is-complete', missing.length===0);
+      if(missing.length){
+        halfWarning.textContent=`${missing.join(' / ')}가 아직 완료되지 않았습니다. 상품 업로드 후 반드시 확인해 주세요.`;
+      }
+    }
+
+    if(!isMaleProductName(val('#productName'))){
+      syncSingle('#lotteThumbDone','#lotteThumbWarning');
+    }else{
+      const lotteWarning=$('#lotteThumbWarning');
+      if(lotteWarning) lotteWarning.classList.add('is-complete');
+    }
+    syncSingle('#bflowMarketDone','#bflowMarketWarning');
+  }
+
   function refreshChannels(){
     refreshSellerCode();
     refreshTopPaperPreview();
+    const useLotte=refreshLotteEligibility();
     refreshNaver();
     refreshGs();
     refreshBflow();
     refreshQueenit();
     refreshHalfClub();
-    refreshLotteOn();
-    applyLotteAttributeSuggestion();
+    if(useLotte){
+      refreshLotteOn();
+      applyLotteAttributeSuggestion();
+    }
+    refreshRequiredWarnings();
   }
 
   $$('.channel-tab').forEach(tab => {
@@ -3420,6 +3934,10 @@
     });
   });
 
+  ['#naverDiscountDone','#gsDiscountDone','#queenThumbDone','#halfThumbDone','#halfOriginDetailDone','#lotteThumbDone','#bflowMarketDone'].forEach(sel=>{
+    const el=$(sel);
+    if(el) el.addEventListener('change', refreshRequiredWarnings);
+  });
 
 
   /* ===== v39 overrides ===== */
@@ -3469,7 +3987,15 @@
     else if(/스커트|치마/.test(name)) base='스커트';
     const fitMap={'메가와이드':'와이드','와이드':'와이드','세미와이드':'세미와이드','부츠컷':'부츠컷','배기핏':'배기','테이퍼드':'테이퍼드','스트레이트':'스트레이트','일자':'일자','스키니':'스키니','조거':'조거','반바지':'반바지'};
     const fit=fitMap[fitRaw]||fitRaw||'';
-    const tags=[]; const push=x=>{x=String(x||'').replace(/\s+/g,'').replace(/[(),]/g,''); if(x&&x.length<=18&&!tags.includes(x))tags.push(x);};
+    const male=isMaleProductName(name);
+    const tags=[]; const push=x=>{
+      x=String(x||'')
+        .replace(/^기타\s*:\s*/,'')
+        .replace(/\s+/g,'')
+        .replace(/[(),]/g,'');
+      if(male&&/(여성|여자)/.test(x))return;
+      if(x&&x.length<=18&&!tags.includes(x))tags.push(x);
+    };
     if(fit && fit!=='반바지') push(`${fit}${base}`);
     if(season && season!=='사계절') push(`${season}${base}`);
     if((band&&band!=='없음')||/밴딩/.test(name)) push(`밴딩${base}`);
@@ -3485,15 +4011,23 @@
     if(feats.includes('논페이드')) push(`논페이드${base}`);
     if(/핀턱/.test(name)) push(`핀턱${base}`);
     if(/카고/.test(name)) push(`카고${base}`);
-    // 검색 기본어로 반드시 5개까지 보충
-    push(`여성${base}`); push(`데일리${base}`); push(`편한${base}`); push(`여자${base}`); push(`포레스트핏${base}`);
-    return tags.slice(0,5).join(',');
+    // 검색 기본어로 최대 5개까지 보충. 남성 상품에는 여성/여자 표현을 절대 넣지 않는다.
+    if(male){
+      if(/남성/.test(name)) push(`남성${base}`);
+      if(/남자/.test(name)) push(`남자${base}`);
+      if(/맨즈/.test(name)) push(`맨즈${base}`);
+    }else{
+      push(`여성${base}`); push(`여자${base}`);
+    }
+    push(`데일리${base}`); push(`편한${base}`); push(`포레스트핏${base}`);
+    return sanitizeGenderTags(tags.slice(0,5).join(','), name, 5);
   };
   makeHalfTags = function(force=false){
     const el=$('#halfTags'); if(!el) return;
     if(force || !halfTagsTouched || !el.value.trim()){
       el.value=generateHalfTags(); halfTagsTouched=false;
     }
+    el.value=sanitizeGenderTags(el.value, val('#productName'), 5);
   };
 
   // 가라 이미지 ZIP은 사용자가 보내준 정상 ZIP 바이트를 그대로 내려받아 오류 방지
@@ -3629,24 +4163,50 @@
   /* v40 refinements */
   suggestHalfItemCode = function(){
     const name=val('#productName').toLowerCase();
-    const fit=(checkedValue('fit')==='기타'?val('#fitOther'):checkedValue('fit')).toLowerCase();
+    const fitValues=checkedValues('fit').map(v=>String(v).toLowerCase());
+    const fitOther=val('#fitOther').toLowerCase();
+    const fit=[...fitValues,fitOther].filter(Boolean).join(' ');
     const band=selectedText('band',' ');
-    const text=`${name} ${fit}`;
+    const features=checkedValues('feature').join(' ');
+    const composition=val('#composition').toLowerCase();
+    const text=`${name} ${fit} ${features} ${composition}`;
+    const male=isMaleProductName(name);
     const isSkirt=/스커트|치마/.test(text);
-    const isDenim=/데님|청바지|노컷진|따숩진|라이크라|와이드진|부츠컷진|일자진|스트레이트진/.test(text);
+    const isDenim=/데님|청바지|노컷진|따숩진|라이크라|와이드진|부츠컷진|일자진|스트레이트진|스키니진/.test(text);
+
+    // 맨즈: 사용자가 제공한 하프클럽 남성의류 > 팬츠 / 데님팬츠 실제 아이템 기준
+    if(male){
+      if(isDenim){
+        if(/반바지|버뮤다|쇼츠/.test(text) || fitValues.includes('반바지')) return '102010002';
+        if(/스키니|슬림/.test(text) || fitValues.includes('스키니')) return '102010003';
+        if(/메가와이드|세미와이드|와이드|통바지|와이드\/통/.test(text) || fitValues.some(v=>['메가와이드','세미와이드','와이드'].includes(v))) return '102010005';
+        if(/스트레이트|일자/.test(text) || fitValues.some(v=>['스트레이트','일자'].includes(v))) return '102010001';
+        if(/기타/.test(text)) return '102010006';
+        return '102010004'; // 데님인데 핏이 불명확하면 하프클럽 '기본'
+      }
+      if(/반바지|버뮤다|쇼츠/.test(text) || fitValues.includes('반바지')) return '102009002';
+      if(/기모|모직|울/.test(text)) return '102009003';
+      if(/슬랙스/.test(text)) return '102009004';
+      if(/카고|밀리터리/.test(text)) return '102009005';
+      if(/배기|조거/.test(text) || fitValues.some(v=>['배기핏','조거'].includes(v))) return '102009007';
+      if(/치노|면바지|코튼|면\s*\d|면\s*%/.test(text)) return '102009001';
+      return '';
+    }
+
+    // 여성/기존 상품 로직 유지
     if(isSkirt){
       if(/h라인|펜슬/.test(text)) return '101011001';
       if(/a라인|플레어/.test(text)) return '101011002';
       return '101011003';
     }
     if(isDenim){
-      if(/반바지|버뮤다|쇼츠/.test(text)||fit==='반바지') return '101010005';
+      if(/반바지|버뮤다|쇼츠/.test(text)||fitValues.includes('반바지')) return '101010005';
       if(/부츠컷/.test(text)) return '101010003';
       if(/메가와이드|세미와이드|와이드/.test(text)) return '101010004';
       return '101010002';
     }
     if(/슬랙스/.test(text)) return '101009015';
-    if(/반바지|버뮤다|쇼츠/.test(text)||fit==='반바지') return '101009007';
+    if(/반바지|버뮤다|쇼츠/.test(text)||fitValues.includes('반바지')) return '101009007';
     if(/부츠컷/.test(text)) return '101009009';
     if(/배기/.test(text)) return '101009012';
     if(/메가와이드|세미와이드|와이드/.test(text)) return '101009004';
@@ -3666,6 +4226,7 @@
     const st=$('#halfCodeStatus');
     if(st){st.className='half-status '+(finalCode?'ok':'warn'); st.textContent=finalCode?`C5 상품코드에 ${finalCode}를 사용합니다.`:info.message;}
     v39SetText('#halfThumbPathPost',val('#thumbnailPath'));
+    if($('#halfUploadBrand')) $('#halfUploadBrand').textContent = isMaleProductName(val('#productName')) ? '포레스트핏 맨즈' : '포레스트핏';
   };
 
   renderHalfDisplayItems();
@@ -3779,23 +4340,15 @@
     const body = panel.querySelector('.channel-body');
     if(!body) return;
     const downloadBox = btn.closest('.half-download-box, .half-download-bar');
-    const postGuide = body.querySelector('.post-download-guide');
     if(downloadBox){
       downloadBox.classList.add('excel-first-step');
       body.insertBefore(downloadBox, body.firstChild);
     }
-    if(postGuide){
-      postGuide.classList.add('excel-post-step');
-      if(downloadBox && downloadBox.nextSibling){
-        body.insertBefore(postGuide, downloadBox.nextSibling);
-      }else if(downloadBox){
-        body.appendChild(postGuide);
-      }
-    }
+    // 등록 후 확인/체크 영역은 패널 최하단에 그대로 둡니다.
   }
 
   document.addEventListener('DOMContentLoaded',()=>{
-    arrangeExcelChannelWorkflow('#panel-queen','downloadQueenBtn');
+    arrangeExcelChannelWorkflow('#panel-queenit','downloadQueenBtn');
     arrangeExcelChannelWorkflow('#panel-halfclub','downloadHalfBtn');
     arrangeExcelChannelWorkflow('#panel-lotteon','downloadLotteBtn');
   });
