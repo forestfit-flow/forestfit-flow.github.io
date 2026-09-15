@@ -1,1 +1,953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FORESTFIT · 행사리스트 생성</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&display=swap');
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
+    *{box-sizing:border-box}
+    :root{
+      --bg:#f7f3ee;--surface:rgba(255,252,249,.9);--surface-soft:rgba(255,251,247,.72);
+      --ink:#282120;--muted:#93877e;--line:rgba(72,57,47,.10);
+      --accent:#797bd7;--accent2:#9a84cf;--accent-soft:#f0efff;
+      --ok:#567d70;--ok-soft:#edf6f2;--warn:#9a7556;--warn-soft:#f8efe7;--danger:#9b6464;--danger-soft:#f8eaea;
+      --shadow:0 24px 60px rgba(79,62,48,.08);
+    }
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;min-height:100vh;color:var(--ink);font-family:"Pretendard",sans-serif;-webkit-font-smoothing:antialiased;
+      background:
+        radial-gradient(circle at 10% 8%,rgba(222,213,239,.28),transparent 29%),
+        radial-gradient(circle at 90% 10%,rgba(198,210,255,.20),transparent 24%),
+        radial-gradient(circle at 82% 78%,rgba(241,220,214,.22),transparent 24%),
+        linear-gradient(180deg,#fbf8f5 0%,#f7f3ee 52%,#fbf8f4 100%);
+    }
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;opacity:.15;background-image:linear-gradient(rgba(80,64,51,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(80,64,51,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,#000,rgba(0,0,0,.35) 58%,transparent)}
+    button,input{font:inherit}button{cursor:pointer}
+    .wrap{width:min(1360px,calc(100% - 64px));margin:0 auto}
+
+    .header{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+    .logo{font:800 15px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.14em;color:#5a5363}.logo em{font-style:normal;color:#8a90d8}
+    .header-right{display:flex;align-items:center;gap:8px;color:#8e847d;font:700 9px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+    .header-right:before{content:"";width:6px;height:6px;border-radius:50%;background:#747ddd;box-shadow:0 0 0 5px rgba(116,125,221,.10)}
+
+    .hero{padding:62px 0 42px}.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:17px;font:700 10px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#9c9288}.eyebrow:before{content:"";width:28px;height:1px;background:#777fe0}
+    .hero h1{margin:0;font:650 clamp(42px,5.2vw,74px)/.96 "Pretendard",sans-serif;letter-spacing:-.065em;color:#6d625d}
+    .hero h1 span{font:italic 600 clamp(30px,3vw,46px)/1 "Cormorant Garamond",serif;letter-spacing:-.02em;color:#7b78a3;margin-left:14px}
+
+    .workspace{border:1px solid var(--line);border-radius:30px;background:linear-gradient(145deg,rgba(255,252,249,.96),rgba(252,248,245,.82));box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(12px)}
+    .upload-wrap{padding:26px}.upload-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 2px}.upload-top strong{font:800 10px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#655d56}.upload-top span{font:700 9px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.12em;color:#a7988f}
+    .upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .upload-card{position:relative;min-height:170px;padding:20px;border:1px solid rgba(70,51,39,.09);border-radius:23px;background:rgba(255,255,255,.56);transition:.25s ease;overflow:hidden;display:flex;flex-direction:column}
+    .upload-card:before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:linear-gradient(90deg,var(--card-accent,#777fe0),transparent 72%);opacity:.75}
+    .upload-card:nth-child(1){--card-accent:#7a7fe0}.upload-card:nth-child(2){--card-accent:#77998d}.upload-card:nth-child(3){--card-accent:#a28198}
+    .upload-card:hover,.upload-card.dragover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--card-accent) 28%,transparent);box-shadow:0 18px 34px rgba(82,66,52,.08)}
+    .upload-card.loaded{background:rgba(247,250,248,.82);border-color:color-mix(in srgb,var(--card-accent) 28%,transparent)}
+    .upload-number{font:800 9px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.14em;color:#aaa097;text-transform:uppercase}
+    .upload-card h3{margin:24px 0 0;font-size:20px;line-height:1.15;letter-spacing:-.04em;font-weight:650;color:#4a4140}
+    .upload-mini{margin-top:7px;color:#9a8f87;font-size:10px;letter-spacing:-.01em}
+    .upload-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:24px}
+    .select-btn{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 13px;border:1px solid rgba(93,86,102,.13);border-radius:999px;background:rgba(255,252,249,.62);color:#665f70;font-size:10.5px;font-weight:750;transition:.2s ease}
+    .select-btn:hover{background:#fff;border-color:rgba(126,126,181,.24);color:#57547a}
+    input[type=file]{display:none}.file-info{min-width:0;text-align:right;color:#9b9088;font-size:9.5px}.file-name{display:block;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#675e59;font-weight:700}.file-size{display:block;margin-top:3px;color:#aaa097}
+    .action-row{display:flex;justify-content:flex-end;padding-top:18px;margin-top:18px;border-top:1px solid var(--line)}
+    .primary-btn{min-width:190px;height:45px;border:0;border-radius:14px;background:linear-gradient(135deg,#6f72cf,#8985d9);color:#fff;font-size:12px;font-weight:800;letter-spacing:-.01em;box-shadow:0 12px 26px rgba(105,108,198,.20);transition:.2s ease}.primary-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 16px 30px rgba(105,108,198,.24)}.primary-btn:disabled{background:#d4cfc9;color:#fff;box-shadow:none;cursor:not-allowed}
+
+    .progress-panel{display:none;padding:15px 26px;border-top:1px solid var(--line);background:rgba(247,246,243,.72)}.progress-panel.show{display:block}.progress-line{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#857a73;margin-bottom:8px}.progress-track{height:4px;background:#e7e1dc;border-radius:999px;overflow:hidden}.progress-bar{height:100%;width:0;background:linear-gradient(90deg,#727ad9,#9b88d5);transition:width .25s ease}
+
+    .results{display:none;border-top:1px solid var(--line)}.results.show{display:block}
+    .summary{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}.metric{padding:20px 22px;border-right:1px solid var(--line)}.metric:last-child{border-right:0}.metric-label{color:#9b9088;font:800 8.5px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase}.metric-value{margin-top:8px;font:700 25px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:-.04em;color:#625d72}.metric-sub{margin-left:3px;font:600 9px/1 "Pretendard",sans-serif;color:#aaa097}
+    .result-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-bottom:1px solid var(--line)}.toolbar-left,.toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.search-box{position:relative}.search-box input{width:280px;height:38px;border:0;border-bottom:1px solid #ddd3cb;background:transparent;outline:none;padding:0 10px 0 26px;font-size:11px;color:#473f3b}.search-box:before{content:"⌕";position:absolute;left:2px;top:8px;color:#9b9088;font-size:15px}.search-box input:focus{border-color:#7a7fd7}
+    .filter-btn,.ghost-btn{height:36px;border:1px solid rgba(93,86,102,.13);border-radius:999px;background:rgba(255,252,249,.58);color:#6a625c;padding:0 13px;font-size:10px;font-weight:750}.filter-btn.active{background:#f0efff;border-color:#d9d5f4;color:#6664a4}.ghost-btn.dark{background:#2f2a31;color:#f5f2ff;border-color:#2f2a31}
+    .table-wrap{overflow:auto;max-height:680px;background:rgba(255,255,255,.78)}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1180px;table-layout:fixed}thead th{position:sticky;top:0;z-index:4;background:#f4f0ec;color:#716861;font-size:9.5px;font-weight:800;text-align:left;padding:12px 14px;border-bottom:1px solid #dfd7d1;letter-spacing:.02em}tbody td{padding:13px 14px;border-bottom:1px solid #eee8e3;vertical-align:top;font-size:11px;line-height:1.55;color:#3e3835;background:rgba(255,255,255,.84)}tbody tr:hover td{background:#fcfaf8}
+    th.col-no,td.col-no{width:54px;text-align:center;color:#a2968d}th.col-product{width:310px}th.col-options{width:220px}th.col-length{width:155px}th.col-size{width:185px}th.col-price{width:145px}th.col-status{width:132px}.product-name{font-weight:700;color:#342e2c;letter-spacing:-.018em}.product-id{margin-top:4px;color:#a39992;font-size:9px}.editable{min-height:27px;border-radius:7px;margin:-4px -6px;padding:4px 6px;outline:none;transition:.15s ease;white-space:normal;word-break:keep-all}.editable:hover{background:#f5f0ec}.editable:focus{background:#f1efff;box-shadow:inset 0 0 0 1px #d7d2ee}.price-main{font-variant-numeric:tabular-nums;font-weight:750}.match-detail{display:block;margin-top:4px;color:#a19993;font-size:9px;line-height:1.45;max-width:200px}.status-pill{display:inline-flex;align-items:center;justify-content:center;min-width:72px;padding:6px 9px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap}.status-ok{color:var(--ok);background:var(--ok-soft)}.status-similar{color:var(--warn);background:var(--warn-soft)}.status-warn{color:var(--danger);background:var(--danger-soft)}.empty-value{color:#b8aea7}
+    .toast{position:fixed;right:24px;bottom:24px;z-index:100;max-width:360px;padding:12px 14px;border-radius:12px;background:#302b30;color:white;box-shadow:0 18px 45px rgba(0,0,0,.14);font-size:10.5px;line-height:1.5;opacity:0;transform:translateY(10px);pointer-events:none;transition:.22s ease}.toast.show{opacity:1;transform:translateY(0)}.toast.error{background:#7d4d4d}
+
+    @media(max-width:980px){.upload-grid{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}.metric:nth-child(2){border-right:0}.metric:nth-child(-n+2){border-bottom:1px solid var(--line)}.result-toolbar{align-items:flex-start;flex-direction:column}}
+    @media(max-width:680px){.wrap{width:calc(100% - 28px)}.header-right{display:none}.hero{padding:44px 0 28px}.hero h1 span{display:block;margin:10px 0 0}.upload-wrap{padding:16px}.summary{grid-template-columns:1fr 1fr}.metric{padding:15px}.action-row{justify-content:stretch}.primary-btn{width:100%}.search-box input{width:min(78vw,300px)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div class="logo">FOREST<em>FIT</em></div>
+      <div class="header-right">EVENT LIST</div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Sales · Event</div>
+      <h1>행사리스트 생성 <span>Event List Builder</span></h1>
+    </section>
+
+    <section class="workspace">
+      <div class="upload-wrap">
+        <div class="upload-top"><strong>Files</strong><span>01 — 03</span></div>
+        <div class="upload-grid">
+          <div class="upload-card" data-slot="base">
+            <div class="upload-number">01 · BASE LIST</div>
+            <h3>행사 상품 리스트</h3>
+            <div class="upload-mini">A 순서 · B 상품명</div>
+            <div class="upload-bottom">
+              <label class="select-btn" for="file-base">파일 선택</label>
+              <div class="file-info" id="info-base"><span>첨부 전</span></div>
+              <input id="file-base" type="file" accept=".xlsx,.xls,.csv" />
+            </div>
+          </div>
+
+          <div class="upload-card" data-slot="cellmate">
+            <div class="upload-number">02 · CELLMATE</div>
+            <h3>셀메이트 상품 파일</h3>
+            <div class="upload-mini">색상 · 기장 · 사이즈</div>
+            <div class="upload-bottom">
+              <label class="select-btn" for="file-cellmate">파일 선택</label>
+              <div class="file-info" id="info-cellmate"><span>첨부 전</span></div>
+              <input id="file-cellmate" type="file" accept=".csv,.xlsx,.xls" />
+            </div>
+          </div>
+
+          <div class="upload-card" data-slot="naver">
+            <div class="upload-number">03 · NAVER</div>
+            <h3>네이버 상품 파일</h3>
+            <div class="upload-mini">판매가</div>
+            <div class="upload-bottom">
+              <label class="select-btn" for="file-naver">파일 선택</label>
+              <div class="file-info" id="info-naver"><span>첨부 전</span></div>
+              <input id="file-naver" type="file" accept=".csv,.xlsx,.xls" />
+            </div>
+          </div>
+        </div>
+        <div class="action-row"><button class="primary-btn" id="process-btn" disabled>행사리스트 생성</button></div>
+      </div>
+
+      <div class="progress-panel" id="progress-panel">
+        <div class="progress-line"><span id="progress-text">파일 확인 중</span><span id="progress-percent">0%</span></div>
+        <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+
+      <div class="results" id="results">
+        <div class="summary">
+          <div class="metric"><div class="metric-label">Products</div><div class="metric-value" id="metric-total">0<span class="metric-sub">개</span></div></div>
+          <div class="metric"><div class="metric-label">Cellmate</div><div class="metric-value" id="metric-cellmate">0<span class="metric-sub">개</span></div></div>
+          <div class="metric"><div class="metric-label">Naver Price</div><div class="metric-value" id="metric-naver">0<span class="metric-sub">개</span></div></div>
+          <div class="metric"><div class="metric-label">Review</div><div class="metric-value" id="metric-review">0<span class="metric-sub">개</span></div></div>
+        </div>
+
+        <div class="result-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box"><input id="search-input" type="search" placeholder="상품 검색" /></div>
+            <button class="filter-btn" id="review-filter">확인 필요</button>
+          </div>
+          <div class="toolbar-right">
+            <button class="ghost-btn" id="copy-btn">표 복사</button>
+            <button class="ghost-btn" id="csv-btn">CSV 저장</button>
+            <button class="ghost-btn dark" id="xlsx-btn">엑셀 저장</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th class="col-no">순서</th><th class="col-product">상품명</th><th class="col-options">색상</th><th class="col-length">기장</th><th class="col-size">사이즈</th><th class="col-price">네이버 판매가</th><th class="col-status">매칭상태</th>
+            </tr></thead>
+            <tbody id="result-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="toast" id="toast"></div>
+<script>
+(() => {
+  'use strict';
+
+  const state = {
+    files: { base: null, cellmate: null, naver: null },
+    rows: [],
+    reviewOnly: false,
+    query: ''
+  };
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  const processBtn = $('#process-btn');
+  const progressPanel = $('#progress-panel');
+  const progressBar = $('#progress-bar');
+  const progressText = $('#progress-text');
+  const progressPercent = $('#progress-percent');
+  const resultsEl = $('#results');
+  const resultBody = $('#result-body');
+
+  const SIZE_ORDER = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','F1','F2','F3','F','FREE'];
+  const LENGTH_ORDER = ['숏','기본','롱'];
+
+  function toast(message, type='normal') {
+    const el = $('#toast');
+    el.textContent = message;
+    el.classList.toggle('error', type === 'error');
+    el.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  function setProgress(percent, text) {
+    const p = Math.max(0, Math.min(100, Math.round(percent)));
+    progressPanel.classList.add('show');
+    progressBar.style.width = `${p}%`;
+    progressPercent.textContent = `${p}%`;
+    if (text) progressText.textContent = text;
+  }
+
+  function formatBytes(bytes) {
+    if (!Number.isFinite(bytes)) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024**2) return `${(bytes/1024).toFixed(1)} KB`;
+    return `${(bytes/1024**2).toFixed(1)} MB`;
+  }
+
+  function normalizeText(value) {
+    return String(value ?? '')
+      .normalize('NFKC')
+      .replace(/^\uFEFF/, '')
+      .replace(/\s+/g, '')
+      .trim()
+      .toLowerCase();
+  }
+
+  function normalizeHeader(value) {
+    return String(value ?? '').replace(/^\uFEFF/, '').replace(/\s+/g, '').trim().toLowerCase();
+  }
+
+  function cleanFormulaText(value) {
+    let s = String(value ?? '').trim();
+    if (/^="[\s\S]*"$/.test(s)) s = s.slice(2, -1).replace(/""/g, '"');
+    return s.trim();
+  }
+
+  function extractParens(value) {
+    const text = String(value ?? '');
+    const found = [];
+    const re = /\(([^()]*)\)/g;
+    let m;
+    while ((m = re.exec(text))) {
+      const token = normalizeText(m[1]);
+      if (token) found.push(token);
+    }
+    return found;
+  }
+
+  function removeParens(value) {
+    return String(value ?? '').replace(/\([^()]*\)/g, '').replace(/\[[^\]]*\]/g, '').replace(/판매중지/g, '');
+  }
+
+  function uniquePush(arr, value) {
+    const v = String(value ?? '').trim();
+    if (v && !arr.includes(v)) arr.push(v);
+  }
+
+  function canonicalLength(raw) {
+    let s = String(raw ?? '').trim().replace(/기장$/,'');
+    const upper = s.toUpperCase();
+    if (upper === 'SHORT') return '숏';
+    if (upper === 'REGULAR' || upper === 'BASIC') return '기본';
+    if (upper === 'LONG') return '롱';
+    return s;
+  }
+
+  function canonicalSize(raw) {
+    return String(raw ?? '').trim().toUpperCase();
+  }
+
+  function parseCombinedOption(value) {
+    const out = { color: [], length: [], size: [] };
+    const cleaned = cleanFormulaText(value);
+    if (!cleaned) return out;
+
+    const sizeRe = /^(XS|S|M|L|XL|2XL|3XL|4XL|5XL|F|FREE|F1|F2|F3|\d{2,3})$/i;
+    const lengthRe = /^(숏|기본|롱|SHORT|REGULAR|BASIC|LONG)(?:기장)?$/i;
+    const comboRe = /^(숏|기본|롱)(?:기장)?\s*(XS|S|M|L|XL|2XL|3XL|4XL|5XL|F|FREE|F1|F2|F3|\d{2,3})$/i;
+    const reverseComboRe = /^(XS|S|M|L|XL|2XL|3XL|4XL|5XL|F|FREE|F1|F2|F3|\d{2,3})\s*(숏|기본|롱)(?:기장)?$/i;
+
+    cleaned.split(',').map(v => v.trim()).filter(Boolean).forEach(part => {
+      let m = part.match(comboRe);
+      if (m) {
+        uniquePush(out.length, canonicalLength(m[1]));
+        uniquePush(out.size, canonicalSize(m[2]));
+        return;
+      }
+      m = part.match(reverseComboRe);
+      if (m) {
+        uniquePush(out.size, canonicalSize(m[1]));
+        uniquePush(out.length, canonicalLength(m[2]));
+        return;
+      }
+      if (sizeRe.test(part)) {
+        uniquePush(out.size, canonicalSize(part));
+      } else if (lengthRe.test(part)) {
+        uniquePush(out.length, canonicalLength(part));
+      } else {
+        uniquePush(out.color, part);
+      }
+    });
+
+    return out;
+  }
+
+  function orderedKnown(values, order) {
+    const original = [...values];
+    return original.sort((a,b) => {
+      const ai = order.indexOf(a);
+      const bi = order.indexOf(b);
+      if (ai === -1 && bi === -1) return original.indexOf(a) - original.indexOf(b);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
+  }
+
+  function detectOptionConfig(fields) {
+    const names = fields || [];
+    const find = (candidates) => names.find(f => candidates.includes(normalizeHeader(f))) || null;
+    const colorCol = find(['색상','색상명','컬러','컬러명','color']);
+    const lengthCol = find(['기장','기장명','길이','length']);
+    const sizeCol = find(['사이즈','사이즈명','size']);
+
+    const dynamicPairs = [];
+    for (const field of names) {
+      const h = normalizeHeader(field);
+      const m = h.match(/^(?:옵션)?분류명(\d+)$/) || h.match(/^분류명(\d+)$/);
+      if (!m) continue;
+      const n = m[1];
+      const valueCandidates = [
+        `옵션값${n}`, `옵션명${n}`, `옵션${n}`, `분류값${n}`, `분류옵션${n}`
+      ];
+      const valueCol = names.find(f => valueCandidates.includes(normalizeHeader(f)));
+      if (valueCol) dynamicPairs.push({ labelCol: field, valueCol });
+    }
+
+    const optionCol = names.find(f => normalizeHeader(f) === '옵션명')
+      || names.find(f => normalizeHeader(f) === '사입옵션명')
+      || names.find(f => normalizeHeader(f).includes('옵션'))
+      || null;
+
+    return { colorCol, lengthCol, sizeCol, dynamicPairs, optionCol };
+  }
+
+  function rowDimensions(row, config) {
+    const out = { color: [], length: [], size: [] };
+    let usedExplicit = false;
+
+    if (config.colorCol && cleanFormulaText(row[config.colorCol])) {
+      uniquePush(out.color, cleanFormulaText(row[config.colorCol])); usedExplicit = true;
+    }
+    if (config.lengthCol && cleanFormulaText(row[config.lengthCol])) {
+      uniquePush(out.length, canonicalLength(cleanFormulaText(row[config.lengthCol]))); usedExplicit = true;
+    }
+    if (config.sizeCol && cleanFormulaText(row[config.sizeCol])) {
+      uniquePush(out.size, canonicalSize(cleanFormulaText(row[config.sizeCol]))); usedExplicit = true;
+    }
+
+    for (const pair of config.dynamicPairs) {
+      const label = normalizeHeader(cleanFormulaText(row[pair.labelCol]));
+      const value = cleanFormulaText(row[pair.valueCol]);
+      if (!value) continue;
+      if (label.includes('색상') || label.includes('컬러') || label === 'color') { uniquePush(out.color, value); usedExplicit = true; }
+      else if (label.includes('기장') || label.includes('길이') || label === 'length') { uniquePush(out.length, canonicalLength(value)); usedExplicit = true; }
+      else if (label.includes('사이즈') || label === 'size') { uniquePush(out.size, canonicalSize(value)); usedExplicit = true; }
+    }
+
+    if (!usedExplicit && config.optionCol) return parseCombinedOption(row[config.optionCol]);
+    return out;
+  }
+
+  function getFileExtension(file) {
+    return (file?.name?.split('.').pop() || '').toLowerCase();
+  }
+
+  async function detectCsvEncoding(file, requiredWords=[]) {
+    const sampleBuffer = await file.slice(0, Math.min(file.size, 160000)).arrayBuffer();
+    const candidates = ['utf-8', 'euc-kr'];
+    for (const enc of candidates) {
+      try {
+        const text = new TextDecoder(enc, { fatal: false }).decode(sampleBuffer);
+        if (!requiredWords.length || requiredWords.some(w => text.includes(w))) return enc;
+      } catch (_) {}
+    }
+    return 'utf-8';
+  }
+
+  function papaParseFile(file, encoding, onChunk) {
+    return new Promise((resolve, reject) => {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: 'greedy',
+        encoding,
+        chunkSize: 1024 * 1024,
+        chunk: (results) => {
+          try { onChunk(results); }
+          catch (err) { reject(err); }
+        },
+        complete: () => resolve(),
+        error: reject
+      });
+    });
+  }
+
+  async function readWorkbookRows(file) {
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+  }
+
+  async function readObjectRows(file, requiredWords=[]) {
+    const ext = getFileExtension(file);
+    if (ext === 'csv' || ext === 'txt') {
+      const encoding = await detectCsvEncoding(file, requiredWords);
+      return await new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: 'greedy',
+          encoding,
+          complete: r => resolve(r.data),
+          error: reject
+        });
+      });
+    }
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+  }
+
+  async function loadBaseProducts(file) {
+    const ext = getFileExtension(file);
+    let rows;
+    if (ext === 'csv' || ext === 'txt') {
+      const encoding = await detectCsvEncoding(file, ['순서','상품명']);
+      const text = new TextDecoder(encoding).decode(await file.arrayBuffer());
+      rows = Papa.parse(text, { header:false, skipEmptyLines:'greedy' }).data;
+    } else {
+      rows = await readWorkbookRows(file);
+    }
+    rows = rows.filter(r => Array.isArray(r) && r.some(v => String(v ?? '').trim() !== ''));
+    if (!rows.length) throw new Error('행사 상품 리스트에서 상품명을 찾지 못했습니다.');
+
+    const headerRow = rows[0].map(normalizeHeader);
+    const hasABHeader = headerRow[0] === '순서' && headerRow[1] === '상품명';
+    const namedProductCol = headerRow.findIndex(v => v === '상품명');
+
+    // 새 양식: A열=순서, B열=상품명. 기존 1열 파일도 계속 호환합니다.
+    const orderCol = hasABHeader ? 0 : -1;
+    let productCol = hasABHeader ? 1 : namedProductCol;
+    let start = (hasABHeader || namedProductCol >= 0) ? 1 : 0;
+
+    if (productCol < 0) {
+      // 헤더가 없을 때 A/B 두 열이 모두 채워져 있으면 B열을 상품명으로 간주합니다.
+      const abRows = rows.filter(r => String(r[0] ?? '').trim() && String(r[1] ?? '').trim());
+      const firstColNumeric = abRows.length && abRows.filter(r => /^\s*\d+(?:\.\d+)?\s*$/.test(String(r[0] ?? ''))).length >= Math.ceil(abRows.length * 0.6);
+      if (rows.some(r => String(r[1] ?? '').trim()) && firstColNumeric) {
+        productCol = 1;
+      } else {
+        let bestCol = 0, bestCount = -1;
+        const maxCols = Math.max(...rows.map(r => r.length));
+        for (let c=0; c<maxCols; c++) {
+          const count = rows.reduce((n,r) => n + (String(r[c] ?? '').trim() ? 1 : 0), 0);
+          if (count > bestCount) { bestCount = count; bestCol = c; }
+        }
+        productCol = bestCol;
+      }
+    }
+
+    const useOrderCol = orderCol === 0 || (productCol === 1 && rows.some(r => String(r[0] ?? '').trim()));
+    const products = [];
+    for (let i=start; i<rows.length; i++) {
+      const name = cleanFormulaText(rows[i][productCol]);
+      if (!name || normalizeHeader(name) === '상품명') continue;
+
+      const rawOrder = useOrderCol ? cleanFormulaText(rows[i][0]) : '';
+      const numericOrder = /^[-+]?\d+(?:\.\d+)?$/.test(rawOrder.replace(/,/g,''))
+        ? Number(rawOrder.replace(/,/g,''))
+        : Number.POSITIVE_INFINITY;
+
+      products.push({
+        sourceRow: i,
+        orderLabel: rawOrder || String(products.length + 1),
+        orderNumber: numericOrder,
+        name,
+        normName: normalizeText(name),
+        ids: extractParens(name),
+        core: normalizeText(removeParens(name))
+      });
+    }
+    if (!products.length) throw new Error('행사 상품 리스트에서 유효한 상품명이 없습니다.');
+
+    // A열에 숫자가 입력되어 있으면 해당 숫자 오름차순으로 배치합니다.
+    // 순서가 비어 있거나 숫자가 아닌 행은 원래 파일의 아래쪽 순서를 유지합니다.
+    products.sort((a, b) => {
+      const aFinite = Number.isFinite(a.orderNumber);
+      const bFinite = Number.isFinite(b.orderNumber);
+      if (aFinite && bFinite && a.orderNumber !== b.orderNumber) return a.orderNumber - b.orderNumber;
+      if (aFinite !== bFinite) return aFinite ? -1 : 1;
+      return a.sourceRow - b.sourceRow;
+    });
+
+    products.forEach((p, i) => {
+      p.index = i;
+      if (!useOrderCol) p.orderLabel = String(i + 1);
+    });
+    return products;
+  }
+
+  function findField(fields, exactNames, containsNames=[]) {
+    let hit = fields.find(f => exactNames.includes(normalizeHeader(f)));
+    if (hit) return hit;
+    return fields.find(f => containsNames.some(k => normalizeHeader(f).includes(k))) || null;
+  }
+
+  async function loadCellmate(file, products) {
+    const records = products.map(() => []);
+    const nameIndex = new Map();
+    const idIndex = new Map();
+    products.forEach((p, i) => {
+      if (!nameIndex.has(p.normName)) nameIndex.set(p.normName, []);
+      nameIndex.get(p.normName).push(i);
+      p.ids.forEach(id => {
+        if (!idIndex.has(id)) idIndex.set(id, []);
+        idIndex.get(id).push(i);
+      });
+    });
+
+    let optionConfig = null;
+    let productField = null;
+    let serialField = null;
+    let sequence = 0;
+
+    const processRows = (rows, fields) => {
+      if (!optionConfig) {
+        optionConfig = detectOptionConfig(fields);
+        productField = findField(fields, ['상품명'], ['상품명']);
+        serialField = findField(fields, ['옵션정보일련번호'], ['일련번호']);
+        if (!productField) throw new Error('셀메이트 파일에서 ‘상품명’ 열을 찾지 못했습니다.');
+        if (!optionConfig.optionCol && !optionConfig.colorCol && !optionConfig.lengthCol && !optionConfig.sizeCol && !optionConfig.dynamicPairs.length) {
+          throw new Error('셀메이트 파일에서 옵션 관련 열을 찾지 못했습니다.');
+        }
+      }
+
+      for (const row of rows) {
+        sequence++;
+        const productName = cleanFormulaText(row[productField]);
+        if (!productName) continue;
+        let targets = nameIndex.get(normalizeText(productName)) || [];
+        if (!targets.length) {
+          const rowIds = extractParens(productName);
+          const set = new Set();
+          rowIds.forEach(id => (idIndex.get(id) || []).forEach(i => set.add(i)));
+          targets = [...set];
+        }
+        if (!targets.length) continue;
+
+        const dims = rowDimensions(row, optionConfig);
+        const serialRaw = serialField ? Number(String(row[serialField] ?? '').replace(/[^0-9.-]/g,'')) : NaN;
+        const serial = Number.isFinite(serialRaw) ? serialRaw : Number.POSITIVE_INFINITY;
+        for (const idx of targets) records[idx].push({ dims, serial, sequence });
+      }
+    };
+
+    const ext = getFileExtension(file);
+    if (ext === 'csv' || ext === 'txt') {
+      const encoding = await detectCsvEncoding(file, ['상품명','옵션명']);
+      await papaParseFile(file, encoding, (results) => {
+        const fields = results.meta?.fields || Object.keys(results.data?.[0] || {});
+        processRows(results.data || [], fields);
+        const cursor = results.meta?.cursor || 0;
+        const ratio = file.size ? Math.min(1, cursor / file.size) : 0;
+        setProgress(18 + ratio * 40, `셀메이트 옵션 분석 중 · ${Math.round(ratio*100)}%`);
+      });
+    } else {
+      const rows = await readObjectRows(file);
+      const fields = Object.keys(rows[0] || {});
+      processRows(rows, fields);
+      setProgress(58, '셀메이트 옵션 분석 완료');
+    }
+
+    return records.map(list => {
+      list.sort((a,b) => (a.serial - b.serial) || (a.sequence - b.sequence));
+      const acc = { color: [], length: [], size: [] };
+      list.forEach(item => {
+        item.dims.color.forEach(v => uniquePush(acc.color, v));
+        item.dims.length.forEach(v => uniquePush(acc.length, v));
+        item.dims.size.forEach(v => uniquePush(acc.size, v));
+      });
+      acc.length = orderedKnown(acc.length, LENGTH_ORDER);
+      acc.size = orderedKnown(acc.size, SIZE_ORDER);
+      return { ...acc, matched: list.length > 0, optionRows: list.length };
+    });
+  }
+
+  function bigramDice(a, b) {
+    a = normalizeText(a); b = normalizeText(b);
+    if (!a || !b) return 0;
+    if (a === b) return 1;
+    const make = s => {
+      if (s.length < 2) return new Set([s]);
+      const set = new Set();
+      for (let i=0;i<s.length-1;i++) set.add(s.slice(i,i+2));
+      return set;
+    };
+    const A = make(a), B = make(b);
+    let inter = 0;
+    A.forEach(x => { if (B.has(x)) inter++; });
+    return (2 * inter) / (A.size + B.size);
+  }
+
+  function naverScore(product, row, fields) {
+    const smart = String(row[fields.smart] ?? '');
+    const win = String(row[fields.window] ?? '');
+    const generic = String(row[fields.generic] ?? '');
+    const smartIds = extractParens(smart);
+    const winIds = extractParens(win);
+    const genericIds = extractParens(generic);
+
+    let score = 0;
+    let exact = false;
+    let relaxed = false;
+
+    for (const id of product.ids) {
+      let idExact = false;
+      if (smartIds.includes(id)) { score += 150; exact = true; idExact = true; }
+      else if (winIds.includes(id)) { score += 115; exact = true; idExact = true; }
+      else if (genericIds.includes(id)) { score += 80; exact = true; idExact = true; }
+
+      if (!idExact && id.includes('/')) {
+        const parts = id.split('/').filter(Boolean);
+        for (const part of parts) {
+          if (smartIds.includes(part)) { score += 100; exact = true; idExact = true; break; }
+          if (winIds.includes(part)) { score += 80; exact = true; idExact = true; break; }
+        }
+      }
+
+      if (!idExact) {
+        if (smartIds.some(t => t.length >= 3 && (t.includes(id) || id.includes(t)))) { score += 45; relaxed = true; }
+        else if (winIds.some(t => t.length >= 3 && (t.includes(id) || id.includes(t)))) { score += 30; relaxed = true; }
+      }
+    }
+
+    const candidates = [smart, win, generic].filter(Boolean).map(removeParens);
+    const similarity = Math.max(0, ...candidates.map(t => bigramDice(product.core, t)));
+    score += similarity * 60;
+
+    const status = String(row[fields.status] ?? '').trim();
+    if (status === '판매중') score += 15;
+    else if (status === '품절') score += 5;
+    else if (status === '판매중지') score -= 20;
+    if (smart.includes('판매중지') || win.includes('판매중지')) score -= 10;
+
+    return { score, exact, relaxed, similarity, smart, win, generic, status };
+  }
+
+  async function loadNaver(file, products) {
+    const top = products.map(() => []);
+    let fields = null;
+
+    const processRows = (rows, rowFields) => {
+      if (!fields) {
+        fields = {
+          price: findField(rowFields, ['판매가'], ['판매가']),
+          smart: findField(rowFields, ['스마트스토어전용상품명'], ['스마트스토어전용상품명']),
+          window: findField(rowFields, ['쇼핑윈도전용상품명'], ['쇼핑윈도전용상품명']),
+          generic: findField(rowFields, ['상품명'], ['상품명']),
+          status: findField(rowFields, ['판매상태'], ['판매상태'])
+        };
+        if (!fields.price) throw new Error('네이버 파일에서 ‘판매가’ 열을 찾지 못했습니다.');
+        if (!fields.smart && !fields.window && !fields.generic) throw new Error('네이버 파일에서 상품명 열을 찾지 못했습니다.');
+      }
+
+      for (const row of rows) {
+        for (let i=0; i<products.length; i++) {
+          const s = naverScore(products[i], row, fields);
+          if (s.score < 35) continue;
+          const price = cleanFormulaText(row[fields.price]);
+          const matchedName = s.smart || s.window || s.generic;
+          const item = { ...s, price, matchedName };
+          const arr = top[i];
+          arr.push(item);
+          arr.sort((a,b) => b.score - a.score);
+          if (arr.length > 3) arr.length = 3;
+        }
+      }
+    };
+
+    const ext = getFileExtension(file);
+    if (ext === 'csv' || ext === 'txt') {
+      const encoding = await detectCsvEncoding(file, ['판매가','상품명']);
+      await papaParseFile(file, encoding, (results) => {
+        const rowFields = results.meta?.fields || Object.keys(results.data?.[0] || {});
+        processRows(results.data || [], rowFields);
+        const cursor = results.meta?.cursor || 0;
+        const ratio = file.size ? Math.min(1, cursor / file.size) : 0;
+        setProgress(61 + ratio * 29, `네이버 판매가 매칭 중 · ${Math.round(ratio*100)}%`);
+      });
+    } else {
+      const rows = await readObjectRows(file);
+      const rowFields = Object.keys(rows[0] || {});
+      processRows(rows, rowFields);
+      setProgress(90, '네이버 판매가 매칭 완료');
+    }
+
+    return top.map(candidates => {
+      if (!candidates.length) return { matched:false, price:'', confidence:'missing', matchedName:'', status:'', score:0 };
+      const best = candidates[0];
+      const second = candidates[1];
+      const gap = second ? best.score - second.score : 999;
+      const sameTopPrice = second && cleanPrice(best.price) === cleanPrice(second.price);
+      let confidence = 'exact';
+      if (!best.exact) confidence = best.score >= 85 ? 'similar' : 'review';
+      else if (gap < 8 && !sameTopPrice) confidence = 'review';
+      return { matched:true, ...best, confidence, gap };
+    });
+  }
+
+  function cleanPrice(value) {
+    const text = String(value ?? '').replace(/,/g,'').trim();
+    const n = Number(text);
+    return Number.isFinite(n) ? String(Math.round(n)) : text;
+  }
+
+  function formatPrice(value) {
+    const clean = cleanPrice(value);
+    const n = Number(clean);
+    return Number.isFinite(n) && clean !== '' ? n.toLocaleString('ko-KR') : clean;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
+  function productIdLabel(product) {
+    const ids = product.ids.map(v => v.toUpperCase());
+    return ids.length ? ids.join(' · ') : '괄호 식별자 없음';
+  }
+
+  function buildResultRows(products, cellmate, naver) {
+    return products.map((p, i) => {
+      const c = cellmate[i];
+      const n = naver[i];
+      let status = '완료', statusClass = 'ok', needsReview = false;
+      if (!c.matched) { status = '옵션 미매칭'; statusClass = 'warn'; needsReview = true; }
+      if (!n.matched) { status = c.matched ? '가격 미매칭' : '확인 필요'; statusClass = 'warn'; needsReview = true; }
+      else if (n.confidence === 'review') { status = '가격 확인'; statusClass = 'warn'; needsReview = true; }
+      else if (n.confidence === 'similar') { status = '유사 매칭'; statusClass = 'similar'; needsReview = true; }
+
+      return {
+        no: p.orderLabel || String(i+1),
+        stateIndex: i,
+        product: p,
+        color: c.color.join(', '),
+        length: c.length.join(', '),
+        size: c.size.join(', '),
+        price: cleanPrice(n.price),
+        status,
+        statusClass,
+        needsReview,
+        cellmateMatched: c.matched,
+        naverMatched: n.matched,
+        naverConfidence: n.confidence,
+        naverMatchedName: n.matchedName || '',
+        naverStatus: n.status || ''
+      };
+    });
+  }
+
+  function statusHtml(row) {
+    const cls = row.statusClass === 'ok' ? 'status-ok' : row.statusClass === 'similar' ? 'status-similar' : 'status-warn';
+    return `<span class="status-pill ${cls}">${escapeHtml(row.status)}</span>`;
+  }
+
+  function renderTable() {
+    const q = normalizeText(state.query);
+    const visible = state.rows.map((row, stateIndex) => ({ row, stateIndex })).filter(({row}) => {
+      if (state.reviewOnly && !row.needsReview) return false;
+      if (!q) return true;
+      return normalizeText(`${row.product.name} ${row.product.ids.join(' ')}`).includes(q);
+    });
+
+    resultBody.innerHTML = visible.map(({row, stateIndex}) => {
+      const detail = row.naverMatchedName && row.naverConfidence !== 'exact'
+        ? `<span class="match-detail" title="${escapeHtml(row.naverMatchedName)}">↳ ${escapeHtml(row.naverMatchedName)}</span>`
+        : '';
+      return `
+        <tr data-row="${stateIndex}">
+          <td class="col-no">${row.no}</td>
+          <td><div class="product-name">${escapeHtml(row.product.name)}</div><div class="product-id">${escapeHtml(productIdLabel(row.product))}</div></td>
+          <td><div class="editable ${row.color ? '' : 'empty-value'}" contenteditable="true" data-field="color">${escapeHtml(row.color || '')}</div></td>
+          <td><div class="editable ${row.length ? '' : 'empty-value'}" contenteditable="true" data-field="length">${escapeHtml(row.length || '')}</div></td>
+          <td><div class="editable ${row.size ? '' : 'empty-value'}" contenteditable="true" data-field="size">${escapeHtml(row.size || '')}</div></td>
+          <td><div class="editable price-main ${row.price ? '' : 'empty-value'}" contenteditable="true" data-field="price">${escapeHtml(formatPrice(row.price))}</div>${detail}</td>
+          <td>${statusHtml(row)}</td>
+        </tr>`;
+    }).join('');
+
+    resultBody.querySelectorAll('.editable').forEach(el => {
+      el.addEventListener('focus', () => el.classList.remove('empty-value'));
+      el.addEventListener('blur', () => {
+        const tr = el.closest('tr');
+        const idx = Number(tr.dataset.row);
+        const field = el.dataset.field;
+        let value = el.textContent.trim();
+        if (field === 'price') {
+          value = cleanPrice(value);
+          el.textContent = formatPrice(value);
+        }
+        state.rows[idx][field] = value;
+        if (!value) el.classList.add('empty-value');
+      });
+    });
+  }
+
+  function updateMetrics() {
+    const rows = state.rows;
+    const cellmateCount = rows.filter(r => r.cellmateMatched).length;
+    const naverCount = rows.filter(r => r.naverMatched).length;
+    const reviewCount = rows.filter(r => r.needsReview).length;
+    $('#metric-total').innerHTML = `${rows.length}<span class="metric-sub">개</span>`;
+    $('#metric-cellmate').innerHTML = `${cellmateCount}<span class="metric-sub">개</span>`;
+    $('#metric-naver').innerHTML = `${naverCount}<span class="metric-sub">개</span>`;
+    $('#metric-review').innerHTML = `${reviewCount}<span class="metric-sub">개</span>`;
+  }
+
+  async function processAll() {
+    if (!state.files.base || !state.files.cellmate || !state.files.naver) return;
+    processBtn.disabled = true;
+    resultsEl.classList.remove('show');
+    setProgress(3, '행사 상품 리스트를 읽고 있습니다.');
+
+    try {
+      const products = await loadBaseProducts(state.files.base);
+      setProgress(14, `상품명 ${products.length}개 확인 · 셀메이트 분석 준비`);
+      const cellmate = await loadCellmate(state.files.cellmate, products);
+      setProgress(60, '셀메이트 옵션 정리 완료 · 네이버 파일 확인 중');
+      const naver = await loadNaver(state.files.naver, products);
+      setProgress(94, '결과를 정리하고 있습니다.');
+
+      state.rows = buildResultRows(products, cellmate, naver);
+      updateMetrics();
+      renderTable();
+      resultsEl.classList.add('show');
+      setProgress(100, `완료 · ${products.length}개 상품 정리`);
+      setTimeout(() => progressPanel.classList.remove('show'), 900);
+      toast(`총 ${products.length}개 상품을 정리했습니다.`);
+      resultsEl.scrollIntoView({ behavior:'smooth', block:'start' });
+    } catch (err) {
+      console.error(err);
+      setProgress(0, '처리 중 오류가 발생했습니다.');
+      toast(err?.message || '파일 처리 중 오류가 발생했습니다.', 'error');
+    } finally {
+      processBtn.disabled = !(state.files.base && state.files.cellmate && state.files.naver);
+    }
+  }
+
+  function updateReady() {
+    processBtn.disabled = !(state.files.base && state.files.cellmate && state.files.naver);
+  }
+
+  function setFile(slot, file) {
+    if (!file) return;
+    state.files[slot] = file;
+    const card = document.querySelector(`.upload-card[data-slot="${slot}"]`);
+    const info = $(`#info-${slot}`);
+    card.classList.add('loaded');
+    info.innerHTML = `<span class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span><span class="file-size">${formatBytes(file.size)}</span>`;
+    updateReady();
+  }
+
+  ['base','cellmate','naver'].forEach(slot => {
+    const input = $(`#file-${slot}`);
+    const card = document.querySelector(`.upload-card[data-slot="${slot}"]`);
+    input.addEventListener('change', e => setFile(slot, e.target.files?.[0]));
+    ['dragenter','dragover'].forEach(evt => card.addEventListener(evt, e => { e.preventDefault(); card.classList.add('dragover'); }));
+    ['dragleave','drop'].forEach(evt => card.addEventListener(evt, e => { e.preventDefault(); card.classList.remove('dragover'); }));
+    card.addEventListener('drop', e => {
+      const file = e.dataTransfer?.files?.[0];
+      if (file) setFile(slot, file);
+    });
+  });
+
+  processBtn.addEventListener('click', processAll);
+
+  $('#search-input').addEventListener('input', e => { state.query = e.target.value; renderTable(); });
+  $('#review-filter').addEventListener('click', e => {
+    state.reviewOnly = !state.reviewOnly;
+    e.currentTarget.classList.toggle('active', state.reviewOnly);
+    renderTable();
+  });
+
+  function exportRows() {
+    return state.rows.map(r => ({
+      '순서': r.no,
+      '상품명': r.product.name,
+      '색상': r.color,
+      '기장': r.length,
+      '사이즈': r.size,
+      '판매가': r.price ? Number(r.price) || r.price : '',
+      '매칭상태': r.status
+    }));
+  }
+
+  $('#xlsx-btn').addEventListener('click', () => {
+    if (!state.rows.length) return;
+    const data = exportRows();
+    const ws = XLSX.utils.json_to_sheet(data, { header:['순서','상품명','색상','기장','사이즈','판매가','매칭상태'] });
+    ws['!cols'] = [{wch:9},{wch:42},{wch:36},{wch:18},{wch:22},{wch:14},{wch:14}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '행사리스트');
+    XLSX.writeFile(wb, `행사리스트_${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
+
+  function exportCsvRows() {
+    return state.rows.map(r => ({
+      '순서': r.no,
+      '상품명': r.product.name,
+      '옵션': [r.color, r.length, r.size]
+        .map(v => String(v ?? '').trim())
+        .filter(Boolean)
+        .join(' / '),
+      '판매가': r.price ? Number(r.price) || r.price : '',
+      '매칭상태': r.status
+    }));
+  }
+
+  $('#csv-btn').addEventListener('click', () => {
+    if (!state.rows.length) return;
+    const csv = Papa.unparse(exportCsvRows(), { quotes:false, newline:'\r\n' });
+    const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `행사리스트_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  $('#copy-btn').addEventListener('click', async () => {
+    if (!state.rows.length) return;
+    const headers = ['순서','상품명','색상','기장','사이즈','판매가'];
+    const lines = [headers.join('\t')].concat(state.rows.map(r => [r.no,r.product.name,r.color,r.length,r.size,r.price].join('\t')));
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      toast('표를 클립보드에 복사했습니다.');
+    } catch (_) {
+      toast('브라우저 권한 때문에 복사하지 못했습니다.', 'error');
+    }
+  });
+})();
+</script>
+</body>
+</html>
