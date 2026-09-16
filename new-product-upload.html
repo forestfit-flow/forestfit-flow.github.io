@@ -189,21 +189,169 @@
 
   /* 판매처별 업로드 가이드 */
   .channel-section{margin-top:20px}
-  .channel-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;align-items:flex-end}
-  .channel-tab-item{display:flex;flex-direction:column;align-items:center;gap:5px}
-  .channel-done{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;font-weight:800;color:#6b7177;cursor:pointer;user-select:none;line-height:1}
-  .channel-done input{width:16px;height:16px;margin:0;cursor:pointer;accent-color:#18864b}
-  .channel-tab{border:1px solid #c7cbd0;background:#fff;border-radius:5px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;min-width:76px}
+  .channel-required-warning{
+    margin:0 0 16px;
+    border:1px solid #d8dde3;
+    border-radius:8px;
+    background:#fbfcfd;
+    overflow:hidden;
+  }
+  .channel-warning-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:11px 14px;
+    border-bottom:1px solid #dfe4e9;
+    background:#f5f7f9;
+    color:#343b43;
+    font-size:14px;
+    font-weight:900;
+  }
+  .channel-warning-head .count{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:34px;
+    height:24px;
+    padding:0 8px;
+    border-radius:999px;
+    background:#c83b30;
+    color:#fff;
+    font-size:12px;
+  }
+  .channel-required-warning.all-complete .channel-warning-head{
+    background:#edf8f0;
+    border-bottom-color:#c8e3d0;
+    color:#236a3d;
+  }
+  .channel-required-warning.all-complete .channel-warning-head .count{
+    background:#2f8a50;
+  }
+  .channel-warning-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    padding:12px;
+  }
+  .channel-warning-card{
+    min-width:0;
+    border:1px solid #efc9c5;
+    border-radius:7px;
+    background:#fff8f7;
+    padding:10px 11px;
+    transition:.15s ease;
+  }
+  .channel-warning-card.complete{
+    border-color:#b8dcc3;
+    background:#f1faf4;
+  }
+  .channel-warning-card-title{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    margin-bottom:6px;
+    color:#9f2f26;
+    font-size:13px;
+    font-weight:900;
+  }
+  .channel-warning-card-title::before{
+    content:'!';
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:#d84a3e;
+    color:#fff;
+    font-size:11px;
+    font-weight:900;
+    flex:0 0 auto;
+  }
+  .channel-warning-card.complete .channel-warning-card-title{
+    color:#25633c;
+  }
+  .channel-warning-card.complete .channel-warning-card-title::before{
+    content:'✓';
+    background:#2f8a50;
+  }
+  .channel-warning-card ul{
+    margin:0;
+    padding-left:17px;
+    color:#4d535a;
+    font-size:12px;
+    line-height:1.6;
+  }
+  .channel-warning-card.complete ul{
+    color:#3d6b4c;
+  }
+  .channel-warning-card li + li{margin-top:2px}
+  .channel-warning-status{
+    margin-left:auto;
+    flex:0 0 auto;
+    padding:3px 7px;
+    border-radius:999px;
+    background:#ffe3df;
+    color:#b42318;
+    font-size:10px;
+    font-weight:900;
+  }
+  .channel-warning-card.complete .channel-warning-status{
+    background:#dff3e5;
+    color:#237044;
+  }
+  @media(max-width:1100px){.channel-warning-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:720px){.channel-warning-grid{grid-template-columns:1fr}}
+  .channel-tabs{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 12px;align-items:flex-end}
+  .channel-tab-item{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:116px}
+  .channel-done{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    min-height:26px;
+    font-size:13px;
+    font-weight:900;
+    color:#626b75;
+    cursor:pointer;
+    user-select:none;
+    line-height:1.2
+  }
+  .channel-done input{width:20px;height:20px;margin:0;cursor:pointer;accent-color:#18864b}
+  .channel-tab{
+    border:1px solid #bcc4cd;
+    background:#fff;
+    border-radius:6px;
+    padding:13px 18px;
+    font-size:15px;
+    font-weight:900;
+    cursor:pointer;
+    min-width:116px;
+    min-height:48px
+  }
   .channel-tab-item.done .channel-tab:not(.active){background:#eef8f1;border-color:#6fa57d;color:#25633c}
   .channel-tab-item.done .channel-done{color:#237044}
   .channel-tab-item.is-excluded{display:none!important}
   .channel-panel.is-excluded{display:none!important}
   .channel-tab.active{background:#202326;color:#fff;border-color:#202326}
-  .channel-group-wrap{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 14px}
-  .channel-group{border:1px solid #d6d9dd;background:#fafbfc;border-radius:7px;padding:10px 12px}
+  .channel-group-wrap{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+    margin:0 0 16px
+  }
+  .channel-group{
+    border:1px solid #cfd5dc;
+    background:#fafbfc;
+    border-radius:8px;
+    padding:15px 16px
+  }
   .channel-group.excel-group{background:#f7fbf8}
-  .channel-group-title{font-size:12px;font-weight:800;color:#555;margin:0 0 8px}
+  .channel-group-title{font-size:14px;font-weight:900;color:#454c54;margin:0 0 11px}
   .channel-group .channel-tabs{margin:0}
+  @media(max-width:900px){
+    .channel-group-wrap{grid-template-columns:1fr}
+  }
 
   .channel-panel{display:none;border:1px solid #cfd3d7;background:#fff}
   .channel-panel.active{display:block}
@@ -388,6 +536,10 @@
   .post-task-checks{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;padding-top:12px;border-top:1px dashed #e6b985}
   .post-task-check{display:inline-flex;align-items:flex-start;gap:8px;font-weight:900;color:#7b3511;cursor:pointer}
   .post-task-check input{width:18px;height:18px;margin:1px 0 0;accent-color:#d9661f;flex:0 0 auto}
+  .post-task-season-note{display:none}
+  .post-task-season-note.is-visible{display:list-item}
+  .post-task-season-checks{display:none;align-items:flex-start;gap:10px 18px;flex-wrap:wrap}
+  .post-task-season-checks.is-visible{display:inline-flex}
   .post-task-path{margin-top:10px;display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px;align-items:center}
   .post-task-market-list{margin:9px 0 0;padding:10px 12px;border:1px solid #ecd0ae;background:#fffdf9;font-weight:800;color:#5f4938;line-height:1.75}
   .post-task-accent{color:#b42318;font-weight:900}
@@ -407,32 +559,129 @@
   .upload-route-chip{display:inline-flex;align-items:center;padding:4px 8px;margin:2px 5px 2px 0;border-radius:999px;background:#e8f2fc;color:#2e5f8d;font-size:11px;font-weight:900}
   @media(max-width:760px){.upload-route-grid{grid-template-columns:1fr}.upload-route-label{padding-bottom:5px}.upload-route-value{padding-top:7px}}
 
-  /* GS SHOP 6% 상시쿠폰 입력 가이드 */
-  .gs-coupon-copy-card{margin-top:12px;border:1px solid #d8dee8;background:#fff;padding:0}
-  .gs-coupon-copy-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#f5f7fa;border-bottom:1px solid #d8dee8;font-size:13px;font-weight:900;color:#28323d}
-  .gs-coupon-copy-title span:last-child{font-size:11px;font-weight:700;color:#697581}
-  .gs-coupon-grid{display:grid;grid-template-columns:145px minmax(0,1fr);border-top:0}
-  .gs-coupon-label{display:flex;align-items:center;padding:10px 12px;background:#fafbfc;border-right:1px solid #e0e5eb;border-bottom:1px solid #e0e5eb;font-size:12px;font-weight:800;color:#333}
-  .gs-coupon-value{display:flex;align-items:center;gap:7px;padding:8px 10px;border-bottom:1px solid #e0e5eb;min-width:0}
-  .gs-coupon-value input{height:36px;border:1px solid #cbd3dd;background:#fff;padding:0 10px;font:inherit;font-size:13px;color:#20252b;min-width:0}
-  .gs-coupon-value input[readonly]{background:#fff}
-  .gs-coupon-value .wide{flex:1}
-  .gs-coupon-value .short{width:120px}
-  .gs-coupon-value .date{width:190px}
-  .gs-coupon-range{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .gs-coupon-range .tilde{color:#717b86;font-weight:800}
-  .gs-coupon-value .mini-btn{flex:0 0 auto}
-  .gs-coupon-note{padding:10px 12px;background:#fff8ef;color:#9a430d;font-size:12px;font-weight:800;line-height:1.55}
+  /* GS SHOP 6% 상시쿠폰 입력 가이드 · 실제 화면 구조 */
+  .gs-coupon-copy-card{
+    margin-top:12px;
+    border:1px solid #dfe3e8;
+    background:#fff;
+    padding:12px 14px;
+  }
+  .gs-coupon-copy-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+    font-size:12px;
+    font-weight:900;
+    color:#343a40;
+  }
+  .gs-coupon-copy-title span:last-child{
+    font-size:11px;
+    font-weight:700;
+    color:#7b8490;
+  }
+  .gs-live-form{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .gs-live-row{
+    display:grid;
+    grid-template-columns:105px minmax(0,1fr);
+    align-items:center;
+    gap:10px;
+  }
+  .gs-live-label{
+    font-size:13px;
+    font-weight:900;
+    color:#222;
+    white-space:nowrap;
+  }
+  .gs-live-fields{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+    flex-wrap:wrap;
+  }
+  .gs-live-field{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    min-width:0;
+  }
+  .gs-live-field.inline-label{
+    gap:8px;
+  }
+  .gs-live-field-label{
+    font-size:12px;
+    font-weight:800;
+    color:#333;
+    white-space:nowrap;
+  }
+  .gs-live-input{
+    height:36px;
+    border:1px solid #aeb9c7!important;
+    border-radius:4px!important;
+    background:#fff!important;
+    padding:0 10px!important;
+    font:inherit!important;
+    font-size:13px!important;
+    color:#20252b!important;
+    min-width:0;
+  }
+  .gs-live-select{
+    position:relative;
+    padding-right:30px!important;
+  }
+  .gs-live-select::after{content:''}
+  .gs-live-w-apply{width:165px}
+  .gs-live-w-type{width:165px}
+  .gs-live-w-share{width:220px}
+  .gs-live-w-date{width:235px}
+  .gs-live-w-reason{flex:1;min-width:280px}
+  .gs-live-tilde{
+    color:#727b86;
+    font-weight:900;
+    padding:0 2px;
+  }
+  .gs-live-copy{
+    height:34px;
+    min-width:46px;
+    padding:0 9px;
+    border:1px solid #b6c1cf;
+    border-radius:4px;
+    background:#fff;
+    font-size:11px;
+    font-weight:800;
+    color:#40566d;
+  }
+  .gs-live-copy:hover{background:#f4f7fa}
+  .gs-live-help{
+    margin-top:10px;
+    padding-top:9px;
+    border-top:1px dashed #d9dee4;
+    color:#6a737d;
+    font-size:11px;
+    line-height:1.55;
+  }
+
+  @media(max-width:980px){
+    .gs-live-row{grid-template-columns:1fr}
+    .gs-live-fields{align-items:stretch}
+    .gs-live-field{flex:1 1 280px}
+    .gs-live-w-apply,.gs-live-w-type,.gs-live-w-share,.gs-live-w-date,.gs-live-w-reason{width:100%;flex:1}
+  }
 
   @media(max-width:760px){
     .market-create-grid{grid-template-columns:1fr}
     .post-task-path{grid-template-columns:1fr}
     .post-task-checks{flex-direction:column;gap:9px}
-    .gs-coupon-grid{grid-template-columns:1fr}
-    .gs-coupon-label{border-right:0;padding-bottom:4px}
-    .gs-coupon-value{padding-top:4px;flex-wrap:wrap}
-    .gs-coupon-value .wide,.gs-coupon-value .short,.gs-coupon-value .date{width:100%;flex:1 1 100%}
-    .gs-coupon-range{width:100%}
+    .gs-live-fields{flex-direction:column;align-items:stretch}
+    .gs-live-field{width:100%;flex:1 1 auto}
+    .gs-live-field.inline-label{display:grid;grid-template-columns:90px 1fr auto}
+    .gs-live-copy{min-width:44px}
   }
 
   .gs-admin-wrap{background:#f3f5f8;padding:14px}
@@ -797,20 +1046,27 @@
 
       <div class="channel-section" id="channelGuide">
         <div class="section-title">4. 판매처별 업로드 가이드</div>
+        <div class="channel-required-warning" id="channelRequiredWarning">
+          <div class="channel-warning-head">
+            <span id="channelRequiredWarningHead">⚠ 필수 작업 확인</span>
+            <span class="count" id="channelRequiredWarningCount">0/0</span>
+          </div>
+          <div class="channel-warning-grid" id="channelRequiredWarningGrid"></div>
+        </div>
         <div class="channel-group-wrap">
           <div class="channel-group">
             <div class="channel-group-title">수동 등록</div>
             <div class="channel-tabs">
               <div class="channel-tab-item">
-                <label class="channel-done" title="네이버 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="naver"><span>완료</span></label>
+                <label class="channel-done" title="네이버 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="naver"><span>등록 완료</span></label>
                 <button type="button" class="channel-tab active" data-channel="naver">네이버</button>
               </div>
               <div class="channel-tab-item">
-                <label class="channel-done" title="GS SHOP 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="gs"><span>완료</span></label>
+                <label class="channel-done" title="GS SHOP 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="gs"><span>등록 완료</span></label>
                 <button type="button" class="channel-tab" data-channel="gs">GS SHOP</button>
               </div>
               <div class="channel-tab-item">
-                <label class="channel-done" title="비플로우 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="brich"><span>완료</span></label>
+                <label class="channel-done" title="비플로우 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="brich"><span>등록 완료</span></label>
                 <button type="button" class="channel-tab" data-channel="brich">비플로우</button>
               </div>
             </div>
@@ -819,15 +1075,15 @@
             <div class="channel-group-title">엑셀 등록 가능</div>
             <div class="channel-tabs">
               <div class="channel-tab-item">
-                <label class="channel-done" title="퀸잇 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="queenit"><span>완료</span></label>
+                <label class="channel-done" title="퀸잇 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="queenit"><span>등록 완료</span></label>
                 <button type="button" class="channel-tab" data-channel="queenit">퀸잇</button>
               </div>
               <div class="channel-tab-item">
-                <label class="channel-done" title="하프클럽 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="halfclub"><span>완료</span></label>
+                <label class="channel-done" title="하프클럽 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="halfclub"><span>등록 완료</span></label>
                 <button type="button" class="channel-tab" data-channel="halfclub">하프클럽</button>
               </div>
               <div class="channel-tab-item">
-                <label class="channel-done" title="롯데온 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="lotteon"><span>완료</span></label>
+                <label class="channel-done" title="롯데온 등록 완료 체크"><input type="checkbox" class="channel-done-check" data-done-channel="lotteon"><span>등록 완료</span></label>
                 <button type="button" class="channel-tab" data-channel="lotteon">롯데온</button>
               </div>
             </div>
@@ -837,11 +1093,12 @@
         <div class="half-note" style="margin-top:12px;margin-bottom:12px">
           <strong>공통 판매자 상품코드</strong> · 네이버 품번 / GS 협력사상품코드 / 비플로우 판매자 상품번호 / 하프클럽 C5 / 퀸잇 C4 / 롯데온 A3(여성 상품만)에 동일하게 사용합니다.
           <div class="half-control" style="margin-top:9px">
-            <span class="half-auto" id="sellerCodeFinal">상품명 입력 후 자동 생성</span>
+            <span class="half-auto" id="sellerCodeFinal">상품명 입력 후 자동 인식</span>
             <button type="button" class="mini-btn" data-copy-target="sellerCodeFinal">복사</button>
-            <input id="sellerCodeManual" type="text" placeholder="자동 변환이 안 될 때 직접 입력 (예: NCJ14)">
+            <input id="sellerCodeManual" type="text" placeholder="자동 인식이 잘못된 경우에만 직접 수정 (예: NCJ14)">
           </div>
           <div id="sellerCodeStatus" class="half-status"></div>
+          <div class="half-season-help"><strong>자동 인식값을 우선 사용합니다.</strong> 결과가 잘못된 경우에만 오른쪽 칸에 정확한 코드를 입력하면 해당 값으로 덮어씁니다. 입력값을 지우면 다시 자동 인식값으로 돌아갑니다.</div>
           <div class="half-season-help">예: (S244) → S244 / (노컷진14탄) → NCJ14 / (여름노컷진14탄) → SNCJ14 / (가을찐스판1탄) → JSP1</div>
         </div>
 
@@ -1063,45 +1320,80 @@
               <div class="post-task-head">상품 등록 후 반드시 확인 · GS SHOP</div>
               <div class="post-task-body">
                 <div class="post-task-warning" id="gsDiscountWarning">6% 상시쿠폰 등록이 아직 완료되지 않았습니다. 상품 등록 후 반드시 쿠폰 설정을 진행해 주세요.</div>
-                <ul class="post-task-list">
-                  <li><strong>위드넷 → 프로모션/매장관리 → 프로모션/가격 관리</strong>에서 <strong>6% 상시쿠폰</strong>을 등록합니다.</li>
-                  <li>부담률은 <strong>GS 부담 3% / 협력사 부담 3%</strong>로 입력합니다.</li>
-                </ul>
 
                 <div class="gs-coupon-copy-card">
-                  <div class="gs-coupon-copy-title"><span>쿠폰 등록 입력값</span><span>각 항목의 복사 버튼을 눌러 GS 화면에 붙여넣기</span></div>
-                  <div class="gs-coupon-grid">
-                    <div class="gs-coupon-label">적용항목</div>
-                    <div class="gs-coupon-value"><input class="wide" id="gsCouponApplyItem" type="text" value="쿠폰" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponApplyItem">복사</button></div>
+                  <div class="gs-coupon-copy-title">
+                    <span>GS SHOP 쿠폰 등록 입력값</span>
+                    <span>실제 GS 화면과 같은 순서 · 필요한 값은 바로 복사</span>
+                  </div>
 
-                    <div class="gs-coupon-label">할인 방식</div>
-                    <div class="gs-coupon-value"><input class="wide" id="gsCouponType" type="text" value="정률" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponType">복사</button></div>
-
-                    <div class="gs-coupon-label">GS 부담</div>
-                    <div class="gs-coupon-value"><input class="short" id="gsCouponGsShare" type="text" value="3" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponGsShare">복사</button><span class="gs-note" style="margin:0">숫자만 입력</span></div>
-
-                    <div class="gs-coupon-label">협력사 부담</div>
-                    <div class="gs-coupon-value"><input class="short" id="gsCouponPartnerShare" type="text" value="3" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponPartnerShare">복사</button><span class="gs-note" style="margin:0">숫자만 입력</span></div>
-
-                    <div class="gs-coupon-label">적용기간</div>
-                    <div class="gs-coupon-value">
-                      <div class="gs-coupon-range">
-                        <input class="date" id="gsCouponStart" type="text" readonly>
-                        <button type="button" class="mini-btn" data-copy-target="gsCouponStart">복사</button>
-                        <span class="tilde">~</span>
-                        <input class="date" id="gsCouponEnd" type="text" value="2999-12-31 23:59" readonly>
-                        <button type="button" class="mini-btn" data-copy-target="gsCouponEnd">복사</button>
+                  <div class="gs-live-form">
+                    <div class="gs-live-row">
+                      <div class="gs-live-label">적용항목</div>
+                      <div class="gs-live-fields">
+                        <div class="gs-live-field">
+                          <input class="gs-live-input gs-live-w-apply" id="gsCouponApplyItem" type="text" value="쿠폰" readonly onclick="this.select()">
+                          <button type="button" class="gs-live-copy" data-copy-target="gsCouponApplyItem">복사</button>
+                        </div>
+                        <div class="gs-live-field">
+                          <input class="gs-live-input gs-live-w-type" id="gsCouponType" type="text" value="정률" readonly onclick="this.select()">
+                          <button type="button" class="gs-live-copy" data-copy-target="gsCouponType">복사</button>
+                        </div>
+                        <div class="gs-live-field inline-label">
+                          <span class="gs-live-field-label">GS부담</span>
+                          <input class="gs-live-input gs-live-w-share" id="gsCouponGsShare" type="text" value="3" readonly onclick="this.select()">
+                          <button type="button" class="gs-live-copy" data-copy-target="gsCouponGsShare">복사</button>
+                        </div>
+                        <div class="gs-live-field inline-label">
+                          <span class="gs-live-field-label">협력사부담</span>
+                          <input class="gs-live-input gs-live-w-share" id="gsCouponPartnerShare" type="text" value="3" readonly onclick="this.select()">
+                          <button type="button" class="gs-live-copy" data-copy-target="gsCouponPartnerShare">복사</button>
+                        </div>
                       </div>
                     </div>
 
-                    <div class="gs-coupon-label">변경사유</div>
-                    <div class="gs-coupon-value"><input class="wide" id="gsCouponReason" type="text" value="6% 상시쿠폰" readonly><button type="button" class="mini-btn" data-copy-target="gsCouponReason">복사</button></div>
+                    <div class="gs-live-row">
+                      <div class="gs-live-label">적용기간</div>
+                      <div class="gs-live-fields">
+                        <div class="gs-live-field">
+                          <input class="gs-live-input gs-live-w-date" id="gsCouponStart" type="text" readonly onclick="this.select()">
+                          <button type="button" class="gs-live-copy" data-copy-target="gsCouponStart">복사</button>
+                        </div>
+                        <span class="gs-live-tilde">~</span>
+                        <div class="gs-live-field">
+                          <input class="gs-live-input gs-live-w-date" id="gsCouponEnd" type="text" value="2999-12-31 23:59" readonly onclick="this.select()">
+                          <button type="button" class="gs-live-copy" data-copy-target="gsCouponEnd">복사</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="gs-live-row">
+                      <div class="gs-live-label">변경사유</div>
+                      <div class="gs-live-fields">
+                        <div class="gs-live-field gs-live-w-reason">
+                          <input class="gs-live-input gs-live-w-reason" id="gsCouponReason" type="text" value="6% 상시쿠폰" readonly onclick="this.select()">
+                          <button type="button" class="gs-live-copy" data-copy-target="gsCouponReason">복사</button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="gs-coupon-note">※ 변경사유는 <strong>“6% 상시쿠폰”</strong>으로 입력합니다.</div>
+
+                  <div class="gs-live-help">
+                    GS 화면 입력 순서: <strong>쿠폰 → 정률 → GS부담 3 → 협력사부담 3 → 적용기간 → 변경사유 ‘6% 상시쿠폰’</strong>
+                  </div>
                 </div>
 
-                <div class="post-task-path"><b>진입 경로</b><div class="copy-line"><div class="guide-value" id="gsDiscount">위드넷 → 프로모션/매장관리 → 프로모션/가격 관리</div><button type="button" class="mini-btn" data-copy-target="gsDiscount">복사</button></div></div>
-                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="gsDiscountDone"> GS SHOP 6% 상시쿠폰 등록 완료</label></div>
+                <div class="post-task-path">
+                  <b>진입 경로</b>
+                  <div class="copy-line">
+                    <div class="guide-value" id="gsDiscount">위드넷 → 프로모션/매장관리 → 프로모션/가격 관리</div>
+                    <button type="button" class="mini-btn" data-copy-target="gsDiscount">복사</button>
+                  </div>
+                </div>
+
+                <div class="post-task-checks">
+                  <label class="post-task-check"><input type="checkbox" id="gsDiscountDone"> GS SHOP 6% 상시쿠폰 등록 완료</label>
+                </div>
               </div>
             </section>
           </div>
@@ -1218,21 +1510,28 @@
               <button type="button" id="downloadQueenBtn" class="half-download">퀸잇 엑셀 다운로드</button>
             </div>
             <div class="upload-route-card">
-              <div class="upload-route-head">퀸잇 엑셀 업로드</div>
+              <div class="upload-route-head">퀸잇 엑셀 업로드 경로</div>
               <div class="upload-route-body">
+                <div class="upload-route-path"><strong>퀸잇어드민 로그인</strong> → 상품 → 상품관리 → 상품등록 → <strong>상품 대량 등록</strong></div>
                 <div class="upload-route-grid">
-                  <div class="upload-route-label">엑셀 업로드</div>
-                  <div class="upload-route-value">위의 <strong>퀸잇 엑셀 다운로드</strong>로 생성한 업로드 파일을 첨부합니다.</div>
+                  <div class="upload-route-label">업로드 파일</div>
+                  <div class="upload-route-value">위의 <strong>퀸잇 엑셀 다운로드</strong>로 생성한 파일을 <strong>상품 대량 등록</strong> 화면에 첨부합니다.</div>
                 </div>
               </div>
             </div>
             <section class="post-task-card" id="queenPostTaskCard">
-              <div class="post-task-head">상품 업로드 후 반드시 확인 · 퀸잇</div>
+              <div class="post-task-head">상품 업로드 후 반드시 확인 · 퀸잇 · 필수 2개</div>
               <div class="post-task-body">
-                <div class="post-task-warning" id="queenThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 엑셀 업로드 후 상품 썸네일을 실제 이미지로 변경해 주세요.</div>
+                <div class="post-task-warning" id="queenThumbWarning">썸네일 변경 / 출고지연일수 +21일 설정이 아직 완료되지 않았습니다. 두 항목 모두 반드시 처리해 주세요.</div>
                 <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="queenThumbPathPost">복사</button><div class="guide-value" id="queenThumbPathPost">입력값 없음</div></div></div>
-                <ul class="post-task-list"><li>상품 썸네일을 실제 이미지로 변경합니다.</li><li><span class="post-task-accent">출고지연일수를 +21일</span>로 설정합니다.</li></ul>
-                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="queenThumbDone"> 썸네일 변경 완료</label><label class="post-task-check"><input type="checkbox" id="queenDelayDone"> 출고지연일수 +21일 설정 완료</label></div>
+                <ul class="post-task-list">
+                  <li><strong>필수 1.</strong> 상품 썸네일을 실제 이미지로 변경합니다.</li>
+                  <li><strong>필수 2.</strong> <span class="post-task-accent">출고지연일수를 일괄 +21일</span>로 설정합니다.</li>
+                </ul>
+                <div class="post-task-checks">
+                  <label class="post-task-check"><input type="checkbox" id="queenThumbDone"> 필수 1 · 썸네일 변경 완료</label>
+                  <label class="post-task-check"><input type="checkbox" id="queenDelayDone"> 필수 2 · 출고지연일수 일괄 +21일 설정 완료</label>
+                </div>
               </div>
             </section>
           </div>
@@ -1353,9 +1652,9 @@
 
             <div class="half-image-box">
               <strong>하프클럽 이미지 업로드 파일</strong>
-              <div class="half-season-help">실제 이미지를 나중에 따로 수정할 경우 <strong>가라 이미지 사용</strong>을 체크해 두세요. 엑셀 AO5에는 <strong>halfclub1.jpg</strong>가 입력되고, 같은 이름의 임시 이미지가 들어있는 ZIP을 바로 다운로드할 수 있습니다.</div>
-              <label style="display:flex;align-items:center;gap:7px;margin:10px 0;font-weight:700"><input type="checkbox" id="halfDummyImage" checked> 가라 이미지 사용 (halfclub1.jpg)</label>
-              <div class="half-season-help">실제 이미지를 바로 올릴 때만 아래에서 파일을 선택해 주세요. 파일을 선택하면 가라 이미지 사용은 자동 해제됩니다.</div>
+              <div class="half-season-help">실제 대표 이미지를 업로드 후 교체할 예정이라면 <strong>임시 대표 이미지 사용</strong>을 체크해 주세요. 엑셀 AO5에는 <strong>halfclub1.jpg</strong>가 입력되고, 동일한 파일명이 포함된 이미지 ZIP을 다운로드할 수 있습니다.</div>
+              <label style="display:flex;align-items:center;gap:7px;margin:10px 0;font-weight:700"><input type="checkbox" id="halfDummyImage" checked> 임시 대표 이미지 사용 (halfclub1.jpg)</label>
+              <div class="half-season-help">실제 대표 이미지를 바로 사용할 경우에만 아래에서 이미지 파일을 선택해 주세요. 파일을 선택하면 임시 대표 이미지 사용은 자동 해제됩니다.</div>
               <div class="half-image-row">
                 <input type="file" id="halfImageFiles" accept="image/jpeg,image/png,image/gif,.jpg,.jpeg,.png,.gif" multiple>
                 <button type="button" class="mini-btn" id="clearHalfImagesBtn">이미지 선택 지우기</button>
@@ -1384,23 +1683,23 @@
               </div>
             </div>
             <div class="upload-route-card" id="halfUploadRouteCard">
-              <div class="upload-route-head">하프클럽 업로드 진입 경로</div>
+              <div class="upload-route-head">하프클럽 상품일괄등록 경로</div>
               <div class="upload-route-body">
-                <div class="upload-route-path">상품관리 → 상품관리 → <strong>상품일괄등록</strong></div>
+                <div class="upload-route-path"><strong>하프클럽 백오피스 로그인</strong> → 상품관리 → 상품관리 → <strong>상품일괄등록</strong></div>
                 <div class="upload-route-grid">
-                  <div class="upload-route-label">사이트</div>
-                  <div class="upload-route-value"><strong>하프클럽</strong></div>
+                  <div class="upload-route-label">1. 사이트</div>
+                  <div class="upload-route-value"><strong>하프클럽</strong>을 선택합니다.</div>
 
-                  <div class="upload-route-label">상세브랜드</div>
-                  <div class="upload-route-value"><strong id="halfUploadBrand">포레스트핏</strong><br><span style="font-size:11px;color:#66717c">남성/남자/맨즈 상품이면 자동으로 ‘포레스트핏 맨즈’로 표시됩니다.</span></div>
+                  <div class="upload-route-label">2. 상세브랜드</div>
+                  <div class="upload-route-value"><strong id="halfUploadBrand">포레스트핏</strong><br><span style="font-size:11px;color:#66717c">일반 상품: 포레스트핏 · 상품명에 남성/남자/맨즈가 있으면 포레스트핏 맨즈</span></div>
 
-                  <div class="upload-route-label">엑셀 업로드</div>
-                  <div class="upload-route-value">위의 <strong>하프클럽 엑셀 다운로드</strong>로 생성한 <strong>상품일괄등록 엑셀 파일</strong>을 첨부합니다.</div>
+                  <div class="upload-route-label">3. 엑셀 첨부</div>
+                  <div class="upload-route-value">위의 <strong>하프클럽 엑셀 다운로드</strong>로 생성한 상품일괄등록 엑셀 파일을 첨부합니다.</div>
 
-                  <div class="upload-route-label">이미지 업로드</div>
-                  <div class="upload-route-value">위의 <strong>하프클럽 이미지 ZIP 다운로드</strong>로 생성한 <strong>ZIP 파일</strong>을 첨부합니다.</div>
+                  <div class="upload-route-label">4. 이미지 업로드</div>
+                  <div class="upload-route-value">위의 <strong>하프클럽 이미지 ZIP 다운로드</strong> 파일을 <strong>압축 해제하지 않고 ZIP 그대로</strong> 첨부합니다.</div>
                 </div>
-                <div class="upload-route-alert">엑셀 파일과 이미지 ZIP을 모두 준비한 뒤 상품일괄등록 화면에서 각각 해당 업로드 칸에 첨부해 주세요.</div>
+                <div class="upload-route-alert">⚠ 이미지 ZIP은 압축을 풀지 않습니다. 엑셀 파일과 ZIP 파일을 각각 해당 업로드 영역에 첨부해 주세요.</div>
               </div>
             </div>
             <section class="post-task-card" id="halfPostTaskCard">
@@ -1408,8 +1707,17 @@
               <div class="post-task-body">
                 <div class="post-task-warning" id="halfThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 상품 업로드 후 썸네일을 실제 이미지로 변경해 주세요.</div>
                 <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="halfThumbPathPost">복사</button><div class="guide-value" id="halfThumbPathPost">입력값 없음</div></div></div>
-                <ul class="post-task-list"><li>상품 썸네일을 실제 이미지로 변경합니다.</li><li>원산지에서 <strong>상세페이지 참조</strong>를 체크합니다.</li><li>생산년도(판매년도)를 <span class="post-task-accent">0으로 수정</span>합니다.</li><li>사계절 상품은 시즌에서 <strong>봄 + 가을 + 사계절</strong>을 모두 체크합니다.</li></ul>
-                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="halfThumbDone"> 썸네일 변경 완료</label><label class="post-task-check"><input type="checkbox" id="halfOriginDetailDone"> 원산지 ‘상세페이지 참조’ 체크 완료</label><label class="post-task-check"><input type="checkbox" id="halfYearDone"> 생산년도 0 수정 완료</label><label class="post-task-check"><input type="checkbox" id="halfSpringDone"> 봄</label><label class="post-task-check"><input type="checkbox" id="halfAutumnDone"> 가을</label><label class="post-task-check"><input type="checkbox" id="halfAllSeasonDone"> 사계절</label></div>
+                <ul class="post-task-list"><li>상품 썸네일을 실제 이미지로 변경합니다.</li><li>원산지에서 <strong>상세페이지 참조</strong>를 체크합니다.</li><li>생산년도(판매년도)를 <span class="post-task-accent">0으로 수정</span>합니다.</li><li class="post-task-season-note" id="halfSeasonInstruction">시즌이 봄·가을·사계절 계열일 때만 <strong>봄 + 가을 + 사계절</strong>을 모두 체크합니다.</li></ul>
+                <div class="post-task-checks">
+                  <label class="post-task-check"><input type="checkbox" id="halfThumbDone"> 썸네일 변경 완료</label>
+                  <label class="post-task-check"><input type="checkbox" id="halfOriginDetailDone"> 원산지 ‘상세페이지 참조’ 체크 완료</label>
+                  <label class="post-task-check"><input type="checkbox" id="halfYearDone"> 생산년도 0 수정 완료</label>
+                  <span class="post-task-season-checks" id="halfSeasonPostChecks">
+                    <label class="post-task-check"><input type="checkbox" id="halfSpringDone"> 봄</label>
+                    <label class="post-task-check"><input type="checkbox" id="halfAutumnDone"> 가을</label>
+                    <label class="post-task-check"><input type="checkbox" id="halfAllSeasonDone"> 사계절</label>
+                  </span>
+                </div>
               </div>
             </section>
           </div>
@@ -1487,23 +1795,20 @@
               </div>
             </div>
             <div class="upload-route-card" id="lotteUploadRouteCard">
-              <div class="upload-route-head">롯데ON 업로드 진입 경로</div>
+              <div class="upload-route-head">롯데ON 상품일괄등록 경로</div>
               <div class="upload-route-body">
-                <div class="upload-route-path">상품관리 → <strong>상품일괄등록</strong></div>
+                <div class="upload-route-path"><strong>롯데ON 판매자센터 로그인</strong> → 상품관리 → 상품일괄등록 → <strong>롯데ON 양식 등록</strong> → <strong>롯데ON 양식 업로드</strong> → 파일 첨부 → <strong>일괄 등록</strong></div>
                 <div class="upload-route-grid">
-                  <div class="upload-route-label">양식 등록 방식</div>
-                  <div class="upload-route-value">
-                    <span class="upload-route-chip">롯데ON 양식 등록</span>
-                    <strong>롯데ON 양식 등록</strong>을 선택합니다.
-                  </div>
+                  <div class="upload-route-label">1. 양식 선택</div>
+                  <div class="upload-route-value"><strong>롯데ON 양식 등록</strong> 탭으로 들어갑니다.</div>
 
-                  <div class="upload-route-label">업로드 버튼</div>
-                  <div class="upload-route-value"><strong>롯데ON 양식 업로드</strong>를 눌러 위에서 생성한 롯데온 엑셀 파일을 첨부합니다.</div>
+                  <div class="upload-route-label">2. 파일 업로드</div>
+                  <div class="upload-route-value"><strong>롯데ON 양식 업로드</strong>를 눌러 위의 <strong>롯데온 엑셀 다운로드</strong>로 생성한 파일을 첨부합니다.</div>
 
-                  <div class="upload-route-label">업로드 파일</div>
-                  <div class="upload-route-value">위의 <strong>롯데온 엑셀 다운로드</strong>로 생성한 파일을 사용합니다.</div>
+                  <div class="upload-route-label">3. 등록</div>
+                  <div class="upload-route-value">파일 첨부가 완료되면 <strong>일괄 등록</strong>을 진행합니다.</div>
                 </div>
-                <div class="upload-route-alert">⚠ <strong>N사 양식 등록이 아닙니다.</strong> 반드시 <strong>롯데ON 양식 등록 → 롯데ON 양식 업로드</strong>로 진행해 주세요.</div>
+                <div class="upload-route-alert">⚠ <strong>N사 양식 등록이 아닙니다.</strong> 반드시 <strong>롯데ON 양식 등록 → 롯데ON 양식 업로드</strong> 경로를 사용해 주세요.</div>
               </div>
             </div>
             <div class="lotte-post-wrap">
@@ -1619,8 +1924,18 @@
               <div class="post-task-body">
                 <div class="post-task-warning" id="lotteThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 자동등록 후 상품 썸네일을 실제 이미지로 변경해 주세요.</div>
                 <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="lotteThumbPathPost">복사</button><div class="guide-value" id="lotteThumbPathPost">입력값 없음</div></div></div>
-                <ul class="post-task-list"><li>상품 썸네일을 실제 이미지로 변경합니다.</li><li>위 속성정보 자동선택값을 실제 상품과 비교한 뒤 최종 확인합니다.</li></ul>
-                <div class="post-task-checks"><label class="post-task-check"><input type="checkbox" id="lotteThumbDone"> 썸네일 변경 완료</label><label class="post-task-check"><input type="checkbox" id="lotteAttrDone"> 속성정보 설정 완료</label></div>
+                <ul class="post-task-list">
+                  <li>상품 썸네일을 실제 이미지로 변경합니다.</li>
+                  <li>위 속성정보 자동선택값을 실제 상품과 비교한 뒤 최종 확인합니다.</li>
+                  <li class="post-task-season-note" id="lotteSeasonInstruction">사용계절이 봄·가을 계열일 때만 <strong>봄 + 가을</strong>이 모두 체크되어 있는지 확인합니다.</li>
+                </ul>
+                <div class="post-task-checks">
+                  <label class="post-task-check"><input type="checkbox" id="lotteThumbDone"> 썸네일 변경 완료</label>
+                  <label class="post-task-check"><input type="checkbox" id="lotteAttrDone"> 속성정보 설정 완료</label>
+                  <span class="post-task-season-checks" id="lotteSeasonPostChecks">
+                    <label class="post-task-check"><input type="checkbox" id="lotteSpringAutumnDone"> 사용계절 봄 + 가을 체크 완료</label>
+                  </span>
+                </div>
               </div>
             </section>
 
@@ -1831,7 +2146,7 @@
     const raw = matches.length ? (matches[matches.length - 1][1] || '').trim() : '';
 
     if(manual) return {raw, code:manual, status:'manual', message:`직접 입력한 ${manual}을(를) 공통 상품코드로 사용합니다.`};
-    if(!raw) return {raw:'', code:'', status:'noBracket', message:'판매 상품명의 괄호 안 내용을 확인해 주세요.'};
+    if(!raw) return {raw:'', code:'', status:'noBracket', message:'상품명의 괄호 안 코드를 자동 인식합니다. 자동 인식이 잘못된 경우에만 직접 수정해 주세요.'};
 
     const compact = raw.replace(/\s+/g,'');
     if(!/[가-힣]/.test(compact) && /^[A-Za-z0-9._-]+$/.test(compact)){
@@ -1852,11 +2167,11 @@
     else if(compact.includes('올데이팬츠')) base = 'ALLDAY';
     else if(compact.includes('냉장고바지')) base = 'NJGP';
 
-    if(!base) return {raw, code:'', status:'unknown', message:`괄호 안 “${raw}”은(는) 자동 변환 규칙에 없습니다. 상품코드를 직접 입력해 주세요.`};
+    if(!base) return {raw, code:'', status:'unknown', message:`괄호 안 “${raw}”은(는) 자동 인식 규칙에 없습니다. 정확한 코드를 알고 있는 경우에만 직접 수정해 주세요.`};
 
     const nums = compact.match(/\d+/g);
     const seq = nums && nums.length ? nums[nums.length - 1] : '';
-    if(!seq) return {raw, code:'', status:'noNumber', message:`“${raw}”에서 시리즈 숫자를 찾지 못했습니다. 상품코드를 직접 입력해 주세요.`};
+    if(!seq) return {raw, code:'', status:'noNumber', message:`“${raw}”에서 시리즈 숫자를 찾지 못했습니다. 자동 인식이 잘못된 경우에만 직접 수정해 주세요.`};
 
     let seasonPrefix = '';
     if(compact.startsWith('여름') && base !== 'WNCJ') seasonPrefix = 'S';
@@ -1870,8 +2185,8 @@
     const finalEl = $('#sellerCodeFinal');
     const statusEl = $('#sellerCodeStatus');
     const topCodeEl = $('#topCodePreview');
-    if(finalEl) finalEl.textContent = info.code || '직접 입력 필요';
-    if(topCodeEl) topCodeEl.textContent = info.code || '상품명 입력 후 자동 생성';
+    if(finalEl) finalEl.textContent = info.code || '자동 인식 대기';
+    if(topCodeEl) topCodeEl.textContent = info.code || '상품명 입력 후 자동 인식';
     if(statusEl){
       statusEl.className = 'half-status ' + (info.code ? 'ok' : 'warn');
       statusEl.textContent = info.message;
@@ -2552,7 +2867,7 @@
     const box=$('#halfImageList');
     if(box){
       if(useHalfDummyImage()){
-        box.textContent = '대표: halfclub1.jpg  ← 가라 이미지 (업로드 후 실제 이미지로 수정)';
+        box.textContent = '대표: halfclub1.jpg  ← 임시 대표 이미지 (업로드 후 실제 이미지로 교체)';
       }else{
         box.textContent = halfImageNames.length
           ? halfImageNames.map((name,i)=>`${i===0?'대표':'추가 '+i}: ${name}${name !== halfImageFiles[i].name ? `  ← 원본 ${halfImageFiles[i].name}` : ''}`).join('\n')
@@ -3812,7 +4127,7 @@
       if(useHalfDummyImage()){
         files['halfclub1.jpg']=await makeHalfDummyJpeg();
       }else{
-        if(!halfImageFiles.length){ alert('실제 이미지를 첨부하거나 가라 이미지 사용을 체크해 주세요.'); return; }
+        if(!halfImageFiles.length){ alert('실제 대표 이미지를 첨부하거나 임시 대표 이미지 사용을 체크해 주세요.'); return; }
         for(let i=0;i<halfImageFiles.length;i++){
           const arr=new Uint8Array(await halfImageFiles[i].arrayBuffer());
           files[halfImageNames[i]]=arr;
@@ -3865,39 +4180,187 @@
     return !excluded;
   }
 
+  function refreshSeasonPostTaskVisibility(){
+    // 하프클럽: 직접 봄/가을을 선택해도 getHalfSeasonCode()에서 05(사계절)로 정규화됩니다.
+    const halfShow = getHalfSeasonCode() === '05';
+    const halfInstruction = $('#halfSeasonInstruction');
+    const halfChecks = $('#halfSeasonPostChecks');
+    if(halfInstruction) halfInstruction.classList.toggle('is-visible', halfShow);
+    if(halfChecks) halfChecks.classList.toggle('is-visible', halfShow);
+    if(!halfShow){
+      ['#halfSpringDone','#halfAutumnDone','#halfAllSeasonDone'].forEach(sel=>{
+        const el=$(sel); if(el) el.checked=false;
+      });
+    }
+
+    // 롯데ON: 사계절 별도 항목이 없으므로 봄+가을이 함께 선택된 경우에만 후처리 체크를 노출합니다.
+    const lotteSelected = [...document.querySelectorAll('#lotteSeasonChecks input:checked')].map(el=>el.value);
+    const lotteShow = lotteSelected.includes('봄') && lotteSelected.includes('가을');
+    const lotteInstruction = $('#lotteSeasonInstruction');
+    const lotteChecks = $('#lotteSeasonPostChecks');
+    if(lotteInstruction) lotteInstruction.classList.toggle('is-visible', lotteShow);
+    if(lotteChecks) lotteChecks.classList.toggle('is-visible', lotteShow);
+    if(!lotteShow && $('#lotteSpringAutumnDone')) $('#lotteSpringAutumnDone').checked=false;
+  }
+
   function refreshRequiredWarnings(){
-    const syncSingle=(checkSel, warningSel)=>{
-      const check=$(checkSel), warning=$(warningSel);
-      if(!warning) return;
-      const done=!!(check && check.checked);
-      warning.classList.toggle('is-complete', done);
+    const statuses=[];
+
+    const addStatus=(channel, tasks, done, excluded=false)=>{
+      statuses.push({
+        channel,
+        tasks:(tasks||[]).filter(Boolean),
+        done:!!done,
+        excluded:!!excluded
+      });
     };
 
-    syncSingle('#naverDiscountDone','#naverDiscountWarning');
-    syncSingle('#gsDiscountDone','#gsDiscountWarning');
-    syncSingle('#queenThumbDone','#queenThumbWarning');
+    // 네이버
+    const naverDone=!!($('#naverDiscountDone') && $('#naverDiscountDone').checked);
+    if($('#naverDiscountWarning')) $('#naverDiscountWarning').classList.toggle('is-complete', naverDone);
+    addStatus('네이버', naverDone ? ['즉시할인·예약할인 등록 완료'] : ['즉시할인·예약할인 등록'], naverDone);
 
-    // 하프클럽 필수 후처리: 썸네일 + 원산지 '상세페이지 참조'
-    const halfWarning=$('#halfThumbWarning');
-    const halfThumbDone=!!($('#halfThumbDone') && $('#halfThumbDone').checked);
-    const halfOriginDone=!!($('#halfOriginDetailDone') && $('#halfOriginDetailDone').checked);
-    if(halfWarning){
-      const missing=[];
-      if(!halfThumbDone) missing.push('썸네일 변경');
-      if(!halfOriginDone) missing.push('원산지 ‘상세페이지 참조’ 체크');
-      halfWarning.classList.toggle('is-complete', missing.length===0);
-      if(missing.length){
-        halfWarning.textContent=`${missing.join(' / ')}가 아직 완료되지 않았습니다. 상품 업로드 후 반드시 확인해 주세요.`;
+    // GS SHOP
+    const gsDone=!!($('#gsDiscountDone') && $('#gsDiscountDone').checked);
+    if($('#gsDiscountWarning')) $('#gsDiscountWarning').classList.toggle('is-complete', gsDone);
+    addStatus('GS SHOP', gsDone ? ['6% 상시쿠폰 등록 완료'] : ['6% 상시쿠폰 등록'], gsDone);
+
+    // 퀸잇
+    const queenThumbDone=!!($('#queenThumbDone') && $('#queenThumbDone').checked);
+    const queenDelayDone=!!($('#queenDelayDone') && $('#queenDelayDone').checked);
+    const queenDone=queenThumbDone && queenDelayDone;
+    const queenTasks=[];
+    queenTasks.push(queenThumbDone ? '썸네일 변경 완료' : '썸네일 변경');
+    queenTasks.push(queenDelayDone ? '출고지연일수 일괄 +21일 설정 완료' : '출고지연일수 일괄 +21일 설정');
+    const queenWarning=$('#queenThumbWarning');
+    if(queenWarning){
+      queenWarning.classList.toggle('is-complete', queenDone);
+      if(!queenDone){
+        const missing=[];
+        if(!queenThumbDone) missing.push('썸네일 변경');
+        if(!queenDelayDone) missing.push('출고지연일수 일괄 +21일 설정');
+        queenWarning.textContent=`${missing.join(' / ')}이 아직 완료되지 않았습니다. 퀸잇 상품 업로드 후 두 필수 작업을 모두 확인해 주세요.`;
       }
     }
+    addStatus('퀸잇',queenTasks,queenDone);
 
-    if(!isMaleProductName(val('#productName'))){
-      syncSingle('#lotteThumbDone','#lotteThumbWarning');
-    }else{
+    // 하프클럽
+    const halfThumbDone=!!($('#halfThumbDone') && $('#halfThumbDone').checked);
+    const halfOriginDone=!!($('#halfOriginDetailDone') && $('#halfOriginDetailDone').checked);
+    const halfYearDone=!!($('#halfYearDone') && $('#halfYearDone').checked);
+    const halfSeasonVisible=!!($('#halfSeasonPostChecks') && $('#halfSeasonPostChecks').classList.contains('is-visible'));
+    const halfSpringDone=!halfSeasonVisible || !!($('#halfSpringDone') && $('#halfSpringDone').checked);
+    const halfAutumnDone=!halfSeasonVisible || !!($('#halfAutumnDone') && $('#halfAutumnDone').checked);
+    const halfAllSeasonDone=!halfSeasonVisible || !!($('#halfAllSeasonDone') && $('#halfAllSeasonDone').checked);
+    const halfDone=halfThumbDone && halfOriginDone && halfYearDone && halfSpringDone && halfAutumnDone && halfAllSeasonDone;
+
+    const halfTasks=[
+      halfThumbDone ? '썸네일 변경 완료' : '썸네일 변경',
+      halfOriginDone ? '원산지 상세페이지 참조 완료' : '원산지 상세페이지 참조',
+      halfYearDone ? '생산년도 0 수정 완료' : '생산년도 0 수정'
+    ];
+    if(halfSeasonVisible){
+      halfTasks.push(halfSpringDone ? '봄 체크 완료' : '봄 체크');
+      halfTasks.push(halfAutumnDone ? '가을 체크 완료' : '가을 체크');
+      halfTasks.push(halfAllSeasonDone ? '사계절 체크 완료' : '사계절 체크');
+    }
+
+    const halfWarning=$('#halfThumbWarning');
+    if(halfWarning){
+      halfWarning.classList.toggle('is-complete', halfDone);
+      if(!halfDone){
+        const missing=[];
+        if(!halfThumbDone) missing.push('썸네일 변경');
+        if(!halfOriginDone) missing.push('원산지 상세페이지 참조');
+        if(!halfYearDone) missing.push('생산년도 0 수정');
+        if(halfSeasonVisible && !halfSpringDone) missing.push('봄 체크');
+        if(halfSeasonVisible && !halfAutumnDone) missing.push('가을 체크');
+        if(halfSeasonVisible && !halfAllSeasonDone) missing.push('사계절 체크');
+        halfWarning.textContent=`${missing.join(' / ')}가 아직 완료되지 않았습니다. 하프클럽 상품 업로드 후 반드시 확인해 주세요.`;
+      }
+    }
+    addStatus('하프클럽',halfTasks,halfDone);
+
+    // 롯데ON: 맨즈는 업로드 제외
+    const maleProduct=isMaleProductName(val('#productName'));
+    if(maleProduct){
       const lotteWarning=$('#lotteThumbWarning');
       if(lotteWarning) lotteWarning.classList.add('is-complete');
+      addStatus('롯데ON',['맨즈 상품 · 업로드 대상 아님'],true,true);
+    }else{
+      const lotteThumbDone=!!($('#lotteThumbDone') && $('#lotteThumbDone').checked);
+      const lotteAttrDone=!!($('#lotteAttrDone') && $('#lotteAttrDone').checked);
+      const lotteSeasonVisible=!!($('#lotteSeasonPostChecks') && $('#lotteSeasonPostChecks').classList.contains('is-visible'));
+      const lotteSeasonDone=!lotteSeasonVisible || !!($('#lotteSpringAutumnDone') && $('#lotteSpringAutumnDone').checked);
+      const lotteDone=lotteThumbDone && lotteAttrDone && lotteSeasonDone;
+
+      const lotteTasks=[
+        lotteThumbDone ? '썸네일 변경 완료' : '썸네일 변경',
+        lotteAttrDone ? '속성정보 설정 완료' : '속성정보 설정'
+      ];
+      if(lotteSeasonVisible){
+        lotteTasks.push(lotteSeasonDone ? '사용계절 봄+가을 확인 완료' : '사용계절 봄+가을 확인');
+      }
+
+      const lotteWarning=$('#lotteThumbWarning');
+      if(lotteWarning){
+        lotteWarning.classList.toggle('is-complete', lotteDone);
+        if(!lotteDone){
+          const missing=[];
+          if(!lotteThumbDone) missing.push('썸네일 변경');
+          if(!lotteAttrDone) missing.push('속성정보 설정');
+          if(lotteSeasonVisible && !lotteSeasonDone) missing.push('사용계절 봄+가을 확인');
+          lotteWarning.textContent=`${missing.join(' / ')}가 아직 완료되지 않았습니다. 롯데ON 상품 업로드 후 반드시 확인해 주세요.`;
+        }
+      }
+      addStatus('롯데ON',lotteTasks,lotteDone);
     }
-    syncSingle('#bflowMarketDone','#bflowMarketWarning');
+
+    // 비플로우
+    const bflowDone=!!($('#bflowMarketDone') && $('#bflowMarketDone').checked);
+    if($('#bflowMarketWarning')) $('#bflowMarketWarning').classList.toggle('is-complete', bflowDone);
+    addStatus(
+      '비플로우',
+      [bflowDone ? '8개 마켓상품생성 및 포레스트핏 목록 지정 완료' : '8개 마켓상품생성 및 포레스트핏 목록 지정'],
+      bflowDone
+    );
+
+    // 상단 상태 카드: 완료되어도 유지, 완료 시 초록색으로 표시
+    const overall=$('#channelRequiredWarning');
+    const grid=$('#channelRequiredWarningGrid');
+    const countEl=$('#channelRequiredWarningCount');
+    const headEl=$('#channelRequiredWarningHead');
+
+    const activeStatuses=statuses.filter(s=>!s.excluded);
+    const doneCount=activeStatuses.filter(s=>s.done).length;
+    const totalCount=activeStatuses.length;
+    const allComplete=totalCount>0 && doneCount===totalCount;
+
+    if(overall){
+      overall.classList.toggle('all-complete', allComplete);
+    }
+    if(headEl){
+      headEl.textContent=allComplete ? '✓ 필수 작업 전체 완료' : '⚠ 필수 작업 확인';
+    }
+    if(countEl){
+      countEl.textContent=`${doneCount}/${totalCount}`;
+    }
+
+    if(grid){
+      grid.innerHTML=statuses.map(item=>{
+        const li=item.tasks.map(task=>`<li>${escapeHtml(task)}</li>`).join('');
+        const statusLabel=item.excluded ? '제외' : (item.done ? '완료' : '미완료');
+        const classes=['channel-warning-card'];
+        if(item.done) classes.push('complete');
+        return `<div class="${classes.join(' ')}">
+          <div class="channel-warning-card-title">
+            <span>${escapeHtml(item.channel)}</span>
+            <span class="channel-warning-status">${statusLabel}</span>
+          </div>
+          <ul>${li}</ul>
+        </div>`;
+      }).join('');
+    }
   }
 
   function refreshChannels(){
@@ -3913,6 +4376,7 @@
       refreshLotteOn();
       applyLotteAttributeSuggestion();
     }
+    refreshSeasonPostTaskVisibility();
     refreshRequiredWarnings();
   }
 
@@ -3934,7 +4398,7 @@
     });
   });
 
-  ['#naverDiscountDone','#gsDiscountDone','#queenThumbDone','#halfThumbDone','#halfOriginDetailDone','#lotteThumbDone','#bflowMarketDone'].forEach(sel=>{
+  ['#naverDiscountDone','#gsDiscountDone','#queenThumbDone','#queenDelayDone','#halfThumbDone','#halfOriginDetailDone','#halfYearDone','#halfSpringDone','#halfAutumnDone','#halfAllSeasonDone','#lotteThumbDone','#lotteAttrDone','#lotteSpringAutumnDone','#bflowMarketDone'].forEach(sel=>{
     const el=$(sel);
     if(el) el.addEventListener('change', refreshRequiredWarnings);
   });
@@ -4030,7 +4494,7 @@
     el.value=sanitizeGenderTags(el.value, val('#productName'), 5);
   };
 
-  // 가라 이미지 ZIP은 사용자가 보내준 정상 ZIP 바이트를 그대로 내려받아 오류 방지
+  // 임시 대표 이미지 ZIP은 정상 ZIP 바이트를 그대로 내려받아 오류 방지
   downloadHalfClubImages = async function(){
     refreshHalfImageNames();
     try{
@@ -4243,7 +4707,7 @@
   $('#halfManualCode').addEventListener('input', refreshHalfClub);
   $('#sellerCodeManual').addEventListener('input', refreshChannels);
   $('#halfStandardItem').addEventListener('change', () => { syncHalfDisplayWithStandard(); refreshHalfClub(); });
-  $('#halfSeason').addEventListener('change', () => { refreshHalfClub(); });
+  $('#halfSeason').addEventListener('change', () => { refreshHalfClub(); refreshSeasonPostTaskVisibility(); refreshRequiredWarnings(); });
   $('#halfTags').addEventListener('input', () => { halfTagsTouched = true; refreshHalfClub(); });
 
   $('#refreshQueenBtn').addEventListener('click', refreshQueenit);
@@ -4259,7 +4723,8 @@
   $('#lotteAttrSuggestBtn').addEventListener('click', applyLotteAttributeSuggestion);
   $('#lotteAttrCopyBtn').addEventListener('click', copyLotteAttributes);
   ['#lotteAttrClothing','#lotteAttrFit','#lotteAttrLength','#lotteAttrItem'].forEach(sel=>$(sel).addEventListener('change',refreshLotteAttributeSummary));
-  document.querySelectorAll('#lotteMaterialChecks input,#lotteSeasonChecks input').forEach(el=>el.addEventListener('change',refreshLotteAttributeSummary));
+  document.querySelectorAll('#lotteMaterialChecks input').forEach(el=>el.addEventListener('change',refreshLotteAttributeSummary));
+  document.querySelectorAll('#lotteSeasonChecks input').forEach(el=>el.addEventListener('change',()=>{refreshLotteAttributeSummary();refreshSeasonPostTaskVisibility();refreshRequiredWarnings();}));
 
 
   $$('.naver-card-title').forEach(btn => btn.addEventListener('click', () => { const card=btn.closest('.naver-card'); if(card) card.classList.toggle('open'); }));
@@ -4330,6 +4795,7 @@
     $('#naverCategory').value = suggestNaverCategoryCode();
   }
   refreshChannels();
+  refreshSeasonPostTaskVisibility();
 
 
   // v41 - 엑셀 등록 채널 실제 작업 순서로 재배치
