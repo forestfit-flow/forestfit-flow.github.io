@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FORESTFIT · 행사리스트 생성</title>
+  <title>FORESTFIT · 채널별 행사</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&display=swap');
@@ -56,6 +57,10 @@
     .select-btn:hover{background:#fff;border-color:rgba(126,126,181,.24);color:#57547a}
     input[type=file]{display:none}.file-info{min-width:0;text-align:right;color:#9b9088;font-size:9.5px}.file-name{display:block;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#675e59;font-weight:700}.file-size{display:block;margin-top:3px;color:#aaa097}
     .action-row{display:flex;justify-content:flex-end;padding-top:18px;margin-top:18px;border-top:1px solid var(--line)}
+    .converter-wrap{padding:18px 26px 22px;border-top:1px solid var(--line);background:rgba(249,247,244,.48)}
+    .converter-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.converter-head strong{font:800 10px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#655d56}.converter-head span{font-size:9px;color:#a3978f}
+    .converter-card{display:grid;grid-template-columns:minmax(190px,1fr) auto minmax(120px,220px) auto;align-items:center;gap:12px;min-height:68px;padding:13px 14px;border:1px solid rgba(70,51,39,.09);border-radius:18px;background:rgba(255,255,255,.58);transition:.22s ease}.converter-card.loaded{border-color:rgba(122,127,224,.28);background:rgba(248,248,255,.72)}.converter-card.dragover{border-color:#8b89da;box-shadow:0 10px 24px rgba(105,108,198,.10)}
+    .converter-title{font-size:12px;font-weight:800;color:#514947;letter-spacing:-.02em}.converter-mini{margin-top:4px;font-size:9px;color:#a39890}.converter-card .file-info{text-align:left}.converter-card .file-name{max-width:220px}.convert-btn{height:36px;padding:0 15px;border:0;border-radius:999px;background:#302b31;color:#fff;font-size:10px;font-weight:800;white-space:nowrap}.convert-btn:disabled{background:#d4cfc9;cursor:not-allowed}
     .primary-btn{min-width:190px;height:45px;border:0;border-radius:14px;background:linear-gradient(135deg,#6f72cf,#8985d9);color:#fff;font-size:12px;font-weight:800;letter-spacing:-.01em;box-shadow:0 12px 26px rgba(105,108,198,.20);transition:.2s ease}.primary-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 16px 30px rgba(105,108,198,.24)}.primary-btn:disabled{background:#d4cfc9;color:#fff;box-shadow:none;cursor:not-allowed}
 
     .progress-panel{display:none;padding:15px 26px;border-top:1px solid var(--line);background:rgba(247,246,243,.72)}.progress-panel.show{display:block}.progress-line{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#857a73;margin-bottom:8px}.progress-track{height:4px;background:#e7e1dc;border-radius:999px;overflow:hidden}.progress-bar{height:100%;width:0;background:linear-gradient(90deg,#727ad9,#9b88d5);transition:width .25s ease}
@@ -66,23 +71,273 @@
     .filter-btn,.ghost-btn{height:36px;border:1px solid rgba(93,86,102,.13);border-radius:999px;background:rgba(255,252,249,.58);color:#6a625c;padding:0 13px;font-size:10px;font-weight:750}.filter-btn.active{background:#f0efff;border-color:#d9d5f4;color:#6664a4}.ghost-btn.dark{background:#2f2a31;color:#f5f2ff;border-color:#2f2a31}
     .table-wrap{overflow:auto;max-height:680px;background:rgba(255,255,255,.78)}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1180px;table-layout:fixed}thead th{position:sticky;top:0;z-index:4;background:#f4f0ec;color:#716861;font-size:9.5px;font-weight:800;text-align:left;padding:12px 14px;border-bottom:1px solid #dfd7d1;letter-spacing:.02em}tbody td{padding:13px 14px;border-bottom:1px solid #eee8e3;vertical-align:top;font-size:11px;line-height:1.55;color:#3e3835;background:rgba(255,255,255,.84)}tbody tr:hover td{background:#fcfaf8}
     th.col-no,td.col-no{width:54px;text-align:center;color:#a2968d}th.col-product{width:310px}th.col-options{width:220px}th.col-length{width:155px}th.col-size{width:185px}th.col-price{width:145px}th.col-status{width:132px}.product-name{font-weight:700;color:#342e2c;letter-spacing:-.018em}.product-id{margin-top:4px;color:#a39992;font-size:9px}.editable{min-height:27px;border-radius:7px;margin:-4px -6px;padding:4px 6px;outline:none;transition:.15s ease;white-space:normal;word-break:keep-all}.editable:hover{background:#f5f0ec}.editable:focus{background:#f1efff;box-shadow:inset 0 0 0 1px #d7d2ee}.price-main{font-variant-numeric:tabular-nums;font-weight:750}.match-detail{display:block;margin-top:4px;color:#a19993;font-size:9px;line-height:1.45;max-width:200px}.status-pill{display:inline-flex;align-items:center;justify-content:center;min-width:72px;padding:6px 9px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap}.status-ok{color:var(--ok);background:var(--ok-soft)}.status-similar{color:var(--warn);background:var(--warn-soft)}.status-warn{color:var(--danger);background:var(--danger-soft)}.empty-value{color:#b8aea7}
+    .upload-output{display:none;border-top:1px solid var(--line);background:rgba(252,250,248,.66)}.upload-output.show{display:block}
+    .upload-output-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;border-bottom:1px solid var(--line)}.upload-output-title{font-size:12px;font-weight:800;color:#574f4a;letter-spacing:-.02em}.upload-output-meta{margin-top:4px;font-size:9px;color:#a2978f}.upload-table-wrap{max-height:520px;overflow:auto;background:rgba(255,255,255,.72)}.upload-table{min-width:960px}.upload-table th:nth-child(1){width:390px}.upload-table th:nth-child(2){width:155px}.upload-table th:nth-child(3){width:155px}.upload-table th:nth-child(4),.upload-table th:nth-child(5){width:110px}.upload-table th:nth-child(6),.upload-table th:nth-child(7){width:105px}.upload-save-btn{height:36px;border:0;border-radius:999px;padding:0 15px;background:#2f2a31;color:#fff;font-size:10px;font-weight:800}
     .toast{position:fixed;right:24px;bottom:24px;z-index:100;max-width:360px;padding:12px 14px;border-radius:12px;background:#302b30;color:white;box-shadow:0 18px 45px rgba(0,0,0,.14);font-size:10.5px;line-height:1.5;opacity:0;transform:translateY(10px);pointer-events:none;transition:.22s ease}.toast.show{opacity:1;transform:translateY(0)}.toast.error{background:#7d4d4d}
 
-    @media(max-width:980px){.upload-grid{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}.metric:nth-child(2){border-right:0}.metric:nth-child(-n+2){border-bottom:1px solid var(--line)}.result-toolbar{align-items:flex-start;flex-direction:column}}
-    @media(max-width:680px){.wrap{width:calc(100% - 28px)}.header-right{display:none}.hero{padding:44px 0 28px}.hero h1 span{display:block;margin:10px 0 0}.upload-wrap{padding:16px}.summary{grid-template-columns:1fr 1fr}.metric{padding:15px}.action-row{justify-content:stretch}.primary-btn{width:100%}.search-box input{width:min(78vw,300px)}}
+
+    .main-menu{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px;padding:6px;border:1px solid var(--line);border-radius:20px;background:rgba(255,252,249,.72);box-shadow:0 14px 34px rgba(79,62,48,.04)}
+    .main-menu-btn{min-height:58px;border:0;border-radius:15px;background:transparent;color:#8e827a;text-align:left;padding:0 18px;transition:.2s ease}
+    .main-menu-btn strong{display:block;font-size:13px;letter-spacing:-.02em}.main-menu-btn span{display:block;margin-top:5px;font:700 8.5px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.11em;text-transform:uppercase;color:#b0a49b}
+    .main-menu-btn.active{background:linear-gradient(135deg,rgba(240,239,255,.96),rgba(248,245,252,.96));color:#5f5c93;box-shadow:inset 0 0 0 1px rgba(121,123,215,.16),0 10px 22px rgba(109,106,183,.08)}
+    .main-menu-btn.active span{color:#8581bd}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .channel-nav{display:flex;align-items:center;gap:8px;margin:0 0 18px;padding:7px;border:1px solid var(--line);border-radius:18px;background:rgba(255,252,249,.72);box-shadow:0 10px 30px rgba(79,62,48,.04)}
+    .channel-btn{height:44px;min-width:132px;padding:0 20px;border:0;border-radius:13px;background:transparent;color:#94877f;font-size:12px;font-weight:800;cursor:pointer;transition:.2s ease}
+    .channel-btn:hover{color:#6f6fbf;background:rgba(240,239,255,.55)}
+    .channel-btn.active{background:#2f2a31;color:#fff;box-shadow:0 8px 18px rgba(47,42,49,.14)}
+    .channel-panel{display:none}.channel-panel.active{display:block}
+    .channel-label{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;padding:0 2px;color:#9b8f87;font-size:9px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+    .lotte-shell{border:1px solid var(--line);border-radius:24px;background:rgba(255,252,249,.82);box-shadow:var(--shadow);overflow:hidden}
+    .lotte-head{display:flex;align-items:center;justify-content:space-between;min-height:72px;padding:0 24px;border-bottom:1px solid var(--line)}
+    .lotte-head strong{font-size:16px;letter-spacing:-.03em;color:#3d3533}.lotte-head span{font:800 9px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.12em;color:#a49a93}
+    .lotte-body{min-height:260px;display:grid;place-items:center;padding:40px;text-align:center;color:#9a8f87}
+    .lotte-body b{display:block;margin-bottom:8px;color:#5e5550;font-size:18px;letter-spacing:-.03em}
+    .selection-workspace{border:1px solid var(--line);border-radius:30px;background:linear-gradient(145deg,rgba(255,252,249,.96),rgba(252,248,245,.82));box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(12px)}
+    .selection-head{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--line)}
+    .selection-head strong{font:800 10px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#655d56}.selection-head span{font-size:9px;color:#a3978f}
+    .selection-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:22px}
+    .selection-card{min-height:260px;padding:24px;border:1px solid rgba(70,51,39,.09);border-radius:24px;background:rgba(255,255,255,.58);position:relative;overflow:hidden}
+    .selection-card:before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:linear-gradient(90deg,var(--sel-accent),transparent 72%)}
+    .selection-card.top{--sel-accent:#7a7fe0}.selection-card.cost{--sel-accent:#9a84cf}
+    .selection-index{font:800 9px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.14em;color:#aaa097;text-transform:uppercase}
+    .selection-card h2{margin:26px 0 0;font-size:25px;line-height:1.1;letter-spacing:-.045em;color:#4a4140}.selection-card p{margin:9px 0 0;font-size:10px;color:#a0958d}
+    .selection-route{display:flex;align-items:center;justify-content:space-between;margin-top:58px;padding-top:18px;border-top:1px solid var(--line);font-size:10px;font-weight:800;color:#6d6460}
+    .selection-route b{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:#f1efff;color:#716fc0;font-size:12px}
+
+
+
+    /* TalkDeal Excel Combination */
+    .combo-builder{margin-bottom:18px;border:1px solid var(--line);border-radius:30px;background:linear-gradient(145deg,rgba(255,252,249,.97),rgba(249,247,251,.86));box-shadow:var(--shadow);overflow:hidden}
+    .combo-head{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--line)}
+    .combo-head strong{font:800 10px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#655d56}.combo-head span{font-size:9px;color:#a3978f}
+    .combo-body{padding:22px 26px 24px}
+    .combo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .combo-file{min-height:136px;padding:18px;border:1px solid rgba(70,51,39,.09);border-radius:20px;background:rgba(255,255,255,.62);display:flex;flex-direction:column;transition:.22s ease;position:relative;overflow:hidden}
+    .combo-file:before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:linear-gradient(90deg,#827fdc,transparent 76%)}
+    .combo-file.secondary:before{background:linear-gradient(90deg,#7f9b91,transparent 76%)}
+    .combo-file.loaded{border-color:rgba(121,123,215,.28);background:rgba(248,248,255,.72)}.combo-file.dragover{border-color:#8784d8;box-shadow:0 12px 24px rgba(105,108,198,.10)}
+    .combo-label{font:800 8.5px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#aaa097}
+    .combo-title{margin-top:18px;font-size:17px;font-weight:750;letter-spacing:-.035em;color:#4b4340}.combo-mini{margin-top:5px;font-size:9.5px;color:#9d928a}
+    .combo-file-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:18px}.combo-file .file-info{text-align:right}
+    .combo-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+    .combo-status{font-size:10px;color:#948981}.combo-status strong{color:#635c72}
+    .combo-generate{height:42px;padding:0 18px;border:0;border-radius:13px;background:linear-gradient(135deg,#716fcf,#8d86dc);color:#fff;font-size:11px;font-weight:800;box-shadow:0 12px 24px rgba(105,108,198,.18)}.combo-generate:disabled{background:#d3cec8;box-shadow:none;cursor:not-allowed}
+    .combo-result{display:none;margin-top:16px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.72)}.combo-result.show{display:block}
+    .combo-result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .combo-result-title{font-size:11px;font-weight:800;color:#554d49}.combo-result-meta{margin-top:3px;font-size:9px;color:#a19790}.combo-download{height:34px;border:0;border-radius:999px;padding:0 14px;background:#302b31;color:#fff;font-size:9.5px;font-weight:800}
+    .combo-preview{max-height:320px;overflow:auto}.combo-preview table{min-width:900px}.combo-preview th:nth-child(1){width:360px}.combo-preview th:nth-child(2){width:145px}.combo-preview th:nth-child(3){width:145px}.combo-preview th:nth-child(4),.combo-preview th:nth-child(5){width:115px}.combo-preview th:nth-child(6),.combo-preview th:nth-child(7){width:105px}
+
+    @media(max-width:980px){.combo-grid{grid-template-columns:1fr}.selection-grid{grid-template-columns:1fr}.main-menu{grid-template-columns:1fr}.upload-grid{grid-template-columns:1fr}.converter-card{grid-template-columns:1fr auto;align-items:center}.converter-card .file-info{grid-column:1}.converter-card .convert-btn{grid-column:2;grid-row:2}.summary{grid-template-columns:repeat(2,1fr)}.metric:nth-child(2){border-right:0}.metric:nth-child(-n+2){border-bottom:1px solid var(--line)}.result-toolbar{align-items:flex-start;flex-direction:column}}
+    @media(max-width:680px){.combo-actions{align-items:stretch;flex-direction:column}.combo-generate{width:100%}.wrap{width:calc(100% - 28px)}.header-right{display:none}.hero{padding:44px 0 28px}.hero h1 span{display:block;margin:10px 0 0}.upload-wrap{padding:16px}.summary{grid-template-columns:1fr 1fr}.metric{padding:15px}.action-row{justify-content:stretch}.primary-btn{width:100%}.search-box input{width:min(78vw,300px)}}
+
+    /* ===== Event Pricing ===== */
+    .pricing-shell{margin-bottom:18px;border:1px solid var(--line);border-radius:30px;background:linear-gradient(145deg,rgba(255,252,249,.97),rgba(248,247,252,.88));box-shadow:var(--shadow);overflow:hidden}
+    .pricing-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;border-bottom:1px solid var(--line)}
+    .pricing-head-title strong{display:block;font-size:16px;letter-spacing:-.035em;color:#4f4744}.pricing-head-title span{display:block;margin-top:5px;color:#9c9189;font-size:9.5px}
+    .pricing-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pricing-head-actions input[type=file]{display:none}
+    .pricing-mini-btn{height:34px;border:1px solid rgba(93,86,102,.13);border-radius:999px;background:rgba(255,252,249,.72);color:#6a625c;padding:0 13px;font-size:9.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}.pricing-mini-btn.dark{background:#302b31;color:#fff;border-color:#302b31}.pricing-mini-btn:disabled{opacity:.45;cursor:not-allowed}
+    .pricing-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--line);background:rgba(249,247,244,.62)}
+    .pricing-tab-btn{position:relative;min-height:54px;border:0;border-right:1px solid var(--line);background:transparent;color:#948880;text-align:left;padding:0 16px;font-weight:750;font-size:11px}.pricing-tab-btn:last-child{border-right:0}.pricing-tab-btn small{display:block;margin-bottom:4px;font:800 8px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.1em;color:#b0a49b}.pricing-tab-btn.active{background:rgba(240,239,255,.8);color:#625f96}.pricing-tab-btn.active:after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:2px;background:#7d7ed7;border-radius:999px}
+    .pricing-panel{display:none;padding:22px 24px}.pricing-panel.active{display:block}
+    .pricing-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}.pricing-card{grid-column:span 6;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.66);padding:17px}.pricing-card.full{grid-column:1/-1}.pricing-card h3{margin:0;font-size:13px;color:#554d49;letter-spacing:-.02em}.pricing-card p{margin:7px 0 0;font-size:10px;line-height:1.65;color:#9b9088}
+    .pricing-step{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid rgba(72,57,47,.07)}.pricing-step:last-child{border-bottom:0}.pricing-step b{flex:0 0 auto;width:26px;height:26px;border-radius:9px;background:#f0efff;color:#7472bc;display:grid;place-items:center;font:800 9px/1 "Plus Jakarta Sans",sans-serif}.pricing-step strong{display:block;font-size:11px;color:#554d49}.pricing-step span{display:block;margin-top:3px;font-size:9.5px;color:#a0958e}
+    .rate-row{display:flex;gap:7px;flex-wrap:wrap}.rate-chip{height:34px;min-width:62px;border:1px solid rgba(93,86,102,.13);border-radius:999px;background:#fff;color:#786f69;font-size:10px;font-weight:800}.rate-chip.active{background:#706fc8;color:#fff;border-color:#706fc8;box-shadow:0 8px 18px rgba(112,111,200,.16)}
+    .rate-test{display:grid;grid-template-columns:170px repeat(5,minmax(110px,1fr));gap:8px;align-items:end;margin-top:15px}.pricing-field label{display:block;margin-bottom:6px;color:#9d928a;font-size:8.5px;font-weight:800}.pricing-input,.pricing-select{width:100%;height:38px;border:1px solid rgba(84,68,57,.12);border-radius:11px;background:rgba(255,255,255,.9);padding:0 11px;outline:none;color:#4d4541;font-size:10.5px}.pricing-input:focus,.pricing-select:focus{border-color:#8885d5;box-shadow:0 0 0 3px rgba(136,133,213,.08)}
+    .rate-result{height:38px;border-radius:11px;background:#f5f2ef;display:flex;align-items:center;justify-content:flex-end;padding:0 11px;font:750 11px/1 "Plus Jakarta Sans",sans-serif;color:#5d5664}.rate-result.selected{background:#efeeff;color:#6261a2;box-shadow:inset 0 0 0 1px #d9d7f5}
+    .pricing-table-wrap{margin-top:15px;max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff}.pricing-table{width:100%;min-width:820px;border-collapse:separate;border-spacing:0;table-layout:auto}.pricing-table th{position:sticky;top:0;z-index:2;background:#f4f0ec;padding:10px 11px;border-bottom:1px solid #dfd7d1;color:#736a63;font-size:9px;text-align:left;white-space:nowrap}.pricing-table td{padding:8px 11px;border-bottom:1px solid rgba(72,57,47,.06);color:#5d5550;font-size:9.5px;vertical-align:middle}.pricing-table tbody tr:last-child td{border-bottom:0}.pricing-table tbody tr.danger td{background:#fff3f1}.pricing-table .num{text-align:right;font-variant-numeric:tabular-nums}.pricing-table .center{text-align:center}
+    .cost-toolbar,.channel-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.cost-toolbar-left,.cost-toolbar-right,.channel-toolbar-left,.channel-toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.cost-search{width:250px}.pricing-count{font-size:9px;color:#9b9088}.pricing-count strong{color:#625c72}
+    .cost-add{display:grid;grid-template-columns:1.5fr .8fr .7fr auto;gap:8px;margin-top:14px}.cost-cell-input{width:110px;height:30px;border:1px solid rgba(84,68,57,.12);border-radius:8px;background:#fff;padding:0 8px;text-align:right;font-size:9.5px;color:#4f4743}.cost-cell-input.missing{border-color:#d6a3a0;background:#fff6f5}.cost-save-note{font-size:8.5px;color:#7d9a90}
+    .channel-select-wrap{display:flex;align-items:center;gap:8px}.channel-rate-badge{height:34px;min-width:62px;padding:0 12px;border-radius:999px;background:#efeeff;color:#6562a5;display:flex;align-items:center;justify-content:center;font:800 10px/1 "Plus Jakarta Sans",sans-serif}.channel-file-info{font-size:9px;color:#9b9088;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.channel-empty{padding:42px 20px;text-align:center;color:#a19790;font-size:10px}
+    .status-pill{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:8.5px;font-weight:800}.status-pill.ok{background:#edf6f2;color:#567d70}.status-pill.warn{background:#f8efe7;color:#9a7556}.status-pill.bad{background:#f8eaea;color:#9b6464}
+    .editable-price{width:92px;height:29px;border:1px solid rgba(84,68,57,.11);border-radius:8px;background:#fff;padding:0 7px;text-align:right;font-size:9px}.editable-price:focus{outline:0;border-color:#8583d2}
+    .legacy-tools{margin:18px 0;border:1px solid var(--line);border-radius:22px;background:rgba(255,252,249,.68);overflow:hidden}.legacy-tools summary{list-style:none;cursor:pointer;padding:15px 18px;font-size:10px;font-weight:800;color:#77706c}.legacy-tools summary::-webkit-details-marker{display:none}.legacy-tools summary:after{content:"＋";float:right;color:#9690a6}.legacy-tools[open] summary:after{content:"−"}.legacy-tools-body{padding:0 0 1px}
+    .source-badge{display:inline-flex;align-items:center;height:25px;padding:0 9px;border-radius:999px;background:#f4f1ee;color:#8c817a;font-size:8.5px;font-weight:750}.pricing-note{margin-top:10px;color:#a19790;font-size:8.5px;line-height:1.55}
+    @media(max-width:980px){.pricing-tabs{grid-template-columns:1fr 1fr}.pricing-tab-btn:nth-child(2){border-right:0}.pricing-tab-btn:nth-child(-n+2){border-bottom:1px solid var(--line)}.pricing-card{grid-column:1/-1}.rate-test{grid-template-columns:1fr 1fr 1fr}.cost-add{grid-template-columns:1fr 1fr}.cost-add .pricing-mini-btn{grid-column:1/-1}.channel-toolbar{align-items:flex-start;flex-direction:column}}
+    @media(max-width:680px){.pricing-head{align-items:flex-start;flex-direction:column}.pricing-tabs{grid-template-columns:1fr}.pricing-tab-btn{border-right:0;border-bottom:1px solid var(--line)}.pricing-panel{padding:16px}.rate-test{grid-template-columns:1fr 1fr}.cost-add{grid-template-columns:1fr}.cost-search{width:100%}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header class="header">
       <div class="logo">FOREST<em>FIT</em></div>
-      <div class="header-right">EVENT LIST</div>
+      <div class="header-right">CHANNEL EVENT</div>
     </header>
 
     <section class="hero">
       <div class="eyebrow">Sales · Event</div>
-      <h1>행사리스트 생성 <span>Event List Builder</span></h1>
+      <h1>채널별 행사 <span>Channel Event Workspace</span></h1>
     </section>
+
+    <nav class="channel-nav" aria-label="판매 채널 선택">
+      <button class="channel-btn active" type="button" data-channel="talkdeal">톡딜</button>
+      <button class="channel-btn" type="button" data-channel="lotteon">롯데온</button>
+    </nav>
+
+    <div class="channel-panel active" id="channel-talkdeal">
+      <div class="channel-label"><span>TALKDEAL</span><span>KAKAO</span></div>
+      <nav class="main-menu" aria-label="톡딜 행사 메뉴">
+        <button class="main-menu-btn active" type="button" data-tab="selection-panel"><strong>1. 행사 상품 선정</strong><span>Product Selection</span></button>
+        <button class="main-menu-btn" type="button" data-tab="analysis-panel"><strong>2. 선정 상품 행사가 책정</strong><span>Event Pricing</span></button>
+      </nav>
+
+      <section class="tab-panel active" id="selection-panel">
+      <div class="selection-workspace">
+        <div class="selection-head"><strong>행사 상품 선정</strong><span>01 — 02</span></div>
+        <div class="selection-grid">
+          <article class="selection-card top">
+            <div class="selection-index">01 · STOCK TOP</div>
+            <h2>TOP 상품</h2>
+            <p>재고관리 파일</p>
+            <div class="selection-route"><span>계절 · 성별 · 제외조건으로 선정</span><b>↗</b></div>
+          </article>
+          <article class="selection-card cost">
+            <div class="selection-index">02 · LOW COST</div>
+            <h2>단가 낮은 상품</h2>
+            <p>상품관리 파일</p>
+            <div class="selection-route"><span>원가 기준으로 선정</span><b>↗</b></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="analysis-panel">
+
+      <div class="pricing-shell" id="pricing-tool">
+        <div class="pricing-head">
+          <div class="pricing-head-title"><strong>선정 상품 행사가 책정</strong><span id="pricing-source-label">기준 데이터 불러오는 중</span></div>
+          <div class="pricing-head-actions">
+            <label class="pricing-mini-btn" for="pricing-config-file">금액 세팅 파일 불러오기</label>
+            <input id="pricing-config-file" type="file" accept=".xlsx,.xls" />
+            <button class="pricing-mini-btn" id="pricing-reset-default" type="button">기본값 복원</button>
+          </div>
+        </div>
+        <div class="pricing-tabs">
+          <button class="pricing-tab-btn active" type="button" data-pricing-tab="pricing-guide"><small>01</small>사용방법</button>
+          <button class="pricing-tab-btn" type="button" data-pricing-tab="pricing-margin"><small>02</small>마지노선</button>
+          <button class="pricing-tab-btn" type="button" data-pricing-tab="pricing-cost"><small>03</small>상품 원가 정보</button>
+          <button class="pricing-tab-btn" type="button" data-pricing-tab="pricing-channel"><small>04</small>판매처 행사가</button>
+        </div>
+
+        <div class="pricing-panel active" id="pricing-guide">
+          <div class="pricing-grid">
+            <div class="pricing-card">
+              <h3>행사가 책정</h3>
+              <div class="pricing-step"><b>1</b><div><strong>선정 상품 불러오기</strong><span>4번째 탭에서 상품 파일을 첨부합니다.</span></div></div>
+              <div class="pricing-step"><b>2</b><div><strong>판매처 선택</strong><span>네이버 10 · GS 18 · 하프클럽 20 · 브리치 21 · 퀸잇 23%</span></div></div>
+              <div class="pricing-step"><b>3</b><div><strong>원가 · 마지노선 자동 연결</strong><span>괄호 상품키를 우선 인식합니다.</span></div></div>
+            </div>
+            <div class="pricing-card">
+              <h3>원가 데이터</h3>
+              <div class="pricing-step"><b>A</b><div><strong>사이트에 기본 저장</strong><span>현재 행사가 책정 파일의 상품 원가를 기본값으로 사용합니다.</span></div></div>
+              <div class="pricing-step"><b>B</b><div><strong>없는 원가는 직접 입력</strong><span>입력값은 브라우저에 자동 저장되어 다시 접속해도 유지됩니다.</span></div></div>
+              <div class="pricing-step"><b>C</b><div><strong>파일로 재설정</strong><span>상단의 금액 세팅 파일로 원가표와 마지노선 기준을 다시 불러옵니다.</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pricing-panel" id="pricing-margin">
+          <div class="cost-toolbar">
+            <div class="cost-toolbar-left"><div class="rate-row" id="pricing-rate-row"></div></div>
+            <div class="cost-toolbar-right"><span class="source-badge" id="margin-source-badge">마지노선 기준</span></div>
+          </div>
+          <div class="rate-test">
+            <div class="pricing-field"><label>원가 입력 · 100원 단위 계산</label><input class="pricing-input" id="margin-test-cost" inputmode="numeric" value="10000" /></div>
+            <div class="pricing-field"><label>10%</label><div class="rate-result" data-rate-result="10">-</div></div>
+            <div class="pricing-field"><label>18%</label><div class="rate-result" data-rate-result="18">-</div></div>
+            <div class="pricing-field"><label>21%</label><div class="rate-result" data-rate-result="21">-</div></div>
+            <div class="pricing-field"><label>23%</label><div class="rate-result" data-rate-result="23">-</div></div>
+            <div class="pricing-field"><label>20%</label><div class="rate-result" data-rate-result="20">-</div></div>
+          </div>
+          <div class="pricing-table-wrap">
+            <table class="pricing-table"><thead><tr><th>원가</th><th class="num">10%</th><th class="num">18%</th><th class="num">21%</th><th class="num">23%</th><th class="num">20%</th></tr></thead><tbody id="margin-table-body"></tbody></table>
+          </div>
+          <div class="pricing-note">원본 마지노선표의 18% · 20% · 23% 값을 기준으로 원가 구간을 계산하고, 21%는 20↔23% 사이 값, 10%는 18↔20% 변화폭을 기준으로 계산합니다. 결과는 100원 단위로 반올림합니다.</div>
+        </div>
+
+        <div class="pricing-panel" id="pricing-cost">
+          <div class="cost-toolbar">
+            <div class="cost-toolbar-left"><input class="pricing-input cost-search" id="cost-search" type="search" placeholder="상품명 · 상품키 검색" /><span class="pricing-count" id="cost-count"></span></div>
+            <div class="cost-toolbar-right"><span class="cost-save-note" id="cost-save-state">자동 저장</span></div>
+          </div>
+          <div class="cost-add">
+            <input class="pricing-input" id="cost-add-name" placeholder="상품명" />
+            <input class="pricing-input" id="cost-add-key" placeholder="상품키 (예: P2678)" />
+            <input class="pricing-input" id="cost-add-value" inputmode="numeric" placeholder="원가" />
+            <button class="pricing-mini-btn dark" id="cost-add-btn" type="button">원가 추가</button>
+          </div>
+          <div class="pricing-table-wrap">
+            <table class="pricing-table"><thead><tr><th>상품명</th><th>상품키</th><th class="num">원가</th><th>저장</th></tr></thead><tbody id="cost-table-body"></tbody></table>
+          </div>
+        </div>
+
+        <div class="pricing-panel" id="pricing-channel">
+          <div class="channel-toolbar">
+            <div class="channel-toolbar-left">
+              <div class="channel-select-wrap"><select class="pricing-select" id="channel-select" style="width:170px"></select><span class="channel-rate-badge" id="channel-rate-badge">18%</span></div>
+              <label class="pricing-mini-btn" for="pricing-products-file">선정 상품 파일</label>
+              <input id="pricing-products-file" type="file" accept=".xlsx,.xls,.csv" />
+              <span class="channel-file-info" id="pricing-products-info">첨부 전</span>
+            </div>
+            <div class="channel-toolbar-right">
+              <button class="pricing-mini-btn" id="pricing-add-row" type="button">상품 직접 추가</button>
+              <button class="pricing-mini-btn dark" id="pricing-download" type="button">책정 파일 다운로드</button>
+            </div>
+          </div>
+          <div class="pricing-table-wrap" style="max-height:620px">
+            <table class="pricing-table"><thead><tr><th>상품코드</th><th style="min-width:280px">상품명</th><th class="num">상시판매가</th><th class="num">제안할인가</th><th class="num">쿠폰</th><th class="num">엔딩가</th><th class="num">원가</th><th class="num">마지노선</th><th class="num">원가율</th><th>상품키</th><th>조회상태</th></tr></thead><tbody id="channel-table-body"></tbody></table>
+            <div class="channel-empty" id="channel-empty">선정 상품 파일을 첨부하거나 상품을 직접 추가해주세요.</div>
+          </div>
+        </div>
+      </div>
+
+      <details class="legacy-tools">
+        <summary>기존 행사리스트 · 작업양식 · 톡딜옵션조합 파일 만들기</summary>
+        <div class="legacy-tools-body">
+
+      <div class="combo-builder" id="combo-builder">
+        <div class="combo-head"><strong>톡딜옵션조합 파일 만들기</strong><span>작업양식 4행 기준</span></div>
+        <div class="combo-body">
+          <div class="combo-grid">
+            <div class="combo-file" id="combo-work-card">
+              <div class="combo-label">WORK FILE</div>
+              <div class="combo-title">톡딜 작업양식</div>
+              <div class="combo-mini">4행 상품명 · 옵션명2 · 옵션가</div>
+              <div class="combo-file-bottom">
+                <label class="select-btn" for="combo-work-file">파일 선택</label>
+                <div class="file-info" id="combo-work-info"><span>첨부 전</span></div>
+                <input id="combo-work-file" type="file" accept=".xlsx,.xls" />
+              </div>
+            </div>
+            <div class="combo-file secondary" id="combo-price-card">
+              <div class="combo-label">PRICE FILE · OPTIONAL</div>
+              <div class="combo-title">행사가 책정 파일</div>
+              <div class="combo-mini">상품명 · 제안할인가 → 옵션가 자동 계산</div>
+              <div class="combo-file-bottom">
+                <label class="select-btn" for="combo-price-file">파일 선택</label>
+                <div class="file-info" id="combo-price-info"><span>미첨부 · K열 옵션가 사용</span></div>
+                <input id="combo-price-file" type="file" accept=".xlsx,.xls" />
+              </div>
+            </div>
+          </div>
+          <div class="combo-actions">
+            <div class="combo-status" id="combo-status">작업양식을 첨부해주세요.</div>
+            <button class="combo-generate" id="combo-generate" disabled>톡딜옵션조합 파일 만들기</button>
+          </div>
+          <div class="combo-result" id="combo-result">
+            <div class="combo-result-head">
+              <div><div class="combo-result-title">톡딜옵션조합엑셀파일</div><div class="combo-result-meta" id="combo-result-meta">0개 옵션</div></div>
+              <button class="combo-download" id="combo-download">엑셀 다운로드</button>
+            </div>
+            <div class="combo-preview">
+              <table>
+                <thead><tr><th>품명</th><th>색상</th><th>사이즈</th><th>재고수량</th><th>옵션가</th><th>사용여부</th><th>관리코드</th></tr></thead>
+                <tbody id="combo-preview-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
     <section class="workspace">
       <div class="upload-wrap">
@@ -120,8 +375,20 @@
               <input id="file-naver" type="file" accept=".csv,.xlsx,.xls" />
             </div>
           </div>
+
         </div>
         <div class="action-row"><button class="primary-btn" id="process-btn" disabled>행사리스트 생성</button></div>
+      </div>
+
+      <div class="converter-wrap">
+        <div class="converter-head"><strong>Talkdeal Option Combination</strong><span>행사리스트 / 작업양식 → 조합형</span></div>
+        <div class="converter-card" data-slot="uploadSource">
+          <div><div class="converter-title">행사리스트 / 작업양식 파일</div><div class="converter-mini">CSV · XLSX</div></div>
+          <label class="select-btn" for="file-uploadSource">파일 선택</label>
+          <div class="file-info" id="info-uploadSource"><span>첨부 전</span></div>
+          <button class="convert-btn" id="convert-upload-btn" disabled>조합파일 생성</button>
+          <input id="file-uploadSource" type="file" accept=".csv,.xlsx,.xls" />
+        </div>
       </div>
 
       <div class="progress-panel" id="progress-panel">
@@ -158,16 +425,106 @@
           </table>
         </div>
       </div>
+
+      <div class="upload-output" id="upload-output">
+        <div class="upload-output-head">
+          <div><div class="upload-output-title">톡딜옵션조합엑셀파일</div><div class="upload-output-meta" id="upload-output-meta">0개 옵션</div></div>
+          <button class="upload-save-btn" id="upload-csv-btn">엑셀 저장</button>
+        </div>
+        <div class="upload-table-wrap">
+          <table class="upload-table">
+            <thead><tr><th>품명</th><th>색상</th><th>사이즈</th><th>재고수량</th><th>옵션가</th><th>사용여부</th><th>관리코드</th></tr></thead>
+            <tbody id="upload-result-body"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
+        </div>
+      </details>
+      </section>
+    </div>
+
+    <div class="channel-panel" id="channel-lotteon">
+      <div class="channel-label"><span>LOTTEON</span><span>CHANNEL EVENT</span></div>
+      <div class="lotte-shell">
+        <div class="lotte-head"><strong>롯데온</strong><span>LOTTE ON</span></div>
+        <div class="lotte-body"><div><b>롯데온 행사 작업</b><span>롯데온 기준 파일과 로직을 적용할 영역입니다.</span></div></div>
+      </div>
+    </div>
   </div>
   <div class="toast" id="toast"></div>
+<script>
+window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵션조합엑셀파일.xlsx') {
+  const headers=['품명','색상','사이즈','재고수량','옵션가','사용여부','관리코드'];
+  // 톡딜 업로드 인식용: 옵션가는 통화/숫자 서식이 아닌 일반 텍스트로 저장합니다.
+  // 음수는 '-' 부호를 그대로 유지하고, 첫 상품처럼 빈 값은 빈칸으로 둡니다.
+  const optionPriceText=(value)=>{
+    if(value===null||value===undefined)return '';
+    const raw=String(value).trim();
+    if(!raw)return '';
+    const cleaned=raw.replace(/[₩￦원,\s]/g,'').replace(/^\+/, '');
+    return cleaned;
+  };
+  const exportRows=rows.map(r=>({
+    '품명':r['품명']??'',
+    '색상':r['색상']??'',
+    '사이즈':r['사이즈']??'',
+    '재고수량':Number(r['재고수량']??200)||200,
+    '옵션가':optionPriceText(r['옵션가']),
+    '사용여부':'Y',
+    '관리코드':r['관리코드']??''
+  }));
+  if (!window.ExcelJS) {
+    const ws=XLSX.utils.json_to_sheet(exportRows,{header:headers});
+    ws['!cols']=[{wch:61.71},{wch:23.14},{wch:23.14},{wch:23.14},{wch:23.14},{wch:23.14},{wch:23.14}];
+    ws['!autofilter']={ref:`A1:G${exportRows.length+1}`};
+    // E열 옵션가 / F열 사용여부는 텍스트 타입으로 고정합니다.
+    for(let r=2;r<=exportRows.length+1;r++){
+      const e=ws[`E${r}`]; if(e){e.t='s'; e.z='@'; e.v=String(e.v??'');}
+      const f=ws[`F${r}`]; if(f){f.t='s'; f.z='@'; f.v='Y';}
+    }
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'조합형'); XLSX.writeFile(wb,filename); return;
+  }
+  const wb=new ExcelJS.Workbook();
+  const ws=wb.addWorksheet('조합형');
+  ws.columns=[
+    {header:'품명',key:'품명',width:61.7109375},
+    {header:'색상',key:'색상',width:23.140625},
+    {header:'사이즈',key:'사이즈',width:23.140625},
+    {header:'재고수량',key:'재고수량',width:23.140625},
+    {header:'옵션가',key:'옵션가',width:23.140625},
+    {header:'사용여부',key:'사용여부',width:23.140625},
+    {header:'관리코드',key:'관리코드',width:23.140625}
+  ];
+  ws.addRows(exportRows);
+  ws.getRow(1).height=25.5;
+  const thin={style:'thin',color:{argb:'FF000000'}};
+  ws.eachRow({includeEmpty:true},(row,rowNo)=>{
+    if(rowNo>1) row.height=16.5;
+    row.eachCell({includeEmpty:true},(cell,colNo)=>{
+      cell.alignment={horizontal:'center',vertical:'middle',wrapText:rowNo===1};
+      cell.border={top:thin,left:thin,bottom:thin,right:thin};
+      cell.font=rowNo===1?{name:'맑은 고딕',size:colNo===1?10:11,bold:true}:{name:colNo===1?'Arial':'맑은 고딕',size:10};
+    });
+  });
+  // 옵션가(E열)는 반드시 일반 텍스트. '-' 음수 부호도 문자열 그대로 유지합니다.
+  ws.getColumn(5).numFmt='@';
+  ws.getColumn(6).numFmt='@';
+  ws.autoFilter={from:'A1',to:`G${Math.max(1,rows.length+1)}`};
+  const buffer=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+};
+</script>
 <script>
 (() => {
   'use strict';
 
   const state = {
-    files: { base: null, cellmate: null, naver: null },
+    files: { base: null, cellmate: null, naver: null, uploadSource: null },
     rows: [],
+    uploadRows: [],
     reviewOnly: false,
     query: ''
   };
@@ -425,56 +782,114 @@
     return XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
   }
 
-  async function loadBaseProducts(file) {
-    const ext = getFileExtension(file);
-    let rows;
-    if (ext === 'csv' || ext === 'txt') {
-      const encoding = await detectCsvEncoding(file, ['순서','상품명']);
-      const text = new TextDecoder(encoding).decode(await file.arrayBuffer());
-      rows = Papa.parse(text, { header:false, skipEmptyLines:'greedy' }).data;
-    } else {
-      rows = await readWorkbookRows(file);
+  function normalizeLooseHeader(value) {
+    return normalizeHeader(value).replace(/[._·:：\-]/g, '');
+  }
+
+  function columnDataScore(rows, startRow, col, mode='text') {
+    let score = 0;
+    const end = Math.min(rows.length, startRow + 80);
+    for (let r=startRow; r<end; r++) {
+      const value = cleanFormulaText(rows[r]?.[col]);
+      if (!value) continue;
+      if (mode === 'order') {
+        if (/^\d+(?:\.0+)?$/.test(value.replace(/,/g,''))) score += 4;
+        else score += 0.2;
+      } else if (mode === 'option') {
+        if (value.includes('/')) score += 5;
+        else if (value.includes(',')) score += 2;
+        else score += 0.5;
+      } else {
+        score += /[가-힣A-Za-z]/.test(value) ? 3 : 0.5;
+        if (value.length >= 5) score += 1;
+      }
     }
+    return score;
+  }
+
+  function detectHeaderLayout(rows) {
+    let best = null;
+    const scanEnd = Math.min(rows.length, 30);
+    for (let r=0; r<scanEnd; r++) {
+      const cells = (rows[r] || []).map(v => cleanFormulaText(v));
+      const heads = cells.map(normalizeLooseHeader);
+      let score = 0;
+      if (heads.some(h => h === '상품명' || (h.includes('상품명') && !h.includes('옵션')))) score += 8;
+      if (heads.some(h => h === '순서' || h === 'no' || h === '번호')) score += 3;
+      if (heads.some(h => h === '색상' || h === '컬러')) score += 3;
+      if (heads.some(h => h === '기장' || h === '길이')) score += 2;
+      if (heads.some(h => h === '사이즈')) score += 3;
+      if (heads.some(h => h === '옵션' || h.includes('옵션명') || (h.includes('컬러') && h.includes('사이즈')))) score += 6;
+      if (!best || score > best.score) best = { index:r, score, cells, heads };
+    }
+    return best && best.score >= 8 ? best : null;
+  }
+
+  function chooseColumn(rows, headerIndex, candidates, mode='text') {
+    if (!candidates.length) return -1;
+    return candidates
+      .map(col => ({ col, score: columnDataScore(rows, headerIndex + 1, col, mode) }))
+      .sort((a,b) => b.score - a.score || a.col - b.col)[0].col;
+  }
+
+  async function readMatrixRows(file, requiredWords=[]) {
+    const ext = getFileExtension(file);
+    if (ext === 'csv' || ext === 'txt') {
+      const encoding = await detectCsvEncoding(file, requiredWords);
+      const text = new TextDecoder(encoding).decode(await file.arrayBuffer());
+      return Papa.parse(text, { header:false, skipEmptyLines:false }).data;
+    }
+    return await readWorkbookRows(file);
+  }
+
+  async function loadBaseProducts(file) {
+    let rows = await readMatrixRows(file, ['순서','상품명','No.']);
     rows = rows.filter(r => Array.isArray(r) && r.some(v => String(v ?? '').trim() !== ''));
     if (!rows.length) throw new Error('행사 상품 리스트에서 상품명을 찾지 못했습니다.');
 
-    const headerRow = rows[0].map(normalizeHeader);
-    const hasABHeader = headerRow[0] === '순서' && headerRow[1] === '상품명';
-    const namedProductCol = headerRow.findIndex(v => v === '상품명');
+    const layout = detectHeaderLayout(rows);
+    let start = 0;
+    let productCol = -1;
+    let orderCol = -1;
 
-    // 새 양식: A열=순서, B열=상품명. 기존 1열 파일도 계속 호환합니다.
-    const orderCol = hasABHeader ? 0 : -1;
-    let productCol = hasABHeader ? 1 : namedProductCol;
-    let start = (hasABHeader || namedProductCol >= 0) ? 1 : 0;
+    if (layout) {
+      start = layout.index + 1;
+      const productCandidates = layout.heads
+        .map((h,i) => ({h,i}))
+        .filter(x => x.h === '상품명' || (x.h.includes('상품명') && !x.h.includes('옵션')))
+        .map(x => x.i);
+      productCol = chooseColumn(rows, layout.index, productCandidates, 'text');
+      const orderCandidates = layout.heads
+        .map((h,i) => ({h,i}))
+        .filter(x => x.h === '순서' || x.h === 'no' || x.h === '번호')
+        .map(x => x.i);
+      orderCol = chooseColumn(rows, layout.index, orderCandidates, 'order');
+    }
 
     if (productCol < 0) {
-      // 헤더가 없을 때 A/B 두 열이 모두 채워져 있으면 B열을 상품명으로 간주합니다.
       const abRows = rows.filter(r => String(r[0] ?? '').trim() && String(r[1] ?? '').trim());
       const firstColNumeric = abRows.length && abRows.filter(r => /^\s*\d+(?:\.\d+)?\s*$/.test(String(r[0] ?? ''))).length >= Math.ceil(abRows.length * 0.6);
       if (rows.some(r => String(r[1] ?? '').trim()) && firstColNumeric) {
-        productCol = 1;
+        productCol = 1; orderCol = 0;
       } else {
-        let bestCol = 0, bestCount = -1;
+        let bestCol = 0, bestScore = -1;
         const maxCols = Math.max(...rows.map(r => r.length));
         for (let c=0; c<maxCols; c++) {
-          const count = rows.reduce((n,r) => n + (String(r[c] ?? '').trim() ? 1 : 0), 0);
-          if (count > bestCount) { bestCount = count; bestCol = c; }
+          const score = columnDataScore(rows, 0, c, 'text');
+          if (score > bestScore) { bestScore = score; bestCol = c; }
         }
         productCol = bestCol;
       }
     }
 
-    const useOrderCol = orderCol === 0 || (productCol === 1 && rows.some(r => String(r[0] ?? '').trim()));
     const products = [];
     for (let i=start; i<rows.length; i++) {
-      const name = cleanFormulaText(rows[i][productCol]);
+      const name = cleanFormulaText(rows[i]?.[productCol]);
       if (!name || normalizeHeader(name) === '상품명') continue;
-
-      const rawOrder = useOrderCol ? cleanFormulaText(rows[i][0]) : '';
+      const rawOrder = orderCol >= 0 ? cleanFormulaText(rows[i]?.[orderCol]) : '';
       const numericOrder = /^[-+]?\d+(?:\.\d+)?$/.test(rawOrder.replace(/,/g,''))
         ? Number(rawOrder.replace(/,/g,''))
         : Number.POSITIVE_INFINITY;
-
       products.push({
         sourceRow: i,
         orderLabel: rawOrder || String(products.length + 1),
@@ -487,8 +902,6 @@
     }
     if (!products.length) throw new Error('행사 상품 리스트에서 유효한 상품명이 없습니다.');
 
-    // A열에 숫자가 입력되어 있으면 해당 숫자 오름차순으로 배치합니다.
-    // 순서가 비어 있거나 숫자가 아닌 행은 원래 파일의 아래쪽 순서를 유지합니다.
     products.sort((a, b) => {
       const aFinite = Number.isFinite(a.orderNumber);
       const bFinite = Number.isFinite(b.orderNumber);
@@ -499,7 +912,7 @@
 
     products.forEach((p, i) => {
       p.index = i;
-      if (!useOrderCol) p.orderLabel = String(i + 1);
+      if (orderCol < 0) p.orderLabel = String(i + 1);
     });
     return products;
   }
@@ -713,8 +1126,216 @@
     });
   }
 
+  function splitOptionList(value) {
+    return String(value || '').split(',').map(v => v.trim()).filter(Boolean);
+  }
+
+  function formatUploadProductName(no, name) {
+    const raw = String(no || '').trim();
+    const n = Number(raw);
+    const prefix = Number.isFinite(n) ? String(Math.trunc(n)).padStart(2,'0') : raw;
+    const clean = String(name || '').replace(/^\s*\d{1,3}\s*(?:[.)]|[-–—])\s*/, '').trim();
+    return prefix ? `${prefix}. ${clean}` : clean;
+  }
+
+  function buildUploadRows(resultRows) {
+    const output = [];
+    for (const row of resultRows) {
+      const colors = splitOptionList(row.color);
+      const lengths = orderedKnown(splitOptionList(row.length).map(canonicalLength), LENGTH_ORDER);
+      const sizes = orderedKnown(splitOptionList(row.size).map(canonicalSize), SIZE_ORDER);
+      const colorValues = colors.length ? colors : [''];
+      let sizeValues = [];
+      if (lengths.length && sizes.length) {
+        for (const length of lengths) for (const size of sizes) sizeValues.push(`${length} ${size}`);
+      } else if (sizes.length) sizeValues = sizes;
+      else if (lengths.length) sizeValues = lengths;
+      else sizeValues = [''];
+
+      const uploadName = formatUploadProductName(row.no, row.product?.name || row.name || '');
+      for (const color of colorValues) {
+        for (const size of sizeValues) {
+          output.push({
+            '품명': uploadName,
+            '색상': color,
+            '사이즈': size,
+            '재고수량': 200,
+            '옵션가': row.optionPrice ?? '',
+            '사용여부': '',
+            '관리코드': ''
+          });
+        }
+      }
+    }
+    return output;
+  }
+
+  function parseSlashOption(value) {
+    const parts = String(value || '').split('/').map(v => v.trim()).filter(Boolean);
+    const out = { color:'', length:'', size:'' };
+    if (!parts.length) return out;
+
+    const looksLikeSizes = v => splitOptionList(v).every(x => /^(XS|S|M|L|XL|2XL|3XL|4XL|5XL|F|FREE|F1|F2|F3|\d{2,3})$/i.test(x));
+    const looksLikeLengths = v => splitOptionList(v).every(x => /^(숏|기본|롱|SHORT|REGULAR|BASIC|LONG)(?:기장)?$/i.test(x));
+
+    if (parts.length >= 3) {
+      out.color = parts[0]; out.length = parts[1]; out.size = parts.slice(2).join(' / ');
+    } else if (parts.length === 2) {
+      out.color = parts[0];
+      if (looksLikeSizes(parts[1])) out.size = parts[1];
+      else if (looksLikeLengths(parts[1])) out.length = parts[1];
+      else out.size = parts[1];
+    } else {
+      if (looksLikeSizes(parts[0])) out.size = parts[0];
+      else if (looksLikeLengths(parts[0])) out.length = parts[0];
+      else out.color = parts[0];
+    }
+    return out;
+  }
+
+  async function loadEventRowsForUpload(file) {
+    const rows = await readMatrixRows(file, ['상품명','색상','사이즈','옵션','No.']);
+    if (!rows.length) throw new Error('파일에서 데이터를 찾지 못했습니다.');
+
+    // 톡딜 작업양식은 4행이 분류명입니다. 4행에 상품명/옵션가가 있으면 최우선으로 사용합니다.
+    let layout = detectHeaderLayout(rows);
+    if (rows[3]) {
+      const row4Cells = (rows[3] || []).map(v => cleanFormulaText(v));
+      const row4Heads = row4Cells.map(normalizeLooseHeader);
+      if (row4Heads.some(h => h === '상품명') && row4Heads.some(h => h.includes('옵션가'))) {
+        layout = { index:3, score:999, cells:row4Cells, heads:row4Heads };
+      }
+    }
+    if (!layout) throw new Error('상품명/옵션 헤더를 찾지 못했습니다.');
+    const h = layout.heads;
+    const hi = layout.index;
+
+    const productCandidates = h.map((v,i)=>({v,i}))
+      .filter(x => x.v === '상품명' || x.v === '품명' || (x.v.includes('상품명') && !x.v.includes('옵션')))
+      .map(x => x.i);
+    const nameCol = chooseColumn(rows, hi, productCandidates, 'text');
+
+    const orderCandidates = h.map((v,i)=>({v,i}))
+      .filter(x => x.v === '순서' || x.v === 'no' || x.v === '번호')
+      .map(x => x.i);
+    const orderCol = chooseColumn(rows, hi, orderCandidates, 'order');
+
+    const colorCandidates = h.map((v,i)=>({v,i}))
+      .filter(x => (x.v === '색상' || x.v === '색상명' || x.v === '컬러' || x.v === '컬러명') && !x.v.includes('사이즈'))
+      .map(x => x.i);
+    const lengthCandidates = h.map((v,i)=>({v,i}))
+      .filter(x => x.v === '기장' || x.v === '기장명' || x.v === '길이')
+      .map(x => x.i);
+    const sizeCandidates = h.map((v,i)=>({v,i}))
+      .filter(x => x.v === '사이즈' || x.v === '사이즈명')
+      .map(x => x.i);
+
+    const colorCol = chooseColumn(rows, hi, colorCandidates, 'option');
+    const lengthCol = chooseColumn(rows, hi, lengthCandidates, 'option');
+    const sizeCol = chooseColumn(rows, hi, sizeCandidates, 'option');
+
+    // 판매팀 작업양식 K열 ‘옵션가’도 상품별로 함께 가져옵니다.
+    const optionPriceCandidates = h.map((v,i)=>({v,i}))
+      .filter(x => x.v === '옵션가' || x.v.startsWith('옵션가') || x.v.includes('대표상품옵션가'))
+      .map(x => x.i);
+    const optionPriceCol = optionPriceCandidates.length ? optionPriceCandidates[0] : (h.length > 10 ? 10 : -1);
+
+    // 판매팀 작업양식의 ‘옵션명2 컬러/사이즈’ 열을 최우선으로 사용합니다.
+    const optionCandidates = h.map((v,i) => {
+      let priority = 0;
+      if ((v.includes('컬러') || v.includes('색상')) && v.includes('사이즈')) priority = 100;
+      else if (v.includes('옵션명2')) priority = 90;
+      else if (v === '옵션') priority = 80;
+      else if (v.includes('옵션') && !v.includes('no')) priority = 40;
+      return { i, priority };
+    }).filter(x => x.priority > 0);
+    optionCandidates.forEach(x => x.score = x.priority + columnDataScore(rows, hi + 1, x.i, 'option'));
+    optionCandidates.sort((a,b) => b.score - a.score || a.i - b.i);
+    let optionCol = optionCandidates.length ? optionCandidates[0].i : -1;
+
+    // 헤더명이 특이한 경우에도 ‘색상/기장/사이즈’처럼 / 로 구분된 데이터 열을 찾습니다.
+    if (optionCol < 0) {
+      const maxCols = Math.max(...rows.map(r => r?.length || 0));
+      let best = { col:-1, score:0 };
+      for (let c=0; c<maxCols; c++) {
+        if (c === nameCol || c === orderCol) continue;
+        const score = columnDataScore(rows, hi + 1, c, 'option');
+        if (score > best.score) best = { col:c, score };
+      }
+      if (best.score >= 10) optionCol = best.col;
+    }
+
+    if (nameCol < 0) throw new Error('상품명 열을 찾지 못했습니다.');
+    if (optionCol < 0 && colorCol < 0 && lengthCol < 0 && sizeCol < 0) throw new Error('옵션 정보를 찾지 못했습니다.');
+
+    const prepared = [];
+    for (let r=hi+1; r<rows.length; r++) {
+      const row = rows[r] || [];
+      const name = cleanFormulaText(row[nameCol]);
+      if (!name || normalizeHeader(name) === '상품명') continue;
+
+      let color = colorCol >= 0 ? cleanFormulaText(row[colorCol]) : '';
+      let length = lengthCol >= 0 ? cleanFormulaText(row[lengthCol]) : '';
+      let size = sizeCol >= 0 ? cleanFormulaText(row[sizeCol]) : '';
+
+      if ((!color && !length && !size) && optionCol >= 0) {
+        const parsed = parseSlashOption(cleanFormulaText(row[optionCol]));
+        color = parsed.color;
+        length = parsed.length;
+        size = parsed.size;
+      }
+
+      // 분리 열과 통합 옵션 열이 함께 있어도 비어 있는 값만 통합 옵션에서 보완합니다.
+      if (optionCol >= 0 && (!color || !length || !size)) {
+        const parsed = parseSlashOption(cleanFormulaText(row[optionCol]));
+        if (!color) color = parsed.color;
+        if (!length) length = parsed.length;
+        if (!size) size = parsed.size;
+      }
+
+      if (!color && !length && !size) continue;
+      const rawOrder = orderCol >= 0 ? cleanFormulaText(row[orderCol]) : String(prepared.length + 1);
+      const num = /^[-+]?\d+(?:\.\d+)?$/.test(rawOrder.replace(/,/g,'')) ? Number(rawOrder.replace(/,/g,'')) : Number.POSITIVE_INFINITY;
+      // 작업양식 4행의 ‘옵션가’ 분류명 아래 값을 그대로 사용합니다.
+      const rawOptionPrice = optionPriceCol >= 0 ? cleanFormulaText(row[optionPriceCol]) : '';
+      const cleanedOptionPrice = cleanPrice(rawOptionPrice);
+      // K열이 비어 있으면 0으로 치환하지 않고 빈칸 그대로 둡니다.
+      const optionPrice = (cleanedOptionPrice !== '' && Number.isFinite(Number(cleanedOptionPrice))) ? cleanedOptionPrice : '';
+      prepared.push({
+        no: rawOrder || String(prepared.length + 1),
+        orderNumber: num,
+        sourceIndex: r,
+        product: { name },
+        color,
+        length,
+        size,
+        optionPrice
+      });
+    }
+
+    if (!prepared.length) throw new Error('상품명과 옵션이 입력된 행을 찾지 못했습니다.');
+    prepared.sort((a,b) => {
+      const af = Number.isFinite(a.orderNumber), bf = Number.isFinite(b.orderNumber);
+      if (af && bf && a.orderNumber !== b.orderNumber) return a.orderNumber - b.orderNumber;
+      if (af !== bf) return af ? -1 : 1;
+      return a.sourceIndex - b.sourceIndex;
+    });
+    return prepared;
+  }
+
+  function renderUploadTable() {
+    const body = $('#upload-result-body');
+    const wrap = $('#upload-output');
+    if (!state.uploadRows.length) { wrap.classList.remove('show'); body.innerHTML=''; return; }
+    body.innerHTML = state.uploadRows.map(r => `<tr><td>${escapeHtml(r['품명'])}</td><td>${escapeHtml(r['색상'])}</td><td>${escapeHtml(r['사이즈'])}</td><td>${escapeHtml(r['재고수량'])}</td><td>${escapeHtml(r['옵션가'])}</td><td></td><td></td></tr>`).join('');
+    $('#upload-output-meta').textContent = `${state.uploadRows.length.toLocaleString('ko-KR')}개 옵션`;
+    wrap.classList.add('show');
+  }
+
   function cleanPrice(value) {
     const text = String(value ?? '').replace(/,/g,'').trim();
+    // 빈 셀은 Number('') === 0 으로 바뀌므로 반드시 먼저 빈값을 보존합니다.
+    if (text === '') return '';
     const n = Number(text);
     return Number.isFinite(n) ? String(Math.round(n)) : text;
   }
@@ -835,11 +1456,13 @@
       const cellmate = await loadCellmate(state.files.cellmate, products);
       setProgress(60, '셀메이트 옵션 정리 완료 · 네이버 파일 확인 중');
       const naver = await loadNaver(state.files.naver, products);
-      setProgress(94, '결과를 정리하고 있습니다.');
+      setProgress(92, '업로드용 옵션을 정리하고 있습니다.');
 
       state.rows = buildResultRows(products, cellmate, naver);
+      state.uploadRows = buildUploadRows(state.rows);
       updateMetrics();
       renderTable();
+      renderUploadTable();
       resultsEl.classList.add('show');
       setProgress(100, `완료 · ${products.length}개 상품 정리`);
       setTimeout(() => progressPanel.classList.remove('show'), 900);
@@ -878,6 +1501,43 @@
       const file = e.dataTransfer?.files?.[0];
       if (file) setFile(slot, file);
     });
+  });
+
+  const uploadSourceInput = $('#file-uploadSource');
+  const uploadSourceCard = document.querySelector('.converter-card[data-slot="uploadSource"]');
+  const convertUploadBtn = $('#convert-upload-btn');
+
+  function setUploadSource(file) {
+    if (!file) return;
+    state.files.uploadSource = file;
+    uploadSourceCard.classList.add('loaded');
+    $('#info-uploadSource').innerHTML = `<span class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span><span class="file-size">${formatBytes(file.size)}</span>`;
+    convertUploadBtn.disabled = false;
+  }
+
+  uploadSourceInput.addEventListener('change', e => setUploadSource(e.target.files?.[0]));
+  ['dragenter','dragover'].forEach(evt => uploadSourceCard.addEventListener(evt, e => { e.preventDefault(); uploadSourceCard.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => uploadSourceCard.addEventListener(evt, e => { e.preventDefault(); uploadSourceCard.classList.remove('dragover'); }));
+  uploadSourceCard.addEventListener('drop', e => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) setUploadSource(file);
+  });
+
+  convertUploadBtn.addEventListener('click', async () => {
+    if (!state.files.uploadSource) return;
+    convertUploadBtn.disabled = true;
+    try {
+      const eventRows = await loadEventRowsForUpload(state.files.uploadSource);
+      state.uploadRows = buildUploadRows(eventRows);
+      renderUploadTable();
+      toast(`${eventRows.length}개 상품 · ${state.uploadRows.length.toLocaleString('ko-KR')}개 옵션 조합을 생성했습니다.`);
+      $('#upload-output').scrollIntoView({ behavior:'smooth', block:'start' });
+    } catch (err) {
+      console.error(err);
+      toast(err?.message || '톡딜옵션조합엑셀파일 생성 중 오류가 발생했습니다.', 'error');
+    } finally {
+      convertUploadBtn.disabled = !state.files.uploadSource;
+    }
   });
 
   processBtn.addEventListener('click', processAll);
@@ -936,6 +1596,11 @@
     URL.revokeObjectURL(url);
   });
 
+  $('#upload-csv-btn').addEventListener('click', async () => {
+    if (!state.uploadRows.length) return;
+    await window.downloadTalkdealOptionWorkbook(state.uploadRows, '톡딜옵션조합엑셀파일.xlsx');
+  });
+
   $('#copy-btn').addEventListener('click', async () => {
     if (!state.rows.length) return;
     const headers = ['순서','상품명','색상','기장','사이즈','판매가'];
@@ -948,6 +1613,470 @@
     }
   });
 })();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const workInput=document.getElementById('combo-work-file');
+  const workCard=document.getElementById('combo-work-card');
+  const priceInput=document.getElementById('combo-price-file');
+  const priceCard=document.getElementById('combo-price-card');
+  const generateBtn=document.getElementById('combo-generate');
+  const downloadBtn=document.getElementById('combo-download');
+  const resultBox=document.getElementById('combo-result');
+  const previewBody=document.getElementById('combo-preview-body');
+  const resultMeta=document.getElementById('combo-result-meta');
+  const statusEl=document.getElementById('combo-status');
+  let workFile=null,priceFile=null,generatedRows=[];
+
+  const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  const normHeader=v=>String(v??'').replace(/^\uFEFF/,'').replace(/\s+/g,'').trim().toLowerCase();
+  const cleanFormula=v=>{let x=String(v??'').trim();if(/^="[\s\S]*"$/.test(x))x=x.slice(2,-1).replace(/""/g,'"');return x.trim();};
+  // 품명 앞의 01. / 1. / 01) / 01- 같은 순번은 매칭에서 제외합니다.
+  const stripProductPrefix=v=>cleanFormula(v).replace(/^\s*\d{1,3}\s*(?:[.)]|[-–—])\s*/,'').replace(/\s+/g,' ').trim();
+  // 상품 매칭은 품명 전체가 아니라 괄호 안 식별자를 최우선으로 사용합니다.
+  // 예: `01. (노컷진19탄) 배기핏 청바지` ↔ `(노컷진19탄) 배기핏 청바지` => `노컷진19탄`
+  const compactKey=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[._·:：\-–—]/g,'');
+  const parenToken=v=>{
+    const s=stripProductPrefix(v);
+    const m=s.match(/[（(]\s*([^()（）]+?)\s*[)）]/);
+    return m&&m[1]?compactKey(m[1]):'';
+  };
+  const productKey=v=>{
+    const token=parenToken(v);
+    return token?`paren:${token}`:`name:${compactKey(stripProductPrefix(v))}`;
+  };
+  const num=v=>{const t=String(v??'').replace(/,/g,'').trim();if(t==='')return null;const x=Number(t);return Number.isFinite(x)?x:null;};
+  const splitList=v=>String(v??'').split(',').map(x=>x.trim()).filter(Boolean);
+  const looksSize=v=>/^(XS|S|M|L|XL|2XL|3XL|4XL|5XL|F|FREE|F1|F2|F3|\d{2,3})$/i.test(v.trim());
+  const looksLength=v=>/^(숏|기본|롱|SHORT|REGULAR|BASIC|LONG)(?:기장)?$/i.test(v.trim());
+  const canonicalLength=v=>{const x=String(v??'').trim().replace(/기장$/,'');const u=x.toUpperCase();return u==='SHORT'?'숏':(u==='REGULAR'||u==='BASIC')?'기본':u==='LONG'?'롱':x;};
+  const canonicalSize=v=>String(v??'').trim().toUpperCase();
+
+  function fileInfo(file){const kb=file.size/1024,size=kb<1024?`${kb.toFixed(1)} KB`:`${(kb/1024).toFixed(1)} MB`;return `<span class="file-name" title="${esc(file.name)}">${esc(file.name)}</span><span class="file-size">${size}</span>`;}
+  function setFile(file){if(!file)return;workFile=file;workCard.classList.add('loaded');document.getElementById('combo-work-info').innerHTML=fileInfo(file);generateBtn.disabled=false;statusEl.innerHTML='<strong>준비 완료</strong> · 상품명별 옵션 · K열 옵션가 기준';}
+  workInput.addEventListener('change',e=>setFile(e.target.files?.[0]));
+  ['dragenter','dragover'].forEach(evt=>workCard.addEventListener(evt,e=>{e.preventDefault();workCard.classList.add('dragover')}));
+  ['dragleave','drop'].forEach(evt=>workCard.addEventListener(evt,e=>{e.preventDefault();workCard.classList.remove('dragover')}));
+  workCard.addEventListener('drop',e=>setFile(e.dataTransfer?.files?.[0]));
+
+  function setPriceFile(file){
+    if(!file)return;
+    priceFile=file;
+    priceCard.classList.add('loaded');
+    document.getElementById('combo-price-info').innerHTML=fileInfo(file);
+    if(workFile)statusEl.innerHTML='<strong>준비 완료</strong> · 작업양식 옵션 + 행사가 책정 가격 연동';
+  }
+  priceInput.addEventListener('change',e=>setPriceFile(e.target.files?.[0]));
+  ['dragenter','dragover'].forEach(evt=>priceCard.addEventListener(evt,e=>{e.preventDefault();priceCard.classList.add('dragover')}));
+  ['dragleave','drop'].forEach(evt=>priceCard.addEventListener(evt,e=>{e.preventDefault();priceCard.classList.remove('dragover')}));
+  priceCard.addEventListener('drop',e=>setPriceFile(e.dataTransfer?.files?.[0]));
+
+  async function workbookMatrix(file){
+    // K열처럼 수식이 있는 숫자 셀은 표시문자(.w)가 아니라 실제 캐시값(.v)을 읽어야
+    // 14,400 / 16,200 같은 옵션가가 빈칸으로 유실되지 않습니다.
+    const ab=await file.arrayBuffer(),book=XLSX.read(ab,{type:'array',cellFormula:true,cellText:true,cellDates:false});
+    let best={score:-1,rows:[]};
+    for(const name of book.SheetNames){
+      const rows=XLSX.utils.sheet_to_json(book.Sheets[name],{header:1,defval:'',raw:true});
+      let score=0;
+      // 요청 양식은 4행이 분류명. 4행이 맞으면 가장 높은 우선순위를 줍니다.
+      const row4=(rows[3]||[]).map(normHeader);
+      if(row4.some(h=>h==='상품명'))score+=20;
+      if(row4.some(h=>h.includes('옵션명2')||(h.includes('컬러')&&h.includes('사이즈'))))score+=20;
+      if(row4.some(h=>h.includes('옵션가')))score+=20;
+      score+=rows.slice(0,15).reduce((acc,row)=>acc+row.map(normHeader).filter(h=>h==='상품명'||h.includes('옵션명2')||h.includes('옵션가')).length,0);
+      if(score>best.score)best={score,rows};
+    }
+    return best.rows;
+  }
+  function findHeader(rows){
+    // 4행 우선
+    if(rows[3]){const heads=rows[3].map(normHeader);if(heads.some(h=>h==='상품명')&&heads.some(h=>h.includes('옵션가')))return{idx:3,heads};}
+    let best={idx:-1,score:-1,heads:[]};
+    for(let i=0;i<Math.min(rows.length,20);i++){const heads=(rows[i]||[]).map(normHeader);let score=0;if(heads.some(h=>h==='상품명'))score+=6;if(heads.some(h=>h.includes('옵션명2')||(h.includes('컬러')&&h.includes('사이즈'))))score+=6;if(heads.some(h=>h.includes('옵션가')))score+=5;if(heads.some(h=>h==='no.'||h==='no'||h==='순서'))score+=2;if(score>best.score)best={idx:i,score,heads};}
+    return best.score>=8?best:null;
+  }
+  function bestCol(rows,hi,cands){let best=-1,score=-1;for(const c of cands){let n=0;for(let r=hi+1;r<Math.min(rows.length,hi+30);r++)if(String(rows[r]?.[c]??'').trim())n++;if(n>score){best=c;score=n;}}return best;}
+  function parseOptionString(v){
+    const parts=String(v??'').split('/').map(x=>x.trim()).filter(Boolean);let colors=[],lengths=[],sizes=[];if(!parts.length)return{colors,lengths,sizes};colors=splitList(parts[0]);
+    if(parts.length>=3){lengths=splitList(parts[1]).map(canonicalLength);sizes=splitList(parts.slice(2).join(',')).map(canonicalSize);}
+    else if(parts.length===2){const second=splitList(parts[1]);if(second.length&&second.every(looksSize))sizes=second.map(canonicalSize);else if(second.length&&second.every(looksLength))lengths=second.map(canonicalLength);else sizes=second.map(canonicalSize);}
+    return{colors,lengths,sizes};
+  }
+  function parseWorkRows(rows){
+    const h=findHeader(rows);if(!h)throw new Error('4행 분류명에서 상품명·옵션가를 찾지 못했습니다.');
+    const heads=h.heads,hi=h.idx;
+    const productCols=heads.map((x,i)=>({x,i})).filter(o=>o.x==='상품명').map(o=>o.i);
+    const productCol=bestCol(rows,hi,productCols);
+    const noCol=heads.findIndex(x=>x==='no.'||x==='no'||x==='순서'||x==='번호');
+    const optionCol=heads.map((x,i)=>({x,i})).filter(o=>o.x.includes('옵션명2')||(o.x.includes('컬러')&&o.x.includes('사이즈'))).map(o=>o.i)[0]??-1;
+    // 요청 양식은 4행 K열이 옵션가 분류명입니다. K4가 옵션가라면 무조건 K열을 사용합니다.
+    const kHeader=heads[10]||'';
+    const optionPriceCol=kHeader.includes('옵션가')?10:heads.findIndex(x=>x==='옵션가'||x.startsWith('옵션가')||x.includes('대표상품옵션가'));
+    const discountCol=heads.findIndex(x=>x==='할인가'||x.startsWith('할인가'));
+    if(productCol<0||optionCol<0||optionPriceCol<0)throw new Error('4행에서 상품명 · 옵션명2 · K열 옵션가를 확인해주세요.');
+
+    // K열 수식의 캐시값이 없는 파일에 한해서만 수식 결과를 복원합니다.
+    let baseDiscount=null;
+    for(let rr=hi+1;rr<rows.length;rr++){
+      const nm=cleanFormula(rows[rr]?.[productCol]);
+      if(!nm)continue;
+      if(discountCol>=0){const d=num(rows[rr]?.[discountCol]);if(d!==null)baseDiscount=d;}
+      break;
+    }
+
+    // 상품명 괄호 안 식별자를 키로 옵션(G)과 옵션가(K)를 한 세트로 묶습니다.
+    // `01.` 같은 순번과 앞뒤 상품명 문구가 달라도 (노컷진19탄), (S021401) 등이 같으면 같은 상품입니다.
+    const byProduct=new Map();
+    const order=[];
+    for(let r=hi+1;r<rows.length;r++){
+      const rawName=cleanFormula(rows[r]?.[productCol]);
+      const name=stripProductPrefix(rawName);
+      if(!name)continue;
+      const key=productKey(name);
+      const opt=cleanFormula(rows[r]?.[optionCol]);
+      if(!opt)continue;
+      const noRaw=cleanFormula(rows[r]?.[noCol>=0?noCol:0])||String(order.length+1);
+      const n=num(noRaw),no=n!==null?String(Math.trunc(n)):noRaw;
+
+      const kRaw=rows[r]?.[optionPriceCol];
+      let optionPrice='';
+      const direct=num(kRaw);
+      if(direct!==null){
+        optionPrice=direct;
+      }else{
+        const currentDiscount=discountCol>=0?num(rows[r]?.[discountCol]):null;
+        if(currentDiscount!==null&&baseDiscount!==null&&r!==hi+1)optionPrice=currentDiscount-baseDiscount;
+      }
+
+      if(!byProduct.has(key))order.push(key);
+      byProduct.set(key,{no,name,opt,optionPrice,source:r,matchKey:key,paren:parenToken(name)});
+    }
+
+    const items=order.map(key=>byProduct.get(key));
+    if(!items.length)throw new Error('상품명과 옵션이 입력된 행을 찾지 못했습니다.');
+    items.sort((a,b)=>{const an=num(a.no),bn=num(b.no);return an!==null&&bn!==null?an-bn:a.source-b.source});
+
+    // 대표상품(결과의 첫 번째 상품)은 옵션가를 0으로 쓰지 않고 반드시 빈칸으로 둡니다.
+    if(items[0])items[0].optionPrice='';
+    return items;
+  }
+  async function readPricingFile(file){
+    const ab=await file.arrayBuffer();
+    const book=XLSX.read(ab,{type:'array',cellFormula:true,cellText:true,cellDates:false});
+    const candidates=[];
+    for(const sheetName of book.SheetNames){
+      if(/마지노선|상품\s*원가|사용방법/i.test(sheetName))continue;
+      const rows=XLSX.utils.sheet_to_json(book.Sheets[sheetName],{header:1,defval:'',raw:true});
+      for(let hi=0;hi<Math.min(12,rows.length);hi++){
+        const heads=(rows[hi]||[]).map(normHeader);
+        const nameCol=heads.findIndex(x=>x==='상품명'||x==='품명');
+        let priceCol=heads.findIndex(x=>x==='제안할인가'||x==='행사가'||x==='할인가');
+        let priceKind='제안할인가';
+        if(priceCol<0){priceCol=heads.findIndex(x=>x.includes('쿠폰적용엔딩가')||x==='엔딩가');priceKind='엔딩가';}
+        if(nameCol<0||priceCol<0)continue;
+        const records=[];
+        for(let r=hi+1;r<rows.length;r++){
+          const name=stripProductPrefix(rows[r]?.[nameCol]);
+          const price=num(rows[r]?.[priceCol]);
+          if(!name||price===null)continue;
+          records.push({name,key:productKey(name),paren:parenToken(name),price,row:r});
+        }
+        if(records.length){
+          let bonus=0;
+          if(/톡딜/i.test(sheetName))bonus+=100000;
+          if(/gs|네이버|퀸잇|브리치|하프클럽|롯데/i.test(sheetName))bonus+=1000;
+          candidates.push({sheetName,records,priceKind,score:records.length*10+bonus});
+        }
+        break;
+      }
+    }
+    if(!candidates.length)throw new Error('행사가 책정 파일에서 상품명 · 제안할인가 열을 찾지 못했습니다.');
+    candidates.sort((a,b)=>b.score-a.score);
+    const selected=candidates[0];
+    const byKey=new Map(),byName=new Map();
+    selected.records.forEach(x=>{byKey.set(x.key,x);byName.set(compactKey(stripProductPrefix(x.name)),x);});
+    return {...selected,byKey,byName};
+  }
+
+  function applyPricingToItems(items,pricing){
+    if(!pricing||!items.length)return {items,matched:0,total:items.length,sheetName:'',base:null};
+    const find=item=>pricing.byKey.get(item.matchKey||productKey(item.name))||pricing.byName.get(compactKey(stripProductPrefix(item.name)))||null;
+    const baseHit=find(items[0]);
+    if(!baseHit)throw new Error(`행사가 책정 파일의 ${pricing.sheetName} 시트에서 대표상품을 찾지 못했습니다.`);
+    const base=baseHit.price;
+    let matched=0;
+    const mapped=items.map((item,i)=>{
+      const hit=find(item);
+      if(!hit)return {...item};
+      matched++;
+      return {...item, optionPrice:i===0?'':Math.round(hit.price-base), pricingMatched:true, pricingPrice:hit.price};
+    });
+    if(mapped[0])mapped[0].optionPrice='';
+    return {items:mapped,matched,total:items.length,sheetName:pricing.sheetName,base,priceKind:pricing.priceKind};
+  }
+
+  function expandRows(items){
+    const out=[];
+    // 작업양식 D열 상품명과 결과 품명을 괄호 안 식별자로 다시 연결합니다.
+    // 첫 상품만 K열이 비어 있으므로 옵션가를 빈칸으로 유지하고, 이후 상품은 해당 K열 값을 그대로 사용합니다.
+    const lookup=new Map(items.map(item=>[item.matchKey||productKey(item.name),item]));
+    for(const item of items){
+      const prefix=String(Number(item.no)||item.no).padStart(2,'0');
+      const cleanName=stripProductPrefix(item.name);
+      const productLabel=`${prefix}. ${cleanName}`;
+      const matched=lookup.get(productKey(productLabel))||item;
+      const {colors,lengths,sizes}=parseOptionString(matched.opt),colorVals=colors.length?colors:[''],sizeVals=[];
+      if(lengths.length&&sizes.length){for(const l of lengths)for(const z of sizes)sizeVals.push(`${l} ${z}`);}else if(sizes.length)sizeVals.push(...sizes);else if(lengths.length)sizeVals.push(...lengths);else sizeVals.push('');
+      for(const color of colorVals)for(const size of sizeVals)out.push({'품명':productLabel,'색상':color,'사이즈':size,'재고수량':200,'옵션가':matched.optionPrice,'사용여부':'Y','관리코드':''});
+    }
+    return out;
+  }
+  function renderPreview(){const shown=generatedRows.slice(0,120);previewBody.innerHTML=shown.map(r=>`<tr><td>${esc(r['품명'])}</td><td>${esc(r['색상'])}</td><td>${esc(r['사이즈'])}</td><td>${r['재고수량']}</td><td>${r['옵션가']}</td><td>Y</td><td></td></tr>`).join('');resultMeta.textContent=`${generatedRows.length.toLocaleString('ko-KR')}개 옵션`;resultBox.classList.add('show');}
+  async function build(){
+    if(!workFile)return;
+    generateBtn.disabled=true;statusEl.textContent='작업양식 분석 중...';
+    try{
+      const rows=await workbookMatrix(workFile);
+      let items=parseWorkRows(rows);
+      let pricingInfo=null;
+      if(priceFile){
+        statusEl.textContent='행사가 책정 파일 연동 중...';
+        const pricing=await readPricingFile(priceFile);
+        pricingInfo=applyPricingToItems(items,pricing);
+        items=pricingInfo.items;
+      }
+      generatedRows=expandRows(items);renderPreview();
+      const priced=items.slice(1).filter(x=>String(x.optionPrice??'').trim()!=='').length;
+      const priceTarget=Math.max(0,items.length-1);const keyMatched=items.filter(x=>x.paren).length;
+      const pricingText=pricingInfo?` · 행사가 ${pricingInfo.sheetName} ${pricingInfo.matched}/${pricingInfo.total} 매칭`:'';
+      statusEl.innerHTML=`<strong>${items.length}개 상품</strong> · ${generatedRows.length.toLocaleString('ko-KR')}개 옵션 · 옵션가 ${priced}/${priceTarget} · 괄호키 ${keyMatched}/${items.length}${pricingText}`;
+      resultBox.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }catch(err){console.error(err);statusEl.textContent=err?.message||'생성 중 오류가 발생했습니다.';}
+    finally{generateBtn.disabled=!workFile;}
+  }
+  async function download(){if(!generatedRows.length)return;await window.downloadTalkdealOptionWorkbook(generatedRows,'톡딜옵션조합엑셀파일.xlsx');}
+  generateBtn.addEventListener('click',build);downloadBtn.addEventListener('click',download);
+})();
+</script>
+
+
+<script>
+(() => {
+  'use strict';
+  const DEFAULT_COST_DATA=[{"name":"핀턱 코듀로이 팬츠 (P2678)","cost":8500.0,"key":"(P2678)"},{"name":"와이드 일자핏 스판 청바지 (J2639)","cost":22000.0,"key":"(J2639)"},{"name":"여성 절개 배기핏 팬츠 (P2677)","cost":23000.0,"key":"(P2677)"},{"name":"사이드 절개 와이드핏 데님 팬츠 (J2638)","cost":21000.0,"key":"(J2638)"},{"name":"일자 배기핏 9부 슬랙스 (S2623)","cost":15000.0,"key":"(S2623)"},{"name":"(노컷진14탄) 사이드 절개 부츠컷 청바지","cost":14000.0,"key":"(노컷진14탄)"},{"name":"(찐스판20탄) 와이드 부츠컷핏 스판 청바지","cost":14000.0,"key":"(찐스판20탄)"},{"name":"파라슈트 와이드 포켓 팬츠 (P2676)","cost":17000.0,"key":"(P2676)"},{"name":"와이드 밴딩 부츠컷 청바지 (J2637)","cost":15000.0,"key":"(J2637)"},{"name":"커브드 배기핏 절개 슬랙스 (S2622)","cost":17000.0,"key":"(S2622)"},{"name":"(올데이슬랙스27탄) 여성 핀턱 스판 와이드 슬랙스","cost":13000.0,"key":"(올데이슬랙스27탄)"},{"name":"밴딩 세미와이드핏 코튼 팬츠 (P2675)","cost":20000.0,"key":"(P2675)"},{"name":"와이드 폴딩 절개 코튼팬츠 (P2672)","cost":14000.0,"key":"(P2672)"},{"name":"(노컷진5탄) 골반뽕 부츠컷 청바지","cost":14000.0,"key":"(노컷진5탄)"},{"name":"(올데이팬츠14탄) 투웨이 트레이닝 팬츠","cost":6000.0,"key":"(올데이팬츠14탄)"},{"name":"투웨이 조거핏 트레이닝 팬츠 (P2674)","cost":18000.0,"key":"(P2674)"},{"name":"골지 밴딩 부츠컷핏 트레이닝 팬츠 (P2673)","cost":12000.0,"key":"(P2673)"},{"name":"골지 밴딩 투웨이 청바지 (J2636)","cost":15000.0,"key":"(J2636)"},{"name":"골지 밴딩 투웨이 트레이닝팬츠 (P2671)","cost":12000.0,"key":"(P2671)"},{"name":"부츠컷 더블요크 데님 청바지 (J2635)","cost":14000.0,"key":"(J2635)"},{"name":"(노컷진72탄) 스판 부츠컷 코튼 팬츠","cost":12000.0,"key":"(노컷진72탄)"},{"name":"부츠컷 코튼 포켓 바지 (P2670)","cost":13000.0,"key":"(P2670)"},{"name":"(올데이팬츠13탄) 세미부츠컷 스판 와이드 밴딩 트레이닝 팬츠","cost":15000.0,"key":"(올데이팬츠13탄)"},{"name":"포켓 스판 부츠컷 (P2669)","cost":15000.0,"key":"(P2669)"},{"name":"(올데이슬랙스7탄) 밴딩 와이드핏 슬랙스","cost":15000.0,"key":"(올데이슬랙스7탄)"},{"name":"골반뽕 부츠컷 스판 절개 팬츠 (P2668)","cost":12500.0,"key":"(P2668)"},{"name":"와이드핏 포켓 절개 데님 팬츠 (J2634)","cost":17000.0,"key":"(J2634)"},{"name":"H라인 뒷트임 코튼 스커트 (SK2608)","cost":15000.0,"key":"(SK2608)"},{"name":"투웨이 와이드 밴딩 트레이닝팬츠 (P2667)","cost":12000.0,"key":"(P2667)"},{"name":"골반뽕 부츠컷 생지 청바지 (J2633)","cost":16000.0,"key":"(J2633)"},{"name":"생지 절개 와이드핏 청바지 (J2632)","cost":12500.0,"key":"(J2632)"},{"name":"(올데이팬츠12탄) 와이드핏 투웨이 트레이닝 팬츠","cost":16500.0,"key":"(올데이팬츠12탄)"},{"name":"(또입진2탄) 와이드핏 포켓 데님 팬츠","cost":14000.0,"key":"(또입진2탄)"},{"name":"(찐코튼9탄) 세미와이드핏 코튼 팬츠","cost":13000.0,"key":"(찐코튼9탄)"},{"name":"밴딩 스판 청바지 (J2631)","cost":18000.0,"key":"(J2631)"},{"name":"A라인 포켓 트레이닝 치마 (SK2607)","cost":12000.0,"key":"(SK2607)"},{"name":"부츠컷 밴딩 트레이닝 바지 (P2666)","cost":12000.0,"key":"(P2666)"},{"name":"(또입진6탄) 와이드핏 워싱 포켓 청바지","cost":14000.0,"key":"(또입진6탄)"},{"name":"(올데이팬츠11탄) 부츠컷 밴딩 트레이닝 팬츠","cost":12000.0,"key":"(올데이팬츠11탄)"},{"name":"부츠컷 골반뽕 스판 바지 (J2630)","cost":13500.0,"key":"(J2630)"},{"name":"코듀로이 데님 부츠컷 팬츠 (J2629)","cost":13500.0,"key":"(J2629)"},{"name":"(올데이슬랙스3탄) 세미와이드 부츠컷 스판 슬랙스","cost":14000.0,"key":"(올데이슬랙스3탄)"},{"name":"(노컷진53탄) 생지 스판 카프리팬츠","cost":16000.0,"key":"(노컷진53탄)"},{"name":"(찐코튼4탄) 절개 부츠컷 코튼 바지","cost":12500.0,"key":"(찐코튼4탄)"},{"name":"포켓 코튼 부츠컷 팬츠 (P2665)","cost":13500.0,"key":"(P2665)"},{"name":"남성 커브드핏 청바지 (MJ2623)","cost":14500.0,"key":"(MJ2623)"},{"name":"남자 포켓 커브드 데님 청바지 (MJ2622)","cost":15000.0,"key":"(MJ2622)"},{"name":"와이드 핀턱 데님팬츠 (MJ2620)","cost":13500.0,"key":"(MJ2620)"},{"name":"부츠컷 생지 스판 청바지 (J2628)","cost":13500.0,"key":"(J2628)"},{"name":"(또입진맨즈2탄) 와이드핏 밴딩 워싱 청바지","cost":14000.0,"key":"(또입진맨즈2탄)"},{"name":"남자 생지 커브드핏 청바지 (MJ2621)","cost":13000.0,"key":"(MJ2621)"},{"name":"(노컷진51탄) 부츠컷 생지 밴딩 청바지","cost":14000.0,"key":"(노컷진51탄)"},{"name":"(노컷진29탄) 와이드핏 생지 청바지","cost":14000.0,"key":"(노컷진29탄)"},{"name":"(노컷진30탄) 밴딩 절개 청바지","cost":14000.0,"key":"(노컷진30탄)"},{"name":"남성 뒷밴딩 와이드핏 슬랙스 (MS2607)","cost":13000.0,"key":"(MS2607)"},{"name":"남성 스판 테이퍼드 슬랙스 (MS2606)","cost":9000.0,"key":"(MS2606)"},{"name":"남성 뒷밴딩 세미와이드 코튼팬츠(MP2642)","cost":13000.0,"key":"(MP2642)"},{"name":"남성 워싱 세미와이드핏 청바지 (MJ2618)","cost":14000.0,"key":"(MJ2618)"},{"name":"남성 밴딩 세미와이드 청바지(MJ2619)","cost":10500.0,"key":"(MJ2619)"},{"name":"남성 여름 나일론 와이드팬츠(MP2641)","cost":9000.0,"key":"(MP2641)"},{"name":"여성 카브라 커브드핏 팬츠 (P2664)","cost":7000.0,"key":"(P2664)"},{"name":"(노컷진24탄) 일자 배기핏 밴딩 청바지","cost":11000.0,"key":"(노컷진24탄)"},{"name":"(노컷진8탄) 생지 배기핏 밴딩 청바지","cost":11000.0,"key":"(노컷진8탄)"},{"name":"밴딩 스판 배기핏 팬츠 (P2663)","cost":11000.0,"key":"(P2663)"},{"name":"(노컷진2탄) 스판 밴딩 와이드핏 청바지","cost":12000.0,"key":"(노컷진2탄)"},{"name":"(찐코튼3탄) 와이드핏 밴딩 스판 팬츠","cost":12000.0,"key":"(찐코튼3탄)"},{"name":"여름 A라인 4부 데님 반바지 (J2626)","cost":11500.0,"key":"(J2626)"},{"name":"생지 스판 와이드핏 데님 바지 (J2627)","cost":12000.0,"key":"(J2627)"},{"name":"(여름올데이팬츠10탄) 와이드핏 텐셀 밴딩 팬츠","cost":7000.0,"key":"(여름올데이팬츠10탄)"},{"name":"부츠컷 스판 하이웨스트 슬랙스(S2621)","cost":21000.0,"key":"(S2621)"},{"name":"(여름올데이슬랙스8탄)밴딩 와이드핏 슬랙스","cost":15000.0,"key":"(여름올데이슬랙스8탄)"},{"name":"나일론 배기핏 카프리 팬츠(P2662)","cost":13000.0,"key":"(P2662)"},{"name":"쿨링 배기핏 밴딩 슬랙스(S2620)","cost":13000.0,"key":"(S2620)"},{"name":"(여름올데이슬랙스7탄) 와이드핏 스판 슬랙스","cost":12000.0,"key":"(여름올데이슬랙스7탄)"},{"name":"(여름올데이슬랙스6탄) 부츠컷 스판 슬랙스","cost":12000.0,"key":"(여름올데이슬랙스6탄)"},{"name":"(여름올데이팬츠9탄) 와이드핏 트레이닝 팬츠","cost":13000.0,"key":"(여름올데이팬츠9탄)"},{"name":"(여름올데이팬츠8탄) 부츠컷핏 트레이닝 팬츠","cost":12000.0,"key":"(여름올데이팬츠8탄)"},{"name":"일자핏 쿨 데님 팬츠(J2625)","cost":20000.0,"key":"(J2625)"},{"name":"여름 핀턱 밴딩 슬랙스(S2619)","cost":18000.0,"key":"(S2619)"},{"name":"와이드핏 린넨 밴딩 슬랙스(S2618)","cost":16000.0,"key":"(S2618)"},{"name":"밴딩 스판 하이웨스트 부츠컷 트레이닝 팬츠 (P2661)","cost":11000.0,"key":"(P2661)"},{"name":"핀턱 투웨이 트레이닝 팬츠 (P2660)","cost":7000.0,"key":"(P2660)"},{"name":"(여름노컷슬랙스6탄)부츠컷 스판 밴딩 슬랙스","cost":16000.0,"key":"(여름노컷슬랙스6탄)"},{"name":"여름 부츠컷 스판 쿨 데님 팬츠(J2624)","cost":20000.0,"key":"(J2624)"},{"name":"카브라 뒷밴딩 와이드핏 팬츠(P2659)","cost":20000.0,"key":"(P2659)"},{"name":"더블버튼 버뮤다 반바지 (P2658)","cost":10000.0,"key":"(P2658)"},{"name":"(여름올데이슬랙스5탄) 와이드 슬랙스","cost":21000.0,"key":"(여름올데이슬랙스5탄)"},{"name":"여성 와이드핏 4부 반바지 (P2657)","cost":11000.0,"key":"(P2657)"},{"name":"(여름노컷슬랙스5탄) 부츠컷 밴딩 슬랙스","cost":13000.0,"key":"(여름노컷슬랙스5탄)"},{"name":"(여름노컷슬랙스4탄) 와이드 스판 밴딩 슬랙스","cost":16000.0,"key":"(여름노컷슬랙스4탄)"},{"name":"(여름올데이슬랙스4탄) 스판 와이드 핀턱 슬랙스","cost":14000.0,"key":"(여름올데이슬랙스4탄)"},{"name":"(노컷슬랙스26탄) 부츠컷 스판 밴딩 슬랙스","cost":14000.0,"key":"(노컷슬랙스26탄)"},{"name":"코튼 카고 배기핏 팬츠 (P2656)","cost":9000.0,"key":"(P2656)"},{"name":"(노컷진맨즈7탄) 남성 리오셀 와이드 청바지","cost":15000.0,"key":"(노컷진맨즈7탄)"},{"name":"남성 여름 세미와이드 팬츠 (MP2640)","cost":12000.0,"key":"(MP2640)"},{"name":"남성 여름 밴딩 스판 테이퍼드핏 팬츠 (MP2639)","cost":12000.0,"key":"(MP2639)"},{"name":"워싱 버뮤다 반바지 (MJ2617)","cost":12500.0,"key":"(MJ2617)"},{"name":"(아이스텍2탄) 여름 냉감 와이드핏 워싱 밴딩 청바지","cost":12870.0,"key":"(아이스텍2탄)"},{"name":"(아이스텍1탄) 여름 냉감 와이드핏 스판 밴딩 청바지","cost":12870.0,"key":"(아이스텍1탄)"},{"name":"여름 핀턱 밴딩 반바지 (MP2638)","cost":6000.0,"key":"(MP2638)"},{"name":"경량 버뮤다 트레이닝 반바지 (MP2637)","cost":6000.0,"key":"(MP2637)"},{"name":"(올데이슬랙스맨즈3탄) 남성 세미와이드 밴딩 슬랙스","cost":8000.0,"key":"(올데이슬랙스맨즈3탄)"},{"name":"남성 스판 핀턱 세미와이드 슬랙스 (MS2605)","cost":12000.0,"key":"(MS2605)"},{"name":"(여름올데이슬랙스3탄) 와이드 밴딩 9부 슬랙스","cost":17000.0,"key":"(여름올데이슬랙스3탄)"},{"name":"포켓 뒷밴딩 4부 반바지 (P2655)","cost":18000.0,"key":"(P2655)"},{"name":"(냉장고바지25탄) 여름 나일론 반바지","cost":9000.0,"key":"(냉장고바지25탄)"},{"name":"(냉장고바지24탄) 카고 4부 반바지","cost":3500.0,"key":"(냉장고바지24탄)"},{"name":"와이드 스판 치마바지 (P2654)","cost":5000.0,"key":"(P2654)"},{"name":"와이드 A라인 치마바지 (P2653)","cost":6000.0,"key":"(P2653)"},{"name":"(냉장고바지23탄)  나일론 밴딩 A라인 치마바지","cost":6000.0,"key":"(냉장고바지23탄)"},{"name":"여름 핀턱 5부 반바지 (P2652)","cost":6000.0,"key":"(P2652)"},{"name":"생지 7부 카프리 팬츠 (J2623)","cost":18000.0,"key":"(J2623)"},{"name":"(올데이팬츠10탄) 카펜터 버뮤다 반바지","cost":6500.0,"key":"(올데이팬츠10탄)"},{"name":"(냉장고바지8탄) 나일론 5부 반바지","cost":5000.0,"key":"(냉장고바지8탄)"},{"name":"(냉장고바지4탄) 나일론 A라인 치마바지","cost":6000.0,"key":"(냉장고바지4탄)"},{"name":"골반뽕 스판 카프리 팬츠 (P2651)","cost":13000.0,"key":"(P2651)"},{"name":"(여름노컷진18탄) 2기장 버뮤다 워싱 절개 데님 반바지","cost":11000.0,"key":"(여름노컷진18탄)"},{"name":"(여름노컷진맨즈1탄) 와이드 데님 팬츠","cost":14500.0,"key":"(여름노컷진맨즈1탄)"},{"name":"남성 뒷밴딩 세미와이드 데님 팬츠 (MJ2616)","cost":14500.0,"key":"(MJ2616)"},{"name":"남성 밴딩 코튼 버뮤다 반바지 (MP2636)","cost":13000.0,"key":"(MP2636)"},{"name":"(올데이팬츠9탄) 여성 버뮤다 트레이닝 팬츠","cost":11000.0,"key":"(올데이팬츠9탄)"},{"name":"(올데이팬츠8탄) 여성 밴딩 스판 A라인 트레이닝 스커트","cost":8000.0,"key":"(올데이팬츠8탄)"},{"name":"(여름올데이팬츠7탄) 린넨 핀턱 팬츠","cost":14000.0,"key":"(여름올데이팬츠7탄)"},{"name":"여성 린넨 와이드 팬츠 (P2650)","cost":21000.0,"key":"(P2650)"},{"name":"여성 코튼 버뮤다 반바지 (P2649)","cost":18000.0,"key":"(P2649)"},{"name":"여성 나일론 커브드핏 팬츠 (P2648)","cost":11500.0,"key":"(P2648)"},{"name":"커브드핏 절개 코튼 팬츠 (P2647)","cost":9000.0,"key":"(P2647)"},{"name":"절개 와이드핏 데님 팬츠 (J2622)","cost":12500.0,"key":"(J2622)"},{"name":"(노컷진90탄) 2기장 워싱 와이드 데님 팬츠","cost":12500.0,"key":"(노컷진90탄)"},{"name":"(노컷진89탄) 2기장 워싱 부츠컷 청바지","cost":12500.0,"key":"(노컷진89탄)"},{"name":"(여름노컷진17탄) 여름 워싱 부츠컷 청바지","cost":12500.0,"key":"(여름노컷진17탄)"},{"name":"(냉장고바지22탄) 바스락 밴딩 반바지","cost":8000.0,"key":"(냉장고바지22탄)"},{"name":"더블 포켓 버뮤다 반바지 (P2646)","cost":8000.0,"key":"(P2646)"},{"name":"여성 사이드 절개 청바지 (J2621)","cost":12500.0,"key":"(J2621)"},{"name":"(여름노컷진16탄) 여름 데님 워싱 청바지","cost":12500.0,"key":"(여름노컷진16탄)"},{"name":"(여름찐코튼17탄) 여름 코튼 바지","cost":8000.0,"key":"(여름찐코튼17탄)"},{"name":"여름 5부 버뮤다 슬랙스 (S2617)","cost":17000.0,"key":"(S2617)"},{"name":"여성 5부 버뮤다 슬랙스 (S2616)","cost":17000.0,"key":"(S2616)"},{"name":"여성 린넨 4부 반바지 (P2645)","cost":5000.0,"key":"(P2645)"},{"name":"핀턱 밴딩 배기핏 팬츠 (P2644)","cost":4000.0,"key":"(P2644)"},{"name":"투웨이 와이드 카고 밴딩 트레이닝 팬츠 (P2643)","cost":7000.0,"key":"(P2643)"},{"name":"스트라이프 밴딩 절개 와이드 팬츠 (P2642)","cost":7000.0,"key":"(P2642)"},{"name":"린넨 핀턱 와이드 바지 (P2641)","cost":6000.0,"key":"(P2641)"},{"name":"밴딩 5부 데님 반바지 (J2620)","cost":16000.0,"key":"(J2620)"},{"name":"여름 밴딩 핀턱 논페이드 생지 반바지 (J2619)","cost":16000.0,"key":"(J2619)"},{"name":"부츠컷 고스판 슬랙스 (S2615)","cost":17000.0,"key":"(S2615)"},{"name":"남성 냉감 세미와이드 팬츠 (MP2633)","cost":10000.0,"key":"(MP2633)"},{"name":"남성 스트레이트핏 정장 슬랙스 (MS2604)","cost":13000.0,"key":"(MS2604)"},{"name":"남성 바스락 세미와이드 팬츠 (MP2634)","cost":13000.0,"key":"(MP2634)"},{"name":"와이드핏 밴딩 절개 슬랙스 (S2614)","cost":18000.0,"key":"(S2614)"},{"name":"(여름노컷슬랙스3탄) 여름 부츠컷 밴딩 슬랙스","cost":17000.0,"key":"(여름노컷슬랙스3탄)"},{"name":"커브드핏 카고 트레이닝 바지 (P2640)","cost":12500.0,"key":"(P2640)"},{"name":"4부 A라인 코튼 반바지 (J2618)","cost":9000.0,"key":"(J2618)"},{"name":"남성 코튼 세미와이드 팬츠 (MP2635)","cost":4000.0,"key":"(MP2635)"},{"name":"남성 바스락 방수 팬츠 (MP2632)","cost":13000.0,"key":"(MP2632)"},{"name":"남성 나일론 버뮤다 반바지 (MP2631)","cost":13000.0,"key":"(MP2631)"},{"name":"(여름올데이팬츠4탄) 쿨링 트레이닝 바지","cost":12000.0,"key":"(여름올데이팬츠4탄)"},{"name":"(냉장고바지맨즈2탄) 남성 카고 와이드 팬츠","cost":14500.0,"key":"(냉장고바지맨즈2탄)"},{"name":"(여름노컷슬랙스2탄) 와이드핏 투핀턱 냉감 슬랙스","cost":11500.0,"key":"(여름노컷슬랙스2탄)"},{"name":"조거핏 모달 팬츠 (P2639)","cost":15000.0,"key":"(P2639)"},{"name":"A라인 4부 밴딩 데님 반바지 (J2617)","cost":11500.0,"key":"(J2617)"},{"name":"남성 뒷밴딩 버뮤다 반바지 (MJ2614)","cost":12500.0,"key":"(MJ2614)"},{"name":"남성 밴딩 스판 핀턱 와이드 팬츠 (MP2630)","cost":16000.0,"key":"(MP2630)"},{"name":"남성 핀턱 5부 반바지 (MP2629)","cost":13500.0,"key":"(MP2629)"},{"name":"남성 쿨링 5부 반바지 (MP2628)","cost":9500.0,"key":"(MP2628)"},{"name":"(여름노컷진15탄) 리오셀 부츠컷 청바지","cost":14000.0,"key":"(여름노컷진15탄)"},{"name":"(여름올데이팬츠3탄) 여름 쿨링 와이드핏 팬츠","cost":9500.0,"key":"(여름올데이팬츠3탄)"},{"name":"(여름노컷슬랙스1탄) 핀턱 냉감 와이드 슬랙스","cost":12000.0,"key":"(여름노컷슬랙스1탄)"},{"name":"절개 스트라이프 청바지 (J2616)","cost":10000.0,"key":"(J2616)"},{"name":"배기핏 9부 밴딩 슬랙스 (S2613)","cost":20000.0,"key":"(S2613)"},{"name":"남성 절개 버뮤다 반바지 (MJ2615)","cost":13000.0,"key":"(MJ2615)"},{"name":"(여름찐코튼16탄) 부츠컷핏 코튼 팬츠","cost":13000.0,"key":"(여름찐코튼16탄)"},{"name":"밴딩 4부 반바지 (P2636)","cost":5500.0,"key":"(P2636)"},{"name":"(여름올데이팬츠5탄) 아이스 밴딩 와이드 팬츠 (P2637)","cost":9500.0,"key":"(여름올데이팬츠5탄)"},{"name":"여성 A라인 밴딩 반바지 (P2638)","cost":8000.0,"key":"(P2638)"},{"name":"(노컷진88탄) 골반뽕 밴딩 부츠컷 청바지","cost":14500.0,"key":"(노컷진88탄)"},{"name":"(여름찐코튼15탄) 밴딩 와이드핏 코튼 바지","cost":14000.0,"key":"(여름찐코튼15탄)"},{"name":"(여름찐코튼14탄) 여름 부츠컷 코튼 바지","cost":13000.0,"key":"(여름찐코튼14탄)"},{"name":"쿨링 스판 일자핏 슬랙스 (S2612)","cost":17000.0,"key":"(S2612)"},{"name":"쿨링 스판 와이드핏 슬랙스 (S2611)","cost":18000.0,"key":"(S2611)"},{"name":"여성 바스락 카고 밴딩 스트링 스커트 (SK2606)","cost":13500.0,"key":"(SK2606)"},{"name":"(여름노컷진14탄) 논페이드 생지 절개 스판 밴딩 청바지","cost":14000.0,"key":"(여름노컷진14탄)"},{"name":"(여름노컷진13탄) 리오셀 와이드핏 밴딩 청바지","cost":14000.0,"key":"(여름노컷진13탄)"},{"name":"(여름노컷진12탄) 린넨 와이드 데님 팬츠","cost":14000.0,"key":"(여름노컷진12탄)"},{"name":"(여름노컷진11탄) 투웨이 와이드 데님 팬츠","cost":14000.0,"key":"(여름노컷진11탄)"},{"name":"(냉장고바지21탄) 링클프리 반바지","cost":5000.0,"key":"(냉장고바지21탄)"},{"name":"남자 스판 밴딩 테이퍼드핏 쿨 슬랙스 (MS2603)","cost":8500.0,"key":"(MS2603)"},{"name":"H라인 뒷트임 밴딩 스커트 (SK2605)","cost":13000.0,"key":"(SK2605)"},{"name":"여름 아이스 밴딩 와이드 팬츠 (P2635)","cost":10000.0,"key":"(P2635)"},{"name":"여름 밴딩 스판 와이드 플리츠 팬츠 (P2634)","cost":9000.0,"key":"(P2634)"},{"name":"A라인 코튼 반바지 (P2633)","cost":10000.0,"key":"(P2633)"},{"name":"(여름올데이팬츠1탄) 와이드핏 스판 냉감 밴딩 트레이닝 바지","cost":12000.0,"key":"(여름올데이팬츠1탄)"},{"name":"워싱 플레어핏 청바지 (MJ2613)","cost":14000.0,"key":"(MJ2613)"},{"name":"투핀턱 와이드핏 스판 슬랙스 (S2608)","cost":20000.0,"key":"(S2608)"},{"name":"(노컷슬랙스25탄) 투핀턱 와이드 비조 슬랙스","cost":12000.0,"key":"(노컷슬랙스25탄)"},{"name":"(냉장고바지20탄) 와이드 냉감 투웨이 바지","cost":11500.0,"key":"(냉장고바지20탄)"},{"name":"세미와이드핏 올밴딩 슬랙스 (S2610)","cost":15000.0,"key":"(S2610)"},{"name":"2기장 스판 밴딩 부츠컷 슬랙스 (S2609)","cost":20000.0,"key":"(S2609)"},{"name":"남성 스판 밴딩 투핀턱 와이드핏 테이퍼드 팬츠 (MP2627)","cost":12000.0,"key":"(MP2627)"},{"name":"5컬러 와이드핏 팬츠 (MP2626)","cost":24000.0,"key":"(MP2626)"},{"name":"밴딩 와이드핏 코튼 팬츠 (MP2625)","cost":25000.0,"key":"(MP2625)"},{"name":"핀턱 커브드 코튼 팬츠 (MP2624)","cost":27000.0,"key":"(MP2624)"},{"name":"(냉장고바지19탄) 쿨링 스판 와이드핏 팬츠","cost":9000.0,"key":"(냉장고바지19탄)"},{"name":"(냉장고바지18탄) 여름 바스락 밴딩 핀턱 버뮤다 치마바지","cost":6000.0,"key":"(냉장고바지18탄)"},{"name":"나일론 파라슈트 트레이닝 팬츠 (P2632)","cost":7000.0,"key":"(P2632)"},{"name":"시어서커 스트라이프 와이드 팬츠 (P2631)","cost":10000.0,"key":"(P2631)"},{"name":"(에어핏11탄) 리오셀 기본핏 반팔 티셔츠","cost":9000.0,"key":"(에어핏11탄)"},{"name":"(노컷슬랙스24탄) 와이드 투핀턱 스판 슬랙스","cost":17000.0,"key":"(노컷슬랙스24탄)"},{"name":"(냉장고바지17탄) 여름 8부 밴딩 배기 바지","cost":12000.0,"key":"(냉장고바지17탄)"},{"name":"(냉장고바지16탄) 여름 바스락 밴딩 반바지","cost":9000.0,"key":"(냉장고바지16탄)"},{"name":"(여름올데이슬랙스1탄) 여름 밴딩 스판 핀턱 와이드 슬랙스","cost":20000.0,"key":"(여름올데이슬랙스1탄)"},{"name":"밴딩 여름 와이드 팬츠 (MP2623)","cost":10500.0,"key":"(MP2623)"},{"name":"밴딩 테이퍼드 팬츠 (MP2622)","cost":13000.0,"key":"(MP2622)"},{"name":"남성 스판 밴딩 워싱 와이드핏 청바지 (MJ2612)","cost":14500.0,"key":"(MJ2612)"},{"name":"남성 스판 밴딩 와이드핏 슬랙스 (MS2602)","cost":15000.0,"key":"(MS2602)"},{"name":"(냉장고바지15탄) 카고 밴딩 버뮤다 치마바지","cost":7000.0,"key":"(냉장고바지15탄)"},{"name":"(올데이슬랙스26탄) 골반뽕 밴딩 와이드 슬랙스","cost":19000.0,"key":"(올데이슬랙스26탄)"},{"name":"(올데이슬랙스24탄) 부츠컷 스판 밴딩 슬랙스","cost":12000.0,"key":"(올데이슬랙스24탄)"},{"name":"(여름올데이슬랙스2탄) 밴딩  핀턱 데님 와이드 슬랙스","cost":21000.0,"key":"(여름올데이슬랙스2탄)"},{"name":"(올데이팬츠7탄) 소프트 스판 와이드 바지","cost":21600.0,"key":"(올데이팬츠7탄)"},{"name":"와이드핏 뒷밴딩 슬랙스 (S2607)","cost":18000.0,"key":"(S2607)"},{"name":"봄 와이드 밴딩 팬츠 (P2630)","cost":22000.0,"key":"(P2630)"},{"name":"밴딩 앞포켓 세미와이드 청바지 (J2615)","cost":22000.0,"key":"(J2615)"},{"name":"와이드 스판 슬랙스 (S2606)","cost":14000.0,"key":"(S2606)"},{"name":"여성 밴딩 와이드 팬츠 (P2629)","cost":16000.0,"key":"(P2629)"},{"name":"여름 린넨 밴딩 와이드핏 바지 (P2625)","cost":14000.0,"key":"(P2625)"},{"name":"스트라이프 밴딩 와이드 팬츠 (P2628)","cost":3500.0,"key":"(P2628)"},{"name":"린넨 투핀턱 와이드 바지 (P2626)","cost":11000.0,"key":"(P2626)"},{"name":"뒷밴딩 버뮤다 청반바지 (J2614)","cost":19000.0,"key":"(J2614)"},{"name":"뒷밴딩 배기 데님 팬츠 (J2613)","cost":19000.0,"key":"(J2613)"},{"name":"(올데이슬랙스25탄) 여성 와이드 스판 뒷밴딩 핀턱 슬랙스","cost":7000.0,"key":"(올데이슬랙스25탄)"},{"name":"남성 워싱 스판 세미와이드 청바지 (MJ2611)","cost":29800.0,"key":"(MJ2611)"},{"name":"연청 스판 세마와이드 청바지 (MJ2610)","cost":31000.0,"key":"(MJ2610)"},{"name":"남성 생지 스판 세미와이드 청바지 (MJ2609)","cost":27600.0,"key":"(MJ2609)"},{"name":"카키 세미와이드 청바지 (MJ2608)","cost":29000.0,"key":"(MJ2608)"},{"name":"스판 와이드 팬츠 (MP2621)","cost":15000.0,"key":"(MP2621)"},{"name":"(에어핏10탄) 링클프리 루즈핏 반팔 티셔츠","cost":10000.0,"key":"(에어핏10탄)"},{"name":"(에어핏9탄) 링클프리 기본핏 반팔 티셔츠","cost":10000.0,"key":"(에어핏9탄)"},{"name":"(에어핏8탄) 모달 라운드넥 반팔 티셔츠","cost":9800.0,"key":"(에어핏8탄)"},{"name":"(에어핏7탄) 찰랑 브이넥 리오셀 반팔","cost":9000.0,"key":"(에어핏7탄)"},{"name":"(에어핏6탄) 찰랑 유넥 리오셀 반팔","cost":9000.0,"key":"(에어핏6탄)"},{"name":"(에어핏5탄) 슬림핏 라운드넥 리오셀 반팔","cost":7800.0,"key":"(에어핏5탄)"},{"name":"(에어핏4탄) 라운드넥 스판 기본핏 반팔","cost":9800.0,"key":"(에어핏4탄)"},{"name":"(에어핏3탄) 슬림핏 브이넥  리오셀 반팔","cost":7800.0,"key":"(에어핏3탄)"},{"name":"(에어핏2탄) 슬림핏 유넥 리오셀 반팔","cost":7800.0,"key":"(에어핏2탄)"},{"name":"(에어핏1탄)라운드넥 슬림핏 스판 민소매 나시","cost":5800.0,"key":"(에어핏1탄)"},{"name":"(찐코튼23탄) 여성 밴딩 스판 부츠컷 청바지","cost":12500.0,"key":"(찐코튼23탄)"},{"name":"(찐코튼12탄) 스판 와이드 팬츠","cost":12500.0,"key":"(찐코튼12탄)"},{"name":"스판 밴딩 핀턱 와이드 트레이닝 팬츠 (P2624)","cost":6000.0,"key":"(P2624)"},{"name":"와이드 밴딩 절개 스판 팬츠 (P2623)","cost":6500.0,"key":"(P2623)"},{"name":"밴딩 스판 핀턱 와이드 슬랙스 (S2604)","cost":18000.0,"key":"(S2604)"},{"name":"(올데이슬랙스23탄) 부츠컷 슬랙스","cost":19000.0,"key":"(올데이슬랙스23탄)"},{"name":"여성 밴딩 스판 일자핏 슬랙스 (S2603)","cost":19000.0,"key":"(S2603)"},{"name":"와이드핏 뒷밴딩 스판 팬츠 (P2622)","cost":22000.0,"key":"(P2622)"},{"name":"면 뒷밴딩 와이드 팬츠 (P2621)","cost":21000.0,"key":"(P2621)"},{"name":"와이드 사이드 핀턱 바지 (P2620)","cost":22000.0,"key":"(P2620)"},{"name":"뒷밴딩 와이드 슬랙스 (P2619)","cost":21000.0,"key":"(P2619)"},{"name":"스판 뒷밴딩 배기바지 (P2616)","cost":25000.0,"key":"(P2616)"},{"name":"[와디즈] 포레스트핏 냉감팬츠","cost":13700.0,"key":""},{"name":"스판 코튼 배기 팬츠 (P2618)","cost":23000.0,"key":"(P2618)"},{"name":"밴딩 코튼 배기 바지 (P2615)","cost":23000.0,"key":"(P2615)"},{"name":"여성 봄 니트 와이드 팬츠 (P2617)","cost":25000.0,"key":"(P2617)"},{"name":"A라인 데님 스커트 (SK2602)","cost":12000.0,"key":"(SK2602)"},{"name":"여성 밴딩 스판 투핀턱 와이드 슬랙스 (S2601)","cost":22000.0,"key":"(S2601)"},{"name":"와이드 인밴딩 슬랙스 (S2602)","cost":18000.0,"key":"(S2602)"},{"name":"여성 버뮤다 반바지 (J2612)","cost":12000.0,"key":"(J2612)"},{"name":"남자 바람막이 맨투맨 (T2601)","cost":16000.0,"key":"(T2601)"},{"name":"플레어핏 절개 청바지 (J2611)","cost":14000.0,"key":"(J2611)"},{"name":"(여름찐스판맨즈1탄) 남자 냉감 와이드 청바지","cost":14500.0,"key":"(여름찐스판맨즈1탄)"},{"name":"(냉장고바지12탄)  바스락 밴딩 반바지","cost":7000.0,"key":"(냉장고바지12탄)"},{"name":"(냉장고바지10탄) 3부 바스락 반바지","cost":7000.0,"key":"(냉장고바지10탄)"},{"name":"(노컷진66탄) 여성 밴딩 스판 부츠컷 청바지","cost":12500.0,"key":"(노컷진66탄)"},{"name":"(냉장고바지13탄) 남녀공용 밴딩 나일론 핀턱 버뮤다 반바지","cost":6000.0,"key":"(냉장고바지13탄)"},{"name":"(냉장고바지14탄) 여성 바스락 밴딩 반바지","cost":6000.0,"key":"(냉장고바지14탄)"},{"name":"(냉장고바지1탄) 냉감 카고 조거 바지","cost":10000.0,"key":"(냉장고바지1탄)"},{"name":"2기장 골반뽕 스판 밴딩 일자 팬츠 (P2614)","cost":12500.0,"key":"(P2614)"},{"name":"와이드 스트라이프 코튼 팬츠 (P2613)","cost":15000.0,"key":"(P2613)"},{"name":"남자 핀턱 트레이닝 바지 (MP2620)","cost":12000.0,"key":"(MP2620)"},{"name":"스판 밴딩 절개 배기 바지 (MP2617)","cost":14000.0,"key":"(MP2617)"},{"name":"나일론 카고 와이드 바지 (MP2616)","cost":13000.0,"key":"(MP2616)"},{"name":"나일론 카펜터 밴딩 바지 (MP2612)","cost":12500.0,"key":"(MP2612)"},{"name":"(올데이팬츠6탄) 핀턱 나일론 트레이닝 팬츠","cost":9500.0,"key":"(올데이팬츠6탄)"},{"name":"여성 밴딩 스판 절개 투웨이 트레이닝 팬츠 (P2610)","cost":12000.0,"key":"(P2610)"},{"name":"남성 밴딩 핀턱 버뮤다 반바지 (MJ2607)","cost":10500.0,"key":"(MJ2607)"},{"name":"남성 밴딩 카고 버뮤다 반바지 (MJ2605)","cost":11000.0,"key":"(MJ2605)"},{"name":"와이드 바스락 나일론 파라슈트 트레이닝 바지 (P2611)","cost":9500.0,"key":"(P2611)"},{"name":"와이드 바스락 나일론 카고 파라슈트 트레이닝 바지 (P2612)","cost":9500.0,"key":"(P2612)"},{"name":"남성 밴딩 세미와이드 데님 팬츠 (MJ2606)","cost":12000.0,"key":"(MJ2606)"},{"name":"남성 밴딩 와이드 데님 팬츠 (MJ2602)","cost":13000.0,"key":"(MJ2602)"},{"name":"(찐코튼43탄) 여성 세미와이드 사이드절개 코튼 팬츠","cost":12000.0,"key":"(찐코튼43탄)"},{"name":"(올데이팬츠5탄) 카고 트레이닝 팬츠","cost":11000.0,"key":"(올데이팬츠5탄)"},{"name":"밴딩 스테이퍼드 청바지 (MJ2603)","cost":13500.0,"key":"(MJ2603)"},{"name":"스판 포켓 절개 배기바지 (MP2615)","cost":16000.0,"key":"(MP2615)"},{"name":"여성 스트라이프 와이드 데님 팬츠 (J2610)","cost":14000.0,"key":"(J2610)"},{"name":"여성 밀리터리 카모 절개 투웨이 팬츠 (P2609)","cost":17500.0,"key":"(P2609)"},{"name":"(노컷진맨즈6탄) 남자 3기장 밴딩 청바지","cost":13500.0,"key":"(노컷진맨즈6탄)"},{"name":"(올데이슬랙스22탄) 밴딩 스판 일자 와이드 슬랙스","cost":19000.0,"key":"(올데이슬랙스22탄)"},{"name":"벌룬핏 절개 데님 팬츠 (J2609)","cost":14000.0,"key":"(SJS26001)"},{"name":"여성 커브드 벌룬핏 워싱 청바지 (J2608)","cost":13000.0,"key":"(J2608)"},{"name":"남성 밴딩 핀턱 버뮤다 트레이닝 반바지 (MP2618)","cost":10500.0,"key":"(MP2618)"},{"name":"남성 밴딩 스판 카고 조거핏 팬츠 (MP2619)","cost":13500.0,"key":"(MP2619)"},{"name":"(노컷슬랙스맨즈3탄) 남성 옆밴딩 스판 테이퍼드 슬랙스","cost":11000.0,"key":"(노컷슬랙스맨즈3탄)"},{"name":"커브드핏 스터드 데님 팬츠 (J2607)","cost":14000.0,"key":"(J2607)"},{"name":"(올데이팬츠3탄) 남녀공용 밴딩 스판 세미와이드 트레이닝 팬츠","cost":10500.0,"key":"(올데이팬츠3탄)"},{"name":"남성 핀턱 테이퍼드 팬츠 (MP2608)","cost":8500.0,"key":"(MP2608)"},{"name":"카펜터 치노 바지 (MP2609)","cost":18500.0,"key":"(MP2609)"},{"name":"나일론 밴딩 와이드 바지 (MP2610)","cost":14000.0,"key":"(MP2610)"},{"name":"남성 투핀턱 밴딩 스판 와이드 청바지 (MJ2604)","cost":8000.0,"key":"(MJ2604)"},{"name":"남성 스판 밴딩 조거 트레이닝 팬츠 (MP2614)","cost":8500.0,"key":"(MP2614)"},{"name":"남성 와이드핏 슬랙스 (MS2601)","cost":8500.0,"key":"(MS2601)"},{"name":"(올데이슬랙스21탄) 뒷밴딩 스판 핀턱 와이드 슬랙스","cost":13000.0,"key":"(올데이슬랙스21탄)"},{"name":"(찐코튼41탄) 여성 스판 뒷밴딩 세미와이드 팬츠","cost":13000.0,"key":"(찐코튼41탄)"},{"name":"투웨이 밴딩 핀턱 트레이닝 팬츠 (P2604)","cost":14000.0,"key":"(P2604)"},{"name":"남성 벌룬핏 절개 바지 (MP2603)","cost":9000.0,"key":"(MP2603)"},{"name":"남성 밴딩 조거핏 팬츠 (MP2613)","cost":8500.0,"key":"(MP2613)"},{"name":"남성 밴딩 스판 와이드 트레이닝 팬츠 (MP2611)","cost":11000.0,"key":"(MP2611)"},{"name":"남녀공용 쿨링 밴딩 와이드 팬츠 (P2608)","cost":6000.0,"key":"(P2608)"},{"name":"남녀공용 쿨링 카고 밴딩 팬츠 (P2607)","cost":6500.0,"key":"(P2607)"},{"name":"스판 조거 바지 (MP2604)","cost":9500.0,"key":"(MP2604)"},{"name":"남성 세미와이드 트레이닝 팬츠 (MP2607)","cost":8500.0,"key":"(MP2607)"},{"name":"남성 밴딩 스판 세미와이드 팬츠 (MP2606)","cost":7000.0,"key":"(MP2606)"},{"name":"남성 투웨이 밴딩 와이드 트레이닝 팬츠 (MP2605)","cost":8500.0,"key":"(MP2605)"},{"name":"(찐코튼42탄) 핀턱 절개 와이드 면바지","cost":13000.0,"key":"(찐코튼42탄)"},{"name":"파라슈트 카고 와이드 트레이닝 팬츠 (P2605)","cost":13000.0,"key":"(P2605)"},{"name":"(찐코튼맨즈1탄) 뒷밴딩 스판 와이드 코튼 팬츠","cost":15000.0,"key":"(찐코튼맨즈1탄)"},{"name":"(노컷진맨즈5탄) 남성 뒷밴딩 와이드 데님 팬츠","cost":13500.0,"key":"(노컷진맨즈5탄)"},{"name":"남자 밴딩 조거 바지 (MP2602)","cost":8500.0,"key":"(MP2602)"},{"name":"남성 코듀로이 팬츠 (MP2601)","cost":8000.0,"key":"(MP2601)"},{"name":"(노컷슬랙스맨즈2탄) 남성 링클프리 테이퍼드 슬랙스","cost":10500.0,"key":"(노컷슬랙스맨즈2탄)"},{"name":"생지 포켓 와이드 청바지 (J2605)","cost":16000.0,"key":"(J2605)"},{"name":"남성 밴딩 생지 청바지 (MJ2601)","cost":14500.0,"key":"(MJ2601)"},{"name":"(올데이팬츠1탄) 여성 절개 밴딩 스판 트레이닝 팬츠","cost":8000.0,"key":"(올데이팬츠1탄)"},{"name":"(노컷슬랙스23탄) 핀턱 와이드 스판 뒷밴딩 슬랙스","cost":13500.0,"key":"(노컷슬랙스23탄)"},{"name":"(찐코튼40탄) 여성 와이드 플레어핏 2기장 코튼 팬츠","cost":13000.0,"key":"(찐코튼40탄)"},{"name":"와이드 절개 투웨이 데님팬츠 (J2606)","cost":15000.0,"key":"(J2606)"},{"name":"(올데이슬랙스10탄) 링클프리 핀턱 스판 밴딩 와이드 슬랙스","cost":12000.0,"key":"(올데이슬랙스10탄)"},{"name":"(올데이팬츠2탄) 밴딩 스판 세미와이드 트레이닝 팬츠","cost":8000.0,"key":"(올데이팬츠2탄)"},{"name":"(노컷진64탄) 밴딩 벌룬 청바지","cost":14000.0,"key":"(노컷진64탄)"},{"name":"(찐코튼39탄) 여성 투웨이 와이드 바지","cost":17000.0,"key":"(찐코튼39탄)"},{"name":"(노컷진65탄) 워싱 와이드 팬츠","cost":12500.0,"key":"(노컷진65탄)"},{"name":"(노컷슬랙스15탄) 밴딩 사이드 핀턱 와이드 슬랙스","cost":13500.0,"key":"(노컷슬랙스15탄)"},{"name":"(찐스판3탄) 리오셀 밴딩 와이드 플레어핏 데님","cost":14500.0,"key":"(찐스판3탄)"},{"name":"(찐코튼38탄) 밴딩 절개 와이드 팬츠","cost":12500.0,"key":"(찐코튼38탄)"},{"name":"(노컷진16탄) 절개 와이드 팬츠","cost":13500.0,"key":"(노컷진16탄)"},{"name":"(찐코튼37탄) 밴딩 와이드 팬츠","cost":12000.0,"key":"(찐코튼37탄)"},{"name":"논페이드 생지 부츠컷 청바지 (J2603)","cost":15000.0,"key":"(J2603)"},{"name":"논페이드 생지 스판 부츠컷 청바지 (J2604)","cost":16000.0,"key":"(J2604)"},{"name":"(찐코튼36탄) A라인 반바지","cost":12500.0,"key":"(찐코튼36탄)"},{"name":"(찐코튼35탄) 밴딩 벌룬 커브드 배럴핏 팬츠","cost":13000.0,"key":"(찐코튼35탄)"},{"name":"여성 스판 와이드 부츠컷 밴딩 팬츠 (P2603)","cost":14000.0,"key":"(P2603)"},{"name":"여성 사이드 절개 트레이닝 팬츠 (P2602)","cost":17000.0,"key":"(P2602)"},{"name":"밴딩 뒤트임 트레이닝 스커트 (SK2601)","cost":12000.0,"key":"(SK2601)"},{"name":"(찐코튼34탄) 포켓 와이드 팬츠","cost":13000.0,"key":"(찐코튼34탄)"},{"name":"7부 버뮤다 데님 반바지 (J2602)","cost":13000.0,"key":"(J2602)"},{"name":"(겨울올데이슬랙스12탄) 와이드 팬츠","cost":8500.0,"key":"(겨울올데이슬랙스12탄)"},{"name":"(겨울올데이슬랙스11탄) 기모 와이드 팬츠","cost":8500.0,"key":"(겨울올데이슬랙스11탄)"},{"name":"(여름올데이슬랙스11탄) 와이드 팬츠","cost":8300.0,"key":"(여름올데이슬랙스11탄)"},{"name":"여성 투핀턱 와이드 슬랙스 (P2601)","cost":13000.0,"key":"(P2601)"},{"name":"핀턱 와이드 청바지 (J2601)","cost":13500.0,"key":"(J2601)"},{"name":"(노컷진63탄) 워싱 와이드 청바지","cost":15000.0,"key":"(노컷진63탄)"},{"name":"여성 논페이드 핀턱 와이드 청바지 (J2548)","cost":13500.0,"key":"(J2548)"},{"name":"(노컷진87탄) 2기장 워싱 절개 커브드 청바지","cost":17000.0,"key":"(노컷진87탄)"},{"name":"(찐코튼32탄) 카고 절개 와이드 팬츠","cost":20000.0,"key":"(찐코튼32탄)"},{"name":"(올데이슬랙스20탄) 겨울 기모 밴딩 스판 부츠컷 슬랙스","cost":16000.0,"key":"(올데이슬랙스20탄)"},{"name":"(겨울찐코튼7탄) 핀턱 기모 밴딩 코튼 와이드팬츠","cost":15000.0,"key":"(겨울찐코튼7탄)"},{"name":"(겨울노컷진5탄) 워싱 핀턱 와이드 데님 팬츠","cost":17000.0,"key":"(겨울노컷진5탄)"},{"name":"(노컷진86탄) 밴딩 스판 워싱 와이드 청바지","cost":12000.0,"key":"(노컷진86탄)"},{"name":"(따숩진12탄) 논페이드 기모 부츠컷 청바지","cost":15000.0,"key":"(따숩진12탄)"},{"name":"(노컷진85탄) 투포켓 워싱 와이드 데님 팬츠","cost":18000.0,"key":"(노컷진85탄)"},{"name":"(올데이윈터팬츠15탄) 기모 벨벳 라인 트레이닝 팬츠","cost":7000.0,"key":"(올데이윈터팬츠15탄)"},{"name":"양털 반바지 (P2558)","cost":8000.0,"key":"(P2558)"},{"name":"밴딩 기모 메가와이드 청바지 (J2546)","cost":16000.0,"key":"(J2546)"},{"name":"(겨울노컷진4탄) 기모 밴딩 세미와이드 청바지","cost":14000.0,"key":"(겨울노컷진4탄)"},{"name":"(겨울찐스판9탄) 기모스판 세미와이드 청바지","cost":14500.0,"key":"(겨울찐스판9탄)"},{"name":"생지 융기모 와이드 팬츠 (J2545)","cost":12000.0,"key":"(J2545)"},{"name":"(찐코튼33탄) 코튼 와이드 팬츠 (P2557)","cost":15000.0,"key":"(찐코튼33탄)"},{"name":"남성 밴딩 투핀턱 슬랙스 (MS2514)","cost":15000.0,"key":"(MS2514)"},{"name":"남성 겨울 기모 부츠컷 슬랙스 (MS2512)","cost":14500.0,"key":"(MS2512)"},{"name":"남성 기모 테이퍼드 슬랙스 (MS2515)","cost":11500.0,"key":"(MS2515)"},{"name":"(따숩진13탄) 옆절개 기모 와이드 청바지","cost":14000.0,"key":"(따숩진13탄)"},{"name":"(올데이윈터팬츠13탄) 스판 기모 와이드 팬츠","cost":7500.0,"key":"(올데이윈터팬츠13탄)"},{"name":"여성 커브드 와이드 팬츠 (J2544)","cost":16000.0,"key":"(J2544)"},{"name":"남성 기모 와이드 청바지 (MJ2513)","cost":14500.0,"key":"(MJ2513)"},{"name":"(코듀로이25탄) 겨울 기모 스판 와이드 팬츠","cost":14000.0,"key":"(코듀로이25탄)"},{"name":"(코듀로이24탄) 스판 뒷밴딩 기모 팬츠","cost":23000.0,"key":"(코듀로이24탄)"},{"name":"기모 커브드 벌룬핏 와이드 데님 팬츠 (J2543)","cost":14000.0,"key":"(J2543)"},{"name":"남성 스판 밴딩 사이드 핀턱 투웨이 와이드 슬렉스 (MS2508)","cost":11500.0,"key":"(MS2508)"},{"name":"남성 테이퍼드 청바지 (MJ2514)","cost":16500.0,"key":"(MJ2514)"},{"name":"(코듀로이23탄) 와이드 팬츠","cost":25000.0,"key":"(코듀로이23탄)"},{"name":"(코듀로이22탄) 융기모 배기 팬츠","cost":23000.0,"key":"(코듀로이22탄)"},{"name":"남성 기모 투핀턱 버클 와이드 슬랙스 (MS2511)","cost":18000.0,"key":"(MS2511)"},{"name":"남성 기모 투핀턱 와이드 슬랙스 (MS2510)","cost":17000.0,"key":"(MS2510)"},{"name":"(겨울찐코튼6탄)여성 절개 스판 기모 와이드 팬츠","cost":25000.0,"key":"(겨울찐코튼6탄)"},{"name":"남성 밴딩 정장 슬랙스  (MS2517)","cost":13000.0,"key":"(MS2517)"},{"name":"(겨울찐스판8탄) 밴딩 와이드 데님","cost":14000.0,"key":"(겨울찐스판8탄)"},{"name":"(올데이윈터팬츠12탄) 겨울 기모 카고 투웨이 트레이닝 팬츠","cost":13500.0,"key":"(올데이윈터팬츠12탄)"},{"name":"남성 밴딩 스판 투핀턱 카고 와이드 슬랙스 (MS2513)","cost":13800.0,"key":"(MS2513)"},{"name":"남성 핀턱  와이드 슬랙스 (MS2516)","cost":12500.0,"key":"(MS2516)"},{"name":"남성 기모 치노 바지 (MP2515)","cost":16000.0,"key":"(MP2515)"},{"name":"남성 카고 기모 조거팬츠 (MP2513)","cost":14000.0,"key":"(MP2513)"},{"name":"(노컷진84탄)밴딩 옆절개 와이드 청바지","cost":14500.0,"key":"(노컷진84탄)"},{"name":"남성 기모 밴딩 데님 팬츠 (MJ2515)","cost":12000.0,"key":"(MJ2515)"},{"name":"(올데이윈터팬츠11탄) 밴딩 핀턱 투웨이 와이드 팬츠","cost":15000.0,"key":"(올데이윈터팬츠11탄)"},{"name":"남성 기모 카고 와이드 팬츠 (MP2514)","cost":14500.0,"key":"(MP2514)"},{"name":"(또입진맨즈16탄) 남성 기모 밴딩 데님 팬츠","cost":17000.0,"key":"(또입진맨즈16탄)"},{"name":"여성 밴딩 H라인 롱 니트 스커트 2기장 (SK2509)","cost":9000.0,"key":"(SK2509)"},{"name":"(찐스판15탄) 여성 스판 밴딩 부츠컷 데님 (J2542)","cost":11000.0,"key":"(찐스판15탄)"},{"name":"스판 밴딩 핀턱 투웨이 와이드 트레이닝 팬츠 (P2555)","cost":7000.0,"key":"(P2555)"},{"name":"(올데이윈터팬츠6탄) 밴딩 투웨이 트레이닝 팬츠","cost":16000.0,"key":"(올데이윈터팬츠6탄)"},{"name":"(노컷진83탄) 여성 밴딩 논페이드 와이드 청바지","cost":13500.0,"key":"(노컷진83탄)"},{"name":"남성 스판 밴딩 핀턱 와이드 슬랙스 (MS2509)","cost":10000.0,"key":"(MS2509)"},{"name":"(노컷진맨즈32탄) 남성 투웨이 와이드 청바지","cost":13000.0,"key":"(노컷진맨즈32탄)"},{"name":"(노컷슬랙스맨즈1탄) 남성 스판 뒷밴딩 투핀턱 와이드 슬랙스","cost":12500.0,"key":"(노컷슬랙스맨즈1탄)"},{"name":"(겨울노컷진2탄) 여성 기모 투웨이 와이드 데님 팬츠","cost":15000.0,"key":"(겨울노컷진2탄)"},{"name":"(올데이윈터팬츠7탄) 기모 절개 와이드 청바지","cost":15000.0,"key":"(올데이윈터팬츠7탄)"},{"name":"(올데이윈터팬츠10탄) 밴딩 니트 와이드 팬츠","cost":12000.0,"key":"(올데이윈터팬츠10탄)"},{"name":"(올데이윈터팬츠9탄) 골지 니트 팬츠","cost":9000.0,"key":"(올데이윈터팬츠9탄)"},{"name":"(윈터슬랙스4탄) 여성 투핀턱 와이드 슬랙스","cost":14000.0,"key":"(윈터슬랙스4탄)"},{"name":"(올데이윈터팬츠8탄) 여성 옆절개 기모 와이드 청바지","cost":15000.0,"key":"(올데이윈터팬츠8탄)"},{"name":"(방한팬츠10탄) 카고 와이드 팬츠","cost":19000.0,"key":"(방한팬츠10탄)"},{"name":"(방한팬츠9탄) 기모 밴딩 트레이닝 팬츠","cost":19000.0,"key":"(방한팬츠9탄)"},{"name":"(윈터슬랙스20탄) 겨울 모직 와이드 슬랙스","cost":15000.0,"key":"(윈터슬랙스20탄)"},{"name":"(노컷진맨즈31탄) 남성 투웨이 밴딩 청바지","cost":14500.0,"key":"(노컷진맨즈31탄)"},{"name":"여성 사이드 워싱 청바지 (J2538)","cost":13000.0,"key":"(J2538)"},{"name":"스판 핀턱 와이드팬츠 (P2554)","cost":14500.0,"key":"(P2554)"},{"name":"(노컷진맨즈30탄) 남성 논페이드 생지 청바지","cost":13000.0,"key":"(노컷진맨즈30탄)"},{"name":"(윈터슬랙스5탄) 밴딩 모직 와이드 슬랙스","cost":13000.0,"key":"(윈터슬랙스5탄)"},{"name":"(겨울노컷진6탄) 여성 기모 논페이드 청바지","cost":14000.0,"key":"(겨울노컷진6탄)"},{"name":"(J2540) 벌룬핏 와이드 청바지","cost":13500.0,"key":"(J2540)"},{"name":"(MJ2512) 남성 벌룬핏 데님 팬츠","cost":13500.0,"key":"(MJ2512)"},{"name":"여성 절개 워싱 청바지 (J2539)","cost":13500.0,"key":"(J2539)"},{"name":"(겨울노컷진10탄) 여성 기모 절개 청바지","cost":14500.0,"key":"(겨울노컷진10탄)"},{"name":"(겨울노컷진1탄) 여성 기모 와이드 청바지","cost":15000.0,"key":"(겨울노컷진1탄)"},{"name":"스판 부츠컷 블랙진 (P022102-S)","cost":9000.0,"key":"(P022102-S)"},{"name":"스판 일자핏 블랙진 (P022101-S)","cost":9000.0,"key":"(P022101-S)"},{"name":"(겨울찐코튼3탄) 투웨이 팬츠","cost":14500.0,"key":"(겨울찐코튼3탄)"},{"name":"(코듀로이5탄) 기모 와이드 팬츠","cost":14500.0,"key":"(코듀로이5탄)"},{"name":"(노컷진맨즈28탄) 남성 생지 와이드 팬츠","cost":13500.0,"key":"(노컷진맨즈28탄)"},{"name":"(코듀로이6탄) 기모 절개 와이드 팬츠","cost":15000.0,"key":"(코듀로이6탄)"},{"name":"여성 니트 조거 팬츠 (P2551)","cost":5000.0,"key":"(P2551)"},{"name":"(겨울찐코튼2탄) 코듀로이 팬츠","cost":14500.0,"key":"(겨울찐코튼2탄)"},{"name":"여성 투웨이 팬츠 (P2552)","cost":8000.0,"key":"(P2552)"},{"name":"(겨울찐스판10탄) 여성 기모 밴딩 일자/부츠컷","cost":15500.0,"key":"(겨울찐스판10탄)"},{"name":"(올데이슬랙스19탄) 부츠컷 슬랙스","cost":9500.0,"key":"(올데이슬랙스19탄)"},{"name":"(겨울찐스판6탄) 와이드 데님 팬츠","cost":16000.0,"key":"(겨울찐스판6탄)"},{"name":"(겨울찐스판5탄) 기모 와이드 데님 팬츠","cost":16000.0,"key":"(겨울찐스판5탄)"},{"name":"(겨울찐스판7탄) 기모 일자핏 데님 팬츠","cost":15500.0,"key":"(겨울찐스판7탄)"},{"name":"(올데이윈터팬츠2탄) 핀턱 투웨이 트레이닝 팬츠","cost":14000.0,"key":"(올데이윈터팬츠2탄)"},{"name":"(올데이윈터팬츠1탄) 절개 투웨이 트레이닝 팬츠","cost":14000.0,"key":"(올데이윈터팬츠1탄)"},{"name":"(겨울찐스판3탄) 융기모 청바지","cost":16500.0,"key":"(겨울찐스판3탄)"},{"name":"(따숩진1탄) 와이드 청바지 (TA1)","cost":16500.0,"key":"(따숩진1탄)"},{"name":"(겨울찐코튼1탄) 핀턱 와이드 코듀로이 팬츠","cost":14500.0,"key":"(겨울찐코튼1탄)"},{"name":"(찐코튼30탄) 스판 밴딩 부츠컷 팬츠","cost":12000.0,"key":"(찐코튼30탄)"},{"name":"(찐코튼31탄) 앞절개 와이드 면바지","cost":17000.0,"key":"(찐코튼31탄)"},{"name":"(노컷진40탄) 여성 부츠컷 와이드 데님","cost":12500.0,"key":"(노컷진40탄)"},{"name":"A라인 워싱 데님 롱스커트(SK2508)","cost":14000.0,"key":"(SK2508)"},{"name":"(노컷진19탄) 배기핏 청바지","cost":7000.0,"key":"(노컷진19탄)"},{"name":"(노컷진맨즈27탄) 남성 밴딩 핀턱 와이드 워싱 데님","cost":15000.0,"key":"(노컷진맨즈27탄)"},{"name":"(올데이슬랙스1탄) 링클프리 투핀턱 밴딩 스판 슬랙스","cost":10000.0,"key":"(올데이슬랙스1탄)"},{"name":"(올데이슬랙스맨즈2탄) 남성 절개 와이드 팬츠","cost":11500.0,"key":"(올데이슬랙스맨즈2탄)"},{"name":"(찐코튼28탄) 핀턱 코튼 팬츠","cost":12500.0,"key":"(찐코튼28탄)"},{"name":"(올데이슬랙스18탄) 핀턱 와이드 슬랙스","cost":13000.0,"key":"(올데이슬랙스18탄)"},{"name":"사용X (찐코튼26탄) 와이드 팬츠","cost":12500.0,"key":"(찐코튼26탄)"},{"name":"스판 부츠컷 트레이닝 팬츠 (P2550)","cost":12000.0,"key":"(P2550)"},{"name":"(올데이슬랙스13탄) 와이드 코튼 여성 슬랙스","cost":12000.0,"key":"(올데이슬랙스13탄)"},{"name":"남성 핀턱 트레이닝 팬츠 (MP2512)","cost":11000.0,"key":"(MP2512)"},{"name":"(올데이슬랙스17탄) 스트라이프 슬랙스","cost":15000.0,"key":"(올데이슬랙스17탄)"},{"name":"(찐코튼24탄)  H라인 스커트","cost":12500.0,"key":"(찐코튼24탄)"},{"name":"(노컷진79탄) 커브드 벌룬핏 데님 팬츠","cost":14500.0,"key":"(노컷진79탄)"},{"name":"(노컷진맨즈26탄) 남성 벌룬핏 데님 팬츠","cost":15000.0,"key":"(노컷진맨즈26탄)"},{"name":"절개 벌룬핏 데님 팬츠 (J2537)","cost":14000.0,"key":"(J2537)"},{"name":"(찐코튼맨즈3탄)  남성 와이드 코튼 팬츠","cost":14000.0,"key":"(찐코튼맨즈3탄)"},{"name":"(또입진23탄) 벌룬 와이드 커브드 여성 팬츠 (J2549)","cost":15000.0,"key":"(또입진23탄)"},{"name":"(찐코튼10탄) 벌룬 와이드 팬츠","cost":13000.0,"key":"(찐코튼10탄)"},{"name":"논페이드 와이드 청바지 (J2536)","cost":7000.0,"key":"(J2536)"},{"name":"투웨이 투핀턱 트레이닝 팬츠 (P2548)","cost":13000.0,"key":"(P2548)"},{"name":"와이드 밴딩 트레이닝 팬츠 2기장(P2549)","cost":12000.0,"key":"(P2549)"},{"name":"(노컷진78탄) 골반뽕 부츠컷 데님 팬츠","cost":16000.0,"key":"(노컷진78탄)"},{"name":"(노컷진76탄) 부츠컷 여성 데님 팬츠","cost":14500.0,"key":"(노컷진76탄)"},{"name":"(노컷진27탄) 밴딩 와이드 부츠컷 팬츠","cost":14000.0,"key":"(노컷진27탄)"},{"name":"논페이드 생지 카브라 와이드 팬츠 (J2534)","cost":16000.0,"key":"(J2534)"},{"name":"(노컷진77탄) 부츠컷 데님 팬츠","cost":16000.0,"key":"(노컷진77탄)"},{"name":"(올데이슬랙스16탄) 링클프리 와이드 부츠컷 슬랙스","cost":12000.0,"key":"(올데이슬랙스16탄)"},{"name":"(노컷진15탄) 와이드 부츠컷 팬츠","cost":14000.0,"key":"(노컷진15탄)"},{"name":"사이드 절개 데님 팬츠 (J2533)","cost":12500.0,"key":"(J2533)"},{"name":"남성 밴딩 슬랙스 (MS2507)","cost":9000.0,"key":"(MS2507)"},{"name":"남성여성 논페이드 여름 와이드팬츠 (MJ2511)","cost":14000.0,"key":"(MJ2511)"},{"name":"여름 와이드 팬츠 (P2541)","cost":5000.0,"key":"(P2541)"},{"name":"(냉장고바지9탄) 1+1 5부 반바지 빅사이즈","cost":4000.0,"key":"(냉장고바지9탄)"},{"name":"(냉장고바지7탄) 1+1 바스락 4부","cost":4000.0,"key":"(냉장고바지7탄)"},{"name":"(냉장고바지5탄) 인견 세미와이드 팬츠 (P2543)","cost":5000.0,"key":"(냉장고바지5탄)"},{"name":"(냉장고바지2탄) 벤추리 핀턱 배기핏 팬츠 (P2545)","cost":6000.0,"key":"(냉장고바지2탄)"},{"name":"(냉장고바지3탄) 아이스 일자 배기 팬츠 (P2544)","cost":4000.0,"key":"(냉장고바지3탄)"},{"name":"남성 밴딩 일자 데님팬츠 (MJ2510)","cost":14700.0,"key":"(MJ2510)"},{"name":"(여름찐코튼6탄) 와이드 핀턱 팬츠 (P2539)","cost":13500.0,"key":"(여름찐코튼6탄)"},{"name":"스티치 와이드 데님 팬츠 (J2525)","cost":8000.0,"key":"(J2525)"},{"name":"남성 데님 팬츠 (MJ2509)","cost":16000.0,"key":"(MJ2509)"},{"name":"남성 코튼 팬츠 (MP2510)","cost":7600.0,"key":"(MP2510)"},{"name":"2기장 버뮤다 데님 반바지 (J2524)","cost":12500.0,"key":"(J2524)"},{"name":"바스락 라인 트레이닝 팬츠 (P2537)","cost":9000.0,"key":"(P2537)"},{"name":"(여름찐코튼10탄) 2기장 포켓 버뮤다 반바지 (P2536)","cost":11000.0,"key":"(여름찐코튼10탄)"},{"name":"(여름찐코튼12탄) 2기장 핀턱 버뮤다 반바지 (P2535)","cost":10000.0,"key":"(여름찐코튼12탄)"},{"name":"사은품 증정 (와디즈)","cost":0.0,"key":"(와디즈)"},{"name":"링클프리 5부 슬랙스 (S251)","cost":8000.0,"key":"(S251)"},{"name":"여름 핀턱 반바지 (J2531)","cost":12000.0,"key":"(J2531)"},{"name":"(여름찐코튼5탄) 투웨이 스트링 팬츠 (P2534)","cost":13500.0,"key":"(여름찐코튼5탄)"},{"name":"(찐코튼19탄) 핀턱 코튼 와이드 팬츠 (P2533)","cost":13000.0,"key":"(찐코튼19탄)"},{"name":"여름 바스락 롱스커트 (SK2507)","cost":11000.0,"key":"(SK2507)"},{"name":"(여름찐코튼9탄) 2기장 버뮤다 면 반바지 (P2532)","cost":10000.0,"key":"(여름찐코튼9탄)"},{"name":"남성 링클프리 밴딩 슬랙스 (MS2506)","cost":8800.0,"key":"(MS2506)"},{"name":"(찐코튼15탄) 옆절개 팬츠","cost":12000.0,"key":"(찐코튼15탄)"},{"name":"(여름올데이팬츠2탄) 핀턱 트레이닝 반바지 (P2529)","cost":10000.0,"key":"(여름올데이팬츠2탄)"},{"name":"(여름찐코튼13탄) 2기장 절개 버뮤다 반바지 (P2527)","cost":10000.0,"key":"(여름찐코튼13탄)"},{"name":"(여름찐코튼11탄) 2기장 비조 버뮤다 반바지 (P2528)","cost":10500.0,"key":"(여름찐코튼11탄)"},{"name":"(여름올데이팬츠6탄) 여름 핀턱 트레이닝 스판 반바지 (P2526)","cost":10000.0,"key":"(여름올데이팬츠6탄)"},{"name":"(여름노컷진10탄) 여름 밴딩 와이드 청바지 (T2)","cost":13500.0,"key":"(여름노컷진10탄)"},{"name":"남성 사이드 워싱 데님 팬츠 (MJ2508)","cost":15000.0,"key":"(MJ2508)"},{"name":"밴딩 데님 스커트 (SK2506)","cost":13500.0,"key":"(SK2506)"},{"name":"(여름노컷진7탄) 뒷포켓 밴딩 부츠컷 (J2522)","cost":14000.0,"key":"(여름노컷진7탄)"},{"name":"(텐셀진맨즈6탄) 남성 핀턱 와이드 팬츠","cost":14500.0,"key":"(텐셀진맨즈6탄)"},{"name":"여름 벨트 와이드 데님 팬츠 (J2521)","cost":14000.0,"key":"(J2521)"},{"name":"(노컷슬랙스22탄) 투핀턱 와이드 슬랙스","cost":10500.0,"key":"(노컷슬랙스22탄)"},{"name":"여름 앞트임 데님 롱스커트 (SK2505)","cost":11000.0,"key":"(SK2505)"},{"name":"(찐코튼16탄) 여름 버뮤다 5부 반바지 (P2524)","cost":8000.0,"key":"(찐코튼16탄)"},{"name":"(노컷진맨즈4탄) 남성 여름 핀턱 와이드 청바지","cost":14500.0,"key":"(노컷진맨즈4탄)"},{"name":"여름 사이드 절개 청바지 (J2520)","cost":14000.0,"key":"(J2520)"},{"name":"(여름찐코튼1탄) 투핀턱 와이드 팬츠","cost":13500.0,"key":"(여름찐코튼1탄)"},{"name":"(여름노컷진5탄) 핀턱 청바지","cost":14000.0,"key":"(여름노컷진5탄)"},{"name":"뒷밴딩 5부 데님 반바지 (J2519)","cost":12000.0,"key":"(J2519)"},{"name":"(여름찐스판8탄) 뒷포켓 와이드 데님 팬츠","cost":14000.0,"key":"(여름찐스판8탄)"},{"name":"(여름노컷진4탄) 생지 와이드 팬츠","cost":12000.0,"key":"(여름노컷진4탄)"},{"name":"스판 블랙진 부츠컷 (P2523)","cost":10200.0,"key":"(P2523)"},{"name":"여름 생지 롱 스커트 (SK2504)","cost":12500.0,"key":"(SK2504)"},{"name":"H라인 여름 스커트 (SK2503)","cost":10500.0,"key":"(SK2503)"},{"name":"사선 투버튼 데님 팬츠 (J2518)","cost":13000.0,"key":"(J2518)"},{"name":"(여름올데이슬랙스12탄) 와이드 팬츠","cost":8500.0,"key":"(여름올데이슬랙스12탄)"},{"name":"여름 절개 코튼 팬츠 (P2520)","cost":15000.0,"key":"(P2520)"},{"name":"여름 투웨이 스트링 팬츠 (P2519)","cost":8000.0,"key":"(P2519)"},{"name":"여름 투웨이 핀턱 팬츠 (P2521)","cost":15000.0,"key":"(P2521)"},{"name":"(노컷슬랙스21탄) 핀턱 세미와이드 슬랙스","cost":4000.0,"key":"(노컷슬랙스21탄)"},{"name":"(찐스판17탄) 카브라 4부 반바지","cost":11000.0,"key":"(찐스판17탄)"},{"name":"남성 생지 데님 팬츠 (MJ2506)","cost":14700.0,"key":"(MJ2506)"},{"name":"남성 조거 카고 면바지 (MP2507)","cost":12800.0,"key":"(MP2507)"},{"name":"남성 테이퍼드 카고 면바지 (MP2506)","cost":12300.0,"key":"(MP2506)"},{"name":"남성 밴딩 카고 반바지 (MP2505)","cost":6000.0,"key":"(MP2505)"},{"name":"남성 테이퍼드핏 데님 팬츠 (MJ2505)","cost":14700.0,"key":"(MJ2505)"},{"name":"남성 밴딩 테이퍼드 면바지 (MP2504)","cost":11800.0,"key":"(MP2504)"},{"name":"투핀턱 빈티지 워싱 청바지 남성 (MJ2503)","cost":15000.0,"key":"(MJ2503)"},{"name":"테이퍼드 팬츠 남성 (MJ2504)","cost":16000.0,"key":"(MJ2504)"},{"name":"3기장 밴딩 투웨이 와이드 팬츠 (P2516)","cost":5000.0,"key":"(P2516)"},{"name":"버뮤다 5부 반바지 (J2513)","cost":12500.0,"key":"(J2513)"},{"name":"카펜터 5부/7부 버뮤다 반바지 2기장 (J2514)","cost":12500.0,"key":"(J2514)"},{"name":"(찐코튼14탄) 와이드 팬츠","cost":5000.0,"key":"(찐코튼14탄)"},{"name":"링클프리 밴딩 와이드 팬츠 (P2517)","cost":3500.0,"key":"(P2517)"},{"name":"워싱 절개 버뮤다 반바지 (J2515)","cost":12500.0,"key":"(J2515)"},{"name":"버뮤다 핀턱 5부 반바지 (J2516)","cost":7000.0,"key":"(J2516)"},{"name":"앞포켓 플레어 데님 팬츠 (J2511)","cost":5000.0,"key":"(J2511)"},{"name":"버뮤다 데님 (J2509)","cost":7000.0,"key":"(J2509)"},{"name":"(또입진20탄) 워싱 뒷포켓 절개 와이드 팬츠 (J2512)","cost":17000.0,"key":"(또입진20탄)"},{"name":"밴딩 스트라이프 와이드 팬츠 (P2515)","cost":4000.0,"key":"(P2515)"},{"name":"(찐코튼21탄) 2기장 골반뽕 부츠컷 면바지 (P2514)","cost":13000.0,"key":"(찐코튼21탄)"},{"name":"밴딩 플리츠 와이드 팬츠 (P2513)","cost":3500.0,"key":"(P2513)"},{"name":"세미와이드 팬츠 (J2508)","cost":11500.0,"key":"(J2508)"},{"name":"(찐스판16탄) 생지 세미와이드 데님 (J2507)","cost":14500.0,"key":"(찐스판16탄)"},{"name":"(텐셀진맨즈2탄) 남성 일자 데님","cost":14500.0,"key":"(텐셀진맨즈2탄)"},{"name":"남성 와이드 데님 (MJ2502)","cost":13000.0,"key":"(MJ2502)"},{"name":"(노컷진73탄) 와이드 데님","cost":13000.0,"key":"(노컷진73탄)"},{"name":"남성 쿨 슬랙스 (MS2505)","cost":10500.0,"key":"(MS2505)"},{"name":"(올데이슬랙스맨즈1탄) 남성 와이드 슬랙스","cost":12000.0,"key":"(올데이슬랙스맨즈1탄)"},{"name":"(여름노컷진맨즈2탄) 남성 세미와이드 청바지","cost":7000.0,"key":"(여름노컷진맨즈2탄)"},{"name":"남성 링클프리 슬랙스 (MS2504)","cost":10500.0,"key":"(MS2504)"},{"name":"남성 밴딩 슬랙스  (MS2502)","cost":9000.0,"key":"(MS2502)"},{"name":"남성 테이퍼드 밴딩 슬랙스 (MS2503)","cost":10700.0,"key":"(MS2503)"},{"name":"(올데이슬랙스15탄) 핀턱 슬랙스","cost":13000.0,"key":"(올데이슬랙스15탄)"},{"name":"남성 테이퍼드 팬츠 (MP2502)","cost":9000.0,"key":"(MP2502)"},{"name":"(텐셀진20탄) 카고 데님 팬츠","cost":12500.0,"key":"(텐셀진20탄)"},{"name":"밴딩 와이드 트레이닝 (P2511)","cost":4000.0,"key":"(P2511)"},{"name":"(또입진7탄) 핀턱 와이드 데님","cost":13700.0,"key":"(또입진7탄)"},{"name":"남성 테이퍼드 슬랙스 (MS2501)","cost":13500.0,"key":"(MS2501)"},{"name":"(찐스판18탄) 와이드 데님 팬츠","cost":13000.0,"key":"(찐스판18탄)"},{"name":"(또입진18탄) 워싱 와이드 뒷밴딩 데님 팬츠","cost":12000.0,"key":"(또입진18탄)"},{"name":"(찐코튼11탄) 배기핏 팬츠","cost":11000.0,"key":"(찐코튼11탄)"},{"name":"H라인 데님 스커트 (SK2502)","cost":13000.0,"key":"(SK2502)"},{"name":"(찐스판14탄) 일자 데님 팬츠","cost":14000.0,"key":"(찐스판14탄)"},{"name":"(노컷진맨즈2탄) 남성 세미와이드 청바지","cost":13000.0,"key":"(노컷진맨즈2탄)"},{"name":"남성 카고 와이드 팬츠 (MP2501)","cost":9500.0,"key":"(MP2501)"},{"name":"(또입진맨즈3탄) 남성 핀턱 와이드 청바지","cost":14500.0,"key":"(또입진맨즈3탄)"},{"name":"(또입진맨즈15탄) 남성  투핀턱 와이드 청바지","cost":14000.0,"key":"(또입진맨즈15탄)"},{"name":"(또입진21탄) 스판 부츠컷 청바지 (J2503)","cost":14000.0,"key":"(또입진21탄)"},{"name":"(또입진22탄) 와이드 워싱 청바지 (J2504)","cost":14000.0,"key":"(또입진22탄)"},{"name":"(찐스판맨즈2탄) 남성 스판 밴딩 와이드 청바지","cost":14500.0,"key":"(찐스판맨즈2탄)"},{"name":"(노컷진맨즈18탄) 남성 논페이드 세미와이드 데님","cost":13000.0,"key":"(노컷진맨즈18탄)"},{"name":"(찐코튼맨즈2탄) 남성 코튼 와이드 팬츠","cost":14300.0,"key":"(찐코튼맨즈2탄)"},{"name":"(노컷진맨즈1탄)남성  와이드 청바지","cost":14500.0,"key":"(노컷진맨즈1탄)"},{"name":"(노컷진맨즈3탄) 남성 세미와이드 청바지","cost":13000.0,"key":"(노컷진맨즈3탄)"},{"name":"(또입진맨즈1탄) 남성  테이퍼드핏 데님","cost":12500.0,"key":"(또입진맨즈1탄)"},{"name":"밴딩 와이드 데님 (MJ2501)","cost":14000.0,"key":"(MJ2501)"},{"name":"(노컷진맨즈29탄) 남성 핀턱 와이드 청바지","cost":13000.0,"key":"(노컷진맨즈29탄)"},{"name":"(찐스판10탄) 워싱 절개 데님","cost":15500.0,"key":"(찐스판10탄)"},{"name":"(찐스판12탄) 카브라 데님","cost":15500.0,"key":"(찐스판12탄)"},{"name":"부츠컷 트레이닝 팬츠 (P2506)","cost":12000.0,"key":"(P2506)"},{"name":"(또입진8탄) 아이스연청 데님","cost":14000.0,"key":"(또입진8탄)"},{"name":"(노컷진71탄)  밴딩 와이드 팬츠","cost":14000.0,"key":"(노컷진71탄)"},{"name":"(노컷진70탄) 부츠컷 데님 팬츠","cost":11000.0,"key":"(노컷진70탄)"},{"name":"(또입진17탄) 워싱 밴딩 팬츠","cost":12500.0,"key":"(또입진17탄)"},{"name":"(찐스판6탄) 와이드 데님 팬츠","cost":16500.0,"key":"(찐스판6탄)"},{"name":"(노컷진62탄) 골반뽕 부츠컷 팬츠 (J2502)","cost":14000.0,"key":"(노컷진62탄)"},{"name":"밴딩 골반뽕 스커트 (SK2501)","cost":5000.0,"key":"(SK2501)"},{"name":"(찐스판2탄)  와이드 데님 팬츠","cost":13500.0,"key":"(찐스판2탄)"},{"name":"(노컷슬랙스20탄) 와이드 투핀턱 슬랙스","cost":13000.0,"key":"(노컷슬랙스20탄)"},{"name":"(찐스판9탄) 와이드 밴딩 팬츠","cost":15500.0,"key":"(찐스판9탄)"},{"name":"(또입진4탄) 워싱 와이드 데님","cost":14000.0,"key":"(또입진4탄)"},{"name":"트레이닝 팬츠 (P2504)","cost":7000.0,"key":"(P2504)"},{"name":"와이드 코튼 팬츠 (P2503)","cost":13500.0,"key":"(P2503)"},{"name":"(또입진15탄) 와이드 팬츠","cost":12000.0,"key":"(또입진15탄)"},{"name":"스판 부츠컷 팬츠 (J2501)","cost":13500.0,"key":"(J2501)"},{"name":"(노컷진69탄) 부츠컷 데님","cost":11000.0,"key":"(노컷진69탄)"},{"name":"(또입진3탄) 와이드 팬츠","cost":10000.0,"key":"(또입진3탄)"},{"name":"카고 트레이닝 팬츠 (P2501)","cost":12500.0,"key":"(P2501)"},{"name":"(올데이슬랙스14탄) 와이드 슬랙스 남성/여성","cost":11500.0,"key":"(올데이슬랙스14탄)"},{"name":"제주 및 도서산간지역 추가배송비(와디즈)","cost":0.0,"key":"(와디즈)"},{"name":"카고 와이드 팬츠 (J2441)","cost":14500.0,"key":"(J2441)"},{"name":"(겨울노컷진9탄) 기모 부츠컷 데님","cost":12500.0,"key":"(겨울노컷진9탄)"},{"name":"코듀로이 절개 와이드 (P2497)","cost":14000.0,"key":"(P2497)"},{"name":"(올데이윈터팬츠14탄) 기모 카고 트레이닝 (P2496)","cost":15000.0,"key":"(올데이윈터팬츠14탄)"},{"name":"(겨울노컷진8탄) 와이드 데님 팬츠","cost":15500.0,"key":"(겨울노컷진8탄)"},{"name":"(겨울노컷진7탄) 투웨이 와이드 팬츠","cost":13500.0,"key":"(겨울노컷진7탄)"},{"name":"(윈터슬랙스3탄) 기모 와이드 슬랙스","cost":21000.0,"key":"(윈터슬랙스3탄)"},{"name":"(겨울노컷진15탄) 기모 와이드 팬츠","cost":12000.0,"key":"(겨울노컷진15탄)"},{"name":"(겨울찐코튼5탄) 기모 코튼 와이드 팬츠 (P2495)","cost":14000.0,"key":"(겨울찐코튼5탄)"},{"name":"(윈터슬랙스2탄) 와이드 슬랙스","cost":13500.0,"key":"(윈터슬랙스2탄)"},{"name":"기모 와이드 데님 팬츠 (J2439)","cost":16000.0,"key":"(J2439)"},{"name":"코듀로이 부츠컷 팬츠 (P2493)","cost":13500.0,"key":"(P2493)"},{"name":"(노컷슬랙스19탄) 부츠컷 슬랙스","cost":10000.0,"key":"(노컷슬랙스19탄)"},{"name":"(겨울찐스판2탄) 와이드 데님","cost":15500.0,"key":"(겨울찐스판2탄)"},{"name":"기모 투웨이 와이드 팬츠(P2492)","cost":13000.0,"key":"(P2492)"},{"name":"DW-301-302","cost":13000.0,"key":""},{"name":"(겨울찐스판1탄) 와이드 데님","cost":15500.0,"key":"(겨울찐스판1탄)"},{"name":"기모 코듀로이 핀턱 A라인 반바지 (P2491)","cost":11000.0,"key":"(P2491)"},{"name":"기모 코듀로이 H라인 스커트 (SK246)","cost":12000.0,"key":"(SK246)"},{"name":"기모 와이드 팬츠 (P2487)","cost":6000.0,"key":"(P2487)"},{"name":"기모 세미와이드 팬츠 (P2488)","cost":6000.0,"key":"(P2488)"},{"name":"(코듀로이3탄) 밍크 기모 세미와이드 팬츠 (P2485)","cost":11500.0,"key":"(코듀로이3탄)"},{"name":"(코듀로이2탄) 기모 부츠컷 코듀로이 팬츠 (P2484)","cost":15000.0,"key":"(코듀로이2탄)"},{"name":"DS-028-1/DS-030-1","cost":16000.0,"key":""},{"name":"DF-214/DF-210-1/DF-211-1","cost":16000.0,"key":""},{"name":"DW-303,306 일자약기모","cost":15500.0,"key":""},{"name":"(노컷슬랙스16탄) 부츠컷 슬랙스","cost":10000.0,"key":"(노컷슬랙스16탄)"},{"name":"(노컷진49탄) 부츠컷 데님 (J2438)","cost":13000.0,"key":"(노컷진49탄)"},{"name":"백슬릿 와이드 데님 (J2437)","cost":12500.0,"key":"(J2437)"},{"name":"(노컷슬랙스12탄) 와이드 슬랙스","cost":8000.0,"key":"(노컷슬랙스12탄)"},{"name":"핀턱 와이드 팬츠 (P2483)","cost":15000.0,"key":"(P2483)"},{"name":"(노컷진46탄) 투버튼 부츠컷 데님","cost":14500.0,"key":"(노컷진46탄)"},{"name":"(노컷진47탄) 와이드 데님 팬츠","cost":15000.0,"key":"(노컷진47탄)"},{"name":"니트 팬츠 (P2479)","cost":6000.0,"key":"(P2479)"},{"name":"(노컷진44탄) 와이드 데님 팬츠","cost":14500.0,"key":"(노컷진44탄)"},{"name":"(찐코튼8탄) 부츠컷 팬츠","cost":5000.0,"key":"(찐코튼8탄)"},{"name":"투웨이 트레이닝 팬츠 (P2478)","cost":6000.0,"key":"(P2478)"},{"name":"(찐코튼7탄) 와이드 팬츠","cost":10000.0,"key":"(찐코튼7탄)"},{"name":"(찐코튼6탄) H라인 스커트","cost":12000.0,"key":"(찐코튼6탄)"},{"name":"코듀로이 와이드 팬츠(P2476)","cost":6000.0,"key":"(P2476)"},{"name":"(노컷슬랙스5탄) 부츠컷 슬랙스","cost":12500.0,"key":"(노컷슬랙스5탄)"},{"name":"(라이크라2탄) 부츠컷 데님","cost":12000.0,"key":"(라이크라2탄)"},{"name":"(노컷진37탄) 부츠컷 데님","cost":14500.0,"key":"(노컷진37탄)"},{"name":"투웨이 와이드 팬츠 (P2475)","cost":13500.0,"key":"(P2475)"},{"name":"(노컷진23탄) 와이드 팬츠","cost":14000.0,"key":"(노컷진23탄)"},{"name":"(노컷진42탄) 와이드 데님 팬츠","cost":5000.0,"key":"(노컷진42탄)"},{"name":"투버튼 부츠컷 팬츠 (P2472)","cost":7000.0,"key":"(P2472)"},{"name":"(노컷진43탄) 와이드 데님","cost":9000.0,"key":"(노컷진43탄)"},{"name":"사선절개 와이드 데님  (J2430)","cost":7000.0,"key":"(J2430)"},{"name":"절개 트레이닝 팬츠 (P2470/MP2470)","cost":13000.0,"key":"(P2470/MP2470)"},{"name":"시와워싱 와이드 팬츠 (J2431)","cost":5000.0,"key":"(J2431)"},{"name":"(노컷진36탄) 부츠컷 데님 팬츠","cost":5000.0,"key":"(노컷진36탄)"},{"name":"하이웨스트 와이드 슬랙스 (S248)","cost":13500.0,"key":"(S248)"},{"name":"찰랑 와이드 슬랙스 (S247)","cost":13000.0,"key":"(S247)"},{"name":"면 4부 반바지(P062201)","cost":3500.0,"key":"(P062201)"},{"name":"(여름노컷진1탄) 생지 와이드 팬츠","cost":13500.0,"key":"(여름노컷진1탄)"},{"name":"(여름찐스판7탄) 남녀공용 와이드 팬츠","cost":14000.0,"key":"(여름찐스판7탄)"},{"name":"탄탄핏 3부 팬츠 (J2422)","cost":10000.0,"key":"(J2422)"},{"name":"논페이드 와이드 팬츠 (J2420)","cost":13000.0,"key":"(J2420)"},{"name":"(냉장고바지11탄) 바스락 밴딩 반바지 (P2450)","cost":3500.0,"key":"(냉장고바지11탄)"},{"name":"(여름찐스판5탄) 배기 팬츠","cost":9000.0,"key":"(여름찐스판5탄)"},{"name":"앞트임 데님 스커트 (S244)","cost":12500.0,"key":"(S244)"},{"name":"(텐셀진12탄) 세미와이드 청바지","cost":5000.0,"key":"(텐셀진12탄)"},{"name":"(여름찐스판6탄) 남녀공용 5부 반바지 (J2418)","cost":12000.0,"key":"(여름찐스판6탄)"},{"name":"투버튼 일자 팬츠 (J2416)","cost":5000.0,"key":"(J2416)"},{"name":"(여름찐코튼2탄) 린넨 와이드 팬츠 (P2438)","cost":10000.0,"key":"(여름찐코튼2탄)"},{"name":"(노컷진38탄) 부츠컷 팬츠","cost":5000.0,"key":"(노컷진38탄)"},{"name":"코튼 와이드 팬츠 (P2437)","cost":15000.0,"key":"(P2437)"},{"name":"(여름찐스판3탄) 와이드 청바지","cost":14000.0,"key":"(여름찐스판3탄)"},{"name":"(여름찐스판4탄) 와이드 팬츠","cost":9000.0,"key":"(여름찐스판4탄)"},{"name":"(여름찐코튼4탄) 와이드 팬츠 (P2436)","cost":11500.0,"key":"(여름찐코튼4탄)"},{"name":"일자핏 블랙 팬츠 (P2410)","cost":9500.0,"key":"(P2410)"},{"name":"DM-103,104,107","cost":10500.0,"key":""},{"name":"(여름찐스판1탄) 텐셀 와이드 청바지","cost":13500.0,"key":"(여름찐스판1탄)"},{"name":"DM 112 113","cost":11500.0,"key":""},{"name":"DM - 108 109 110 111","cost":9000.0,"key":""},{"name":"DM 128 DM 129 DM 130","cost":10500.0,"key":""},{"name":"DM 105 106","cost":9000.0,"key":""},{"name":"4부 데님 청반바지 (J252)","cost":6500.0,"key":"(J252)"},{"name":"DM - 124 125 126 127","cost":9500.0,"key":""},{"name":"뒷밴딩 핀턱 5부 데님 반바지 (J251)","cost":11500.0,"key":"(J251)"},{"name":"와이드 데님 숏팬츠 (J247)","cost":5000.0,"key":"(J247)"},{"name":"카고 와이드 반바지 (J248)","cost":5000.0,"key":"(J248)"},{"name":"(노컷진60탄) 부츠컷 데님 (J242)","cost":5000.0,"key":"(노컷진60탄)"},{"name":"(노컷진57탄)부츠컷 데님","cost":12000.0,"key":"(노컷진57탄)"},{"name":"DS-017 019 020","cost":9000.0,"key":""},{"name":"(노컷진56탄) 와이드 청바지","cost":12000.0,"key":"(노컷진56탄)"},{"name":"DS-07","cost":12500.0,"key":""},{"name":"DS-010","cost":12500.0,"key":""},{"name":"DS-04 05 06","cost":9500.0,"key":""},{"name":"[GS단독] 2종택1 / 와이드 밴딩청바지 찐스판2탄/10탄","cost":0.0,"key":""},{"name":"DF-206 DF-212","cost":15000.0,"key":""},{"name":"스판 부츠컷 데님 (P030701)","cost":14000.0,"key":"(P030701)"},{"name":"(찐코튼5탄) 와이드 면바지 (P022801)","cost":11000.0,"key":"(찐코튼5탄)"},{"name":"카고 와이드 데님 (P022601)","cost":5000.0,"key":"(P022601)"},{"name":"밴딩 하이웨스트 와이드 데님 팬츠 S~2XL (J092701)","cost":13000.0,"key":"(J092701)"},{"name":"빈티지 와이드 데님 (J101001)","cost":9000.0,"key":"(J101001)"},{"name":"스판 부츠컷 블랙진 (P022102-W)","cost":9000.0,"key":"(P022102-W)"},{"name":"스판 일자핏 블랙진 (P022101-W)","cost":10000.0,"key":"(P022101-W)"},{"name":"(라이크라1탄) 와이드 데님(P022001)","cost":17500.0,"key":"(라이크라1탄)"},{"name":"DS-028 DS-029 DS-030","cost":15500.0,"key":""},{"name":"DS-031 -032","cost":15500.0,"key":""},{"name":"(찐스판11탄) 와이드 팬츠","cost":15500.0,"key":"(찐스판11탄)"},{"name":"논페이드 데님 스커트 (S021401)","cost":13500.0,"key":"(S021401)"},{"name":"(찐스판4탄) 배기 데님 팬츠","cost":14500.0,"key":"(찐스판4탄)"},{"name":"(찐스판7탄) 밴딩 일자 인디고진","cost":11500.0,"key":"(찐스판7탄)"},{"name":"(찐스판8탄) 일자 데님 팬츠","cost":13000.0,"key":"(찐스판8탄)"},{"name":"(찐스판5탄) 인디고 일자 데님","cost":12000.0,"key":"(찐스판5탄)"},{"name":"(찐스판1탄) 밴딩 와이드 데님","cost":16500.0,"key":"(찐스판1탄)"},{"name":"(따숩진10탄) 와이드 데님","cost":14000.0,"key":"(따숩진10탄)"},{"name":"(겨울노컷진13탄) 기모 와이드 청바지","cost":13000.0,"key":"(겨울노컷진13탄)"},{"name":"(노컷슬랙스17탄) 기모 일자 팬츠","cost":13000.0,"key":"(노컷슬랙스17탄)"},{"name":"(노컷슬랙스14탄) 모직 와이드 슬랙스","cost":16000.0,"key":"(노컷슬랙스14탄)"},{"name":"기모 코튼 와이드 팬츠(P112201)","cost":13500.0,"key":"(P112201)"},{"name":"코듀로이 와이드 팬츠 (P112202)","cost":13000.0,"key":"(P112202)"},{"name":"(노컷진39탄) 기모 부츠컷 데님","cost":5000.0,"key":"(노컷진39탄)"},{"name":"(핫기모10탄) 포켓 와이드 팬츠","cost":8000.0,"key":"(핫기모10탄)"},{"name":"(코듀로이1탄) 밍크 융기모 팬츠 (P102301)","cost":14000.0,"key":"(코듀로이1탄)"},{"name":"(따숩진4탄) 세미와이드 팬츠","cost":5000.0,"key":"(따숩진4탄)"},{"name":"GS ONLY 기획특가 융기모 코듀로이 와이드 팬츠 / 포레스트핏","cost":0.0,"key":""},{"name":"(또입진13탄) 와이드 청바지","cost":5000.0,"key":"(또입진13탄)"},{"name":"(또입진16탄) 와이드 청바지","cost":5000.0,"key":"(또입진16탄)"},{"name":"와이드 데님 청바지 (J100501)","cost":13000.0,"key":"(J100501)"},{"name":"(또입진12탄) 와이드 청바지","cost":13000.0,"key":"(또입진12탄)"},{"name":"스트랩 와이드 팬츠 (J092601)","cost":7000.0,"key":"(J092601)"},{"name":"(올데이슬랙스11탄)와이드 팬츠","cost":8000.0,"key":"(올데이슬랙스11탄)"},{"name":"와이드 슬랙스 (P091501)","cost":8000.0,"key":"(P091501)"},{"name":"와이드 슬랙스 (P091402)","cost":10500.0,"key":"(P091402)"},{"name":"조거 스티치 트레이닝 팬츠 (P091403)","cost":5000.0,"key":"(P091403)"},{"name":"(노컷슬랙스13탄) 와이드 슬랙스","cost":13000.0,"key":"(노컷슬랙스13탄)"},{"name":"와이드 트레이닝 팬츠 (P090802)","cost":9500.0,"key":"(P090802)"},{"name":"와이드 트레이닝바지 (P090803)","cost":9000.0,"key":"(P090803)"},{"name":"(코듀로이11탄) 조거 팬츠","cost":3500.0,"key":"(코듀로이11탄)"},{"name":"(찐코튼1탄) 와이드 팬츠 (P090501)","cost":13000.0,"key":"(찐코튼1탄)"},{"name":"(코듀로이10탄)벨벳 와이드 팬츠","cost":3500.0,"key":"(코듀로이10탄)"},{"name":"(코듀로이9탄) 와이드 통바지","cost":4000.0,"key":"(코듀로이9탄)"},{"name":"(코듀로이8탄) 조거 팬츠","cost":4000.0,"key":"(코듀로이8탄)"},{"name":"(여름노컷진9탄) 와이드 청바지","cost":14000.0,"key":"(여름노컷진9탄)"},{"name":"(여름찐스판13탄) 냉감소재 와이드 청바지","cost":14500.0,"key":"(여름찐스판13탄)"},{"name":"(여름노컷진3탄) 부츠컷 청바지","cost":13000.0,"key":"(여름노컷진3탄)"},{"name":"(여름노컷진2탄) 빈티지 청바지","cost":13000.0,"key":"(여름노컷진2탄)"},{"name":"(1+1) 7부 레이온 티셔츠 (T051202)","cost":3500.0,"key":"(1+1)"},{"name":"(여름노컷진8탄) A라인 반바지","cost":11500.0,"key":"(여름노컷진8탄)"},{"name":"(노컷슬랙스9탄) 세미와이드 슬랙스","cost":11500.0,"key":"(노컷슬랙스9탄)"},{"name":"(노컷슬랙스8탄) 세미와이드 슬랙스","cost":11500.0,"key":"(노컷슬랙스8탄)"},{"name":"(노컷슬랙스7탄) 투버튼 슬랙스","cost":11500.0,"key":"(노컷슬랙스7탄)"},{"name":"(노컷진22탄) 부츠컷 청바지","cost":14500.0,"key":"(노컷진22탄)"},{"name":"(노컷진20탄) 부츠컷 블랙진","cost":14500.0,"key":"(노컷진20탄)"},{"name":"(노컷슬랙스6탄)와이드 슬랙스","cost":10500.0,"key":"(노컷슬랙스6탄)"},{"name":"(올데이슬랙스9탄) 와이드 팬츠","cost":14000.0,"key":"(올데이슬랙스9탄)"},{"name":"(올데이슬랙스8탄) 부츠컷 팬츠","cost":13000.0,"key":"(올데이슬랙스8탄)"},{"name":"(노컷슬랙스4탄) 기모 와이드 슬랙스","cost":14000.0,"key":"(노컷슬랙스4탄)"},{"name":"(노컷슬랙스3탄) 모직 와이드 슬랙스","cost":15000.0,"key":"(노컷슬랙스3탄)"},{"name":"(겨울노컷진16탄) 스트레이트 청바지","cost":15500.0,"key":"(겨울노컷진16탄)"},{"name":"(핫기모4탄) 조거 팬츠","cost":7000.0,"key":"(핫기모4탄)"},{"name":"(핫기모5탄) 시보리 팬츠","cost":7000.0,"key":"(핫기모5탄)"},{"name":"(겨울노컷진11탄) 기모 와이드 청바지","cost":15000.0,"key":"(겨울노컷진11탄)"},{"name":"(겨울노컷진12탄) 기모 세미와이드 청바지","cost":14500.0,"key":"(겨울노컷진12탄)"},{"name":"(노컷진4탄) 일자핏 배기 청바지","cost":12500.0,"key":"(노컷진4탄)"},{"name":"(노컷진3탄)세미와이드 청바지","cost":13500.0,"key":"(노컷진3탄)"},{"name":"(노컷진1탄) 와이드 청바지","cost":14500.0,"key":"(노컷진1탄)"},{"name":"(롱한느낌1탄)브이넥 롱 조끼","cost":7000.0,"key":"(롱한느낌1탄)"},{"name":"브이넥 숏 조끼 (K2412)","cost":6000.0,"key":"(K2412)"},{"name":"(텐셀진3탄)(37) 텐셀 밴딩 배기 청바지","cost":12500.0,"key":"(텐셀진3탄)"},{"name":"(여름찐스판2탄) 아이스 데님 청바지","cost":14500.0,"key":"(여름찐스판2탄)"},{"name":"[무료배송]사이즈넉넉~ 고무줄 쭈리밴딩 빅포켓 청 반바지 3컬러 J062201","cost":11000.0,"key":""},{"name":"5부 냉장고 반바지 (P053101)","cost":3500.0,"key":"(P053101)"},{"name":"(냉장고바지6탄) 5부 반바지","cost":4000.0,"key":"(냉장고바지6탄)"},{"name":"(노컷슬랙스1탄) 일자 슬랙스","cost":11000.0,"key":"(노컷슬랙스1탄)"},{"name":"(노컷슬랙스2탄) 와이드 슬랙스","cost":10000.0,"key":"(노컷슬랙스2탄)"},{"name":"(핫기모1탄) 와이드 팬츠","cost":7500.0,"key":"(핫기모1탄)"},{"name":"(노컷슬랙스16탄) 부츠컷 슬랙스","cost":10000.0,"key":"(노컷슬랙스16탄)"},{"name":"(노컷진49탄) 부츠컷 데님 (J2438)","cost":13000.0,"key":"(노컷진49탄)"},{"name":"백슬릿 와이드 데님 (J2437)","cost":12500.0,"key":"(J2437)"},{"name":"(노컷슬랙스12탄) 와이드 슬랙스","cost":8000.0,"key":"(노컷슬랙스12탄)"},{"name":"핀턱 와이드 팬츠 (P2483)","cost":15000.0,"key":"(P2483)"},{"name":"(노컷진46탄) 투버튼 부츠컷 데님","cost":14500.0,"key":"(노컷진46탄)"},{"name":"(노컷진47탄) 와이드 데님 팬츠","cost":15000.0,"key":"(노컷진47탄)"},{"name":"니트 팬츠 (P2479)","cost":6000.0,"key":"(P2479)"},{"name":"(노컷진44탄) 와이드 데님 팬츠","cost":14500.0,"key":"(노컷진44탄)"},{"name":"(찐코튼8탄) 부츠컷 팬츠","cost":5000.0,"key":"(찐코튼8탄)"},{"name":"투웨이 트레이닝 팬츠 (P2478)","cost":6000.0,"key":"(P2478)"},{"name":"(찐코튼7탄) 와이드 팬츠","cost":10000.0,"key":"(찐코튼7탄)"},{"name":"(찐코튼6탄) H라인 스커트","cost":12000.0,"key":"(찐코튼6탄)"},{"name":"코듀로이 와이드 팬츠(P2476)","cost":6000.0,"key":"(P2476)"},{"name":"(노컷슬랙스5탄) 부츠컷 슬랙스","cost":12500.0,"key":"(노컷슬랙스5탄)"},{"name":"(라이크라2탄) 부츠컷 데님","cost":12000.0,"key":"(라이크라2탄)"},{"name":"(노컷진37탄) 부츠컷 데님","cost":14500.0,"key":"(노컷진37탄)"},{"name":"투웨이 와이드 팬츠 (P2475)","cost":13500.0,"key":"(P2475)"},{"name":"(노컷진23탄) 와이드 팬츠","cost":14000.0,"key":"(노컷진23탄)"},{"name":"(노컷진42탄) 와이드 데님 팬츠","cost":5000.0,"key":"(노컷진42탄)"},{"name":"투버튼 부츠컷 팬츠 (P2472)","cost":14000.0,"key":"(P2472)"},{"name":"(노컷진43탄) 와이드 데님","cost":9000.0,"key":"(노컷진43탄)"},{"name":"사선절개 와이드 데님  (J2430)","cost":7000.0,"key":"(J2430)"},{"name":"절개 트레이닝 팬츠 (P2470)","cost":13000.0,"key":"(P2470)"},{"name":"절개 트레이닝 팬츠 (MP2470)","cost":13000.0,"key":"(MP2470)"},{"name":"시와워싱 와이드 팬츠 (J2431)","cost":5000.0,"key":"(J2431)"},{"name":"(노컷진36탄) 부츠컷 데님 팬츠","cost":13500.0,"key":"(노컷진36탄)"},{"name":"하이웨스트 와이드 슬랙스 (S248)","cost":13500.0,"key":"(S248)"},{"name":"찰랑 와이드 슬랙스 (S247)","cost":13000.0,"key":"(S247)"},{"name":"면 4부 반바지(P062201)","cost":3500.0,"key":"(P062201)"},{"name":"(여름노컷진1탄) 생지 와이드 팬츠","cost":13500.0,"key":"(여름노컷진1탄)"},{"name":"(여름찐스판7탄) 남녀공용 와이드 팬츠","cost":14000.0,"key":"(여름찐스판7탄)"},{"name":"탄탄핏 3부 팬츠 (J2422)","cost":10000.0,"key":"(J2422)"},{"name":"논페이드 와이드 팬츠 (J2420)","cost":13000.0,"key":"(J2420)"},{"name":"(냉장고바지11탄) 바스락 밴딩 반바지 (P2450)","cost":3500.0,"key":"(냉장고바지11탄)"},{"name":"(여름찐스판5탄) 배기 팬츠","cost":9000.0,"key":"(여름찐스판5탄)"},{"name":"앞트임 데님 스커트 (S244)","cost":12500.0,"key":"(S244)"},{"name":"(텐셀진12탄) 세미와이드 청바지","cost":5000.0,"key":"(텐셀진12탄)"},{"name":"(여름찐스판6탄) 남녀공용 5부 반바지 (J2418)","cost":12000.0,"key":"(여름찐스판6탄)"},{"name":"투버튼 일자 팬츠 (J2416)","cost":12500.0,"key":"(J2416)"},{"name":"(여름찐코튼2탄) 린넨 와이드 팬츠 (P2438)","cost":10000.0,"key":"(여름찐코튼2탄)"},{"name":"(노컷진38탄) 부츠컷 팬츠","cost":12500.0,"key":"(노컷진38탄)"},{"name":"코튼 와이드 팬츠 (P2437)","cost":15000.0,"key":"(P2437)"},{"name":"(여름찐스판3탄) 와이드 청바지","cost":14000.0,"key":"(여름찐스판3탄)"},{"name":"(여름찐스판4탄) 와이드 팬츠","cost":9000.0,"key":"(여름찐스판4탄)"},{"name":"(여름찐코튼4탄) 와이드 팬츠 (P2436)","cost":11500.0,"key":"(여름찐코튼4탄)"},{"name":"일자핏 블랙 팬츠 (P2410)","cost":9500.0,"key":"(P2410)"},{"name":"DM-103,104,107","cost":10500.0,"key":""},{"name":"(여름찐스판1탄) 텐셀 와이드 청바지","cost":13500.0,"key":"(여름찐스판1탄)"},{"name":"DM 112 113","cost":11500.0,"key":""},{"name":"DM - 108 109 110 111","cost":9000.0,"key":""},{"name":"DM 128 DM 129 DM 130","cost":10500.0,"key":""},{"name":"DM 105 106","cost":9000.0,"key":""},{"name":"4부 데님 청반바지 (J252)","cost":6500.0,"key":"(J252)"},{"name":"DM - 124 125 126 127","cost":9500.0,"key":""},{"name":"뒷밴딩 핀턱 5부 데님 반바지 (J251)","cost":11500.0,"key":"(J251)"},{"name":"와이드 데님 숏팬츠 (J247)","cost":6000.0,"key":"(J247)"},{"name":"카고 와이드 반바지 (J248)","cost":8000.0,"key":"(J248)"},{"name":"(노컷진60탄) 부츠컷 데님 (J242)","cost":6000.0,"key":"(노컷진60탄)"},{"name":"(노컷진57탄)부츠컷 데님","cost":12000.0,"key":"(노컷진57탄)"},{"name":"DS-017 019 020","cost":9000.0,"key":""},{"name":"(노컷진56탄) 와이드 청바지","cost":12000.0,"key":"(노컷진56탄)"},{"name":"DS-07","cost":12500.0,"key":""},{"name":"DS-010","cost":12500.0,"key":""},{"name":"DS-04 05 06","cost":9500.0,"key":""},{"name":"DF-206 DF-212","cost":15000.0,"key":""},{"name":"스판 부츠컷 데님 (P030701)","cost":14000.0,"key":"(P030701)"},{"name":"(찐코튼5탄) 와이드 면바지 (P022801)","cost":11000.0,"key":"(찐코튼5탄)"},{"name":"카고 와이드 데님 (P022601)","cost":12500.0,"key":"(P022601)"},{"name":"밴딩 하이웨스트 와이드 데님 팬츠 S~2XL (J092701)","cost":13000.0,"key":"(J092701)"},{"name":"빈티지 와이드 데님 (J101001)","cost":9000.0,"key":"(J101001)"},{"name":"(노컷진55탄) 데미지 팬츠","cost":7000.0,"key":"(노컷진55탄)"},{"name":"스판 부츠컷 블랙진 (P022102-W)","cost":9000.0,"key":"(P022102-W)"},{"name":"스판 일자핏 블랙진 (P022101-W)","cost":10000.0,"key":"(P022101-W)"},{"name":"(라이크라1탄) 와이드 데님(P022001)","cost":17500.0,"key":"(라이크라1탄)"},{"name":"DS-028 DS-029 DS-030","cost":15500.0,"key":""},{"name":"DS-031 -032","cost":15500.0,"key":""},{"name":"(찐스판11탄) 와이드 팬츠","cost":15500.0,"key":"(찐스판11탄)"},{"name":"논페이드 데님 스커트 (S021401)","cost":13500.0,"key":"(S021401)"},{"name":"(찐스판4탄) 배기 데님 팬츠","cost":14500.0,"key":"(찐스판4탄)"},{"name":"(찐스판7탄) 밴딩 일자 인디고진","cost":11500.0,"key":"(찐스판7탄)"},{"name":"(찐스판8탄) 일자 데님 팬츠","cost":13000.0,"key":"(찐스판8탄)"},{"name":"(찐스판5탄) 인디고 일자 데님","cost":12000.0,"key":"(찐스판5탄)"},{"name":"(찐스판1탄) 밴딩 와이드 데님","cost":15500.0,"key":"(찐스판1탄)"},{"name":"(따숩진10탄) 와이드 데님","cost":14000.0,"key":"(따숩진10탄)"},{"name":"(겨울노컷진13탄) 기모 와이드 청바지","cost":13000.0,"key":"(겨울노컷진13탄)"},{"name":"(노컷슬랙스17탄) 기모 일자 팬츠","cost":13000.0,"key":"(노컷슬랙스17탄)"},{"name":"(노컷슬랙스14탄) 모직 와이드 슬랙스","cost":16000.0,"key":"(노컷슬랙스14탄)"},{"name":"기모 코튼 와이드 팬츠(P112201)","cost":13500.0,"key":"(P112201)"},{"name":"코듀로이 와이드 팬츠 (P112202)","cost":13000.0,"key":"(P112202)"},{"name":"(노컷진39탄) 기모 부츠컷 데님","cost":15500.0,"key":"(노컷진39탄)"},{"name":"(핫기모10탄) 포켓 와이드 팬츠","cost":8000.0,"key":"(핫기모10탄)"},{"name":"(코듀로이1탄) 밍크 융기모 팬츠 (P102301)","cost":14000.0,"key":"(코듀로이1탄)"},{"name":"(따숩진4탄) 세미와이드 팬츠","cost":5000.0,"key":"(따숩진4탄)"},{"name":"GS ONLY 기획특가 융기모 코듀로이 와이드 팬츠 / 포레스트핏","cost":0.0,"key":""},{"name":"(또입진13탄) 와이드 청바지","cost":14000.0,"key":"(또입진13탄)"},{"name":"(또입진16탄) 와이드 청바지","cost":13000.0,"key":"(또입진16탄)"},{"name":"와이드 데님 청바지 (J100501)","cost":13000.0,"key":"(J100501)"},{"name":"(또입진12탄) 와이드 청바지","cost":13000.0,"key":"(또입진12탄)"},{"name":"스트랩 와이드 팬츠 (J092601)","cost":15000.0,"key":"(J092601)"},{"name":"와이드 슬랙스 (P091501)","cost":8000.0,"key":"(P091501)"},{"name":"와이드 슬랙스 (P091402)","cost":10500.0,"key":"(P091402)"},{"name":"조거 스티치 트레이닝 팬츠 (P091403)","cost":5000.0,"key":"(P091403)"},{"name":"(노컷슬랙스13탄) 와이드 슬랙스","cost":13000.0,"key":"(노컷슬랙스13탄)"},{"name":"와이드 트레이닝 팬츠 (P090802)","cost":9500.0,"key":"(P090802)"},{"name":"와이드 트레이닝바지 (P090803)","cost":9000.0,"key":"(P090803)"},{"name":"(코듀로이11탄) 조거 팬츠","cost":3500.0,"key":"(코듀로이11탄)"},{"name":"(찐코튼1탄) 와이드 팬츠 (P090501)","cost":13000.0,"key":"(찐코튼1탄)"},{"name":"(코듀로이10탄)벨벳 와이드 팬츠","cost":3500.0,"key":"(코듀로이10탄)"},{"name":"(노컷진29탄) 와이드 팬츠","cost":5000.0,"key":"(노컷진29탄)"},{"name":"(코듀로이9탄) 와이드 통바지","cost":4000.0,"key":"(코듀로이9탄)"},{"name":"(코듀로이8탄) 조거 팬츠","cost":4000.0,"key":"(코듀로이8탄)"},{"name":"(여름노컷진9탄) 와이드 청바지","cost":14000.0,"key":"(여름노컷진9탄)"},{"name":"(여름찐스판13탄) 냉감소재 와이드 청바지","cost":14500.0,"key":"(여름찐스판13탄)"},{"name":"(여름노컷진3탄) 부츠컷 청바지","cost":13000.0,"key":"(여름노컷진3탄)"},{"name":"(여름노컷진2탄) 빈티지 청바지","cost":13000.0,"key":"(여름노컷진2탄)"},{"name":"(1+1) 7부 레이온 티셔츠 (T051202)","cost":3500.0,"key":"(T051202)"},{"name":"(여름노컷진8탄) A라인 반바지","cost":11500.0,"key":"(여름노컷진8탄)"},{"name":"(노컷슬랙스9탄) 세미와이드 슬랙스","cost":11500.0,"key":"(노컷슬랙스9탄)"},{"name":"(노컷슬랙스8탄) 세미와이드 슬랙스","cost":11500.0,"key":"(노컷슬랙스8탄)"},{"name":"(노컷슬랙스7탄) 투버튼 슬랙스","cost":11500.0,"key":"(노컷슬랙스7탄)"},{"name":"(노컷진22탄) 부츠컷 청바지","cost":14500.0,"key":"(노컷진22탄)"},{"name":"(노컷진20탄) 부츠컷 블랙진","cost":14500.0,"key":"(노컷진20탄)"},{"name":"(노컷슬랙스6탄)와이드 슬랙스","cost":10500.0,"key":"(노컷슬랙스6탄)"},{"name":"(올데이슬랙스9탄) 와이드 팬츠","cost":14000.0,"key":"(올데이슬랙스9탄)"},{"name":"(올데이슬랙스8탄) 부츠컷 팬츠","cost":13000.0,"key":"(올데이슬랙스8탄)"},{"name":"(노컷슬랙스4탄) 기모 와이드 슬랙스","cost":14000.0,"key":"(노컷슬랙스4탄)"},{"name":"(노컷슬랙스3탄) 모직 와이드 슬랙스","cost":15000.0,"key":"(노컷슬랙스3탄)"},{"name":"(겨울노컷진16탄) 스트레이트 청바지","cost":15500.0,"key":"(겨울노컷진16탄)"},{"name":"(핫기모4탄) 조거 팬츠","cost":7000.0,"key":"(핫기모4탄)"},{"name":"(핫기모5탄) 시보리 팬츠","cost":7000.0,"key":"(핫기모5탄)"},{"name":"(겨울노컷진11탄) 기모 와이드 청바지","cost":15000.0,"key":"(겨울노컷진11탄)"},{"name":"(겨울노컷진12탄) 기모 세미와이드 청바지","cost":14500.0,"key":"(겨울노컷진12탄)"},{"name":"(노컷진4탄) 일자핏 배기 청바지","cost":12500.0,"key":"(노컷진4탄)"},{"name":"(노컷진3탄)세미와이드 청바지","cost":13500.0,"key":"(노컷진3탄)"},{"name":"(노컷진1탄) 와이드 청바지","cost":14500.0,"key":"(노컷진1탄)"},{"name":"(롱한느낌1탄)브이넥 롱 조끼","cost":7000.0,"key":"(롱한느낌1탄)"},{"name":"브이넥 숏 조끼 (K2412)","cost":6000.0,"key":"(K2412)"},{"name":"(텐셀진3탄)(37) 텐셀 밴딩 배기 청바지","cost":12500.0,"key":"(텐셀진3탄)"},{"name":"(여름찐스판2탄) 아이스 데님 청바지","cost":14500.0,"key":"(여름찐스판2탄)"},{"name":"5부 냉장고 반바지 (P053101)","cost":3500.0,"key":"(P053101)"},{"name":"5부 냉장고 반바지 (MP053101)","cost":3500.0,"key":"(MP053101)"},{"name":"(냉장고바지6탄) 5부 반바지","cost":4000.0,"key":"(냉장고바지6탄)"},{"name":"(노컷슬랙스1탄) 일자 슬랙스","cost":11000.0,"key":"(노컷슬랙스1탄)"},{"name":"(노컷슬랙스2탄) 와이드 슬랙스","cost":10000.0,"key":"(노컷슬랙스2탄)"},{"name":"(핫기모1탄) 와이드 팬츠","cost":7500.0,"key":"(핫기모1탄)"},{"name":"(여름올데이슬랙스6탄) 부츠컷 스판 슬랙스","cost":12000.0,"key":"(여름올데이슬랙스6탄)"},{"name":"(여름올데이팬츠8탄) 부츠컷핏 트레이닝 팬츠","cost":12000.0,"key":"(여름올데이팬츠8탄)"},{"name":"(여름올데이팬츠9탄) 와이드핏 트레이닝 팬츠","cost":13000.0,"key":"(여름올데이팬츠9탄)"},{"name":"여름 핀턱 밴딩 슬랙스(S2619)","cost":18000.0,"key":"(S2619)"},{"name":"일자핏 쿨 데님 팬츠(J2625)","cost":20000.0,"key":"(J2625)"},{"name":"와이드핏 린넨 밴딩 슬랙스(S2618)","cost":16000.0,"key":"(S2618)"},{"name":"(여름노컷슬랙스6탄)부츠컷 스판 밴딩 슬랙스","cost":16000.0,"key":"(여름노컷슬랙스6탄)"},{"name":"밴딩 스판 하이웨스트 부츠컷 트레이닝 팬츠 (P2661)","cost":11000.0,"key":"(P2661)"},{"name":"핀턱 투웨이 트레이닝 팬츠 (P2660)","cost":7000.0,"key":"(P2660)"},{"name":"카브라 뒷밴딩 와이드핏 팬츠(P2659)","cost":20000.0,"key":"(P2659)"},{"name":"여름 부츠컷 스판 쿨 데님 팬츠(J2624)","cost":20000.0,"key":"(J2624)"},{"name":"(여름올데이팬츠10탄) 와이드핏 텐셀 밴딩 팬츠","cost":7000.0,"key":"(여름올데이팬츠10탄)"},{"name":"부츠컷 스판 하이웨스트 슬랙스(S2621)","cost":21000.0,"key":"(S2621)"},{"name":"(여름올데이슬랙스7탄) 와이드핏 스판 슬랙스","cost":12000.0,"key":"(여름올데이슬랙스7탄)"},{"name":"쿨링 배기핏 밴딩 슬랙스(S2620)","cost":13000.0,"key":"(S2620)"},{"name":"나일론 배기핏 카프리 팬츠(P2662)","cost":13000.0,"key":"(P2662)"},{"name":"여름 A라인 4부 데님 반바지 (J2626)","cost":11500.0,"key":"(J2626)"},{"name":"(노컷진2탄) 스판 밴딩 와이드핏 청바지","cost":12000.0,"key":"(노컷진2탄)"},{"name":"(찐코튼3탄) 와이드핏 밴딩 스판 팬츠","cost":12000.0,"key":"(찐코튼3탄)"},{"name":"생지 스판 와이드핏 데님 바지 (J2627)","cost":12000.0,"key":"(J2627)"},{"name":"부츠컷 골반뽕 스판 바지 (J2630)","cost":13500.0,"key":"(J2630)"},{"name":"(올데이슬랙스3탄) 세미와이드 부츠컷 스판 슬랙스","cost":14000.0,"key":"(올데이슬랙스3탄)"},{"name":"코듀로이 데님 부츠컷 팬츠 (J2629)","cost":13500.0,"key":"(J2629)"},{"name":"(노컷진53탄) 생지 스판 카프리팬츠","cost":16000.0,"key":"(노컷진53탄)"},{"name":"(또입진6탄) 와이드핏 워싱 포켓 청바지","cost":14000.0,"key":"(또입진6탄)"},{"name":"(올데이팬츠11탄) 부츠컷 밴딩 트레이닝 팬츠","cost":12000.0,"key":"(올데이팬츠11탄)"},{"name":"코듀로이 투웨이 와이드핏 팬츠 (P2680)","cost":8000.0,"key":"(P2680)"}];
+  const DEFAULT_MARGIN_DATA=[{"cost":3000.0,"supply":3300.0,"18":10500.0,"20":10800.0,"23":11400.0,"25":11800.0},{"cost":3500.0,"supply":3850.0,"18":11200.0,"20":11500.0,"23":12200.0,"25":12600.0},{"cost":4000.0,"supply":4400.0,"18":12500.0,"20":12900.0,"23":13700.0,"25":14100.0},{"cost":5000.0,"supply":5500.0,"18":13800.0,"20":14200.0,"23":15100.0,"25":15600.0},{"cost":5500.0,"supply":6050.0,"18":14700.0,"20":15100.0,"23":16000.0,"25":16500.0},{"cost":6000.0,"supply":6600.000000000001,"18":15500.0,"20":16000.0,"23":17000.0,"25":17500.0},{"cost":6500.0,"supply":7150.000000000001,"18":16100.0,"20":16600.0,"23":17600.0,"25":18100.0},{"cost":7000.0,"supply":7700.000000000001,"18":17500.0,"20":18000.0,"23":19100.0,"25":19700.0},{"cost":7500.0,"supply":8250.0,"18":18200.0,"20":18700.0,"23":19800.0,"25":20400.0},{"cost":8000.0,"supply":8800.0,"18":19200.0,"20":19800.0,"23":21000.0,"25":21600.0},{"cost":8500.0,"supply":9350.0,"18":19900.0,"20":20500.0,"23":21700.0,"25":22300.0},{"cost":9000.0,"supply":9900.0,"18":20800.0,"20":21400.0,"23":22700.0,"25":23400.0},{"cost":9500.0,"supply":10450.0,"18":21500.0,"20":22100.0,"23":23400.0,"25":24100.0},{"cost":10000.0,"supply":11000.0,"18":22800.0,"20":23500.0,"23":24900.0,"25":25600.0},{"cost":10500.0,"supply":11550.0,"18":23500.0,"20":24200.0,"23":25700.0,"25":26400.0},{"cost":11000.0,"supply":12100.0,"18":24500.0,"20":25200.0,"23":26700.0,"25":27500.0},{"cost":11500.0,"supply":12650.0,"18":25200.0,"20":26000.0,"23":27600.0,"25":28400.0},{"cost":12000.0,"supply":13200.0,"18":26200.0,"20":27000.0,"23":28600.0,"25":29400.0},{"cost":12500.0,"supply":13750.0,"18":26900.0,"20":27700.0,"23":29400.0,"25":30200.0},{"cost":13000.0,"supply":14300.0,"18":27800.0,"20":28600.0,"23":30300.0,"25":31200.0},{"cost":13500.0,"supply":14850.0,"18":28600.0,"20":29400.0,"23":31200.0,"25":32100.0},{"cost":14000.0,"supply":15400.0,"18":29300.0,"20":30200.0,"23":32000.0,"25":32900.0},{"cost":14500.0,"supply":15950.0,"18":30200.0,"20":31100.0,"23":32900.0,"25":33800.0},{"cost":15000.0,"supply":16500.0,"18":31000.0,"20":31900.0,"23":33800.0,"25":34800.0},{"cost":15500.0,"supply":17050.0,"18":32100.0,"20":33000.0,"23":35000.0,"25":36000.0},{"cost":16000.0,"supply":17600.0,"18":33100.0,"20":34100.0,"23":36100.0,"25":37100.0},{"cost":17000.0,"supply":18700.0,"18":34800.0,"20":35800.0,"23":37900.0,"25":39000.0},{"cost":18000.0,"supply":19800.0,"18":36900.0,"20":38000.0,"23":40300.0,"25":41400.0},{"cost":19000.0,"supply":20900.0,"18":38600.0,"20":39800.0,"23":42200.0,"25":43400.0},{"cost":20000.0,"supply":22000.0,"18":40200.0,"20":41400.0,"23":43900.0,"25":45100.0},{"cost":21000.0,"supply":23100.0,"18":42000.0,"20":43300.0,"23":45900.0,"25":47200.0},{"cost":22000.0,"supply":24200.0,"18":43900.0,"20":45300.0,"23":48000.0,"25":49300.0},{"cost":23000.0,"supply":25300.0,"18":45800.0,"20":47200.0,"23":50000.0,"25":51400.0},{"cost":24000.0,"supply":26400.0,"18":47600.0,"20":49000.0,"23":51900.0,"25":53300.0},{"cost":25000.0,"supply":27500.0,"18":49300.0,"20":50800.0,"23":53800.0,"25":55300.0},{"cost":27000.0,"supply":29700.0,"18":53500.0,"20":55100.0,"23":58400.0,"25":60000.0},{"cost":28000.0,"supply":30800.0,"18":57500.0,"20":59200.0,"23":62800.0,"25":64500.0},{"cost":29000.0,"supply":31900.0,"18":59500.0,"20":61300.0,"23":65000.0,"25":66800.0},{"cost":30000.0,"supply":33000.0,"18":61500.0,"20":63300.0,"23":67100.0,"25":68900.0}];
+  const DEFAULT_SOURCE="★★채널별 행사가 책정 파일 (대외비) 톡딜 0915 복구본(1).xlsx";
+  const STORAGE_COST='forestfit_pricing_cost_v2';
+  const STORAGE_MARGIN='forestfit_pricing_margin_v2';
+  const STORAGE_SOURCE='forestfit_pricing_source_v2';
+  const STORAGE_ROWS='forestfit_pricing_rows_v2';
+  const STORAGE_CHANNEL='forestfit_pricing_channel_v2';
+  const CHANNELS={'네이버':10,'GS SHOP':18,'브리치':21,'퀸잇':23,'하프클럽':20};
+  const RATES=[10,18,21,23,20];
+  const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+  const fmt=v=>v===null||v===undefined||v===''?'-':Math.round(Number(v)).toLocaleString('ko-KR');
+  const toNum=v=>{const s=String(v??'').replace(/[^0-9.\-]/g,'').trim();if(!s)return null;const n=Number(s);return Number.isFinite(n)?n:null;};
+  const norm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/^\s*\d{1,3}\s*(?:[.)]|[-–—])\s*/,'').replace(/\s+/g,'').replace(/[._·:：\-–—]/g,'');
+  const displayKey=v=>{const s=String(v??'').normalize('NFKC');const ms=[...s.matchAll(/[（(]\s*([^()（）]+?)\s*[)）]/g)];return ms.length?`(${ms[0][1].trim()})`:'';};
+  const allParenKeys=v=>[...String(v??'').normalize('NFKC').matchAll(/[（(]\s*([^()（）]+?)\s*[)）]/g)].map(m=>`(${m[1].trim()})`);
+  const normalizeKey=v=>String(v??'').replace(/[（）]/g,x=>x==='（'?'(':')').replace(/\s+/g,'').toLowerCase();
+  const safeLocalGet=(k,fallback)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fallback;}catch(e){return fallback;}};
+  const safeLocalSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}};
+  let costData=safeLocalGet(STORAGE_COST,DEFAULT_COST_DATA.map(x=>({...x})));
+  let marginData=safeLocalGet(STORAGE_MARGIN,DEFAULT_MARGIN_DATA.map(x=>({...x})));
+  let sourceLabel=localStorage.getItem(STORAGE_SOURCE)||DEFAULT_SOURCE;
+  let pricingRows=safeLocalGet(STORAGE_ROWS,[]);
+  let selectedChannel=localStorage.getItem(STORAGE_CHANNEL)||'GS SHOP';
+  let selectedRate=CHANNELS[selectedChannel]||18;
+
+  function priceToast(msg){const t=$('#toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(priceToast.timer);priceToast.timer=setTimeout(()=>t.classList.remove('show'),2200);}
+  function saveCore(){safeLocalSet(STORAGE_COST,costData);safeLocalSet(STORAGE_MARGIN,marginData);localStorage.setItem(STORAGE_SOURCE,sourceLabel);$('#cost-save-state').textContent='저장됨';setTimeout(()=>{if($('#cost-save-state'))$('#cost-save-state').textContent='자동 저장';},900);}
+  function stripNo(v){return String(v??'').replace(/^\s*\d{1,3}\s*(?:[.)]|[-–—])\s*/,'').trim();}
+  function rebuildCostIndex(){
+    const byKey=new Map(),byName=new Map();
+    costData.forEach((x,i)=>{const c=toNum(x.cost);if(c===null||c<=0)return;const k=normalizeKey(x.key);if(k)byKey.set(k,{...x,index:i});const n=norm(x.name);if(n)byName.set(n,{...x,index:i});});
+    return {byKey,byName};
+  }
+  function lookupCost(name,keyHint=''){
+    const idx=rebuildCostIndex();
+    const candidates=[];if(keyHint)candidates.push(keyHint);candidates.push(...allParenKeys(name));
+    for(const k of candidates){const hit=idx.byKey.get(normalizeKey(k));if(hit)return hit;}
+    const n=norm(name);if(idx.byName.has(n))return idx.byName.get(n);
+    const code=String(name??'').match(/([A-Z]{1,3}\d{3,7})/i);if(code){const hit=idx.byKey.get(normalizeKey(`(${code[1]})`));if(hit)return hit;}
+    return null;
+  }
+  function getOrCreateCostEntry(row,cost){
+    const found=lookupCost(row.name,row.key);if(found){costData[found.index].cost=cost;return;}
+    const key=row.key||displayKey(row.name)||'';costData.unshift({name:stripNo(row.name),key,cost});
+  }
+  function interpCostColumn(cost,key){
+    const rows=marginData.filter(r=>toNum(r.cost)!==null&&toNum(r[key])!==null).sort((a,b)=>a.cost-b.cost);if(!rows.length)return null;
+    if(rows.length===1)return toNum(rows[0][key]);
+    let a,b;
+    if(cost<=rows[0].cost){a=rows[0];b=rows[1];}
+    else if(cost>=rows[rows.length-1].cost){a=rows[rows.length-2];b=rows[rows.length-1];}
+    else{for(let i=0;i<rows.length-1;i++)if(cost>=rows[i].cost&&cost<=rows[i+1].cost){a=rows[i];b=rows[i+1];break;}}
+    if(!a||!b)return null;const av=toNum(a[key]),bv=toNum(b[key]);if(av===null||bv===null)return null;if(b.cost===a.cost)return av;
+    return av+(cost-a.cost)/(b.cost-a.cost)*(bv-av);
+  }
+  function marginAt(cost,rate){
+    cost=toNum(cost);rate=Number(rate);if(cost===null||cost<=0)return null;let raw=null;
+    if([18,20,23,25].includes(rate))raw=interpCostColumn(cost,String(rate));
+    else if(rate===21){const a=interpCostColumn(cost,'20'),b=interpCostColumn(cost,'23');if(a!==null&&b!==null)raw=a+(b-a)/3;}
+    else if(rate===10){const a=interpCostColumn(cost,'18'),b=interpCostColumn(cost,'20');if(a!==null&&b!==null)raw=a+(10-18)/(20-18)*(b-a);}
+    else{const a=interpCostColumn(cost,'18'),b=interpCostColumn(cost,'23');if(a!==null&&b!==null)raw=a+(rate-18)/(23-18)*(b-a);}
+    return raw===null?null:Math.round(raw/100)*100;
+  }
+  function endingPrice(proposed,coupon){const p=toNum(proposed);if(p===null)return null;const c=toNum(coupon);if(c===null)return p;return c>1?p-c:p*(1-c);}
+  function productKeyFor(name){return displayKey(name)||'';}
+
+  // inner tabs
+  $$('.pricing-tab-btn').forEach(btn=>btn.addEventListener('click',()=>{$$('.pricing-tab-btn').forEach(b=>b.classList.toggle('active',b===btn));$$('.pricing-panel').forEach(p=>p.classList.toggle('active',p.id===btn.dataset.pricingTab));if(btn.dataset.pricingTab==='pricing-margin')renderMargin();if(btn.dataset.pricingTab==='pricing-cost')renderCosts();if(btn.dataset.pricingTab==='pricing-channel')renderChannel();}));
+
+  function updateSourceLabels(){$('#pricing-source-label').textContent=`고정 기준 · ${sourceLabel}`;$('#margin-source-badge').textContent=`${marginData.length}개 기준 원가 · 100원 계산`;}
+  function renderRates(){const box=$('#pricing-rate-row');box.innerHTML=RATES.map(r=>`<button class="rate-chip ${r===selectedRate?'active':''}" type="button" data-rate="${r}">${r}%</button>`).join('');box.querySelectorAll('[data-rate]').forEach(b=>b.addEventListener('click',()=>{selectedRate=Number(b.dataset.rate);renderRates();renderMarginTest();}));}
+  function renderMarginTest(){const c=toNum($('#margin-test-cost').value);$$('[data-rate-result]').forEach(el=>{const r=Number(el.dataset.rateResult),v=marginAt(c,r);el.textContent=v===null?'-':`${fmt(v)}원`;el.classList.toggle('selected',r===selectedRate);});}
+  function renderMargin(){renderRates();renderMarginTest();const tbody=$('#margin-table-body');const costs=[];const min=3000,max=Math.max(31000,...marginData.map(r=>Number(r.cost)||0));for(let c=min;c<=max;c+=100)costs.push(c);tbody.innerHTML=costs.map(c=>`<tr><td class="num">${fmt(c)}</td>${RATES.map(r=>`<td class="num">${fmt(marginAt(c,r))}</td>`).join('')}</tr>`).join('');}
+  $('#margin-test-cost').addEventListener('input',renderMarginTest);
+
+  function renderCosts(){
+    const q=norm($('#cost-search').value);const rows=costData.map((x,i)=>({...x,_i:i})).filter(x=>!q||norm(x.name).includes(q)||norm(x.key).includes(q));$('#cost-count').innerHTML=`<strong>${rows.length.toLocaleString('ko-KR')}</strong> / ${costData.length.toLocaleString('ko-KR')}`;
+    const shown=rows.slice(0,350);$('#cost-table-body').innerHTML=shown.map(x=>`<tr><td>${String(x.name??'').replace(/</g,'&lt;')}</td><td>${String(x.key??'').replace(/</g,'&lt;')}</td><td class="num"><input class="cost-cell-input" data-cost-index="${x._i}" value="${toNum(x.cost)??''}" inputmode="numeric"></td><td><span class="cost-save-note">자동</span></td></tr>`).join('');
+    $('#cost-table-body').querySelectorAll('[data-cost-index]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.costIndex),v=toNum(inp.value);if(v!==null){costData[i].cost=v;saveCore();renderChannel();}}));
+  }
+  $('#cost-search').addEventListener('input',renderCosts);
+  $('#cost-add-btn').addEventListener('click',()=>{const name=$('#cost-add-name').value.trim(),rawKey=$('#cost-add-key').value.trim(),cost=toNum($('#cost-add-value').value);if(!name||cost===null){priceToast('상품명과 원가를 입력해주세요.');return;}const key=rawKey?(/^\(.+\)$/.test(rawKey)?rawKey:`(${rawKey})`):displayKey(name);costData.unshift({name,key,cost});saveCore();$('#cost-add-name').value='';$('#cost-add-key').value='';$('#cost-add-value').value='';renderCosts();renderChannel();priceToast('원가가 저장되었습니다.');});
+
+  function detectHeader(rows){let best={i:-1,score:-1};for(let i=0;i<Math.min(15,rows.length);i++){const hs=(rows[i]||[]).map(v=>String(v??'').replace(/\s+/g,'').toLowerCase());let score=0;if(hs.some(h=>h.includes('상품명')||h==='품명'))score+=5;if(hs.some(h=>h.includes('판매가')||h.includes('정상가')||h.includes('상시')))score+=2;if(hs.some(h=>h.includes('상품코드')||h==='코드'))score+=1;if(score>best.score)best={i,score,hs};}return best.score>=4?best:null;}
+  async function matrixFromFile(file){
+    const ext=(file.name.split('.').pop()||'').toLowerCase();
+    if(ext==='csv'){const ab=await file.arrayBuffer();let text=new TextDecoder('utf-8').decode(ab);if((text.match(/�/g)||[]).length>4){try{text=new TextDecoder('euc-kr').decode(ab);}catch(e){}}const wb=XLSX.read(text,{type:'string'});return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:true});}
+    const ab=await file.arrayBuffer(),book=XLSX.read(ab,{type:'array',cellFormula:true,cellText:true});let best=[];let score=-1;for(const sn of book.SheetNames){const rows=XLSX.utils.sheet_to_json(book.Sheets[sn],{header:1,defval:'',raw:true}),h=detectHeader(rows);const s=h?h.score:0;if(s>score){score=s;best=rows;}}return best;
+  }
+  async function loadSelectedProducts(file){
+    const rows=await matrixFromFile(file),h=detectHeader(rows);if(!h)throw new Error('상품명 분류명을 찾지 못했습니다.');const heads=h.hs,hi=h.i;
+    const find=(patterns)=>heads.findIndex(x=>patterns.some(p=>x.includes(p)));
+    const nameCols=heads.map((x,i)=>({x,i})).filter(o=>o.x.includes('상품명')||o.x==='품명').map(o=>o.i);let nameCol=nameCols[0]??-1;if(nameCols.length>1){let best=-1,c=-1;for(const col of nameCols){let n=0;for(let r=hi+1;r<Math.min(rows.length,hi+80);r++)if(String(rows[r]?.[col]??'').trim())n++;if(n>c){c=n;best=col;}}nameCol=best;}
+    const codeCol=find(['상품코드','관리코드']);const normalCol=find(['상시판매가','정상가','판매가']);const proposedCol=find(['제안할인가','행사가','할인가']);const couponCol=find(['쿠폰']);
+    const out=[];for(let r=hi+1;r<rows.length;r++){const name=stripNo(rows[r]?.[nameCol]);if(!name)continue;out.push({id:`r${Date.now()}_${r}`,code:String(rows[r]?.[codeCol]??'').trim(),name,normal:toNum(rows[r]?.[normalCol]),proposed:toNum(rows[r]?.[proposedCol]),coupon:toNum(rows[r]?.[couponCol]),key:productKeyFor(name)});}
+    const seen=new Set();pricingRows=out.filter(x=>{const k=norm(x.name);if(seen.has(k))return false;seen.add(k);return true;});safeLocalSet(STORAGE_ROWS,pricingRows);renderChannel();return pricingRows.length;
+  }
+
+  function renderChannelSelect(){const s=$('#channel-select');s.innerHTML=Object.entries(CHANNELS).map(([n,r])=>`<option value="${n}" ${n===selectedChannel?'selected':''}>${n}</option>`).join('');$('#channel-rate-badge').textContent=`${CHANNELS[selectedChannel]}%`;}
+  function rowStatus(row,cost,margin,end){if(cost===null)return ['원가 입력','bad'];if(margin===null)return ['마지노선 확인','warn'];if(end!==null&&end<margin)return ['마지노선 미달','bad'];return ['조회완료','ok'];}
+  function renderChannel(){renderChannelSelect();const rate=CHANNELS[selectedChannel]||18;const tbody=$('#channel-table-body'),empty=$('#channel-empty');if(!pricingRows.length){tbody.innerHTML='';empty.style.display='block';return;}empty.style.display='none';tbody.innerHTML=pricingRows.map((row,i)=>{const hit=lookupCost(row.name,row.key),cost=hit?toNum(hit.cost):null,margin=marginAt(cost,rate),end=endingPrice(row.proposed,row.coupon),ratio=(cost!==null&&end)?cost/end:null,[st,cls]=rowStatus(row,cost,margin,end);return `<tr class="${end!==null&&margin!==null&&end<margin?'danger':''}"><td><input class="editable-price" style="text-align:left" data-row-field="code" data-row-i="${i}" value="${String(row.code??'').replace(/"/g,'&quot;')}"></td><td>${String(row.name).replace(/</g,'&lt;')}</td><td class="num"><input class="editable-price" data-row-field="normal" data-row-i="${i}" value="${row.normal??''}"></td><td class="num"><input class="editable-price" data-row-field="proposed" data-row-i="${i}" value="${row.proposed??''}"></td><td class="num"><input class="editable-price" data-row-field="coupon" data-row-i="${i}" value="${row.coupon??''}"></td><td class="num">${fmt(end)}</td><td class="num">${cost===null?`<input class="cost-cell-input missing" data-missing-cost="${i}" placeholder="원가 입력">`:fmt(cost)}</td><td class="num">${fmt(margin)}</td><td class="num">${ratio===null?'-':(ratio*100).toFixed(1)+'%'}</td><td>${row.key||displayKey(row.name)||'-'}</td><td><span class="status-pill ${cls}">${st}</span></td></tr>`;}).join('');
+    tbody.querySelectorAll('[data-row-field]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.rowI),f=inp.dataset.rowField;pricingRows[i][f]=f==='code'?inp.value:toNum(inp.value);safeLocalSet(STORAGE_ROWS,pricingRows);renderChannel();}));
+    tbody.querySelectorAll('[data-missing-cost]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.missingCost),v=toNum(inp.value);if(v===null||v<=0)return;getOrCreateCostEntry(pricingRows[i],v);saveCore();renderCosts();renderChannel();priceToast('원가가 저장되었습니다.');}));
+  }
+  $('#channel-select').addEventListener('change',e=>{selectedChannel=e.target.value;localStorage.setItem(STORAGE_CHANNEL,selectedChannel);selectedRate=CHANNELS[selectedChannel];renderChannel();renderRates();renderMarginTest();});
+  $('#pricing-products-file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;$('#pricing-products-info').textContent=f.name;try{const n=await loadSelectedProducts(f);priceToast(`${n}개 상품을 불러왔습니다.`);}catch(err){priceToast(err.message||'상품 파일을 읽지 못했습니다.');}});
+  $('#pricing-add-row').addEventListener('click',()=>{pricingRows.push({id:`manual_${Date.now()}`,code:'',name:'직접 입력 상품',normal:null,proposed:null,coupon:null,key:''});safeLocalSet(STORAGE_ROWS,pricingRows);renderChannel();});
+
+  async function importPricingConfig(file){
+    const ab=await file.arrayBuffer();
+    const book=XLSX.read(ab,{type:'array',cellFormula:true,cellText:true});
+    let newCosts=null,newMargins=null,costSheetName='';
+
+    for(const sn of book.SheetNames){
+      const rows=XLSX.utils.sheet_to_json(book.Sheets[sn],{header:1,defval:'',raw:true});
+      for(let hi=0;hi<Math.min(10,rows.length);hi++){
+        const hs=(rows[hi]||[]).map(v=>String(v??'').replace(/\s+/g,''));
+        const nameCol=hs.findIndex(x=>x==='상품명');
+        const costCol=hs.findIndex(x=>x==='원가');
+        const keyCol=hs.findIndex(x=>x.includes('상품키'));
+        if(nameCol>=0&&costCol>=0&&keyCol>=0){
+          const arr=[];
+          for(let r=hi+1;r<rows.length;r++){
+            const name=String(rows[r]?.[nameCol]??'').trim();
+            const cost=toNum(rows[r]?.[costCol]);
+            if(!name||cost===null)continue;
+            arr.push({name,cost,key:String(rows[r]?.[keyCol]??'').trim()});
+          }
+          if(arr.length>50){newCosts=arr;costSheetName=sn;}
+          break;
+        }
+      }
+    }
+
+    const msn=book.SheetNames.find(n=>n.includes('마지노선'));
+    if(msn){
+      const rows=XLSX.utils.sheet_to_json(book.Sheets[msn],{header:1,defval:'',raw:true});
+      let hi=-1,idx={};
+      for(let i=0;i<Math.min(10,rows.length);i++){
+        const hs=(rows[i]||[]).map(v=>String(v??'').replace(/\s+/g,''));
+        if(hs.includes('원가')){
+          hi=i;
+          idx.cost=hs.indexOf('원가');
+          idx.supply=hs.findIndex(x=>x.includes('공급가'));
+          idx.r18=hs.findIndex(x=>x==='0.18'||x==='18%'||x==='18');
+          idx.r20=hs.findIndex(x=>x==='0.2'||x==='20%'||x==='20');
+          idx.r23=hs.findIndex(x=>x==='0.23'||x==='23%'||x==='23');
+          idx.r25=hs.findIndex(x=>x==='0.25'||x==='25%'||x==='25');
+          break;
+        }
+      }
+      if(hi>=0){
+        const arr=[];
+        for(let r=hi+1;r<rows.length;r++){
+          const c=toNum(rows[r]?.[idx.cost]);
+          if(c===null)break;
+          arr.push({
+            cost:c,
+            supply:idx.supply>=0?toNum(rows[r]?.[idx.supply]):null,
+            '18':idx.r18>=0?toNum(rows[r]?.[idx.r18]):null,
+            '20':idx.r20>=0?toNum(rows[r]?.[idx.r20]):null,
+            '23':idx.r23>=0?toNum(rows[r]?.[idx.r23]):null,
+            '25':idx.r25>=0?toNum(rows[r]?.[idx.r25]):null
+          });
+        }
+        if(arr.length>5)newMargins=arr;
+      }
+    }
+
+    if(!newCosts&&!newMargins)throw new Error('상품 원가표 또는 마지노선표를 찾지 못했습니다.');
+    if(newCosts)costData=newCosts;
+    if(newMargins)marginData=newMargins;
+    sourceLabel=`${file.name}${costSheetName?` · ${costSheetName}`:''}`;
+    saveCore();
+    updateSourceLabels();
+    renderMargin();
+    renderCosts();
+    renderChannel();
+  }
+  $('#pricing-config-file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{await importPricingConfig(f);priceToast('금액 세팅을 다시 불러왔습니다.');}catch(err){priceToast(err.message||'파일을 읽지 못했습니다.');}e.target.value='';});
+  $('#pricing-reset-default').addEventListener('click',()=>{if(!confirm('사이트에 저장된 원가/마지노선을 기본 파일 값으로 되돌릴까요?'))return;costData=DEFAULT_COST_DATA.map(x=>({...x}));marginData=DEFAULT_MARGIN_DATA.map(x=>({...x}));sourceLabel=DEFAULT_SOURCE;saveCore();updateSourceLabels();renderMargin();renderCosts();renderChannel();priceToast('기본값으로 복원했습니다.');});
+
+  function channelExportRows(){const rate=CHANNELS[selectedChannel]||18;return pricingRows.map(row=>{const hit=lookupCost(row.name,row.key),cost=hit?toNum(hit.cost):null,margin=marginAt(cost,rate),end=endingPrice(row.proposed,row.coupon),ratio=(cost!==null&&end)?cost/end:null,[st]=rowStatus(row,cost,margin,end);return {'상품코드':row.code||'','상품명':row.name,'상시판매가':row.normal??'','제안할인가':row.proposed??'','쿠폰':row.coupon??'','쿠폰 적용 엔딩가':end??'','원가':cost??'','마지노선':margin??'','원가율':ratio??'','상품키(자동)':row.key||displayKey(row.name)||'','조회상태':st};});}
+  $('#pricing-download').addEventListener('click',()=>{
+    const wb2=XLSX.utils.book_new();
+    const guide=[['행사가 산정 파일'],['판매처',selectedChannel],['적용 비율',`${CHANNELS[selectedChannel]}%`],['원가 데이터',sourceLabel],[],['사이트에서 원가를 직접 입력한 값은 브라우저에 자동 저장됩니다.']];XLSX.utils.book_append_sheet(wb2,XLSX.utils.aoa_to_sheet(guide),'사용방법');
+    const marginRows=[['원가','10%','18%','21%','23%','20%']];const max=Math.max(31000,...marginData.map(r=>Number(r.cost)||0));for(let c=3000;c<=max;c+=100)marginRows.push([c,...RATES.map(r=>marginAt(c,r))]);XLSX.utils.book_append_sheet(wb2,XLSX.utils.aoa_to_sheet(marginRows),'마지노선');
+    const crows=[['상품명','원가','상품키(괄호포함)'],...costData.filter(x=>toNum(x.cost)!==null&&toNum(x.cost)>0).map(x=>[x.name,toNum(x.cost),x.key||''])];XLSX.utils.book_append_sheet(wb2,XLSX.utils.aoa_to_sheet(crows),'상품 원가 정보');
+    const ch=channelExportRows();XLSX.utils.book_append_sheet(wb2,XLSX.utils.json_to_sheet(ch),`${selectedChannel} (${CHANNELS[selectedChannel]}%)`.slice(0,31));
+    XLSX.writeFile(wb2,`행사가_책정_${selectedChannel}_${CHANNELS[selectedChannel]}%.xlsx`);
+  });
+
+  updateSourceLabels();renderMargin();renderCosts();renderChannel();
+})();
+</script>
+
+<script>
+  document.querySelectorAll('.channel-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.channel-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      document.querySelectorAll('.channel-panel').forEach(panel=>panel.classList.toggle('active',panel.id===`channel-${btn.dataset.channel}`));
+    });
+  });
+
+  document.querySelectorAll('#channel-talkdeal .main-menu-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#channel-talkdeal .main-menu-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      document.querySelectorAll('#channel-talkdeal .tab-panel').forEach(panel=>panel.classList.toggle('active',panel.id===btn.dataset.tab));
+    });
+  });
 </script>
 </body>
 </html>
