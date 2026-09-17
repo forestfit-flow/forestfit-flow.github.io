@@ -152,6 +152,7 @@ button,input{font:inherit}
 .card.planning{--accent:#9a84cf;--soft:#f3effc;--deep:#695798}
 .card.purchase{--accent:#ca9a74;--soft:#fcf2ea;--deep:#8e6040}
 .card.product{--accent:#7b75dc;--soft:#f1efff;--deep:#504a9b}
+.card.analytics{--accent:#5f7382;--soft:#edf2f5;--deep:#384b59}
 .card:nth-child(1){grid-column:span 7;min-height:274px}
 .card:nth-child(2){grid-column:span 5;min-height:274px}
 .card:nth-child(3),.card:nth-child(4),.card:nth-child(5){grid-column:span 4;min-height:210px}
@@ -203,6 +204,7 @@ button,input{font:inherit}
 .footer strong{color:#615852}
 .reveal{opacity:0;transform:translateY(18px);transition:opacity .62s ease,transform .62s cubic-bezier(.2,.8,.2,1)}
 .reveal.show{opacity:1;transform:none}
+
 
 @media(max-width:980px){
   .hero-grid{grid-template-columns:1fr}
@@ -267,7 +269,7 @@ button,input{font:inherit}
         <button class="filter-chip active" data-filter="sales" type="button"><span>판매</span></button>
         <button class="filter-chip" data-filter="supply" type="button"><span>공급</span></button>
         <button class="filter-chip" data-filter="product-upload" type="button"><span>상품 업로드</span></button>
-        <button class="filter-chip" data-filter="order" type="button"><span>오더</span></button>
+        <button class="filter-chip" data-filter="management" type="button"><span>경영</span></button>
       </div>
       <a class="sellmate-link" href="https://forestfit.sellmate.co.kr/main.asp" target="_blank" rel="noopener noreferrer">셀메이트 바로가기</a>
       <div class="search">
@@ -281,7 +283,7 @@ button,input{font:inherit}
 </div>
 
 <div class="wrap">
-  <div class="section-head"><strong>Work Index</strong><span><span id="resultCount">04</span> / 08</span></div>
+  <div class="section-head"><strong>Work Index</strong><span><span id="resultCount">04</span> / 09</span></div>
 
   <main class="tools">
     <a class="card delivery reveal" href="integrated-delivery.html" data-category="delivery" data-groups="supply" data-search="통합 납기관리 납기 배송 출고 delivery schedule">
@@ -309,7 +311,7 @@ button,input{font:inherit}
       <div class="card-body"><h2 class="tool-name">월별 사업계획서</h2><span class="card-label">Open tool</span></div><span class="card-watermark">05</span>
     </a>
 
-    <a class="card purchase reveal" href="additional-order.html" data-category="purchase" data-groups="order" data-search="추가발주 제작 상품 발주 발주수량 발주서 purchase production">
+    <a class="card purchase reveal" href="additional-order.html" data-category="purchase" data-groups="management" data-search="추가발주 제작 상품 발주 발주수량 발주서 경영 management purchase production">
       <div class="card-top"><div class="card-index"><span class="mini-no">006</span><span class="category">Purchase</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">추가발주 / 제작 상품</h2><span class="card-label">Open tool</span></div><span class="card-watermark">06</span>
     </a>
@@ -322,6 +324,11 @@ button,input{font:inherit}
     <a class="card event reveal" href="sales-event.html" data-category="event" data-groups="sales" data-search="행사 판매팀 프로모션 행사리스트 톡딜 기획전 이벤트 sales event promotion deal">
       <div class="card-top"><div class="card-index"><span class="mini-no">008</span><span class="category">Sales · Event</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">행사</h2><span class="card-label">Sales Team · Open tool</span></div><span class="card-watermark">08</span>
+    </a>
+
+    <a class="card analytics reveal" href="sales-dashboard.html" data-category="analytics" data-groups="management" data-search="매출분석 대시보드 매출 판매 실적 경영 분석 analytics sales dashboard management">
+      <div class="card-top"><div class="card-index"><span class="mini-no">009</span><span class="category">Analytics</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">매출분석 대시보드</h2><span class="card-label">Management · Open tool</span></div><span class="card-watermark">09</span>
     </a>
 
     <div class="empty" id="emptyState">검색 결과가 없습니다.</div>
