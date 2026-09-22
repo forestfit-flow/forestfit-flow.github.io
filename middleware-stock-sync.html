@@ -345,20 +345,23 @@ function patchNumericCellInSheetXml(xml,rowNumber,colLetter,value){
   const numeric=Number(value);
   if(!Number.isFinite(numeric))throw new Error(ref+' 셀에 입력할 수량이 숫자가 아닙니다.');
 
-  // 기존 셀이 있는 경우 해당 셀 태그만 직접 치환합니다.
-  // XML 전체를 DOMParser/XMLSerializer로 재작성하지 않으므로 열너비·행높이·필터·인쇄설정·스타일 구조를 건드리지 않습니다.
-  const fullCellRe=new RegExp('<c\\b([^>]*\\br=["\\\']'+safeRef+'["\\\'][^>]*)>([\\s\\S]*?)<\\/c>','i');
-  if(fullCellRe.test(xml)){
-    return xml.replace(fullCellRe,(all,attrs,inner)=>{
-      const keptAttrs=attrs.replace(/\\s+t=["\\\'][^"\\\']*["\\\']/gi,'');
-      return '<c'+keptAttrs+'>'+removeCellValueNodes(inner)+'<v>'+String(numeric)+'</v></c>';
-    });
-  }
+  // 빈 셀(<c .../>)을 먼저 처리합니다.
+  // fullCell 정규식이 self-closing 셀을 건너뛰고 뒤쪽 다른 셀의 </c>까지 잡는 문제를 방지합니다.
   const selfCellRe=new RegExp('<c\\b([^>]*\\br=["\\\']'+safeRef+'["\\\'][^>]*)\\s*\\/>','i');
   if(selfCellRe.test(xml)){
     return xml.replace(selfCellRe,(all,attrs)=>{
-      const keptAttrs=attrs.replace(/\\s+t=["\\\'][^"\\\']*["\\\']/gi,'');
+      const keptAttrs=attrs.replace(/\s+t=["\'][^"\']*["\']/gi,'');
       return '<c'+keptAttrs+'><v>'+String(numeric)+'</v></c>';
+    });
+  }
+
+  // 값이 있는 기존 셀은 해당 셀 태그만 직접 치환합니다.
+  // t="s", inlineStr 등 문자열 타입을 제거해 실제 숫자 셀로 저장합니다.
+  const fullCellRe=new RegExp('<c\\b([^>]*\\br=["\\\']'+safeRef+'["\\\'][^>]*)>([\\s\\S]*?)<\\/c>','i');
+  if(fullCellRe.test(xml)){
+    return xml.replace(fullCellRe,(all,attrs,inner)=>{
+      const keptAttrs=attrs.replace(/\s+t=["\'][^"\']*["\']/gi,'');
+      return '<c'+keptAttrs+'>'+removeCellValueNodes(inner)+'<v>'+String(numeric)+'</v></c>';
     });
   }
 
