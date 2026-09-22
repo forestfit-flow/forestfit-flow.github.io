@@ -264,7 +264,7 @@ body.auth-locked > *:not(#authGate){visibility:hidden}
               <option>네이버</option><option>GS SHOP</option><option>GS SHOP(더소재)</option><option>퀸잇</option><option>퀸잇(더소재)</option><option>롯데온</option><option>비플로우</option><option>비플로우(더소재)</option><option>하프클럽</option><option>하프클럽(더소재)</option><option>카카오톡스토어</option><option>와디즈</option>
             </select>
             <input type="file" id="legacyChannelInput" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
-            <div class="channel-quick-hint"><span><b>아래 판매처 카드에 파일을 끌어놓으면 즉시 반영됩니다.</b><br>카드를 클릭해 파일을 선택해도 바로 적용됩니다.</span></div>
+            <div class="channel-quick-hint"><span><b>아래 판매처 카드 전체가 드롭 영역입니다. 파일을 놓으면 즉시 반영됩니다.</b><br>카드를 클릭해 파일을 선택해도 바로 적용됩니다.</span></div>
           </div>
           <div class="legacy-note"><b>미입력 카드 → 파일 드롭 즉시 저장</b> · 완료 카드 → 다시 드롭하면 교체 확인 후 저장합니다. 한 판매처 카드에는 한 번에 파일 1개만 적용됩니다.</div>
           <div class="channel-upload-status" id="channelUploadStatus">
@@ -315,6 +315,8 @@ const STORE='months';
 let db=null, months=[], state={brand:'ALL',channel:'전체',level:'month',year:2026,month:7,week:1};
 let trendChart=null, channelChart=null;
 const $=s=>document.querySelector(s);
+// CSV/XLSX 업로드 공통 검사: 주문 드롭존과 판매처 카드 드롭존에서 함께 사용
+const acceptedFile=f=>/\.(csv|xlsx|xls)$/i.test(f?.name||'');
 const fmt=n=>new Intl.NumberFormat('ko-KR').format(Math.round(Number(n)||0));
 const won=n=>fmt(n)+'원';
 const pct=n=>Number.isFinite(n)?`${n>=0?'+':''}${n.toFixed(1)}%`:'-';
@@ -461,7 +463,7 @@ function renderChannelUploadStatus(){
     btn.className='channel-status-card '+(ok?'done':'missing')+(channelImportKey(lc.value)===ch?' selected':'');
     const src=sources[ch]||sources[Object.keys(sources).find(k=>channelImportKey(k)===ch)]||null;
     const count=rows.filter(r=>r&&r.aggregateMonthly===true&&channelImportKey(r.c)===ch).length;
-    const meta=ok?(src?.file?`${escHtml(src.file)} · 다시 놓으면 교체`:`${fmt(count)}개 상품행 · 다시 놓으면 교체`):'파일을 여기로 끌어놓으세요';
+    const meta=ok?(src?.file?`${escHtml(src.file)} · 다시 놓으면 교체`:`${fmt(count)}개 상품행 · 다시 놓으면 교체`):'카드 어디에나 파일을 놓으세요';
     btn.innerHTML=`<span class="channel-status-top"><span class="channel-status-name">${ch}</span><span class="channel-state">${ok?'✓ 완료':'미입력'}</span></span><span class="channel-status-meta">${meta}</span>`;
     btn.onclick=()=>{lc.value=ch;renderChannelUploadStatus();const input=$('#legacyChannelInput');if(input){input.dataset.channel=ch;input.click()}};
     ['dragenter','dragover'].forEach(type=>btn.addEventListener(type,e=>{e.preventDefault();e.stopPropagation();btn.classList.add('drag-over')}));
@@ -598,7 +600,6 @@ async function restore(file){const obj=JSON.parse(await file.text());if(!obj||!A
 function bind(){
   buildBrandChips();
   const orderInput=$('#csvInput'),orderDrop=$('#orderDropZone');
-  const acceptedFile=f=>/\.(csv|xlsx|xls)$/i.test(f?.name||'');
   const runOrderFiles=async files=>{const list=[...files].filter(acceptedFile);if(!list.length){alert('CSV 또는 XLSX 파일을 끌어놓아주세요.');return}try{await importFiles(list)}catch(err){alert('파일 업데이트 실패\n'+err.message)}};
   $('#uploadBtn').onclick=()=>orderInput.click();
   orderInput.onchange=async e=>{try{if(e.target.files.length)await runOrderFiles(e.target.files)}finally{e.target.value=''}};
