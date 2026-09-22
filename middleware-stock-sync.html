@@ -72,14 +72,24 @@ function colorAliases(v){const raw=text(v);const out=new Set();const main=raw.re
 function normSize(v){return text(v).replace(/\([^)]*\)/g,'').replace(/\s+/g,'').toUpperCase().replace(/^F$/,'FREE')}
 function normLength(v){const s=text(v).replace(/\s+/g,'').toLowerCase();if(!s||['기본','기본기장','단일기장','일반','basic'].includes(s))return '기본';if(['숏','short'].includes(s))return '숏';if(['롱','long'].includes(s))return '롱';return s}
 function cellValue(ws,r,c){const a=XLSX.utils.encode_cell({r,c});return ws[a]?ws[a].v:''}
+function cellValueMerged(ws,r,c){
+  const direct=cellValue(ws,r,c);
+  if(direct!==''&&direct!=null)return direct;
+  const merges=ws['!merges']||[];
+  const hit=merges.find(m=>r>=m.s.r&&r<=m.e.r&&c>=m.s.c&&c<=m.e.c);
+  return hit?cellValue(ws,hit.s.r,hit.s.c):'';
+}
 async function readWorkbook(file){const ab=await file.arrayBuffer();return XLSX.read(ab,{type:'array',cellStyles:true,cellFormula:true,cellNF:true,cellDates:true})}
 function buildStockIndex(wb){const exact=new Map(), productMap=new Map();let rows=0, duplicateKeys=0;
-  wb.SheetNames.slice(1).forEach(sheetName=>{const ws=wb.Sheets[sheetName];if(!ws||!ws['!ref'])return;const range=XLSX.utils.decode_range(ws['!ref']);let p='',c='',l='';
+  wb.SheetNames.slice(1).forEach(sheetName=>{const ws=wb.Sheets[sheetName];if(!ws||!ws['!ref'])return;const range=XLSX.utils.decode_range(ws['!ref']);
     for(let r=5;r<=range.e.r;r++){
-      const bv=text(cellValue(ws,r,1)), cv=text(cellValue(ws,r,2)), ev=text(cellValue(ws,r,4));
-      if(bv)p=bv;if(cv)c=cv;if(ev)l=ev;
-      const size=normSize(cellValue(ws,r,5));if(!p||!size)continue;
-      const qtyRaw=cellValue(ws,r,10);const qty=typeof qtyRaw==='number'?qtyRaw:Number(String(qtyRaw).replace(/,/g,''));
+      const p=text(cellValueMerged(ws,r,1)), c=text(cellValueMerged(ws,r,2)), l=text(cellValueMerged(ws,r,4));
+      const size=normSize(cellValueMerged(ws,r,5));if(!p||!size)continue;
+      // 반복 삽입된 표 머리글은 실제 상품으로 인덱싱하지 않습니다.
+      if(normProduct(p)==='상품명'&&normColor(c)==='컬러'&&size==='사이즈')continue;
+      const qtyRaw=cellValue(ws,r,10);
+      const qtyText=text(qtyRaw);
+      const qty=qtyText===''?null:(typeof qtyRaw==='number'?qtyRaw:Number(qtyText.replace(/,/g,'')));
       const pk=normProduct(p), aliases=colorAliases(c), len=normLength(l);
       const rec={sheetName,row:r+1,product:p,productKey:pk,color:c,colorAliases:aliases,length:len,size,qty:Number.isFinite(qty)?qty:null};
       if(!productMap.has(pk))productMap.set(pk,[]);productMap.get(pk).push(rec);
@@ -87,6 +97,7 @@ function buildStockIndex(wb){const exact=new Map(), productMap=new Map();let row
     }
   });return {exact,productMap,rows,duplicateKeys};
 }
+
 function extractProductName(v){
   const s=text(v);
   if(!s)return '';
@@ -339,15 +350,18 @@ function removeCellValueNodes(inner){
     .replace(/<v\b[^>]*>[\s\S]*?<\/v>/gi,'')
     .replace(/<v\b[^>]*\/>/gi,'');
 }
+function cellElementRegex(ref,selfClosingOnly=false){
+  const safeRef=escapeRegExp(ref);
+  if(selfClosingOnly)return new RegExp("<c\\b([^>]*\\br=[\"']"+safeRef+"[\"'][^>]*)\\s*\\/>",'i');
+  return new RegExp("<c\\b([^>]*\\br=[\"']"+safeRef+"[\"'][^>]*)>([\\s\\S]*?)<\\/c>",'i');
+}
 function patchNumericCellInSheetXml(xml,rowNumber,colLetter,value){
   const ref=String(colLetter).toUpperCase()+String(rowNumber);
-  const safeRef=escapeRegExp(ref);
   const numeric=Number(value);
   if(!Number.isFinite(numeric))throw new Error(ref+' 셀에 입력할 수량이 숫자가 아닙니다.');
 
-  // 빈 셀(<c .../>)을 먼저 처리합니다.
-  // fullCell 정규식이 self-closing 셀을 건너뛰고 뒤쪽 다른 셀의 </c>까지 잡는 문제를 방지합니다.
-  const selfCellRe=new RegExp('<c\\b([^>]*\\br=["\\\']'+safeRef+'["\\\'][^>]*)\\s*\\/>','i');
+  // 빈 셀(<c .../>)을 먼저 처리해 뒤쪽 셀까지 잘못 잡는 일을 막습니다.
+  const selfCellRe=cellElementRegex(ref,true);
   if(selfCellRe.test(xml)){
     return xml.replace(selfCellRe,(all,attrs)=>{
       const keptAttrs=attrs.replace(/\s+t=["\'][^"\']*["\']/gi,'');
@@ -355,9 +369,7 @@ function patchNumericCellInSheetXml(xml,rowNumber,colLetter,value){
     });
   }
 
-  // 값이 있는 기존 셀은 해당 셀 태그만 직접 치환합니다.
-  // t="s", inlineStr 등 문자열 타입을 제거해 실제 숫자 셀로 저장합니다.
-  const fullCellRe=new RegExp('<c\\b([^>]*\\br=["\\\']'+safeRef+'["\\\'][^>]*)>([\\s\\S]*?)<\\/c>','i');
+  const fullCellRe=cellElementRegex(ref,false);
   if(fullCellRe.test(xml)){
     return xml.replace(fullCellRe,(all,attrs,inner)=>{
       const keptAttrs=attrs.replace(/\s+t=["\'][^"\']*["\']/gi,'');
@@ -365,14 +377,42 @@ function patchNumericCellInSheetXml(xml,rowNumber,colLetter,value){
     });
   }
 
-  const rowRe=new RegExp('(<row\\b[^>]*\\br=["\\\']'+String(rowNumber)+'["\\\'][^>]*>)([\\s\\S]*?)(<\\/row>)','i');
-  if(rowRe.test(xml)){
-    return xml.replace(rowRe,(all,open,inner,close)=>open+inner+'<c r="'+ref+'"><v>'+String(numeric)+'</v></c>'+close);
+  // 현재 미들웨어 양식에는 D셀이 항상 존재합니다. 없는 셀을 임의 삽입하면
+  // 열 순서/스타일이 깨질 수 있으므로 조용히 생성하지 않고 다운로드를 중단합니다.
+  throw new Error(ref+' 셀 구조를 원본 파일에서 찾을 수 없습니다. 원본 미들웨어 양식인지 확인해주세요.');
+}
+function normalizeUpdatedCellsForCompare(xml,updates){
+  let out=xml;
+  [...updates.keys()].sort((a,b)=>a-b).forEach(row=>{
+    const ref='D'+row;
+    const marker='<c r="'+ref+'">__FORESTFIT_D_PATCH__</c>';
+    const selfRe=cellElementRegex(ref,true);
+    const fullRe=cellElementRegex(ref,false);
+    if(selfRe.test(out))out=out.replace(selfRe,marker);
+    else if(fullRe.test(out))out=out.replace(fullRe,marker);
+    else throw new Error(ref+' 셀을 검증할 수 없습니다.');
+  });
+  return out;
+}
+function verifyPatchedWorksheet(originalXml,patchedXml,updates){
+  for(const [row,qty] of updates.entries()){
+    const ref='D'+row;
+    const selfRe=cellElementRegex(ref,true);
+    if(selfRe.test(patchedXml))throw new Error(ref+' 수량 반영 후에도 빈 셀 구조로 남아 있습니다.');
+    const fullRe=cellElementRegex(ref,false);
+    const m=patchedXml.match(fullRe);
+    if(!m)throw new Error(ref+' 반영 결과 셀을 찾을 수 없습니다.');
+    const attrs=m[1]||'', inner=m[2]||'';
+    if(/\bt=["\'][^"\']*["\']/i.test(attrs))throw new Error(ref+'에 문자열 셀 속성이 남아 있어 다운로드를 중단했습니다.');
+    if(/<f\b/i.test(inner)||/<is\b/i.test(inner))throw new Error(ref+'에 기존 수식/문자열 구조가 남아 있어 다운로드를 중단했습니다.');
+    const vm=inner.match(/<v\b[^>]*>([\s\S]*?)<\/v>/i);
+    if(!vm||!Number.isFinite(Number(vm[1]))||Number(vm[1])!==Number(qty))throw new Error(ref+' 수량 검증에 실패했습니다.');
   }
-
-  const newRow='<row r="'+String(rowNumber)+'"><c r="'+ref+'"><v>'+String(numeric)+'</v></c></row>';
-  if(/<\/sheetData>/i.test(xml))return xml.replace(/<\/sheetData>/i,newRow+'</sheetData>');
-  throw new Error('시트 데이터 구조를 찾을 수 없습니다.');
+  // 수정 대상 D셀을 동일한 마커로 치환한 뒤 XML 전체를 비교합니다.
+  // 이 비교가 같아야 D열 외 다른 셀/행/설정이 전혀 바뀌지 않은 것입니다.
+  const before=normalizeUpdatedCellsForCompare(originalXml,updates);
+  const after=normalizeUpdatedCellsForCompare(patchedXml,updates);
+  if(before!==after)throw new Error('D열 이외의 첫 번째 시트 XML이 변경되어 다운로드를 중단했습니다.');
 }
 
 async function sha256Hex(data){
@@ -406,7 +446,7 @@ function cleanOutputBaseName(fileName){
     .replace(/(?:_재고반영_결과)+$/i,'');
 }
 function isPreviouslyGeneratedResult(fileName){
-  return /(?:_재고반영_결과)+\.xlsx$/i.test(String(fileName||''));
+  return /_재고반영_결과(?:\s*\(\d+\))*\.(?:xls|xlsx)$/i.test(String(fileName||''));
 }
 
 function isZipBasedExcelBuffer(buffer){
@@ -439,8 +479,11 @@ async function download(){
     const sheetPath=await getFirstWorksheetPath(zip);
     const originalHashes=await captureZipContentHashes(zip,sheetPath);
     const file=zip.file(sheetPath);if(!file)throw new Error('첫 번째 미들웨어 시트 XML을 찾을 수 없습니다.');
-    let xml=await file.async('string');
+    const originalSheetXml=await file.async('string');
+    if(middlewareUpdates.size!==(lastResult.matched||0))throw new Error('매칭 완료 건수와 실제 D열 반영 예정 건수가 일치하지 않습니다.');
+    let xml=originalSheetXml;
     [...middlewareUpdates.entries()].sort((a,b)=>a[0]-b[0]).forEach(([row,qty])=>{xml=patchNumericCellInSheetXml(xml,row,'D',qty)});
+    verifyPatchedWorksheet(originalSheetXml,xml,middlewareUpdates);
     zip.file(sheetPath,xml);
     const blob=await zip.generateAsync({
       type:'blob',
@@ -457,7 +500,7 @@ async function download(){
 }
 function fullReset(){stockWb=null;middlewareWb=null;stockIndex=null;lastResult=null;middlewareFileName='';middlewareOriginalBuffer=null;middlewareExtension='';middlewareUpdates=new Map();$('stockFile').value='';$('middlewareFile').value='';['step2','step3','step4','step5','step6'].forEach(x=>enable(x,false));$('runBtn').disabled=true;$('downloadBtn').disabled=true;$('stockStatus').className='status';$('stockStatus').textContent='재고장 파일을 선택해주세요.';$('middlewareStatus').className='status';$('middlewareStatus').textContent='1단계 완료 후 첨부할 수 있습니다.';$('runStatus').className='status';$('runStatus').textContent='파일을 순서대로 첨부해주세요.';$('failures').innerHTML='매칭 실행 후 실패 항목이 표시됩니다.';$('productPrecheck').className='empty';$('productPrecheck').textContent='두 파일을 첨부하면 상품명 구성 차이를 자동으로 확인합니다.';productPrecheckResult=null;$('summary').innerHTML='';$('downloadNote').textContent='매칭을 먼저 실행해주세요.';window.scrollTo({top:0,behavior:'smooth'})}
 async function handleStockFile(f){try{stockWb=await readWorkbook(f);stockIndex=buildStockIndex(stockWb);$('stockStatus').className='status ok';$('stockStatus').textContent=`확인 완료 · 거래처 탭 ${Math.max(0,stockWb.SheetNames.length-1)}개 · 옵션 ${stockIndex.rows.toLocaleString()}건`;enable('step2',true);$('middlewareStatus').textContent='미들웨어 품목정보 파일을 선택하거나 끌어다 놓아주세요.';$('step2').scrollIntoView({behavior:'smooth',block:'start'})}catch(err){stockWb=null;stockIndex=null;$('stockFile').value='';$('stockStatus').className='status err';$('stockStatus').textContent='파일을 읽지 못했습니다: '+err.message}}
-async function handleMiddlewareFile(f){try{middlewareExtension=(f.name.split('.').pop()||'').toLowerCase();if(!['xls','xlsx'].includes(middlewareExtension))throw new Error('지원 형식은 .xls 또는 .xlsx입니다.');middlewareOriginalBuffer=await f.arrayBuffer();if(!isZipBasedExcelBuffer(middlewareOriginalBuffer))throw new Error('해당 .xls 파일은 구형 바이너리 형식입니다. 현재 원본 양식 보존 방식은 Excel 2007 이상 내부 형식의 .xls/.xlsx 파일만 지원합니다.');middlewareWb=XLSX.read(middlewareOriginalBuffer,{type:'array',cellStyles:true,cellFormula:true,cellNF:true,cellDates:true});middlewareFileName=f.name;const sourceZip=await JSZip.loadAsync(middlewareOriginalBuffer.slice(0));const sourceEntryCount=Object.keys(sourceZip.files).filter(name=>!sourceZip.files[name].dir).length;const ws=middlewareWb.Sheets[middlewareWb.SheetNames[0]], range=XLSX.utils.decode_range(ws['!ref']);$('middlewareStatus').className='status ok';$('middlewareStatus').textContent=`확인 완료 · 원본 내부 구성 ${sourceEntryCount}개 · 시트 ${middlewareWb.SheetNames.length}개 · 데이터 최대 ${(range.e.r).toLocaleString()}행 · 원본 양식 유지 후 D열만 수정`;runProductPrecheck();enable('step3',true);enable('step4',true);$('runBtn').disabled=false;$('runStatus').textContent='두 파일이 준비되었습니다. 상품명 구성 확인 후 매칭을 시작해주세요.';$('step3').scrollIntoView({behavior:'smooth',block:'start'})}catch(err){middlewareOriginalBuffer=null;middlewareWb=null;middlewareFileName='';middlewareExtension='';$('middlewareFile').value='';$('middlewareStatus').className='status err';$('middlewareStatus').textContent='파일을 읽지 못했습니다: '+err.message}}
+async function handleMiddlewareFile(f){try{middlewareExtension=(f.name.split('.').pop()||'').toLowerCase();if(!['xls','xlsx'].includes(middlewareExtension))throw new Error('지원 형식은 .xls 또는 .xlsx입니다.');if(isPreviouslyGeneratedResult(f.name))throw new Error('이미 재고반영 결과로 생성된 파일입니다. 결과 파일이 아닌 원본 미들웨어 품목정보 파일을 첨부해주세요.');middlewareOriginalBuffer=await f.arrayBuffer();if(!isZipBasedExcelBuffer(middlewareOriginalBuffer))throw new Error('해당 .xls 파일은 구형 바이너리 형식입니다. 현재 원본 양식 보존 방식은 Excel 2007 이상 내부 형식의 .xls/.xlsx 파일만 지원합니다.');middlewareWb=XLSX.read(middlewareOriginalBuffer,{type:'array',cellStyles:true,cellFormula:true,cellNF:true,cellDates:true});middlewareFileName=f.name;const sourceZip=await JSZip.loadAsync(middlewareOriginalBuffer.slice(0));const sourceEntryCount=Object.keys(sourceZip.files).filter(name=>!sourceZip.files[name].dir).length;const ws=middlewareWb.Sheets[middlewareWb.SheetNames[0]], range=XLSX.utils.decode_range(ws['!ref']);$('middlewareStatus').className='status ok';$('middlewareStatus').textContent=`확인 완료 · 원본 내부 구성 ${sourceEntryCount}개 · 시트 ${middlewareWb.SheetNames.length}개 · 데이터 최대 ${(range.e.r).toLocaleString()}행 · 원본 양식 유지 후 D열만 수정`;runProductPrecheck();enable('step3',true);enable('step4',true);$('runBtn').disabled=false;$('runStatus').textContent='두 파일이 준비되었습니다. 상품명 구성 확인 후 매칭을 시작해주세요.';$('step3').scrollIntoView({behavior:'smooth',block:'start'})}catch(err){middlewareOriginalBuffer=null;middlewareWb=null;middlewareFileName='';middlewareExtension='';$('middlewareFile').value='';$('middlewareStatus').className='status err';$('middlewareStatus').textContent='파일을 읽지 못했습니다: '+err.message}}
 setupDropzone('stockDropzone','stockFile',handleStockFile);
 setupDropzone('middlewareDropzone','middlewareFile',handleMiddlewareFile);
 $('runBtn').addEventListener('click',runMatching);$('downloadBtn').addEventListener('click',download);$('resetBtn').addEventListener('click',fullReset);
