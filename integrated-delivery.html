@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FORESTFIT 통합 상품 대응 · CS 전달 관리 V2.15</title>
+<title>FORESTFIT 통합 상품 대응 · CS 전달 관리 V2.22</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
@@ -100,7 +100,7 @@ button,input,select,textarea{font:inherit}
       <h1>통합 상품 대응 · CS 전달 관리</h1>
       <p>품절 / GS / 기타채널 주문 파일의 동일 양식을 통합해 상품 단위로 정리한 뒤 사이트 안에서 대응 내용을 입력하고,<br>거래처별로 위에서 아래로 필요한 건만 처리합니다. 품절건은 입고일 입력 없이 대체 대응하고, 일반 납기건은 입고예정일이 준수일 이내면 업무목록에서 자동 제외합니다. 모든 주문번호는 끝까지 보존됩니다.</p>
     </div>
-    <div class="version">UNIFIED V2.21 · 입고일 입력 후 단계 자동이동 · 주문별 납기판정</div>
+    <div class="version">UNIFIED V2.22 · 기타채널 7일 기준 · 퀸잇 납기초과 포함 · 전일값 일괄적용</div>
   </div>
 
   <div class="grid4">
@@ -127,9 +127,10 @@ button,input,select,textarea{font:inherit}
     </div>
     <div class="card upload-card">
       <h3><span class="tag prev">5. 어제 결과</span> 이전 입력 파일</h3>
-      <p>어제 내려받은 <b>CS전달 엑셀</b>을 선택하면 같은 상품+옵션의 이전 내용을 오늘 화면에서 <b>참고용</b>으로 보여줍니다. 자동 반영하지 않으며, 필요한 건만 <b>[어제 값 그대로 입력]</b> 버튼으로 복사할 수 있습니다.</p>
+      <p>어제 내려받은 <b>CS전달 엑셀</b>을 선택하면 오늘 주문과 중복되는 상품을 자동으로 찾아 표시합니다. 파일을 올린 뒤 <b>[어제 입력 내용만 적용]</b>을 누르면 중복 매칭된 건에만 어제 직접 입력한 내용을 한 번에 복사합니다.</p>
       <div class="upload-box"><input type="file" id="previousFile" accept=".csv,.xlsx,.xls"><div class="file-state" id="previousState">선택된 파일 없음 · 선택사항</div></div>
-      <div class="small" style="margin-top:8px">어제 값은 기본적으로 보기 전용입니다. [어제 값 그대로 입력]을 직접 누른 상품만 오늘 입력칸에 복사됩니다.</div>
+      <button class="btn light" id="applyPreviousAllBtn" type="button" disabled style="width:100%;margin-top:9px">어제 입력 내용만 적용</button>
+      <div class="small" style="margin-top:8px">상품+옵션이 같고 거래처 또는 사입상품명까지 일치하는 중복 건만 적용합니다. 오늘 이미 직접 입력한 값이 있는 상품은 덮어쓰지 않습니다.</div>
     </div>
   </div>
 
@@ -151,8 +152,8 @@ button,input,select,textarea{font:inherit}
       <b>일반 납기건:</b> ① 입고일정 기입에서 날짜를 입력합니다. 출고준수일 이내면 자동 제외되고, 납기 초과면 ②로 이동합니다. [입고일정 확인불가 → 2번 탭 이동]을 누른 건도 즉시 ②로 이동해 대체품/옵션 변경을 확인합니다. 잘못 입력해 제외된 건은 [납기 내 입고 · 되돌리기] 탭에서 수정할 수 있습니다.<br>
       <b>CS 이력:</b> 신규 양식의 <b>CS일자</b>를 최근 상담일로 표시하고, CS메모에 대체품/다른 옵션 안내내용이 있으면 사이트에 함께 보여주며 입력칸에도 안전하게 반영합니다.<br>      <b>입고예정일:</b> GS/기타채널 파일의 마지막 열 <b>재고매칭(1)입고예정일</b>을 주문번호별 입고일로 읽습니다. <b>품절 파일은 해당 컬럼이 없어도 됩니다.</b> 일반 납기건은 비어 있으면 ① 입고일정 기입, 출고준수일보다 늦으면 ② 대체품 / 옵션 변경 상품으로 자동 분류합니다.<br>
       <b>CS 전달내용:</b> 한 줄 요약으로 자동 작성하며 필요할 때만 수정합니다. 처리결과 공유 문구는 넣지 않습니다.<br>      <b>확인 필요 품번 파일:</b> 원본 파일을 모두 불러온 뒤 [확인 필요 품번 엑셀 다운로드]를 누르면 주문별 입고예정일 판정 결과를 기준으로 <b>입고일 미기입 / 납기일정 초과 / 품절</b>만 내려받습니다. 같은 품번에 미기입 주문과 초과 주문이 섞여 있으면 구분별로 각각 표시합니다.<br>
-      <b>어제 참고:</b> 이전 입력 파일을 선택하면 같은 상품+옵션의 어제 내용을 카드에서 참고할 수 있습니다. 어제 값은 오늘 입력칸에 자동 반영하지 않습니다. 상품+옵션이 같고 거래처 또는 사입상품명까지 일치할 때만 참고를 표시하며, 필요할 때 [어제 값 그대로 입력] 버튼으로 해당 상품에만 복사할 수 있습니다. 현재 페이지에서 입력한 값은 재계산해도 유지됩니다.<br>
-      <b>출고준수일 기준:</b> 퀸잇 주문일 +21영업일 / GS 주문일 +8영업일(단, +8영업일 날짜가 금요일 또는 공휴일 전날이면 +7영업일) / 네이버·롯데ON 주문일 +1개월 / 하프클럽 주문일 +15영업일 / 비플로우 주문일 +5일입니다. 퀸잇 고객 안내기한은 사용자정의1 다음 영업일, GS 고객 안내기한은 주문일 다음 2영업일 이내로 유지합니다.
+      <b>어제 참고:</b> 이전 입력 파일을 선택하면 같은 상품+옵션이며 거래처 또는 사입상품명까지 일치하는 중복 건을 자동 매칭합니다. [어제 입력 내용만 적용]을 누르면 매칭된 상품에만 어제 입력값을 일괄 복사하며, 오늘 이미 입력한 상품은 덮어쓰지 않습니다. 개별 카드의 [어제 값 그대로 입력]도 계속 사용할 수 있습니다.<br>
+      <b>조회/출고준수일 기준:</b> 품절·GS는 기존 기준을 유지하고, <b>기타채널 일반 주문은 오늘 기준 주문일이 7일 이상 지난 건만 조회</b>합니다. 단, <b>퀸잇은 7일 미만 주문이라도 입력된 입고예정일이 출고준수일을 넘으면 포함</b>합니다. 퀸잇 주문일 +21영업일 / GS 주문일 +8영업일(단, +8영업일 날짜가 금요일 또는 공휴일 전날이면 +7영업일) / 네이버·롯데ON 주문일 +1개월 / 하프클럽 주문일 +15영업일 / 비플로우 주문일 +5일입니다.
     </div>
   </div>
 
@@ -766,6 +767,27 @@ function analyzeRow(row,holidays){
   const orderSaved=orderStore[row.exactKey]||{};row.done=!!orderSaved.done;
   return row;
 }
+function isQueenitRow(row){
+  return normText(row?.seller).replace(/\s/g,"").toLowerCase().includes("퀸잇");
+}
+function shouldIncludeBySevenDayRule(row){
+  // 품절과 GS는 기존 기준 유지
+  if(row.isStock||row.route==="gs")return true;
+  const today=toDate(document.getElementById("todayDate").value);
+  const od=toDate(row.orderDate);
+  // 날짜를 확인할 수 없는 주문은 누락시키지 않고 확인 대상으로 유지
+  if(!today||!od)return true;
+  const cutoff=addCalendarDays(today,-7);
+  if(od.getTime()<=cutoff.getTime())return true;
+
+  // 퀸잇 예외: 7일 미만 주문이어도 입력된 입고일이 준수일을 넘으면 반드시 포함
+  if(isQueenitRow(row)){
+    const inbound=toDate(row.inboundDate);
+    const limit=row.effectiveDueDate||row.dueDate;
+    if(inbound&&limit&&inbound.getTime()>limit.getTime())return true;
+  }
+  return false;
+}
 function mergeAllRows(){
   const all=[...(filesData.stock||[]),...(filesData.gs||[]),...(filesData.all||[])].map(src=>({
     ...src, sourceKinds:new Set(src.sourceKinds), cs:(src.cs||[]).map(c=>({...c})), duplicateCount:1
@@ -788,7 +810,8 @@ function mergeAllRows(){
       }
     }
   }
-  const holidays=getHolidaySet();mergedRows=[...map.values()].map(r=>analyzeRow(r,holidays));
+  const holidays=getHolidaySet();
+  mergedRows=[...map.values()].map(r=>analyzeRow(r,holidays)).filter(shouldIncludeBySevenDayRule);
   const groupCounts={};mergedRows.forEach(r=>groupCounts[r.sharedKey]=(groupCounts[r.sharedKey]||0)+1);mergedRows.forEach(r=>r.sameItemCount=groupCounts[r.sharedKey]);
   mergedRows.sort((a,b)=>{
     if(a.isStock!==b.isStock)return a.isStock?-1:1;
@@ -1113,13 +1136,14 @@ function saveGroupField(key,field,value,opts={}){
   if(!g.csInstructionManual&&["optionStock","altOption","substituteProduct","inboundDate","inboundUnknown","processDirection"].includes(field)){g.csInstruction=autoCsInstruction(g);productStore[key].csInstruction=g.csInstruction;}
   g.validation=productValidation(g);
 }
-function applyPreviousValues(key){
+function applyPreviousValues(key,opts={}){
   const g=productGroups.find(x=>x.key===key);
   if(!g||!g.previousRef)return false;
   const p=g.previousRef;
   const saved=productStore[key]||{};
   const hasTodayInput=Object.keys(saved).some(k=>!["csTarget"].includes(k));
-  if(hasTodayInput&&!confirm("현재 입력값이 있습니다. 어제 값으로 덮어쓸까요?"))return false;
+  if(hasTodayInput&&opts.onlyIfEmpty)return false;
+  if(hasTodayInput&&!opts.skipConfirm&&!confirm("현재 입력값이 있습니다. 어제 값으로 덮어쓸까요?"))return false;
 
   // 어제 참고값을 사용자가 직접 요청한 경우에만 오늘 입력칸으로 복사합니다.
   saveGroupField(key,"purchaseName",p.purchaseName||g.purchaseName||"",{manual:false});
@@ -1147,6 +1171,25 @@ function applyPreviousValues(key){
   }
   const gg=productGroups.find(x=>x.key===key);if(gg)gg.validation=productValidation(gg);
   return true;
+}
+
+function applyPreviousValuesAll(){
+  if(!previousRows.length){alert("어제 결과 파일을 먼저 업로드해주세요.");return;}
+  if(!productGroups.length){alert("먼저 상품 대응표 만들기 / 재계산을 실행해주세요.");return;}
+  let matched=0,applied=0,skipped=0;
+  for(const g of productGroups){
+    if(!g.previousRef)continue;
+    matched++;
+    const saved=productStore[g.key]||{};
+    const hasTodayInput=Object.keys(saved).some(k=>!["csTarget"].includes(k));
+    if(hasTodayInput){skipped++;continue;}
+    if(applyPreviousValues(g.key,{skipConfirm:true,onlyIfEmpty:true}))applied++;
+  }
+  buildProductGroups();
+  render();
+  const state=document.getElementById("previousState");
+  if(state){state.className="file-state ok";state.textContent=`어제 중복 ${matched}건 · 입력 적용 ${applied}건${skipped?` · 오늘 입력 있어 제외 ${skipped}건`:""}`;}
+  alert(`어제 입력 내용 적용 완료\n중복 매칭 ${matched}건 / 적용 ${applied}건${skipped?` / 오늘 입력 보호 ${skipped}건`:""}`);
 }
 
 function bindProductEvents(){
@@ -1369,11 +1412,14 @@ async function onPreviousFile(file){
     previousRows=previousRowsFromSheet(raw);
     rebuildPreviousMap();
     state.className="file-state ok";
-    state.textContent=`${file.name} · 어제 참고 ${previousRows.length}건 인식 완료`;
     if(mergedRows.length){buildProductGroups();render();}
+    const matched=productGroups.filter(g=>g.previousRef).length;
+    state.textContent=`${file.name} · 어제 참고 ${previousRows.length}건 인식 · 오늘 중복 ${matched}건`;
+    const btn=document.getElementById("applyPreviousAllBtn");if(btn)btn.disabled=false;
   }catch(e){
     previousRows=[];
     previousMap=new Map();
+    const btn=document.getElementById("applyPreviousAllBtn");if(btn)btn.disabled=true;
     state.className="file-state bad";
     state.textContent=`${file.name} · 인식 실패: ${e.message}`;
     alert(`${file.name}\n${e.message}`);
@@ -1660,7 +1706,7 @@ setupDropUpload("previousFile",f=>onPreviousFile(f));
 // 파일을 페이지 바깥에 잘못 놓아 브라우저가 파일을 열어버리는 동작 방지
 document.addEventListener("dragover",e=>{if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes("Files"))e.preventDefault()});
 document.addEventListener("drop",e=>{if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes("Files")&&!e.target.closest(".upload-box"))e.preventDefault()});
-document.getElementById("mergeBtn").addEventListener("click",recalc);document.getElementById("checkExcelBtn").addEventListener("click",downloadCheckExcel);document.getElementById("excelBtn").addEventListener("click",downloadExcel);document.getElementById("workStartBtn").addEventListener("click",()=>openWorkMode());
+document.getElementById("mergeBtn").addEventListener("click",recalc);document.getElementById("checkExcelBtn").addEventListener("click",downloadCheckExcel);document.getElementById("excelBtn").addEventListener("click",downloadExcel);document.getElementById("workStartBtn").addEventListener("click",()=>openWorkMode());document.getElementById("applyPreviousAllBtn").addEventListener("click",applyPreviousValuesAll);
 document.getElementById("searchInput").addEventListener("input",render);document.getElementById("sortSelect").addEventListener("change",e=>{activeSort=e.target.value||"supplier";sortProductGroups();render()});document.getElementById("todayDate").addEventListener("change",()=>{saveSettings();if(mergedRows.length){mergeAllRows();buildProductGroups();render()}});document.getElementById("holidays").addEventListener("change",()=>{saveSettings();if(mergedRows.length){mergeAllRows();buildProductGroups();render()}});
 document.querySelectorAll(".workflow-tab").forEach(b=>b.addEventListener("click",()=>{activeWorkflow=b.dataset.workflow;activeFilter="all";syncWorkflowTabs();syncStatusTabs();render()}));
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;syncStatusTabs();render()}));
