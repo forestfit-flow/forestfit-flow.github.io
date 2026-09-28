@@ -398,8 +398,25 @@ function unlockSite(){
   passwordGate.classList.add('hidden');
 }
 
+const ACCESS_KEY = 'forestfitWorkroomUnlocked';
+
+function rememberUnlocked(){
+  try{
+    sessionStorage.setItem(ACCESS_KEY,'1');
+  }catch(e){}
+}
+
+function wasUnlocked(){
+  try{
+    return sessionStorage.getItem(ACCESS_KEY)==='1';
+  }catch(e){
+    return false;
+  }
+}
+
 function checkPassword(){
   if(passwordInput.value === SITE_PASSWORD){
+    rememberUnlocked();
     unlockSite();
   }else{
     passwordError.textContent='비밀번호가 올바르지 않습니다.';
@@ -408,7 +425,11 @@ function checkPassword(){
   }
 }
 
-setTimeout(()=>passwordInput.focus(),0);
+if(wasUnlocked()){
+  unlockSite();
+}else{
+  setTimeout(()=>passwordInput.focus(),0);
+}
 
 passwordSubmit.addEventListener('click',checkPassword);
 passwordToggle.addEventListener('click',()=>{
