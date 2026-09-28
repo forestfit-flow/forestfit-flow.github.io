@@ -233,9 +233,86 @@ button,input{font:inherit}
   .card-watermark{font-size:84px}
   .footer{flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:18px 0}
 }
+/* Password Gate */
+body.locked{overflow:hidden}
+body.locked > *:not(#passwordGate){visibility:hidden;pointer-events:none;user-select:none}
+.password-gate{
+  position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
+  padding:32px;background:#f6f7f8;
+}
+.password-gate.hidden{display:none}
+.password-panel{
+  width:min(500px,90vw);
+  transform:translateY(-5vh);
+}
+.password-brand{margin-bottom:44px}
+.password-brand h1{
+  margin:0;
+  font:700 clamp(30px,4vw,42px)/1 "Plus Jakarta Sans",sans-serif;
+  letter-spacing:-.045em;
+  color:#2c3036;
+}
+.password-brand h1 span{
+  display:block;
+  margin-top:11px;
+  font:500 12px/1.2 "Plus Jakarta Sans",sans-serif;
+  letter-spacing:.08em;
+  text-transform:none;
+  color:#9ca1a8;
+}
+.password-form-wrap{
+  display:flex;align-items:center;gap:14px;
+  height:52px;padding:0 0 8px 0;
+  border:0;border-bottom:1px solid #cfd3d8;border-radius:0;
+  background:transparent;box-shadow:none;
+  transition:border-color .18s ease;
+}
+.password-form-wrap:focus-within{border-bottom-color:#4b5058;box-shadow:none}
+.password-input{
+  flex:1;min-width:0;height:44px;border:0;background:transparent;padding:0;outline:none;
+  color:#292d33;font:500 14px/1 "Pretendard",sans-serif;letter-spacing:-.01em;
+}
+.password-input::placeholder{color:#b2b6bc}
+.password-toggle{
+  width:32px;height:32px;flex:0 0 32px;border:0;background:transparent;padding:0;
+  display:flex;align-items:center;justify-content:center;color:#9da2a9;cursor:pointer;
+  transition:color .16s ease;
+}
+.password-toggle:hover{background:transparent;color:#555b63}
+.password-toggle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.password-submit{
+  height:36px;min-width:auto;padding:0;border:0;border-radius:0;background:transparent;color:#353a41;
+  font:700 10px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.13em;text-transform:uppercase;
+  cursor:pointer;transition:color .18s ease,transform .18s ease;
+}
+.password-submit:hover{background:transparent;color:#6b73b8;transform:translateX(2px)}
+.password-error{min-height:18px;margin-top:10px;padding:0;font:500 11px/1.4 "Pretendard",sans-serif;color:#b95757}
+@media(max-width:680px){
+  .password-panel{width:min(100%,90vw);transform:translateY(-3vh)}
+  .password-brand{margin-bottom:34px}
+  .password-brand h1{font-size:32px}
+  .password-form-wrap{gap:10px}
+}
 </style>
 </head>
-<body>
+<body class="locked">
+<div id="passwordGate" class="password-gate" role="dialog" aria-modal="true" aria-label="비밀번호 입력">
+  <div class="password-panel">
+    <div class="password-brand">
+      <h1>FORESTFIT<span>Commerce Workroom</span></h1>
+    </div>
+    <div class="password-form-wrap">
+      <input id="sitePassword" class="password-input" type="password" placeholder="Password" autocomplete="current-password" aria-label="비밀번호" />
+      <button id="passwordToggle" class="password-toggle" type="button" aria-label="비밀번호 보기" aria-pressed="false">
+        <svg id="eyeOpen" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M2.8 12s3.3-5 9.2-5 9.2 5 9.2 5-3.3 5-9.2 5-9.2-5-9.2-5Z"></path><circle cx="12" cy="12" r="2.4"></circle></svg>
+        <svg id="eyeClosed" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c5.9 0 9.2 6 9.2 6a15 15 0 0 1-2.4 3.1"></path><path d="M6.1 6.1A15.2 15.2 0 0 0 2.8 12s3.3 6 9.2 6a9.8 9.8 0 0 0 3-.5"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg>
+      </button>
+      <button id="passwordSubmit" class="password-submit" type="button" aria-label="입장">ENTER&nbsp;&nbsp;→</button>
+    </div>
+    <div id="passwordError" class="password-error" aria-live="polite"></div>
+  </div>
+</div>
+
 <div class="ambient"><span class="orb one"></span><span class="orb two"></span></div>
 <div class="cursor-glow" id="cursorGlow"></div>
 
@@ -338,6 +415,49 @@ button,input{font:inherit}
 </div>
 
 <script>
+
+// === PASSWORD GATE ===
+// 아래 비밀번호를 원하는 값으로 변경하세요.
+const SITE_PASSWORD = '판매7';
+const passwordGate = document.getElementById('passwordGate');
+const passwordInput = document.getElementById('sitePassword');
+const passwordSubmit = document.getElementById('passwordSubmit');
+const passwordToggle = document.getElementById('passwordToggle');
+const eyeOpen = document.getElementById('eyeOpen');
+const eyeClosed = document.getElementById('eyeClosed');
+const passwordError = document.getElementById('passwordError');
+
+function unlockSite(){
+  document.body.classList.remove('locked');
+  passwordGate.classList.add('hidden');
+}
+
+function checkPassword(){
+  if(passwordInput.value === SITE_PASSWORD){
+    unlockSite();
+  }else{
+    passwordError.textContent='비밀번호가 올바르지 않습니다.';
+    passwordInput.value='';
+    passwordInput.focus();
+  }
+}
+
+setTimeout(()=>passwordInput.focus(),0);
+
+passwordSubmit.addEventListener('click',checkPassword);
+passwordToggle.addEventListener('click',()=>{
+  const showing = passwordInput.type === 'text';
+  passwordInput.type = showing ? 'password' : 'text';
+  // 현재 상태를 아이콘으로 표시: 숨김=눈 감김, 표시=눈 뜸
+  eyeOpen.style.display = showing ? 'none' : '';
+  eyeClosed.style.display = showing ? '' : 'none';
+  passwordToggle.setAttribute('aria-label', showing ? '비밀번호 보기' : '비밀번호 숨기기');
+  passwordToggle.setAttribute('aria-pressed', showing ? 'false' : 'true');
+  passwordInput.focus();
+});
+passwordInput.addEventListener('keydown',(e)=>{if(e.key==='Enter')checkPassword()});
+// === /PASSWORD GATE ===
+
 const observer=new IntersectionObserver((entries)=>{entries.forEach((entry,i)=>{if(entry.isIntersecting){setTimeout(()=>entry.target.classList.add('show'),i*45);observer.unobserve(entry.target)}})},{threshold:.08});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
