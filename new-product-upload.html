@@ -839,6 +839,208 @@
 .upload-table th.need-input-label{background:var(--label)!important}
 .upload-table td.need-input-cell{background:#fff!important}
 @media (max-width:900px){.input-mark,.auto-mark{display:block;width:max-content;margin:4px auto 0}.need-input-cell{box-shadow:inset 0 0 0 1px #9ea4aa}}
+
+
+  /* v49: 퀸잇 패널 정돈 - 실제 대량등록 화면의 보라색 포인트를 반영 */
+  #panel-queenit .channel-body{gap:14px;background:#fafbfc;padding:16px}
+  #panel-queenit .queen-download-card{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;
+    margin:0!important;padding:20px 22px!important;border:1px solid #ddd7fb!important;
+    border-radius:12px;background:linear-gradient(135deg,#fbfaff 0%,#f4f1ff 100%)!important;
+    box-shadow:0 5px 18px rgba(102,72,220,.08)
+  }
+  #panel-queenit .queen-step-kicker{display:inline-flex;align-items:center;gap:7px;margin-bottom:7px;color:#6d4ce8;font-size:12px;font-weight:900}
+  #panel-queenit .queen-step-kicker .qno{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:50%;background:#744ee8;color:#fff;font-size:11px}
+  #panel-queenit .queen-download-title{font-size:17px;font-weight:950;color:#25232b;margin-bottom:5px}
+  #panel-queenit .queen-download-desc{font-size:12.5px;color:#6e6a78;line-height:1.6}
+  #panel-queenit #downloadQueenBtn{
+    min-width:210px;min-height:54px;padding:0 22px;border:0;border-radius:9px;
+    background:linear-gradient(135deg,#7754e8,#6640da);color:#fff;font-size:15px;font-weight:950;
+    box-shadow:0 8px 18px rgba(105,67,220,.25)
+  }
+  #panel-queenit #downloadQueenBtn::before{content:'↓';display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:17px;font-weight:900}
+  #panel-queenit #downloadQueenBtn:hover{filter:brightness(.98);transform:translateY(-1px)}
+  #panel-queenit .queen-file-summary{border:1px solid #e0e3e8;background:#fff;border-radius:10px;overflow:hidden}
+  #panel-queenit .queen-file-summary-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;background:#f7f7f9;border-bottom:1px solid #e3e5e9}
+  #panel-queenit .queen-file-summary-head strong{font-size:14px;color:#30323a}
+  #panel-queenit .queen-file-summary-head span{font-size:11px;color:#7b8088}
+  #panel-queenit .queen-file-summary .guide-grid{border:0;border-left:0;border-top:0}
+  #panel-queenit .queen-file-summary .guide-grid>div{border-left:0;border-right:0}
+  #panel-queenit .queen-file-summary .guide-label{background:#fafafa}
+  #panel-queenit .queen-route-details{margin:0;border:1px solid #dedfe5;border-radius:9px;background:#fff;overflow:hidden}
+  #panel-queenit .queen-route-details summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;cursor:pointer;background:#fff;color:#4b4f58;font-size:13px;font-weight:900}
+  #panel-queenit .queen-route-details summary::-webkit-details-marker{display:none}
+  #panel-queenit .queen-route-details summary::after{content:'펼치기  ▾';color:#7352df;font-size:11px;font-weight:900}
+  #panel-queenit .queen-route-details[open] summary{background:#faf9ff;border-bottom:1px solid #e4e0f5}
+  #panel-queenit .queen-route-details[open] summary::after{content:'접기  ▴'}
+  #panel-queenit .queen-route-inner{padding:14px 16px}
+  #panel-queenit .queen-route-path{padding:12px 14px;border:1px solid #e2def6;border-radius:7px;background:#faf9ff;color:#373341;font-size:13px;font-weight:800;line-height:1.6}
+  #panel-queenit .queen-route-note{margin-top:9px;color:#707580;font-size:12px;line-height:1.55}
+  #panel-queenit #queenPostTaskCard{margin:0;border:1px solid #e1d8c8;border-radius:10px;overflow:hidden;box-shadow:none}
+  #panel-queenit #queenPostTaskCard .post-task-head{background:#fff9ef;border-bottom:1px solid #f0dfbd;color:#8b5a14}
+  #panel-queenit #queenPostTaskCard .post-task-warning{border-width:1px;border-radius:6px}
+  @media(max-width:760px){
+    #panel-queenit .queen-download-card{grid-template-columns:1fr}
+    #panel-queenit #downloadQueenBtn{width:100%;min-width:0}
+  }
+
+
+/* v-final queenit simple workflow */
+#panel-queenit .channel-body{gap:12px!important;background:#fff!important;}
+#panel-queenit .channel-head{background:#f8f8fa!important;border-bottom:1px solid #e4e5e8!important;}
+#panel-queenit .queen-download-card{
+  order:1;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:18px!important;
+  margin:0!important;padding:18px 20px!important;border:1px solid #ded7fb!important;border-radius:10px!important;
+  background:#faf9ff!important;box-shadow:none!important;
+}
+#panel-queenit .queen-download-title{font-size:16px!important;margin:0 0 4px!important;}
+#panel-queenit .queen-download-desc{font-size:12px!important;line-height:1.5!important;color:#77717f!important;}
+#panel-queenit #downloadQueenBtn{
+  min-width:200px!important;min-height:48px!important;border-radius:7px!important;
+  background:#7147e8!important;box-shadow:none!important;font-size:14px!important;
+}
+#panel-queenit .queen-file-details{order:2;border:1px solid #e1e3e7;border-radius:8px;background:#fff;overflow:hidden;}
+#panel-queenit .queen-file-details>summary{
+  list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;
+  padding:12px 15px;font-size:13px;font-weight:900;color:#4f535a;background:#fff;
+}
+#panel-queenit .queen-file-details>summary::-webkit-details-marker{display:none;}
+#panel-queenit .queen-file-details>summary small{font-size:11px;font-weight:700;color:#9a9da3;}
+#panel-queenit .queen-file-details>summary::after{content:'▾';color:#7954e8;font-size:12px;margin-left:auto;}
+#panel-queenit .queen-file-details[open]>summary{background:#fafafa;border-bottom:1px solid #eceef1;}
+#panel-queenit .queen-file-details[open]>summary::after{content:'▴';}
+#panel-queenit .queen-file-details-body{padding:12px;}
+#panel-queenit .queen-file-details-body>.half-note{margin:0 0 10px!important;padding:10px 12px!important;border:0!important;background:#f7f7f8!important;color:#64686e!important;font-size:11.5px!important;}
+#panel-queenit .queen-file-details-body>.queen-file-summary{margin:0!important;border-radius:7px!important;}
+#panel-queenit .queen-file-summary-head{display:none!important;}
+#panel-queenit .queen-route-details{order:3!important;border-color:#e1e3e7!important;border-radius:8px!important;}
+#panel-queenit .queen-route-details summary{padding:12px 15px!important;font-size:13px!important;}
+#panel-queenit .queen-route-details summary::after{content:'▾'!important;font-size:12px!important;}
+#panel-queenit .queen-route-details[open] summary::after{content:'▴'!important;}
+#panel-queenit #queenPostTaskCard{order:4!important;margin:0!important;border:1px solid #eadfcf!important;border-radius:9px!important;background:#fff!important;}
+#panel-queenit #queenPostTaskCard .post-task-head{
+  padding:12px 15px!important;background:#fffaf2!important;color:#79511a!important;font-size:13px!important;border-bottom:1px solid #efe2ce!important;
+}
+#panel-queenit #queenPostTaskCard .post-task-head::before{font-size:14px!important;}
+#panel-queenit .queen-required-count{display:inline-flex;margin-left:6px;padding:2px 7px;border-radius:999px;background:#f2dfbf;color:#805713;font-size:10px;font-weight:900;}
+#panel-queenit #queenPostTaskCard .post-task-body{padding:12px 15px!important;}
+#panel-queenit #queenPostTaskCard .post-task-warning{
+  margin:0 0 10px!important;padding:8px 10px!important;border:0!important;background:#fff3f1!important;color:#b42318!important;font-size:11.5px!important;
+}
+#panel-queenit #queenPostTaskCard .post-task-path{margin-top:0!important;grid-template-columns:125px minmax(0,1fr)!important;}
+#panel-queenit #queenPostTaskCard .post-task-list{margin-top:10px!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;}
+#panel-queenit #queenPostTaskCard .post-task-list li{padding:9px 10px!important;border:1px solid #eee3d5!important;border-radius:6px!important;background:#fffdf9!important;}
+#panel-queenit #queenPostTaskCard .post-task-list li::before{display:none!important;}
+#panel-queenit #queenPostTaskCard .post-task-checks{gap:10px!important;margin-top:10px!important;padding-top:10px!important;}
+#panel-queenit #queenPostTaskCard .post-task-check{font-size:12px!important;}
+@media(max-width:760px){
+  #panel-queenit .queen-download-card{align-items:stretch!important;flex-direction:column!important;}
+  #panel-queenit #downloadQueenBtn{width:100%!important;min-width:0!important;}
+  #panel-queenit #queenPostTaskCard .post-task-list{grid-template-columns:1fr!important;}
+}
+
+/* v-next halfclub simple workflow */
+#panel-halfclub .channel-body{gap:12px!important;background:#fff!important;}
+#panel-halfclub .channel-head{background:#f8f8fa!important;border-bottom:1px solid #e4e5e8!important;}
+#panel-halfclub .half-note{margin:0!important;padding:10px 12px!important;border:1px solid #ebedf0!important;background:#fafbfc!important;color:#656b73!important;font-size:12px!important;line-height:1.6!important;}
+#panel-halfclub .half-bulk-card{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border:1px solid #dce3ea;border-radius:10px;background:#fff;}
+#panel-halfclub .half-bulk-title{font-size:16px;font-weight:950;color:#22252c;margin-bottom:4px;}
+#panel-halfclub .half-bulk-desc{font-size:12px;color:#6b7078;line-height:1.55;}
+#panel-halfclub .half-bulk-actions{display:flex;gap:10px;flex-wrap:wrap;}
+#panel-halfclub .half-bulk-btn{min-width:210px;min-height:46px;padding:0 18px;border:0;border-radius:7px;background:#2b7fd3;color:#fff;font-size:14px;font-weight:900;box-shadow:none;cursor:pointer;}
+#panel-halfclub .half-bulk-btn:hover{filter:brightness(.98)}
+#panel-halfclub .half-upload-card{border:1px solid #e1e4e8;border-radius:8px;background:#fff;overflow:hidden;}
+#panel-halfclub .half-upload-row{display:grid;grid-template-columns:160px 1fr;}
+#panel-halfclub .half-upload-label{padding:14px 16px;background:#fafafa;border-right:1px solid #ebeef2;font-size:13px;font-weight:900;color:#2f3339;}
+#panel-halfclub .half-upload-content{padding:14px 16px;}
+#panel-halfclub .half-upload-content .half-image-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+#panel-halfclub .half-file-details{border:1px solid #e1e3e7;border-radius:8px;background:#fff;overflow:hidden;}
+#panel-halfclub .half-file-details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:12px 15px;background:#fff;color:#4f535a;font-size:13px;font-weight:900;}
+#panel-halfclub .half-file-details>summary::-webkit-details-marker{display:none;}
+#panel-halfclub .half-file-details>summary small{font-size:11px;font-weight:700;color:#9aa0a8;}
+#panel-halfclub .half-file-details>summary::after{content:'▾';color:#2b7fd3;font-size:12px;margin-left:auto;}
+#panel-halfclub .half-file-details[open]>summary{background:#fafafa;border-bottom:1px solid #eceef1;}
+#panel-halfclub .half-file-details[open]>summary::after{content:'▴';}
+#panel-halfclub .half-file-details-body{padding:12px;}
+#panel-halfclub .half-file-details-body>.guide-grid{margin:0;}
+#panel-halfclub .half-file-details-body>.half-preview-table{margin-top:12px;}
+#panel-halfclub .half-file-details-body>.channel-copybox{margin-top:12px;}
+#panel-halfclub .half-focus-card{border:1px solid #e0e3e7;border-radius:10px;background:#fff;overflow:hidden;}
+#panel-halfclub .half-focus-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;background:#f7f8fa;border-bottom:1px solid #eceef1;}
+#panel-halfclub .half-focus-head strong{font-size:14px;color:#2d3138;}
+#panel-halfclub .half-focus-head span{font-size:11px;color:#7c8189;font-weight:800;}
+#panel-halfclub .half-focus-body{padding:14px 16px;}
+#panel-halfclub .half-focus-help{font-size:12px;color:#666c74;line-height:1.6;margin-bottom:10px;}
+#panel-halfclub .half-route-details{margin:0;border:1px solid #dfe3e8;border-radius:8px;background:#fff;overflow:hidden;}
+#panel-halfclub .half-route-details summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;cursor:pointer;background:#fff;color:#4b4f58;font-size:13px;font-weight:900;}
+#panel-halfclub .half-route-details summary::-webkit-details-marker{display:none;}
+#panel-halfclub .half-route-details summary::after{content:'펼치기  ▾';color:#2b7fd3;font-size:11px;font-weight:900;}
+#panel-halfclub .half-route-details[open] summary{background:#fafcff;border-bottom:1px solid #e7edf5;}
+#panel-halfclub .half-route-details[open] summary::after{content:'접기  ▴';}
+#panel-halfclub .half-route-inner{padding:14px 16px;}
+#panel-halfclub .half-route-inner .upload-route-path{margin:0 0 10px 0;}
+@media(max-width:760px){
+  #panel-halfclub .half-bulk-card{flex-direction:column;align-items:stretch;}
+  #panel-halfclub .half-bulk-actions{width:100%;}
+  #panel-halfclub .half-bulk-btn{width:100%;min-width:0;}
+  #panel-halfclub .half-upload-row{grid-template-columns:1fr;}
+  #panel-halfclub .half-upload-label{border-right:0;border-bottom:1px solid #ebeef2;}
+}
+
+
+/* v-next lotteon simple workflow */
+#panel-lotteon .channel-body{gap:12px!important;background:#fff!important;}
+#panel-lotteon .channel-head{background:#f8f8fa!important;border-bottom:1px solid #e4e5e8!important;}
+#panel-lotteon .lotte-brief-note{margin:0!important;padding:10px 12px!important;border:1px solid #ebedf0!important;background:#fafbfc!important;color:#656b73!important;font-size:12px!important;line-height:1.6!important;}
+#panel-lotteon .lotte-download-card{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border:1px solid #e4e4e4;border-radius:10px;background:#fff;}
+#panel-lotteon .lotte-download-title{font-size:16px;font-weight:950;color:#23262d;margin-bottom:4px;}
+#panel-lotteon .lotte-download-desc{font-size:12px;color:#6d727a;line-height:1.55;}
+#panel-lotteon #downloadLotteBtn{min-width:180px;min-height:48px;padding:0 18px;border:0;border-radius:4px;background:#ff4d3f!important;color:#fff!important;font-size:14px!important;font-weight:900;box-shadow:none!important;}
+#panel-lotteon #downloadLotteBtn:hover{filter:brightness(.98)}
+#panel-lotteon .lotte-file-details,
+#panel-lotteon .lotte-route-details,
+#panel-lotteon .lotte-attr-details,
+#panel-lotteon .lotte-check-details{border:1px solid #e1e3e7;border-radius:8px;background:#fff;overflow:hidden;}
+#panel-lotteon .lotte-file-details>summary,
+#panel-lotteon .lotte-route-details>summary,
+#panel-lotteon .lotte-attr-details>summary,
+#panel-lotteon .lotte-check-details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:12px 15px;background:#fff;color:#4f535a;font-size:13px;font-weight:900;}
+#panel-lotteon .lotte-file-details>summary::-webkit-details-marker,
+#panel-lotteon .lotte-route-details>summary::-webkit-details-marker,
+#panel-lotteon .lotte-attr-details>summary::-webkit-details-marker,
+#panel-lotteon .lotte-check-details>summary::-webkit-details-marker{display:none;}
+#panel-lotteon .lotte-file-details>summary small,
+#panel-lotteon .lotte-route-details>summary small,
+#panel-lotteon .lotte-attr-details>summary small,
+#panel-lotteon .lotte-check-details>summary small{font-size:11px;font-weight:700;color:#9aa0a8;}
+#panel-lotteon .lotte-file-details>summary::after,
+#panel-lotteon .lotte-route-details>summary::after,
+#panel-lotteon .lotte-attr-details>summary::after,
+#panel-lotteon .lotte-check-details>summary::after{content:'▾';color:#ff4d3f;font-size:12px;margin-left:auto;}
+#panel-lotteon .lotte-file-details[open]>summary,
+#panel-lotteon .lotte-route-details[open]>summary,
+#panel-lotteon .lotte-attr-details[open]>summary,
+#panel-lotteon .lotte-check-details[open]>summary{background:#fafafa;border-bottom:1px solid #eceef1;}
+#panel-lotteon .lotte-file-details[open]>summary::after,
+#panel-lotteon .lotte-route-details[open]>summary::after,
+#panel-lotteon .lotte-attr-details[open]>summary::after,
+#panel-lotteon .lotte-check-details[open]>summary::after{content:'▴';}
+#panel-lotteon .lotte-file-details-body,
+#panel-lotteon .lotte-route-inner,
+#panel-lotteon .lotte-attr-details-body,
+#panel-lotteon .lotte-check-details-body{padding:12px;}
+#panel-lotteon .lotte-file-details-body>.guide-grid{margin:0;}
+#panel-lotteon .lotte-file-details-body>.half-preview-table{margin-top:12px;}
+#panel-lotteon .lotte-route-details .upload-route-path{margin:0 0 10px 0;}
+#panel-lotteon .lotte-attr-details .lotte-post-wrap{margin:0;border:0;}
+#panel-lotteon .lotte-attr-details .lotte-post-head{display:none;}
+#panel-lotteon .lotte-check-details #lottePostTaskCard{margin:0;border:0;box-shadow:none;}
+@media(max-width:760px){
+  #panel-lotteon .lotte-download-card{flex-direction:column;align-items:stretch;}
+  #panel-lotteon #downloadLotteBtn{width:100%;min-width:0;}
+}
+
+
 </style>
 </head>
 <body>
@@ -1090,16 +1292,24 @@
           </div>
         </div>
 
-        <div class="half-note" style="margin-top:12px;margin-bottom:12px">
-          <strong>공통 판매자 상품코드</strong> · 네이버 품번 / GS 협력사상품코드 / 비플로우 판매자 상품번호 / 하프클럽 C5 / 퀸잇 C4 / 롯데온 A3(여성 상품만)에 동일하게 사용합니다.
-          <div class="half-control" style="margin-top:9px">
-            <span class="half-auto" id="sellerCodeFinal">상품명 입력 후 자동 인식</span>
+        <div class="half-note" style="margin-top:12px;margin-bottom:12px;padding:12px 14px;background:#fff">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <strong style="font-size:14px">상품코드</strong>
+            <span class="half-auto" id="sellerCodeFinal" style="font-size:14px;padding:7px 11px;background:#f2f3f4">상품명 입력 후 자동 인식</span>
             <button type="button" class="mini-btn" data-copy-target="sellerCodeFinal">복사</button>
-            <input id="sellerCodeManual" type="text" placeholder="자동 인식이 잘못된 경우에만 직접 수정 (예: NCJ14)">
+            <details style="margin-left:auto">
+              <summary style="cursor:pointer;font-size:12px;font-weight:800;color:#6b7280;user-select:none">수정 / 설명</summary>
+              <div style="margin-top:10px;min-width:min(720px,80vw);padding:12px;border:1px solid #d9dde2;background:#fafbfc">
+                <div class="half-control">
+                  <input id="sellerCodeManual" type="text" placeholder="자동 인식이 잘못된 경우에만 직접 수정 (예: NCJ14)">
+                </div>
+                <div id="sellerCodeStatus" class="half-status"></div>
+                <div class="half-season-help">네이버 품번 / GS 협력사상품코드 / 비플로우 판매자 상품번호 / 하프클럽 C5 / 퀸잇 C4 / 롯데온 A3(여성 상품만)에 동일하게 사용합니다.</div>
+                <div class="half-season-help"><strong>자동 인식값을 우선 사용합니다.</strong> 잘못된 경우에만 위 칸에 정확한 코드를 입력하면 해당 값으로 덮어씁니다.</div>
+                <div class="half-season-help">예: (S244) → S244 / (노컷진14탄) → NCJ14 / (여름노컷진14탄) → SNCJ14 / (가을찐스판1탄) → JSP1</div>
+              </div>
+            </details>
           </div>
-          <div id="sellerCodeStatus" class="half-status"></div>
-          <div class="half-season-help"><strong>자동 인식값을 우선 사용합니다.</strong> 결과가 잘못된 경우에만 오른쪽 칸에 정확한 코드를 입력하면 해당 값으로 덮어씁니다. 입력값을 지우면 다시 자동 인식값으로 돌아갑니다.</div>
-          <div class="half-season-help">예: (S244) → S244 / (노컷진14탄) → NCJ14 / (여름노컷진14탄) → SNCJ14 / (가을찐스판1탄) → JSP1</div>
         </div>
 
         <div class="channel-panel active" id="panel-naver">
@@ -1408,12 +1618,26 @@
             </div>
           </div>
           <div class="channel-body">
+<div class="half-download-box queen-download-card">
+              <div>
+                <div class="queen-download-title">퀸잇 엑셀 다운로드</div>
+                <div class="queen-download-desc">상품정보를 퀸잇 대량등록 양식으로 자동 생성합니다.</div>
+              </div>
+              <button type="button" id="downloadQueenBtn" class="half-download">퀸잇 엑셀 다운로드</button>
+            </div>
+
+            
+            <details class="queen-file-details">
+              <summary><span>등록 파일 내용 확인</span><small>필요할 때만 보기</small></summary>
+              <div class="queen-file-details-body">
             <div class="half-note">
               첨부하신 퀸잇 상품등록 양식의 <strong>1~3행 구조는 그대로 유지</strong>하고, 상품 기본정보는 <strong>4행</strong>에 입력합니다.<br>
               옵션은 4행부터 아래로 한 조합씩 생성되며, <strong>J4 브랜드명 / L4 이미지 값은 원본 파일 값을 그대로 유지</strong>합니다.
             </div>
 
-            <div class="guide-grid">
+            <div class="queen-file-summary">
+              <div class="queen-file-summary-head"><strong>등록 파일 내용</strong><span>카테고리 · 기본정보 · 옵션</span></div>
+              <div class="guide-grid">
               <div class="guide-label">F4~I4 카테고리</div>
               <div>
                 <div class="half-control">
@@ -1500,37 +1724,32 @@
                 <div class="half-season-help">M/N = 색상 · O/P = 옵션2(기장 우선, 기장 없으면 사이즈) · Q/R = 옵션3(기장과 사이즈가 모두 있을 때 사이즈) · S = 판매자상품코드-1, -2, -3… · T = 재고 200</div>
                 <div id="queenOptionPreview" class="half-auto" style="margin-top:7px;white-space:pre-line;max-height:210px;overflow:auto"></div>
               </div>
+              </div>
             </div>
 
-            <div class="half-download-box">
-              <div>
-                <strong>퀸잇 등록용 엑셀 생성</strong>
-                <div class="half-season-help">안내해주신 4행 양식에 맞춰 상품명 / 판매자상품코드 / 판매가 / 카테고리 / 상세페이지 HTML / 옵션 조합을 자동 반영합니다.</div>
+            
               </div>
-              <button type="button" id="downloadQueenBtn" class="half-download">퀸잇 엑셀 다운로드</button>
-            </div>
-            <div class="upload-route-card">
-              <div class="upload-route-head">퀸잇 엑셀 업로드 경로</div>
-              <div class="upload-route-body">
-                <div class="upload-route-path"><strong>퀸잇어드민 로그인</strong> → 상품 → 상품관리 → 상품등록 → <strong>상품 대량 등록</strong></div>
-                <div class="upload-route-grid">
-                  <div class="upload-route-label">업로드 파일</div>
-                  <div class="upload-route-value">위의 <strong>퀸잇 엑셀 다운로드</strong>로 생성한 파일을 <strong>상품 대량 등록</strong> 화면에 첨부합니다.</div>
-                </div>
+            </details>
+
+<details class="queen-route-details">
+              <summary>엑셀 업로드 경로</summary>
+              <div class="queen-route-inner">
+                <div class="queen-route-path"><strong>퀸잇어드민 로그인</strong> → 상품 → 상품관리 → 상품등록 → <strong>상품 대량 등록</strong></div>
+                <div class="queen-route-note">위에서 다운로드한 엑셀 파일을 상품 대량 등록 화면의 파일 업로드 영역에 첨부합니다.</div>
               </div>
-            </div>
+            </details>
             <section class="post-task-card" id="queenPostTaskCard">
-              <div class="post-task-head">상품 업로드 후 반드시 확인 · 퀸잇 · 필수 2개</div>
+              <div class="post-task-head">업로드 후 필수 확인 <span class="queen-required-count">2개</span></div>
               <div class="post-task-body">
-                <div class="post-task-warning" id="queenThumbWarning">썸네일 변경 / 출고지연일수 +21일 설정이 아직 완료되지 않았습니다. 두 항목 모두 반드시 처리해 주세요.</div>
+                <div class="post-task-warning" id="queenThumbWarning">업로드 후 아래 2가지만 확인해 주세요.</div>
                 <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="queenThumbPathPost">복사</button><div class="guide-value" id="queenThumbPathPost">입력값 없음</div></div></div>
                 <ul class="post-task-list">
-                  <li><strong>필수 1.</strong> 상품 썸네일을 실제 이미지로 변경합니다.</li>
-                  <li><strong>필수 2.</strong> <span class="post-task-accent">출고지연일수를 일괄 +21일</span>로 설정합니다.</li>
+                  <li>상품 썸네일을 <strong>실제 이미지</strong>로 변경</li>
+                  <li>출고지연일수 <span class="post-task-accent">일괄 +21일</span> 설정</li>
                 </ul>
                 <div class="post-task-checks">
-                  <label class="post-task-check"><input type="checkbox" id="queenThumbDone"> 필수 1 · 썸네일 변경 완료</label>
-                  <label class="post-task-check"><input type="checkbox" id="queenDelayDone"> 필수 2 · 출고지연일수 일괄 +21일 설정 완료</label>
+                  <label class="post-task-check"><input type="checkbox" id="queenThumbDone"> 썸네일 변경 완료</label>
+                  <label class="post-task-check"><input type="checkbox" id="queenDelayDone"> 출고지연 +21일 완료</label>
                 </div>
               </div>
             </section>
@@ -1546,92 +1765,47 @@
           </div>
           <div class="channel-body">
             <div class="half-note">
-              앞으로는 비교해주신 <strong>오른쪽 결과 파일 형식</strong>처럼 생성합니다. <strong>DATA 시트 5행</strong>을 작성하되 K5 전시아이템은 공란으로 두고, 대표/추가 이미지는 아래에서 첨부한 실제 이미지 파일명으로 입력합니다.<br>
-              원본 파일의 하프클럽/거래처/브랜드/MD 등 기존 고정값은 그대로 유지합니다.
+              하프클럽은 <strong>선택해야 하는 항목(K5 전시아이템 / AT5 시즌)</strong>만 바로 보이게 정리했습니다. C5 상품코드·표준아이템·고시항목코드 등은 아래 <strong>기타 자동 생성값 확인</strong>을 펼쳐서 확인하면 됩니다.
             </div>
 
-            <div class="guide-grid">
-              <div class="guide-label">C5 상품코드</div>
-              <div>
-                <div class="half-control">
-                  <span class="half-auto" id="halfAutoCode">괄호 안 코드 자동 확인</span>
-                  <input id="halfManualCode" type="text" placeholder="직접 입력이 필요한 경우 예: NCJ14">
+            <div class="half-download-box half-bulk-card">
+              <div class="half-bulk-info">
+                <div class="half-bulk-title">1. 하프클럽 등록 파일 준비</div>
+                <div class="half-bulk-desc">하프클럽 일괄등록 팝업 흐름에 맞춰 <strong>엑셀 파일</strong>과 <strong>이미지 ZIP 파일</strong>을 각각 준비합니다.</div>
+              </div>
+              <div class="half-bulk-actions">
+                <button type="button" id="downloadHalfBtn" class="half-bulk-btn">하프클럽 엑셀 다운로드</button>
+                <button type="button" id="downloadHalfImagesBtn" class="half-bulk-btn">하프클럽 이미지 ZIP 다운로드</button>
+              </div>
+            </div>
+
+            <div class="half-upload-card">
+              <div class="half-upload-row">
+                <div class="half-upload-label">이미지 ZIP 준비</div>
+                <div class="half-upload-content">
+                  <div class="half-season-help" style="margin-bottom:10px">팝업창의 <strong>이미지 업로드</strong> 영역에 넣을 ZIP 파일입니다. 대표 이미지를 바로 쓰면 파일을 선택하고, 썸네일을 나중에 바꿀 예정이면 임시 대표 이미지를 그대로 사용해도 됩니다.</div>
+                  <label style="display:flex;align-items:center;gap:7px;margin:0 0 10px 0;font-weight:700"><input type="checkbox" id="halfDummyImage" checked> 임시 대표 이미지 사용 (halfclub1.jpg)</label>
+                  <div class="half-season-help" style="margin-bottom:10px">실제 대표 이미지를 바로 사용할 경우에만 아래에서 이미지 파일을 선택해 주세요. 파일을 선택하면 임시 대표 이미지 사용은 자동 해제됩니다.</div>
+                  <div class="half-image-row">
+                    <input type="file" id="halfImageFiles" accept="image/jpeg,image/png,image/gif,.jpg,.jpeg,.png,.gif" multiple>
+                    <button type="button" class="mini-btn" id="clearHalfImagesBtn">이미지 선택 지우기</button>
+                  </div>
+                  <div id="halfImageList" class="half-image-list" style="margin-top:10px">선택된 이미지 없음</div>
                 </div>
-                <div id="halfCodeStatus" class="half-status"></div>
               </div>
+            </div>
 
-              <div class="guide-label">F5 표준아이템</div>
-              <div class="half-control">
-                <select id="halfStandardItem">
-                  <option value="">표준아이템 선택</option>
-                  <optgroup label="스커트">
-                    <option value="101011001">스커트 · H라인/펜슬 · 101011001</option>
-                    <option value="101011002">스커트 · A라인/플레어 · 101011002</option>
-                    <option value="101011003">스커트 · 롱스커트 · 101011003</option>
-                  </optgroup>
-                  <optgroup label="데님팬츠">
-                    <option value="101010002">데님팬츠 · 스트레이트/일자 · 101010002</option>
-                    <option value="101010004">데님팬츠 · 통/와이드 · 101010004</option>
-                    <option value="101010003">데님팬츠 · 부츠컷/나팔 · 101010003</option>
-                    <option value="101010005">데님팬츠 · 반바지 · 101010005</option>
-                  </optgroup>
-                  <optgroup label="팬츠">
-                    <option value="101009010">팬츠 · 일반 · 101009010</option>
-                    <option value="101009002">팬츠 · 스트레이트 · 101009002</option>
-                    <option value="101009004">팬츠 · 통/와이드 · 101009004</option>
-                    <option value="101009009">팬츠 · 부츠컷/나팔 · 101009009</option>
-                    <option value="101009015">팬츠 · 슬랙스/정장 · 101009015</option>
-                    <option value="101009007">팬츠 · 반바지 · 101009007</option>
-                    <option value="101009001">팬츠 · 밴딩 · 101009001</option>
-                    <option value="101009012">팬츠 · 배기 · 101009012</option>
-                  </optgroup>
-                  <optgroup label="맨즈 팬츠 · 하프클럽 실제 아이템">
-                    <option value="102009001">남성의류 · 팬츠 · 면/치노 · 102009001</option>
-                    <option value="102009002">남성의류 · 팬츠 · 반바지 · 102009002</option>
-                    <option value="102009003">남성의류 · 팬츠 · 기모/모직 · 102009003</option>
-                    <option value="102009004">남성의류 · 팬츠 · 슬랙스 · 102009004</option>
-                    <option value="102009005">남성의류 · 팬츠 · 카고/밀리터리 · 102009005</option>
-                    <option value="102009007">남성의류 · 팬츠 · 배기/조거 · 102009007</option>
-                  </optgroup>
-                  <optgroup label="맨즈 데님팬츠 · 하프클럽 실제 아이템">
-                    <option value="102010001">남성의류 · 데님팬츠 · 스트레이트 · 102010001</option>
-                    <option value="102010002">남성의류 · 데님팬츠 · 반바지 · 102010002</option>
-                    <option value="102010003">남성의류 · 데님팬츠 · 스키니진 · 102010003</option>
-                    <option value="102010004">남성의류 · 데님팬츠 · 기본 · 102010004</option>
-                    <option value="102010005">남성의류 · 데님팬츠 · 와이드/통 · 102010005</option>
-                    <option value="102010006">남성의류 · 데님팬츠 · 기타 · 102010006</option>
-                  </optgroup>
-                </select>
-                <span id="halfStandardLabel" class="half-auto">선택 전</span>
-              </div>
-
-              <div class="guide-label">AC5 고시항목 코드</div>
-              <div>
-                <div class="copy-line"><div class="guide-value" id="halfNoticeCodePreview">NO101</div><button type="button" class="mini-btn" data-copy-target="halfNoticeCodePreview">복사</button></div>
-                <div class="half-season-help">첨부해주신 하프클럽 화면 기준 의류 고시항목 코드는 NO101로 파일 AC5에 입력합니다.</div>
-              </div>
-
-              <div class="guide-label">K5 전시아이템</div>
-              <div>
-                <div style="font-size:12px;color:#666;margin-bottom:7px">참고용 선택 영역입니다. <strong>F5 표준아이템과 동일한 코드는 자동으로 선택 해제·비활성화</strong>되어 중복되지 않습니다. 현재 하프클럽 결과 파일 다운로드 시 K5 전시아이템은 공란으로 저장됩니다.</div>
+            <div class="half-focus-card">
+              <div class="half-focus-head"><strong>K5 전시아이템</strong><span>선택 필요</span></div>
+              <div class="half-focus-body">
+                <div class="half-focus-help">참고용 선택 영역입니다. <strong>F5 표준아이템과 동일한 코드는 자동으로 선택 해제·비활성화</strong>되어 중복되지 않습니다. 현재 하프클럽 결과 파일 다운로드 시 <strong>K5 전시아이템은 공란으로 저장</strong>됩니다.</div>
                 <div class="half-code-grid" id="halfDisplayItems"></div>
               </div>
+            </div>
 
-              <div class="guide-label">옵션 Z5 / AA5</div>
-              <div class="copy-line"><div class="guide-value" id="halfOptionsPreview">컬러,사이즈</div><button type="button" class="mini-btn" data-copy-target="halfOptionsPreview">복사</button></div>
-
-              <div class="guide-label">AL5 상품태그</div>
-              <div>
-                <div class="tag-tools">
-                  <textarea id="halfTags" rows="2" placeholder="최대 5개, 콤마 구분" style="width:100%;min-height:54px;resize:vertical;padding:9px 10px;border:1px solid #cfd5dc;border-radius:4px;font:inherit"></textarea>
-                  <button type="button" class="mini-btn" id="halfMakeTagsBtn">태그 자동 생성</button>
-                  <button type="button" class="mini-btn" id="halfClearTagsBtn">태그 지우기</button>
-                </div>
-                <div class="half-season-help">자동 생성 후 원하는 태그를 직접 수정할 수 있습니다. 콤마(,)로 구분해 최대 5개까지 입력하며, 직접 수정한 값은 엑셀 AL5에 그대로 반영됩니다.</div>
-              </div>
-
-              <div class="guide-label">AT5 시즌</div>
-              <div>
+            <div class="half-focus-card">
+              <div class="half-focus-head"><strong>AT5 시즌</strong><span>선택 필요</span></div>
+              <div class="half-focus-body">
                 <div class="half-control">
                   <select id="halfSeason">
                     <option value="">자동 판단</option>
@@ -1643,48 +1817,108 @@
                   </select>
                   <span id="halfSeasonResult" class="half-auto">자동 판단 대기</span>
                 </div>
-                <div class="half-season-help">하프클럽 기준으로 봄·가을·사계절은 한 세트로 처리하여 05(사계절)로 입력합니다. 여름/냉감/아이스 → 02, 겨울/기모 → 04로 자동 판단합니다.</div>
-              </div>
-
-              <div class="guide-label">AS5 성별</div>
-              <div class="guide-value" id="halfGenderPreview">스커트 선택 시 02 / 스커트 외 공란</div>
-            </div>
-
-            <div class="half-image-box">
-              <strong>하프클럽 이미지 업로드 파일</strong>
-              <div class="half-season-help">실제 대표 이미지를 업로드 후 교체할 예정이라면 <strong>임시 대표 이미지 사용</strong>을 체크해 주세요. 엑셀 AO5에는 <strong>halfclub1.jpg</strong>가 입력되고, 동일한 파일명이 포함된 이미지 ZIP을 다운로드할 수 있습니다.</div>
-              <label style="display:flex;align-items:center;gap:7px;margin:10px 0;font-weight:700"><input type="checkbox" id="halfDummyImage" checked> 임시 대표 이미지 사용 (halfclub1.jpg)</label>
-              <div class="half-season-help">실제 대표 이미지를 바로 사용할 경우에만 아래에서 이미지 파일을 선택해 주세요. 파일을 선택하면 임시 대표 이미지 사용은 자동 해제됩니다.</div>
-              <div class="half-image-row">
-                <input type="file" id="halfImageFiles" accept="image/jpeg,image/png,image/gif,.jpg,.jpeg,.png,.gif" multiple>
-                <button type="button" class="mini-btn" id="clearHalfImagesBtn">이미지 선택 지우기</button>
-                <button type="button" class="half-download" id="downloadHalfImagesBtn">하프클럽 이미지 ZIP 다운로드</button>
-              </div>
-              <div id="halfImageList" class="half-image-list">선택된 이미지 없음</div>
-            </div>
-
-
-            <table class="half-preview-table">
-              <thead><tr><th>셀</th><th>항목</th><th>입력값</th></tr></thead>
-              <tbody id="halfCellPreview"></tbody>
-            </table>
-
-            <div class="channel-copybox">
-              <textarea id="halfAllText" readonly></textarea>
-              <div class="channel-copy-actions">
-                <button type="button" id="copyHalfAllBtn">하프클럽 셀값 전체 복사</button>
+                <div class="half-season-help" style="margin-top:8px">하프클럽 기준으로 봄·가을·사계절은 한 세트로 처리하여 <strong>05(사계절)</strong>로 입력합니다. 여름/냉감/아이스 → 02, 겨울/기모 → 04로 자동 판단합니다.</div>
               </div>
             </div>
 
-            <div class="half-download-bar">
-              <div class="desc">원본 엑셀의 다른 시트와 고정값을 유지한 상태로 DATA!5행을 채운 파일을 생성합니다.</div>
-              <div class="buttons">
-                <button type="button" id="downloadHalfBtn" class="half-download">하프클럽 엑셀 다운로드</button>
+            <details class="half-file-details">
+              <summary><span>기타 자동 생성값 확인</span><small>C5 / F5 / AC5 / 옵션 / 태그 / 셀값 전체</small></summary>
+              <div class="half-file-details-body">
+                <div class="guide-grid">
+                  <div class="guide-label">C5 상품코드</div>
+                  <div>
+                    <div class="half-control">
+                      <span class="half-auto" id="halfAutoCode">괄호 안 코드 자동 확인</span>
+                      <input id="halfManualCode" type="text" placeholder="직접 입력이 필요한 경우 예: NCJ14">
+                    </div>
+                    <div id="halfCodeStatus" class="half-status"></div>
+                  </div>
+
+                  <div class="guide-label">F5 표준아이템</div>
+                  <div class="half-control">
+                    <select id="halfStandardItem">
+                      <option value="">표준아이템 선택</option>
+                      <optgroup label="스커트">
+                        <option value="101011001">스커트 · H라인/펜슬 · 101011001</option>
+                        <option value="101011002">스커트 · A라인/플레어 · 101011002</option>
+                        <option value="101011003">스커트 · 롱스커트 · 101011003</option>
+                      </optgroup>
+                      <optgroup label="데님팬츠">
+                        <option value="101010002">데님팬츠 · 스트레이트/일자 · 101010002</option>
+                        <option value="101010004">데님팬츠 · 통/와이드 · 101010004</option>
+                        <option value="101010003">데님팬츠 · 부츠컷/나팔 · 101010003</option>
+                        <option value="101010005">데님팬츠 · 반바지 · 101010005</option>
+                      </optgroup>
+                      <optgroup label="팬츠">
+                        <option value="101009010">팬츠 · 일반 · 101009010</option>
+                        <option value="101009002">팬츠 · 스트레이트 · 101009002</option>
+                        <option value="101009004">팬츠 · 통/와이드 · 101009004</option>
+                        <option value="101009009">팬츠 · 부츠컷/나팔 · 101009009</option>
+                        <option value="101009015">팬츠 · 슬랙스/정장 · 101009015</option>
+                        <option value="101009007">팬츠 · 반바지 · 101009007</option>
+                        <option value="101009001">팬츠 · 밴딩 · 101009001</option>
+                        <option value="101009012">팬츠 · 배기 · 101009012</option>
+                      </optgroup>
+                      <optgroup label="맨즈 팬츠 · 하프클럽 실제 아이템">
+                        <option value="102009001">남성의류 · 팬츠 · 면/치노 · 102009001</option>
+                        <option value="102009002">남성의류 · 팬츠 · 반바지 · 102009002</option>
+                        <option value="102009003">남성의류 · 팬츠 · 기모/모직 · 102009003</option>
+                        <option value="102009004">남성의류 · 팬츠 · 슬랙스 · 102009004</option>
+                        <option value="102009005">남성의류 · 팬츠 · 카고/밀리터리 · 102009005</option>
+                        <option value="102009007">남성의류 · 팬츠 · 배기/조거 · 102009007</option>
+                      </optgroup>
+                      <optgroup label="맨즈 데님팬츠 · 하프클럽 실제 아이템">
+                        <option value="102010001">남성의류 · 데님팬츠 · 스트레이트 · 102010001</option>
+                        <option value="102010002">남성의류 · 데님팬츠 · 반바지 · 102010002</option>
+                        <option value="102010003">남성의류 · 데님팬츠 · 스키니진 · 102010003</option>
+                        <option value="102010004">남성의류 · 데님팬츠 · 기본 · 102010004</option>
+                        <option value="102010005">남성의류 · 데님팬츠 · 와이드/통 · 102010005</option>
+                        <option value="102010006">남성의류 · 데님팬츠 · 기타 · 102010006</option>
+                      </optgroup>
+                    </select>
+                    <span id="halfStandardLabel" class="half-auto">선택 전</span>
+                  </div>
+
+                  <div class="guide-label">AC5 고시항목 코드</div>
+                  <div>
+                    <div class="copy-line"><div class="guide-value" id="halfNoticeCodePreview">NO101</div><button type="button" class="mini-btn" data-copy-target="halfNoticeCodePreview">복사</button></div>
+                    <div class="half-season-help">첨부해주신 하프클럽 화면 기준 의류 고시항목 코드는 NO101로 파일 AC5에 입력합니다.</div>
+                  </div>
+
+                  <div class="guide-label">옵션 Z5 / AA5</div>
+                  <div class="copy-line"><div class="guide-value" id="halfOptionsPreview">컬러,사이즈</div><button type="button" class="mini-btn" data-copy-target="halfOptionsPreview">복사</button></div>
+
+                  <div class="guide-label">AL5 상품태그</div>
+                  <div>
+                    <div class="tag-tools">
+                      <textarea id="halfTags" rows="2" placeholder="최대 5개, 콤마 구분" style="width:100%;min-height:54px;resize:vertical;padding:9px 10px;border:1px solid #cfd5dc;border-radius:4px;font:inherit"></textarea>
+                      <button type="button" class="mini-btn" id="halfMakeTagsBtn">태그 자동 생성</button>
+                      <button type="button" class="mini-btn" id="halfClearTagsBtn">태그 지우기</button>
+                    </div>
+                    <div class="half-season-help">자동 생성 후 원하는 태그를 직접 수정할 수 있습니다. 콤마(,)로 구분해 최대 5개까지 입력하며, 직접 수정한 값은 엑셀 AL5에 그대로 반영됩니다.</div>
+                  </div>
+
+                  <div class="guide-label">AS5 성별</div>
+                  <div class="guide-value" id="halfGenderPreview">스커트 선택 시 02 / 스커트 외 공란</div>
+                </div>
+
+                <table class="half-preview-table">
+                  <thead><tr><th>셀</th><th>항목</th><th>입력값</th></tr></thead>
+                  <tbody id="halfCellPreview"></tbody>
+                </table>
+
+                <div class="channel-copybox">
+                  <textarea id="halfAllText" readonly></textarea>
+                  <div class="channel-copy-actions">
+                    <button type="button" id="copyHalfAllBtn">하프클럽 셀값 전체 복사</button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="upload-route-card" id="halfUploadRouteCard">
-              <div class="upload-route-head">하프클럽 상품일괄등록 경로</div>
-              <div class="upload-route-body">
+            </details>
+
+            <details class="half-route-details" id="halfUploadRouteCard">
+              <summary>하프클럽 업로드 경로</summary>
+              <div class="half-route-inner">
                 <div class="upload-route-path"><strong>하프클럽 백오피스 로그인</strong> → 상품관리 → 상품관리 → <strong>상품일괄등록</strong></div>
                 <div class="upload-route-grid">
                   <div class="upload-route-label">1. 사이트</div>
@@ -1701,7 +1935,7 @@
                 </div>
                 <div class="upload-route-alert">⚠ 이미지 ZIP은 압축을 풀지 않습니다. 엑셀 파일과 ZIP 파일을 각각 해당 업로드 영역에 첨부해 주세요.</div>
               </div>
-            </div>
+            </details>
             <section class="post-task-card" id="halfPostTaskCard">
               <div class="post-task-head">상품 업로드 후 반드시 확인 · 하프클럽</div>
               <div class="post-task-body">
@@ -1731,72 +1965,76 @@
             </div>
           </div>
           <div class="channel-body">
-            <div class="half-note">
-              첨부해주신 <strong>롯데온 업로드.xlsx</strong> 원본 양식을 그대로 사용해 Sheet1의 3행을 자동 작성합니다.<br>
-              <strong>A3 판매자 상품코드 / B3 카테고리 / C3 상품명 / D3 P37666 / E3 판매가 / G3 옵션명 / H3 옵션값 / J3 공란 / M3 상세 HTML</strong>과 지정 고정값을 함께 입력합니다.<br>
-              옵션명·옵션값은 위에서 입력한 <strong>색상 / 기장 / 사이즈 중 실제 입력된 항목만</strong> 줄바꿈으로 생성합니다.
+            <div class="lotte-brief-note">
+              롯데온은 <strong>다운로드만 바로 보이게</strong> 정리했고, 카테고리/셀값/업로드 경로/속성정보/후확인 항목은 전부 접어두었습니다. 필요할 때만 펼쳐서 확인해 주세요.
             </div>
 
-            <div class="guide-grid">
-              <div class="guide-label">A3 판매자 상품코드</div>
-              <div class="copy-line"><div class="guide-value" id="lotteSellerCode">상품명 입력 후 자동 생성</div><button type="button" class="mini-btn" data-copy-target="lotteSellerCode">복사</button></div>
-
-              <div class="guide-label">B3 카테고리코드</div>
+            <div class="half-download-bar lotte-download-card">
               <div>
-                <div class="half-control">
-                  <select id="lotteCategory">
-                    <option value="">롯데온 카테고리 선택</option>
-                    <optgroup label="여성의류 > 바지/레깅스">
-                      <option value="BC46040100">BC46040100 · 레깅스 · 여성의류&gt;바지/레깅스&gt;레깅스</option>
-                      <option value="BC46040200">BC46040200 · 면바지/밴딩팬츠 · 여성의류&gt;바지/레깅스&gt;면바지/밴딩팬츠</option>
-                      <option value="BC46040300">BC46040300 · 반바지/치마바지 · 여성의류&gt;바지/레깅스&gt;반바지/치마바지</option>
-                      <option value="BC46040400">BC46040400 · 슬랙스 · 여성의류&gt;바지/레깅스&gt;슬랙스</option>
-                      <option value="BC46040500">BC46040500 · 청반바지 · 여성의류&gt;바지/레깅스&gt;청반바지</option>
-                    </optgroup>
-                    <optgroup label="여성의류 > 스커트">
-                      <option value="BC46060100">BC46060100 · 롱스커트 · 여성의류&gt;스커트&gt;롱스커트</option>
-                      <option value="BC46060200">BC46060200 · 미니스커트 · 여성의류&gt;스커트&gt;미니스커트</option>
-                      <option value="BC46060300">BC46060300 · 미디스커트 · 여성의류&gt;스커트&gt;미디스커트</option>
-                    </optgroup>
-                    <optgroup label="여성의류 > 원피스">
-                      <option value="BC46080100">BC46080100 · 나시원피스 · 여성의류&gt;원피스&gt;나시원피스</option>
-                    </optgroup>
-                    <optgroup label="여성의류 > 청바지">
-                      <option value="BC46120100">BC46120100 · 부츠컷/와이드핏 · 여성의류&gt;청바지&gt;부츠컷/와이드핏</option>
-                      <option value="BC46120200">BC46120200 · 스키니/슬림핏 · 여성의류&gt;청바지&gt;스키니/슬림핏</option>
-                      <option value="BC46120300">BC46120300 · 스트레이트핏 · 여성의류&gt;청바지&gt;스트레이트핏</option>
-                    </optgroup>
-                    <optgroup label="여성의류 > 트레이닝복">
-                      <option value="BC46130100">BC46130100 · 트레이닝상의 · 여성의류&gt;트레이닝복&gt;트레이닝상의</option>
-                      <option value="BC46130200">BC46130200 · 트레이닝세트 · 여성의류&gt;트레이닝복&gt;트레이닝세트</option>
-                      <option value="BC46130300">BC46130300 · 트레이닝하의 · 여성의류&gt;트레이닝복&gt;트레이닝하의</option>
-                    </optgroup>
-                  </select>
-                </div>
-                <div id="lotteCategoryStatus" class="half-status"></div>
-              </div>
-
-              <div class="guide-label">선택 카테고리</div>
-              <div class="copy-line"><div class="guide-value" id="lotteCategoryPreview">카테고리를 선택해 주세요.</div><button type="button" class="mini-btn" data-copy-target="lotteCategoryPreview">복사</button></div>
-            </div>
-
-            <table class="half-preview-table">
-              <thead><tr><th>셀</th><td style="font-weight:800;background:#f5f6f7">항목</td><td style="font-weight:800;background:#f5f6f7">입력값</td></tr></thead>
-              <tbody id="lotteCellPreview"></tbody>
-            </table>
-
-            <div class="half-download-bar">
-              <div class="desc">
-                원본 양식은 유지하고 <strong>Sheet1 3행</strong>에 롯데온 등록값을 자동 입력합니다.<br>
-                상품코드 자동 변환이 어려운 경우 위의 공통 판매자 상품코드에서 직접 입력해 주세요. <strong>배송/반품 관련 고정값까지 자동 입력됩니다.</strong>
+                <div class="lotte-download-title">롯데온 엑셀 다운로드</div>
+                <div class="lotte-download-desc">원본 양식은 유지하고 <strong>Sheet1 3행</strong>에 롯데온 등록값을 자동 입력합니다. 배송/반품 관련 고정값도 함께 반영됩니다.</div>
               </div>
               <div class="buttons">
                 <button type="button" id="downloadLotteBtn" class="half-download">롯데온 엑셀 다운로드</button>
               </div>
             </div>
-            <div class="upload-route-card" id="lotteUploadRouteCard">
-              <div class="upload-route-head">롯데ON 상품일괄등록 경로</div>
-              <div class="upload-route-body">
+
+            <details class="lotte-file-details">
+              <summary><span>등록 파일 내용 확인</span><small>카테고리 / 셀값</small></summary>
+              <div class="lotte-file-details-body">
+                <div class="guide-grid">
+                  <div class="guide-label">A3 판매자 상품코드</div>
+                  <div class="copy-line"><div class="guide-value" id="lotteSellerCode">상품명 입력 후 자동 생성</div><button type="button" class="mini-btn" data-copy-target="lotteSellerCode">복사</button></div>
+
+                  <div class="guide-label">B3 카테고리코드</div>
+                  <div>
+                    <div class="half-control">
+                      <select id="lotteCategory">
+                        <option value="">롯데온 카테고리 선택</option>
+                        <optgroup label="여성의류 > 바지/레깅스">
+                          <option value="BC46040100">BC46040100 · 레깅스 · 여성의류&gt;바지/레깅스&gt;레깅스</option>
+                          <option value="BC46040200">BC46040200 · 면바지/밴딩팬츠 · 여성의류&gt;바지/레깅스&gt;면바지/밴딩팬츠</option>
+                          <option value="BC46040300">BC46040300 · 반바지/치마바지 · 여성의류&gt;바지/레깅스&gt;반바지/치마바지</option>
+                          <option value="BC46040400">BC46040400 · 슬랙스 · 여성의류&gt;바지/레깅스&gt;슬랙스</option>
+                          <option value="BC46040500">BC46040500 · 청반바지 · 여성의류&gt;바지/레깅스&gt;청반바지</option>
+                        </optgroup>
+                        <optgroup label="여성의류 > 스커트">
+                          <option value="BC46060100">BC46060100 · 롱스커트 · 여성의류&gt;스커트&gt;롱스커트</option>
+                          <option value="BC46060200">BC46060200 · 미니스커트 · 여성의류&gt;스커트&gt;미니스커트</option>
+                          <option value="BC46060300">BC46060300 · 미디스커트 · 여성의류&gt;스커트&gt;미디스커트</option>
+                        </optgroup>
+                        <optgroup label="여성의류 > 원피스">
+                          <option value="BC46080100">BC46080100 · 나시원피스 · 여성의류&gt;원피스&gt;나시원피스</option>
+                        </optgroup>
+                        <optgroup label="여성의류 > 청바지">
+                          <option value="BC46120100">BC46120100 · 부츠컷/와이드핏 · 여성의류&gt;청바지&gt;부츠컷/와이드핏</option>
+                          <option value="BC46120200">BC46120200 · 스키니/슬림핏 · 여성의류&gt;청바지&gt;스키니/슬림핏</option>
+                          <option value="BC46120300">BC46120300 · 스트레이트핏 · 여성의류&gt;청바지&gt;스트레이트핏</option>
+                        </optgroup>
+                        <optgroup label="여성의류 > 트레이닝복">
+                          <option value="BC46130100">BC46130100 · 트레이닝상의 · 여성의류&gt;트레이닝복&gt;트레이닝상의</option>
+                          <option value="BC46130200">BC46130200 · 트레이닝세트 · 여성의류&gt;트레이닝복&gt;트레이닝세트</option>
+                          <option value="BC46130300">BC46130300 · 트레이닝하의 · 여성의류&gt;트레이닝복&gt;트레이닝하의</option>
+                        </optgroup>
+                      </select>
+                    </div>
+                    <div id="lotteCategoryStatus" class="half-status"></div>
+                  </div>
+
+                  <div class="guide-label">선택 카테고리</div>
+                  <div class="copy-line"><div class="guide-value" id="lotteCategoryPreview">카테고리를 선택해 주세요.</div><button type="button" class="mini-btn" data-copy-target="lotteCategoryPreview">복사</button></div>
+                </div>
+
+                <table class="half-preview-table">
+                  <thead><tr><th>셀</th><td style="font-weight:800;background:#f5f6f7">항목</td><td style="font-weight:800;background:#f5f6f7">입력값</td></tr></thead>
+                  <tbody id="lotteCellPreview"></tbody>
+                </table>
+              </div>
+            </details>
+
+            <details class="lotte-route-details" id="lotteUploadRouteCard">
+              <summary><span>롯데온 업로드 경로</span><small>필요할 때만 보기</small></summary>
+              <div class="lotte-route-inner">
                 <div class="upload-route-path"><strong>롯데ON 판매자센터 로그인</strong> → 상품관리 → 상품일괄등록 → <strong>롯데ON 양식 등록</strong> → <strong>롯데ON 양식 업로드</strong> → 파일 첨부 → <strong>일괄 등록</strong></div>
                 <div class="upload-route-grid">
                   <div class="upload-route-label">1. 양식 선택</div>
@@ -1810,136 +2048,147 @@
                 </div>
                 <div class="upload-route-alert">⚠ <strong>N사 양식 등록이 아닙니다.</strong> 반드시 <strong>롯데ON 양식 등록 → 롯데ON 양식 업로드</strong> 경로를 사용해 주세요.</div>
               </div>
-            </div>
-            <div class="lotte-post-wrap">
-              <div class="lotte-post-head"><span>롯데온 자동등록 후 속성정보 확인</span></div>
+            </details>
 
-              <div class="lotte-attr-note">
-                <strong>자동등록 후 필수 확인</strong><br>
-                ① 상품 썸네일 이미지를 등록합니다.<br>
-                ② <b>속성정보설정</b>에서 아래 항목은 사이트가 자동으로 선택해 둡니다.<br>
-                자동 선택값은 위에서 입력한 상품명·혼용률·신축성·핏·기장·기능성 키워드를 기준으로 생성됩니다. 실제 상품과 다르면 직접 수정해주세요.
-              </div>
+            <details class="lotte-attr-details">
+              <summary><span>자동등록 후 속성정보 확인</span><small>필요할 때만 보기</small></summary>
+              <div class="lotte-attr-details-body">
+                <div class="lotte-post-wrap">
+                  <div class="lotte-post-head"><span>롯데온 자동등록 후 속성정보 확인</span></div>
 
-              <div class="lotte-attr-table">
-                <div class="lotte-attr-row">
-                  <div class="lotte-attr-label">의류 종류</div>
-                  <div class="lotte-attr-value">
-                    <select id="lotteAttrClothing">
-                      <option value="">선택</option>
-                      <option>팬츠</option><option>청바지</option><option>스커트</option><option>레깅스</option><option>트레이닝복</option><option>원피스</option>
-                    </select>
-                    <span class="lotte-rec-badge" id="lotteClothingRec">추천 대기</span>
+                  <div class="lotte-attr-note">
+                    <strong>자동등록 후 필수 확인</strong><br>
+                    ① 상품 썸네일 이미지를 등록합니다.<br>
+                    ② <b>속성정보설정</b>에서 아래 항목은 사이트가 자동으로 선택해 둡니다.<br>
+                    자동 선택값은 위에서 입력한 상품명·혼용률·신축성·핏·기장·기능성 키워드를 기준으로 생성됩니다. 실제 상품과 다르면 직접 수정해주세요.
                   </div>
-                </div>
 
-                <div class="lotte-attr-row">
-                  <div class="lotte-attr-label">주요소재</div>
-                  <div class="lotte-attr-value" id="lotteMaterialChecks">
-                    <label class="lotte-attr-check"><input type="checkbox" value="면">면</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="린넨">린넨</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="데님">데님</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="모">모</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="퍼">퍼</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="가죽">가죽</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="인조가죽">인조가죽</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="캐시미어">캐시미어</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="코듀로이">코듀로이</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="기모">기모</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="앙고라">앙고라</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="쉬폰">쉬폰</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="벨벳">벨벳</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="스웨이드">스웨이드</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="네오프렌">네오프렌</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="나일론">나일론</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="실크">실크</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="텐셀">텐셀</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="폴리에스터">폴리에스터</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="레이온">레이온</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="아크릴">아크릴</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="폴리우레탄">폴리우레탄</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="스판덱스">스판덱스</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="트위드">트위드</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="모달">모달</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="플리스">플리스</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="새틴">새틴</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="시어서커">시어서커</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="메쉬">메쉬</label>
+                  <div class="lotte-attr-table">
+                    <div class="lotte-attr-row">
+                      <div class="lotte-attr-label">의류 종류</div>
+                      <div class="lotte-attr-value">
+                        <select id="lotteAttrClothing">
+                          <option value="">선택</option>
+                          <option>팬츠</option><option>청바지</option><option>스커트</option><option>레깅스</option><option>트레이닝복</option><option>원피스</option>
+                        </select>
+                        <span class="lotte-rec-badge" id="lotteClothingRec">추천 대기</span>
+                      </div>
+                    </div>
+
+                    <div class="lotte-attr-row">
+                      <div class="lotte-attr-label">주요소재</div>
+                      <div class="lotte-attr-value" id="lotteMaterialChecks">
+                        <label class="lotte-attr-check"><input type="checkbox" value="면">면</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="린넨">린넨</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="데님">데님</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="모">모</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="퍼">퍼</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="가죽">가죽</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="인조가죽">인조가죽</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="캐시미어">캐시미어</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="코듀로이">코듀로이</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="기모">기모</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="앙고라">앙고라</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="쉬폰">쉬폰</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="벨벳">벨벳</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="스웨이드">스웨이드</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="네오프렌">네오프렌</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="나일론">나일론</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="실크">실크</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="텐셀">텐셀</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="폴리에스터">폴리에스터</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="레이온">레이온</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="아크릴">아크릴</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="폴리우레탄">폴리우레탄</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="스판덱스">스판덱스</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="트위드">트위드</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="모달">모달</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="플리스">플리스</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="새틴">새틴</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="시어서커">시어서커</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="메쉬">메쉬</label>
+                      </div>
+                    </div>
+
+                    <div class="lotte-attr-row">
+                      <div class="lotte-attr-label">팬츠 핏</div>
+                      <div class="lotte-attr-value">
+                        <select id="lotteAttrFit">
+                          <option value="">선택</option>
+                          <option>와이드핏</option><option>세미와이드핏</option><option>부츠컷</option><option>배기핏</option><option>테이퍼드핏</option><option>스트레이트핏</option><option>일자핏</option><option>스키니핏</option><option>조거핏</option><option>기타</option>
+                        </select>
+                        <span class="lotte-rec-badge" id="lotteFitRec">추천 대기</span>
+                      </div>
+                    </div>
+
+                    <div class="lotte-attr-row">
+                      <div class="lotte-attr-label">하의기장</div>
+                      <div class="lotte-attr-value">
+                        <select id="lotteAttrLength">
+                          <option value="">선택</option>
+                          <option>반바지</option><option>5부</option><option>7부</option><option>9부</option><option>긴바지</option>
+                        </select>
+                        <span class="lotte-rec-badge" id="lotteLengthRec">추천 대기</span>
+                      </div>
+                    </div>
+
+                    <div class="lotte-attr-row">
+                      <div class="lotte-attr-label">사용계절</div>
+                      <div class="lotte-attr-value" id="lotteSeasonChecks">
+                        <label class="lotte-attr-check"><input type="checkbox" value="봄">봄</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="여름">여름</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="가을">가을</label>
+                        <label class="lotte-attr-check"><input type="checkbox" value="겨울">겨울</label>
+                      </div>
+                    </div>
+
+                    <div class="lotte-attr-row">
+                      <div class="lotte-attr-label">품목</div>
+                      <div class="lotte-attr-value">
+                        <select id="lotteAttrItem">
+                          <option value="">선택</option>
+                          <option>신발</option><option>가방</option><option>의류</option><option>잡화</option><option>넥타이/머플러/손수건</option>
+                        </select>
+                        <span class="lotte-rec-badge" id="lotteItemRec">추천 대기</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div class="lotte-attr-row">
-                  <div class="lotte-attr-label">팬츠 핏</div>
-                  <div class="lotte-attr-value">
-                    <select id="lotteAttrFit">
-                      <option value="">선택</option>
-                      <option>와이드핏</option><option>세미와이드핏</option><option>부츠컷</option><option>배기핏</option><option>테이퍼드핏</option><option>스트레이트핏</option><option>일자핏</option><option>스키니핏</option><option>조거핏</option><option>기타</option>
-                    </select>
-                    <span class="lotte-rec-badge" id="lotteFitRec">추천 대기</span>
+                  <div class="lotte-attr-actions">
+                    <button type="button" class="mini-btn" id="lotteAttrSuggestBtn">자동 선택 다시 적용</button>
+                    <button type="button" class="mini-btn" id="lotteAttrCopyBtn">체크 항목 복사</button>
                   </div>
-                </div>
-
-                <div class="lotte-attr-row">
-                  <div class="lotte-attr-label">하의기장</div>
-                  <div class="lotte-attr-value">
-                    <select id="lotteAttrLength">
-                      <option value="">선택</option>
-                      <option>반바지</option><option>5부</option><option>7부</option><option>9부</option><option>긴바지</option>
-                    </select>
-                    <span class="lotte-rec-badge" id="lotteLengthRec">추천 대기</span>
-                  </div>
-                </div>
-
-                <div class="lotte-attr-row">
-                  <div class="lotte-attr-label">사용계절</div>
-                  <div class="lotte-attr-value" id="lotteSeasonChecks">
-                    <label class="lotte-attr-check"><input type="checkbox" value="봄">봄</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="여름">여름</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="가을">가을</label>
-                    <label class="lotte-attr-check"><input type="checkbox" value="겨울">겨울</label>
-                  </div>
-                </div>
-
-                <div class="lotte-attr-row">
-                  <div class="lotte-attr-label">품목</div>
-                  <div class="lotte-attr-value">
-                    <select id="lotteAttrItem">
-                      <option value="">선택</option>
-                      <option>신발</option><option>가방</option><option>의류</option><option>잡화</option><option>넥타이/머플러/손수건</option>
-                    </select>
-                    <span class="lotte-rec-badge" id="lotteItemRec">추천 대기</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="lotte-attr-actions">
-                <button type="button" class="mini-btn" id="lotteAttrSuggestBtn">자동 선택 다시 적용</button>
-                <button type="button" class="mini-btn" id="lotteAttrCopyBtn">체크 항목 복사</button>
-              </div>
-              <div class="lotte-attr-summary" id="lotteAttrSummary">상품정보를 입력하면 속성정보가 자동으로 선택됩니다.</div>
-            </div>
-
-            <section class="post-task-card" id="lottePostTaskCard">
-              <div class="post-task-head">상품 업로드 후 반드시 확인 · 롯데온</div>
-              <div class="post-task-body">
-                <div class="post-task-warning" id="lotteThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 자동등록 후 상품 썸네일을 실제 이미지로 변경해 주세요.</div>
-                <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="lotteThumbPathPost">복사</button><div class="guide-value" id="lotteThumbPathPost">입력값 없음</div></div></div>
-                <ul class="post-task-list">
-                  <li>상품 썸네일을 실제 이미지로 변경합니다.</li>
-                  <li>위 속성정보 자동선택값을 실제 상품과 비교한 뒤 최종 확인합니다.</li>
-                  <li class="post-task-season-note" id="lotteSeasonInstruction">사용계절이 봄·가을 계열일 때만 <strong>봄 + 가을</strong>이 모두 체크되어 있는지 확인합니다.</li>
-                </ul>
-                <div class="post-task-checks">
-                  <label class="post-task-check"><input type="checkbox" id="lotteThumbDone"> 썸네일 변경 완료</label>
-                  <label class="post-task-check"><input type="checkbox" id="lotteAttrDone"> 속성정보 설정 완료</label>
-                  <span class="post-task-season-checks" id="lotteSeasonPostChecks">
-                    <label class="post-task-check"><input type="checkbox" id="lotteSpringAutumnDone"> 사용계절 봄 + 가을 체크 완료</label>
-                  </span>
+                  <div class="lotte-attr-summary" id="lotteAttrSummary">상품정보를 입력하면 속성정보가 자동으로 선택됩니다.</div>
                 </div>
               </div>
-            </section>
+            </details>
 
-          </div>
+            <details class="lotte-check-details">
+              <summary><span>업로드 후 필수 확인</span><small>필요할 때만 보기</small></summary>
+              <div class="lotte-check-details-body">
+                <section class="post-task-card" id="lottePostTaskCard">
+                  <div class="post-task-head">상품 업로드 후 반드시 확인 · 롯데온</div>
+                  <div class="post-task-body">
+                    <div class="post-task-warning" id="lotteThumbWarning">썸네일 변경이 아직 완료되지 않았습니다. 자동등록 후 상품 썸네일을 실제 이미지로 변경해 주세요.</div>
+                    <div class="post-task-path"><b>썸네일 파일 경로</b><div class="copy-line"><button type="button" class="mini-btn" data-copy-target="lotteThumbPathPost">복사</button><div class="guide-value" id="lotteThumbPathPost">입력값 없음</div></div></div>
+                    <ul class="post-task-list">
+                      <li>상품 썸네일을 실제 이미지로 변경합니다.</li>
+                      <li>위 속성정보 자동선택값을 실제 상품과 비교한 뒤 최종 확인합니다.</li>
+                      <li class="post-task-season-note" id="lotteSeasonInstruction">사용계절이 봄·가을 계열일 때만 <strong>봄 + 가을</strong>이 모두 체크되어 있는지 확인합니다.</li>
+                    </ul>
+                    <div class="post-task-checks">
+                      <label class="post-task-check"><input type="checkbox" id="lotteThumbDone"> 썸네일 변경 완료</label>
+                      <label class="post-task-check"><input type="checkbox" id="lotteAttrDone"> 속성정보 설정 완료</label>
+                      <span class="post-task-season-checks" id="lotteSeasonPostChecks">
+                        <label class="post-task-check"><input type="checkbox" id="lotteSpringAutumnDone"> 사용계절 봄 + 가을 체크 완료</label>
+                      </span>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </details>
+
+          </div>          </div>
         </div>
         <div class="channel-panel" id="panel-brich">
           <div class="channel-head">
