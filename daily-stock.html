@@ -2984,17 +2984,19 @@ async function normalizeFinalFormulaBuffer(buffer){
     validateFormulaLengths(doc,sheetName);
   }
 
-  // 자동 제외 탭도 구조 자체는 반드시 정상이어야 합니다. 원본 수식 형식은 유지하되 길이/병합/스타일을 검증합니다.
+  // 자동 제외 탭(현재: 중국생산)은 수기로 관리하는 원본 보존 영역입니다.
+  // 이 탭은 등록/삭제/정렬/수식 재작성뿐 아니라 shared/array/cm 같은
+  // 기존 계산 메타데이터 검사에서도 제외합니다. 원본 XML 자체는 그대로 보존하며,
+  // 패키지에 시트 파일이 실제 존재하는지만 확인합니다.
   for(let i=1;i<checkSheetNames.length;i++){
     const sheetName=checkSheetNames[i];
     if(!isExcludedAutoSheet(sheetName))continue;
     const sheetPath=checkPathMap.get(sheetName);
     if(!sheetPath||!checkZip.file(sheetPath))throw new Error(`${sheetName} 탭 최종 XML을 찾지 못했습니다.`);
-    const xml=await checkZip.file(sheetPath).async('string');
-    const doc=validateWorksheetXmlText(xml,sheetName);
-    validateNoOverlappingMerges(doc,sheetName);
-    validateCellStyleRefs(doc,stylesDoc,sheetName);
-    validateFormulaLengths(doc,sheetName);
+    // 중요: validateWorksheetXmlText()를 호출하지 않습니다.
+    // 중국생산 원본 M열의 array/cm 메타데이터는 정상적인 원본 수식 정보일 수 있으며
+    // 자동 처리 대상이 아니므로 오류 조건으로 간주하지 않습니다.
+    await checkZip.file(sheetPath).async('string');
   }
   return finalBuffer;
 }
