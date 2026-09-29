@@ -154,6 +154,13 @@
     .editable-price{width:92px;height:29px;border:1px solid rgba(84,68,57,.11);border-radius:8px;background:#fff;padding:0 7px;text-align:right;font-size:9px}.editable-price:focus{outline:0;border-color:#8583d2}
     .legacy-tools{margin:18px 0;border:1px solid var(--line);border-radius:22px;background:rgba(255,252,249,.68);overflow:hidden}.legacy-tools summary{list-style:none;cursor:pointer;padding:15px 18px;font-size:10px;font-weight:800;color:#77706c}.legacy-tools summary::-webkit-details-marker{display:none}.legacy-tools summary:after{content:"＋";float:right;color:#9690a6}.legacy-tools[open] summary:after{content:"−"}.legacy-tools-body{padding:0 0 1px}
     .source-badge{display:inline-flex;align-items:center;height:25px;padding:0 9px;border-radius:999px;background:#f4f1ee;color:#8c817a;font-size:8.5px;font-weight:750}.pricing-note{margin-top:10px;color:#a19790;font-size:8.5px;line-height:1.55}
+
+    .pricing-rate-summary{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 18px!important}
+    .pricing-rate-summary-title{font-size:11px;color:#554d49;white-space:nowrap}
+    .pricing-rate-summary-list{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .pricing-rate-summary-list span{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid rgba(93,86,102,.12);border-radius:999px;background:#fff;color:#756b65;font-size:10px;font-weight:700}
+    .pricing-rate-summary-list b{color:#6664a4;font-weight:850}
+
     @media(max-width:980px){.pricing-tabs{grid-template-columns:1fr 1fr}.pricing-tab-btn:nth-child(2){border-right:0}.pricing-tab-btn:nth-child(-n+2){border-bottom:1px solid var(--line)}.pricing-card{grid-column:1/-1}.rate-test{grid-template-columns:1fr 1fr 1fr}.cost-add{grid-template-columns:1fr 1fr}.cost-add .pricing-mini-btn{grid-column:1/-1}.channel-toolbar{align-items:flex-start;flex-direction:column}}
     @media(max-width:680px){.pricing-head{align-items:flex-start;flex-direction:column}.pricing-tabs{grid-template-columns:1fr}.pricing-tab-btn{border-right:0;border-bottom:1px solid var(--line)}.pricing-panel{padding:16px}.rate-test{grid-template-columns:1fr 1fr}.cost-add{grid-template-columns:1fr}.cost-search{width:100%}}
 
@@ -330,6 +337,335 @@ html,body{max-width:100%;overflow-x:hidden}
 .pricing-missing-actions{display:flex;align-items:center;gap:12px;margin-top:11px;flex-wrap:wrap}
 @media(max-width:760px){.pricing-missing-row{grid-template-columns:1fr 110px}.pricing-missing-row .pm-key{display:none}}
 </style>
+
+<style id="pricing-simple-first-tab-style">
+#pricing-channel{padding:20px 22px}
+#pricing-channel .channel-toolbar-simple{margin:0;padding:18px 20px;border:1px solid rgba(72,57,47,.10);border-radius:18px;background:rgba(255,255,255,.70);display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+#pricing-channel .channel-toolbar-left{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+#pricing-channel .simple-channel-field{width:240px;min-width:240px}
+#pricing-channel .simple-rate-field{width:130px;min-width:130px}
+#pricing-channel .pricing-field label{display:block;margin:0 0 7px;color:#8e827a;font-size:9px;font-weight:800;letter-spacing:.02em}
+#pricing-channel .pricing-input,#pricing-channel .pricing-select{width:100%;height:42px}
+#pricing-channel .simple-download-btn{height:42px;min-width:132px;padding:0 18px;border-radius:12px}
+@media(max-width:680px){#pricing-channel{padding:16px}#pricing-channel .channel-toolbar-simple{align-items:stretch;flex-direction:column;padding:16px}#pricing-channel .channel-toolbar-left{display:grid;grid-template-columns:1fr 120px;width:100%}#pricing-channel .simple-channel-field,#pricing-channel .simple-rate-field{width:auto;min-width:0}#pricing-channel .channel-toolbar-right,#pricing-channel .simple-download-btn{width:100%}}
+</style>
+
+<style id="pricing-first-tab-clean-v2">
+#channel-pricing .pricing-head{justify-content:center;min-height:74px;padding:18px 24px;text-align:center}
+#channel-pricing .pricing-head-title strong{font-size:17px}
+#channel-pricing #pricing-source-label{display:none!important}
+#channel-pricing .pricing-head-actions{display:none!important}
+
+#pricing-channel{padding:34px 24px 38px}
+#pricing-channel .channel-toolbar-simple{
+  width:min(560px,100%);
+  margin:0 auto;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:22px;
+}
+#pricing-channel .channel-toolbar-left{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(150px,.65fr);
+  gap:12px;
+  align-items:end;
+}
+#pricing-channel .channel-toolbar-right{
+  width:100%;
+  display:flex;
+  justify-content:center;
+}
+#pricing-channel .pricing-field label{
+  margin-bottom:8px;
+  font-size:10px;
+  font-weight:800;
+  color:#746a64;
+}
+#pricing-channel .pricing-input,#pricing-channel .pricing-select{
+  height:46px;
+  border-radius:13px;
+  font-size:12px;
+  background:#fff;
+}
+#pricing-channel .simple-download-btn{
+  width:min(260px,100%);
+  height:46px;
+  border-radius:13px;
+  font-size:11px;
+  box-shadow:0 10px 22px rgba(47,42,49,.10);
+}
+@media(max-width:620px){
+  #pricing-channel .channel-toolbar-left{grid-template-columns:1fr}
+  #pricing-channel{padding:26px 18px 30px}
+}
+</style>
+
+<style id="pricing-first-tab-final-cleanup">
+/* 행사가 책정 첫 탭: 불필요 상단 도구 숨김 + 중앙 집중 배치 */
+#channel-pricing .pricing-head{
+  justify-content:center !important;
+  min-height:82px;
+  padding:20px 24px !important;
+  text-align:center;
+}
+#channel-pricing .pricing-head-actions{display:none !important;}
+#channel-pricing .pricing-head-title span{display:none !important;}
+#channel-pricing .pricing-head-title strong{
+  font-size:18px !important;
+  letter-spacing:-.03em;
+}
+#pricing-channel{padding:0 !important;}
+#pricing-channel .channel-toolbar-simple{
+  min-height:255px;
+  padding:42px 24px 46px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:24px !important;
+  border:0 !important;
+}
+#pricing-channel .channel-toolbar-left{
+  display:flex !important;
+  align-items:flex-end !important;
+  justify-content:center !important;
+  gap:16px !important;
+  width:100%;
+  flex-wrap:wrap;
+}
+#pricing-channel .channel-toolbar-right{
+  display:flex !important;
+  justify-content:center !important;
+  width:100%;
+}
+#pricing-channel .simple-channel-field{width:250px !important;}
+#pricing-channel .simple-rate-field{width:180px !important;}
+#pricing-channel .pricing-field label{
+  margin-bottom:8px !important;
+  text-align:left;
+  font-size:10px !important;
+  color:#776e68 !important;
+}
+#pricing-channel .pricing-input,
+#pricing-channel .pricing-select{
+  height:44px !important;
+  border-radius:13px !important;
+  font-size:11px !important;
+}
+#pricing-channel .simple-download-btn{
+  min-width:230px !important;
+  height:44px !important;
+  border-radius:13px !important;
+  font-size:11px !important;
+  box-shadow:0 10px 24px rgba(47,42,49,.12);
+}
+@media(max-width:680px){
+  #pricing-channel .channel-toolbar-left{flex-direction:column !important;align-items:stretch !important;}
+  #pricing-channel .simple-channel-field,
+  #pricing-channel .simple-rate-field{width:min(100%,320px) !important;margin:0 auto;}
+  #pricing-channel .simple-download-btn{width:min(100%,320px) !important;}
+}
+</style>
+
+<style id="pricing-first-tab-flat-layout">
+/* 행사가 책정 첫 탭: 중첩 카드 제거 */
+#pricing-channel{
+  padding:38px 24px 42px !important;
+  background:transparent !important;
+}
+#pricing-channel .channel-toolbar-simple{
+  width:min(620px,100%) !important;
+  min-height:210px !important;
+  margin:0 auto !important;
+  padding:26px 0 18px !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:26px !important;
+}
+#pricing-channel .channel-toolbar-left{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 190px !important;
+  gap:14px !important;
+  align-items:end !important;
+}
+#pricing-channel .simple-channel-field,
+#pricing-channel .simple-rate-field{width:auto !important;min-width:0 !important;}
+#pricing-channel .pricing-field label{
+  display:block !important;
+  margin:0 0 9px !important;
+  text-align:left !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  color:#746a64 !important;
+}
+#pricing-channel .pricing-input,
+#pricing-channel .pricing-select{
+  height:46px !important;
+  border:1px solid rgba(84,68,57,.14) !important;
+  border-radius:12px !important;
+  background:rgba(255,255,255,.78) !important;
+  box-shadow:none !important;
+}
+#pricing-channel .channel-toolbar-right{
+  width:100% !important;
+  display:flex !important;
+  justify-content:center !important;
+}
+#pricing-channel .simple-download-btn{
+  width:240px !important;
+  height:46px !important;
+  border-radius:12px !important;
+  box-shadow:0 10px 22px rgba(47,42,49,.10) !important;
+}
+@media(max-width:680px){
+  #pricing-channel{padding:28px 18px 34px !important;}
+  #pricing-channel .channel-toolbar-simple{min-height:190px !important;padding:18px 0 10px !important;}
+  #pricing-channel .channel-toolbar-left{grid-template-columns:1fr !important;}
+  #pricing-channel .simple-download-btn{width:100% !important;}
+}
+</style>
+
+<style id="forestfit-channel-cleanup">
+/* ===== 전체 채널 : GS샵과 동일한 정돈감 ===== */
+.channel-panel:not(#channel-pricing){margin-top:0}
+.channel-panel:not(#channel-pricing)>.channel-label{margin:0 2px 12px;padding:0;color:#9c9088;font-size:9px;font-weight:800;letter-spacing:.12em}
+
+/* 공통 외곽 카드 */
+#channel-talkdeal .selection-workspace,
+#channel-talkdeal .workspace,
+#channel-talkdeal .combo-builder,
+#channel-lotteon .lotte-shell,
+#channel-queenit .q-shell,
+#channel-gsshop .gs-shell{
+  border:1px solid rgba(72,57,47,.10)!important;
+  border-radius:24px!important;
+  background:rgba(255,252,249,.86)!important;
+  box-shadow:0 18px 46px rgba(79,62,48,.055)!important;
+  overflow:hidden;
+}
+
+/* 채널 헤더 통일 */
+#channel-lotteon .lotte-head,
+#channel-queenit .q-head,
+#channel-gsshop .gs-head,
+#channel-talkdeal .selection-head,
+#channel-talkdeal .combo-head{
+  min-height:72px!important;
+  padding:0 24px!important;
+  border-bottom:1px solid rgba(72,57,47,.09)!important;
+  background:rgba(255,255,255,.34)!important;
+}
+#channel-lotteon .lotte-head strong,
+#channel-queenit .q-head strong,
+#channel-gsshop .gs-head strong,
+#channel-talkdeal .selection-head strong,
+#channel-talkdeal .combo-head strong{font-size:16px!important;letter-spacing:-.03em!important;color:#3f3734!important}
+
+/* 업로드 카드 통일 */
+#channel-lotteon .lotte-upload-grid,
+#channel-queenit .q-grid,
+#channel-gsshop .gs-grid{gap:14px!important;padding:22px 24px 16px!important}
+#channel-lotteon .lotte-file-card,
+#channel-queenit .q-drop,
+#channel-gsshop .gs-drop,
+#channel-talkdeal .upload-card,
+#channel-talkdeal .combo-file{
+  min-height:156px!important;
+  border:1px dashed #cfd5e4!important;
+  border-radius:20px!important;
+  background:rgba(255,255,255,.58)!important;
+  box-shadow:none!important;
+  transition:.18s ease!important;
+}
+#channel-lotteon .lotte-file-card:hover,
+#channel-queenit .q-drop:hover,
+#channel-gsshop .gs-drop:hover,
+#channel-talkdeal .upload-card:hover,
+#channel-talkdeal .combo-file:hover{
+  border-color:#aaaee0!important;
+  background:rgba(248,248,255,.72)!important;
+  transform:translateY(-1px)!important;
+}
+
+/* 액션바 통일 */
+#channel-lotteon .lotte-actions,
+#channel-queenit .q-actions,
+#channel-gsshop .gs-actions,
+#channel-talkdeal .action-row,
+#channel-talkdeal .combo-actions{
+  margin:0!important;
+  padding:14px 24px 20px!important;
+  border-top:1px solid rgba(72,57,47,.07)!important;
+  background:transparent!important;
+}
+#channel-lotteon .lotte-run,
+#channel-queenit .q-download,
+#channel-gsshop .gs-download,
+#channel-talkdeal .primary-btn,
+#channel-talkdeal .combo-generate{
+  min-width:190px!important;
+  height:42px!important;
+  border:0!important;
+  border-radius:13px!important;
+  background:#302b31!important;
+  color:#fff!important;
+  font-size:10.5px!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+}
+#channel-lotteon .lotte-run:disabled,
+#channel-queenit .q-download:disabled,
+#channel-gsshop .gs-download:disabled,
+#channel-talkdeal .primary-btn:disabled,
+#channel-talkdeal .combo-generate:disabled{background:#c9c4c0!important}
+
+/* 불필요하게 긴 설명은 시각적으로 약화 */
+#channel-queenit .q-info,
+#channel-queenit .q-note,
+#channel-lotteon .lotte-note,
+#channel-talkdeal .talkdeal-stage-head p,
+#channel-talkdeal .combo-mini,
+#channel-talkdeal .upload-mini{color:#a29891!important;font-size:9px!important;line-height:1.55!important}
+
+/* 퀸잇 결과부도 GS 결과부와 같은 구조감 */
+#channel-queenit .q-result,
+#channel-gsshop .gs-result,
+#channel-lotteon .lotte-result{
+  border-top:1px solid rgba(72,57,47,.08)!important;
+  background:rgba(255,255,255,.30)!important;
+}
+#channel-queenit .q-tools,
+#channel-gsshop .gs-tools,
+#channel-lotteon .lotte-toolbar{padding:14px 20px!important}
+
+/* 톡딜 상단 단계 메뉴를 GS 스타일에 어울리게 */
+#channel-talkdeal .talkdeal-main-menu{
+  margin-bottom:14px!important;
+  border:1px solid rgba(72,57,47,.10)!important;
+  background:rgba(255,252,249,.82)!important;
+  box-shadow:none!important;
+}
+#channel-talkdeal .main-menu-btn.active{background:#302b31!important;color:#fff!important;box-shadow:none!important}
+#channel-talkdeal .main-menu-btn.active span{color:#d9d4d0!important}
+
+/* 롯데온의 별도 입력영역 과한 카드감 완화 */
+#channel-lotteon .lotte-main10{margin:0 24px 16px!important;border:1px solid rgba(72,57,47,.09)!important;border-radius:16px!important;background:rgba(255,255,255,.42)!important}
+
+/* 하단 여백 */
+.channel-panel{padding-bottom:6px}
+</style>
+
 </head>
 <body>
   <div class="wrap">
@@ -344,7 +680,7 @@ html,body{max-width:100%;overflow-x:hidden}
     </section>
 
     <nav class="channel-nav" aria-label="행사 업무 선택">
-      <button class="channel-btn active" type="button" data-channel="pricing">공통 가격 책정</button>
+      <button class="channel-btn active" type="button" data-channel="pricing">행사가 책정</button>
       <button class="channel-btn" type="button" data-channel="talkdeal">톡딜</button>
       <button class="channel-btn" type="button" data-channel="lotteon">롯데온</button>
       <button class="channel-btn" type="button" data-channel="queenit">퀸잇</button>
@@ -374,7 +710,7 @@ html,body{max-width:100%;overflow-x:hidden}
       <div class="channel-label"><span>ALL CHANNEL</span><span>EVENT PRICE · FORMULA SAFE</span></div>
       <div class="pricing-shell" id="pricing-tool">
         <div class="pricing-head">
-          <div class="pricing-head-title"><strong>공통 가격 책정</strong><span id="pricing-source-label">0915 기준 양식 · 마지노선 / 원가 / 판매채널 3시트</span></div>
+          <div class="pricing-head-title"><strong>행사가 책정</strong><span id="pricing-source-label">0915 기준 양식 · 마지노선 / 원가 / 판매채널 3시트</span></div>
           <div class="pricing-head-actions">
             <label class="pricing-mini-btn dark" for="pricing-template-file">기준 엑셀 교체</label>
             <input id="pricing-template-file" type="file" accept=".xlsx" />
@@ -416,7 +752,13 @@ html,body{max-width:100%;overflow-x:hidden}
         <div class="pricing-panel" id="pricing-cost">
           <div class="cost-toolbar">
             <div class="cost-toolbar-left"><input class="pricing-input cost-search" id="cost-search" type="search" placeholder="상품명 · 상품키 검색" /><span class="pricing-count" id="cost-count"></span></div>
-            <div class="cost-toolbar-right"><span class="cost-save-note" id="cost-save-state">자동 저장</span><button class="pricing-mini-btn" id="pricing-cost-download" type="button">원가 파일 다운로드</button></div>
+            <div class="cost-toolbar-right">
+              <span class="cost-save-note" id="cost-save-state">자동 저장</span>
+              <span class="cost-save-note" id="cost-import-state"></span>
+              <label class="pricing-mini-btn dark" for="pricing-cost-sellmate-file">셀메이트 원가 파일 첨부</label>
+              <input id="pricing-cost-sellmate-file" type="file" accept=".csv,.xlsx,.xls" style="display:none" />
+              <button class="pricing-mini-btn" id="pricing-cost-download" type="button">원가 파일 다운로드</button>
+            </div>
           </div>
           <div class="cost-add">
             <input class="pricing-input" id="cost-add-name" placeholder="상품명" />
@@ -430,37 +772,32 @@ html,body{max-width:100%;overflow-x:hidden}
         </div>
 
         <div class="pricing-panel active" id="pricing-channel">
-          <div class="pricing-input-guide">
-            <div class="guide-item"><b>판매채널</b>실제 행사 판매처명을 입력해주세요. 예: 롯데온 / GS / 퀸잇</div>
-            <div class="guide-item"><b>수수료율</b>해당 판매처의 실제 수수료율을 선택해주세요.</div>
-            <div class="guide-item"><b>원가 기준</b>다운로드한 결과 엑셀의 03 판매채널 탭에서 상품명을 입력하면 02 상품 원가 정보와 자동 매칭되어 원가·마지노선·원가율·조회상태가 따라옵니다.</div>
-            <div class="guide-item guide-file"><b>상품 목록 입력</b>사이트에서는 상품 목록을 넣지 않아도 됩니다. <strong>3시트 결과 다운로드 후, 3번째 탭 C열 상품명에 직접 붙여넣어주세요.</strong> 괄호 상품키를 기준으로 원가를 자동 조회합니다.</div>
-          </div>
-          <div class="channel-toolbar">
+          <div class="channel-toolbar channel-toolbar-simple">
             <div class="channel-toolbar-left">
-              <div class="pricing-field" style="min-width:210px"><label>판매채널</label><input class="pricing-input" id="pricing-event-name" type="text" placeholder="예: 롯데온 / GS / 퀸잇" style="width:210px" /></div>
-              <div class="pricing-field" style="min-width:150px"><label>수수료율</label><div class="channel-select-wrap"><select class="pricing-select" id="channel-select" style="width:150px">
-                <option value="10">수수료율 10%</option><option value="11">수수료율 11%</option><option value="17">수수료율 17%</option><option value="18">수수료율 18%</option><option value="20">수수료율 20%</option><option value="21">수수료율 21%</option><option value="23">수수료율 23%</option><option value="25">수수료율 25%</option>
-              </select><span class="channel-rate-badge" id="channel-rate-badge">수수료 18%</span></div></div>
-
+              <div class="pricing-field simple-channel-field">
+                <label>판매처</label>
+                <input class="pricing-input" id="pricing-event-name" type="text" placeholder="예: GS" />
+              </div>
+              <div class="pricing-field simple-rate-field">
+                <label>수수료율</label>
+                <select class="pricing-select" id="channel-select">
+                  <option value="10">10%</option>
+                  <option value="11">11%</option>
+                  <option value="17">17%</option>
+                  <option value="18">18%</option>
+                  <option value="20">20%</option>
+                  <option value="21">21%</option>
+                  <option value="23">23%</option>
+                  <option value="25">25%</option>
+                </select>
+              </div>
             </div>
             <div class="channel-toolbar-right">
-              <button class="pricing-mini-btn dark" id="pricing-download" type="button">3시트 템플릿 다운로드</button>
+              <button class="pricing-mini-btn dark simple-download-btn" id="pricing-download" type="button">엑셀 다운로드</button>
             </div>
           </div>
-          <div class="pricing-download-guide">
-            <strong>엑셀에서 상품 목록 입력</strong>
-            <span>다운로드한 파일의 <b>3번째 탭</b>에서 C열 상품명만 입력하면 상품키 → 원가 → 마지노선 → 원가율 → 조회상태가 자동으로 계산됩니다. 수식은 3행부터 1002행까지 미리 설정됩니다.</span>
-          </div>
-          <div class="pricing-missing-box" id="pricing-missing-box">
-            <div class="pricing-missing-head">
-              <div><strong>원가 미등록 상품 확인</strong><span>다운로드한 3시트 파일에 상품명을 입력한 뒤 다시 첨부하면, 원가DB에 없는 상품만 보여줍니다.</span></div>
-              <label class="pricing-mini-btn dark pricing-workbook-upload" for="pricing-workbook-check">작업 파일 첨부</label>
-              <input id="pricing-workbook-check" type="file" accept=".xlsx,.xls" />
-            </div>
-            <div class="pricing-missing-status" id="pricing-missing-status">작업 파일을 첨부하면 미등록 원가를 확인합니다.</div>
-            <div class="pricing-missing-list" id="pricing-missing-list"></div>
-            <div class="pricing-missing-actions" id="pricing-missing-actions" style="display:none"><button class="pricing-mini-btn dark" id="pricing-missing-save" type="button">입력 원가 저장</button><span>저장한 원가는 다음 다운로드부터 2번째 「상품 원가」 탭에 자동 반영됩니다. 같은 상품키는 중복 저장하지 않습니다. · 기본 원가DB: 2026-09-21 상품파일 기준</span></div>
+          <div class="pricing-fee-guide" aria-label="판매처 수수료 참고">
+            <span><b>GS</b> 18%</span><span><b>퀸잇</b> 23%</span><span><b>롯데온</b> 17%</span><span><b>브리치</b> 21%</span><span><b>네이버</b> 10%</span><span><b>하프클럽</b> 20%</span><span><b>톡딜</b> 10%</span><span><b>GS 행사</b> 25%</span>
           </div>
           <div id="channel-table-body" style="display:none"></div><div id="channel-empty" style="display:none"></div>
         </div>
@@ -520,7 +857,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
           <div class="upload-card" data-slot="cellmate">
             <div class="upload-number">02 · CELLMATE</div>
-            <h3>셀메이트 재고 파일</h3>
+            <h3>셀메이트 순위 파일</h3>
             <div class="upload-mini">상품명 · 옵션명(색상, 기장, 사이즈)</div>
             <div class="upload-bottom">
               <label class="select-btn" for="file-cellmate">파일 선택</label>
@@ -595,7 +932,7 @@ html,body{max-width:100%;overflow-x:hidden}
             <div class="combo-file" id="combo-work-card">
               <div class="combo-label">WORK FILE</div>
               <div class="combo-title">톡딜 작업양식</div>
-              <div class="combo-mini">셀메이트 상품마스터 CSV 또는 톡딜톡딜.xlsx 형식</div>
+              <div class="combo-mini">상품명 · 원가 · 판매량</div>
               <div class="combo-file-bottom">
                 <label class="select-btn" for="combo-work-file">파일 선택</label>
                 <div class="file-info" id="combo-work-info"><span>첨부 전</span></div>
@@ -704,32 +1041,31 @@ html,body{max-width:100%;overflow-x:hidden}
 
 
     <div class="channel-panel" id="channel-queenit">
-      <div class="channel-label"><span>QUEENIT</span><span>CHANNEL EVENT</span></div>
+      <div class="channel-label"><span>QUEENIT</span><span>CHANNEL EVENT · SALES RANKING</span></div>
       <div class="q-shell">
         <div class="q-head">
-          <div><strong>퀸잇 행사 상품 매칭</strong><span>QUEENIT PRODUCTS × SELLMATE RANKING</span></div>
-          <div class="q-badge">판매량 E열 기준</div>
+          <div><strong>퀸잇 행사 상품 정리</strong><span>SELLMATE RANKING × QUEENIT PRODUCTS</span></div>
+          <div class="q-badge">판매량 순 자동 정렬</div>
         </div>
         <div class="q-body">
-          <div class="q-info">퀸잇 상품 파일을 기준으로 전체 상품을 유지합니다. 상품명의 <b>괄호 안 상품키</b>를 셀메이트 상품명과 매칭하며, 괄호 안의 <b>봄 · 가을</b> 문구는 제거한 뒤 비교합니다.</div>
           <div class="q-grid">
             <label class="q-drop" id="q-sell-drop">
               <input id="q-sell-file" type="file" accept=".csv,.xlsx,.xls">
               <span class="q-kicker">01 · SELLMATE RANKING</span>
               <span class="q-drop-title">셀메이트 순위 파일</span>
-              <span class="q-desc">상품명 · 원가 · <strong>E열 판매량</strong>을 읽습니다.</span>
+              <span class="q-desc">상품명 · 원가 · 판매량</span>
               <span class="q-file"><b id="q-sell-name">파일 선택 또는 끌어놓기</b><em id="q-sell-size"></em></span>
             </label>
             <label class="q-drop" id="q-product-drop">
               <input id="q-product-file" type="file" accept=".xlsx,.xls">
               <span class="q-kicker">02 · QUEENIT PRODUCTS</span>
               <span class="q-drop-title">퀸잇 상품 파일</span>
-              <span class="q-desc">1행의 상품 등록일시 · 상품 ID · 상품명 · 판매가 · 할인 예약 적용가 · 리뷰 개수 · 리뷰 평점을 사용합니다.</span>
+              <span class="q-desc">상품 ID · 상품명 · 판매가격 · 할인 예약 적용가 · 등록일 · 리뷰수 · 리뷰평점</span>
               <span class="q-file"><b id="q-product-name">파일 선택 또는 끌어놓기</b><em id="q-product-size"></em></span>
             </label>
           </div>
           <div class="q-actions">
-            <div class="q-status" id="q-status">두 파일을 첨부하면 자동으로 매칭합니다.</div>
+            <div class="q-status" id="q-status">두 파일을 첨부해주세요.</div>
             <button class="q-download" id="q-download" type="button" disabled>결과 파일 다운로드</button>
           </div>
           <div class="q-result" id="q-result">
@@ -740,15 +1076,14 @@ html,body{max-width:100%;overflow-x:hidden}
             </div>
             <div class="q-tools">
               <input class="q-search" id="q-search" type="search" placeholder="상품명 · 상품ID 검색">
-              <span>판매량 높은 순 · 매칭 안 된 상품은 맨 아래</span>
+              <span>판매량 높은 순</span>
             </div>
             <div class="q-table-wrap">
               <table class="q-table">
-                <thead><tr><th style="width:142px">상품 등록일시</th><th style="width:235px">상품 ID</th><th>상품명</th><th style="width:100px" class="right">판매가</th><th style="width:130px" class="right">할인 예약 적용가</th><th style="width:95px" class="right">리뷰 개수</th><th style="width:90px" class="right">리뷰 평점</th><th style="width:90px" class="right">판매량</th><th style="width:105px" class="right">원가</th><th style="width:92px">매칭</th></tr></thead>
+                <thead><tr><th style="width:60px">순위</th><th style="width:142px">등록일</th><th style="width:250px">셀메이트상품명</th><th style="width:300px">퀸잇상품명</th><th style="width:90px" class="right">판매량</th><th style="width:105px" class="right">원가</th><th style="width:105px" class="right">판매가격</th><th style="width:125px" class="right">할인 예약 적용가</th><th style="width:220px">상품 ID</th><th style="width:90px" class="right">리뷰수</th><th style="width:90px" class="right">리뷰평점</th></tr></thead>
                 <tbody id="q-body"></tbody>
               </table>
             </div>
-            <div class="q-note">다운로드 열: 퀸잇 등록일자 / 상품ID / 셀메이트 상품명 / 판매처 상품명 / 퀸잇 판매가 / 할인 예약 적용가 / 리뷰 개수 / 리뷰 평점 / 판매량 / 원가. 셀메이트에 없는 상품은 판매량·원가만 공백으로 유지합니다.</div>
           </div>
         </div>
       </div>
@@ -758,15 +1093,15 @@ html,body{max-width:100%;overflow-x:hidden}
       <div class="channel-label"><span>GS SHOP</span><span>CHANNEL EVENT · SALES RANKING</span></div>
       <div class="gs-shell">
         <div class="gs-head">
-          <div><strong>GS샵 행사 상품 정리</strong><span>SELLMATE × GS SHOP PRODUCTS</span></div>
+          <div><strong>GS샵 행사 상품 정리</strong><span>SELLMATE RANKING × GS SHOP PRODUCTS</span></div>
           <div class="gs-badge">판매량 순 자동 정렬</div>
         </div>
         <div class="gs-body">
           <div class="gs-grid">
             <label class="gs-drop" id="gs-sell-drop">
               <input id="gs-sell-file" type="file" accept=".csv,.xlsx,.xls">
-              <span class="gs-kicker">01 · SELLMATE</span>
-              <span class="gs-drop-title">셀메이트 파일</span>
+              <span class="gs-kicker">01 · SELLMATE RANKING</span>
+              <span class="gs-drop-title">셀메이트 순위 파일</span>
               <span class="gs-desc">상품명 · 원가 · 판매량</span>
               <span class="gs-file"><b id="gs-sell-name">파일 선택 또는 끌어놓기</b><em id="gs-sell-size"></em></span>
             </label>
@@ -2480,6 +2815,35 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   $('#cost-search').addEventListener('input',renderCosts);
   $('#cost-add-btn').addEventListener('click',()=>{const name=$('#cost-add-name').value.trim(),rawKey=$('#cost-add-key').value.trim(),cost=toNum($('#cost-add-value').value);if(!name||cost===null){priceToast('상품명과 원가를 입력해주세요.');return;}const key=rawKey?(/^\(.+\)$/.test(rawKey)?rawKey:`(${rawKey})`):displayKey(name);const nk=normalizeKey(key),nn=norm(name);let hit=-1;if(nk)hit=costData.findIndex(x=>normalizeKey(x.key)===nk);if(hit<0&&nn)hit=costData.findIndex(x=>norm(x.name)===nn);if(hit>=0){costData[hit]={...costData[hit],name:stripNo(name),key:key||costData[hit].key,cost};}else{costData.unshift({name:stripNo(name),key,cost});}saveCore();$('#cost-add-name').value='';$('#cost-add-key').value='';$('#cost-add-value').value='';renderCosts();renderChannel();priceToast(hit>=0?'기존 원가를 업데이트했습니다.':'원가가 저장되었습니다.');});
 
+  async function importSellmateCosts(file){
+    const rows=await matrixFromFile(file),h=detectHeader(rows);
+    if(!h)throw new Error('셀메이트 파일에서 분류명을 찾지 못했습니다.');
+    const heads=h.hs,hi=h.i;
+    const nameCols=heads.map((x,i)=>({x,i})).filter(o=>o.x.includes('상품명')||o.x==='품명').map(o=>o.i);
+    if(!nameCols.length)throw new Error('셀메이트 파일에서 상품명 열을 찾지 못했습니다.');
+    let nameCol=nameCols[0];
+    if(nameCols.length>1){let best=-1,c=-1;for(const col of nameCols){let n=0;for(let r=hi+1;r<Math.min(rows.length,hi+120);r++)if(String(rows[r]?.[col]??'').trim())n++;if(n>c){c=n;best=col;}}nameCol=best;}
+    const costCol=heads.findIndex(x=>x==='원가'||x.includes('원가'));
+    if(costCol<0)throw new Error('셀메이트 파일에서 원가 열을 찾지 못했습니다.');
+    let added=0,updated=0,skipped=0;
+    for(let r=hi+1;r<rows.length;r++){
+      const rawName=String(rows[r]?.[nameCol]??'').trim(),cost=toNum(rows[r]?.[costCol]);
+      if(!rawName||cost===null||cost<=0){skipped++;continue;}
+      const name=stripNo(rawName),key=productKeyFor(name)||displayKey(name)||'',nk=normalizeKey(key),nn=norm(name);
+      let hit=-1;if(nk)hit=costData.findIndex(x=>normalizeKey(x.key)===nk);if(hit<0&&nn)hit=costData.findIndex(x=>norm(x.name)===nn);
+      if(hit>=0){costData[hit]={...costData[hit],name,key:key||costData[hit].key,cost};updated++;}
+      else{costData.unshift({name,key,cost});added++;}
+    }
+    saveCore();renderCosts();renderChannel();
+    return {added,updated,skipped};
+  }
+  $('#pricing-cost-sellmate-file')?.addEventListener('change',async e=>{
+    const file=e.target.files?.[0];if(!file)return;const state=$('#cost-import-state');
+    try{if(state)state.textContent='불러오는 중…';const r=await importSellmateCosts(file);if(state)state.textContent=`추가 ${r.added} · 갱신 ${r.updated}`;priceToast(`셀메이트 원가 반영 완료 · 추가 ${r.added}개 · 갱신 ${r.updated}개`);}
+    catch(err){console.error(err);if(state)state.textContent='불러오기 실패';alert(err.message||'셀메이트 원가 파일을 불러오지 못했습니다.');}
+    finally{e.target.value='';}
+  });
+
   function detectHeader(rows){let best={i:-1,score:-1};for(let i=0;i<Math.min(15,rows.length);i++){const hs=(rows[i]||[]).map(v=>String(v??'').replace(/\s+/g,'').toLowerCase());let score=0;if(hs.some(h=>h.includes('상품명')||h==='품명'))score+=5;if(hs.some(h=>h.includes('판매가')||h.includes('정상가')||h.includes('상시')))score+=2;if(hs.some(h=>h.includes('상품코드')||h==='코드'))score+=1;if(score>best.score)best={i,score,hs};}return best.score>=4?best:null;}
   async function matrixFromFile(file){
     const ext=(file.name.split('.').pop()||'').toLowerCase();
@@ -3336,37 +3700,25 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const panel=document.getElementById('channel-lotteon');
   if(!panel || !window.XLSX) return;
   panel.innerHTML=`
+    <div class="channel-label"><span>LOTTEON</span><span>CHANNEL EVENT · SALES RANKING</span></div>
     <div class="lw-shell">
       <div class="lw-head">
-        <div class="lw-title"><strong>롯데온 행사 업무</strong><span>WEEKLY EVENT · PLAN EXHIBITION</span></div>
-        <div class="lw-tabs"><button class="lw-tab active" type="button" data-lw-pane="weekly">주간 행사 · 이전행사 비교</button><button class="lw-tab" type="button" data-lw-pane="plan">기획전 · 상품코드 매칭</button></div>
+        <div class="lw-title"><strong>롯데온 행사 상품 정리</strong><span>SELLMATE RANKING × LOTTEON PRODUCTS</span></div>
       </div>
       <div class="lw-body">
-        <section class="lw-pane active" data-lw-content="weekly">
-          <div class="lw-info"><div><b>주간 행사 · 이전행사 비교</b><p>이전 행사 파일과 현재 판매중 상품을 비교해 <strong>신규상품을 확인</strong>합니다.</p></div></div>
+        <section class="lw-pane active" data-lw-content="plan">
           <div class="lw-grid">
-            <label class="lw-drop" id="lw-week-prev-drop"><input id="lw-week-prev" type="file" accept=".xlsx,.xls"><span class="lw-kicker">01 · PREVIOUS</span><span class="lw-drop-title">이전 행사 파일 · 주간 행사 전용</span><span class="lw-desc">주간 행사에서만 사용 · 기존 상품 순서와 스토어 할인률을 가져옵니다.</span><span class="lw-file"><b id="lw-week-prev-name">파일 선택 또는 끌어놓기</b><em id="lw-week-prev-size"></em></span></label>
-            <label class="lw-drop" id="lw-week-current-drop"><input id="lw-week-current" type="file" accept=".xlsx,.xls"><span class="lw-kicker">02 · CURRENT</span><span class="lw-drop-title">롯데온 판매중 상품 파일</span><span class="lw-desc">현재 판매중 상품과 판매가를 확인하고 신규 상품을 추가합니다.</span><span class="lw-file"><b id="lw-week-current-name">파일 선택 또는 끌어놓기</b><em id="lw-week-current-size"></em></span></label>
+            <label class="lw-drop" id="lw-plan-sell-drop"><input id="lw-plan-sell" type="file" accept=".csv,.xlsx,.xls"><span class="lw-kicker">01 · SELLMATE RANKING</span><span class="lw-drop-title">셀메이트 순위 파일</span><span class="lw-desc">상품명 · 원가 · 판매량</span><span class="lw-file"><b id="lw-plan-sell-name">파일 선택 또는 끌어놓기</b><em id="lw-plan-sell-size"></em></span></label>
+            <label class="lw-drop" id="lw-plan-lotte-drop"><input id="lw-plan-lotte" type="file" accept=".xlsx,.xls"><span class="lw-kicker">02 · LOTTEON</span><span class="lw-drop-title">롯데온 상품 파일</span><span class="lw-desc">판매자상품번호 · 상품명 · 판매가격 · 등록일</span><span class="lw-file"><b id="lw-plan-lotte-name">파일 선택 또는 끌어놓기</b><em id="lw-plan-lotte-size"></em></span></label>
           </div>
-          <div class="lw-actions"><div class="lw-status" id="lw-week-status">두 파일을 첨부하면 자동으로 비교합니다.</div><button class="lw-btn dark" id="lw-week-download" type="button" disabled>가격 컨펌 파일 다운로드</button></div>
-          <div class="lw-result" id="lw-week-result"><div class="lw-metrics" style="grid-template-columns:repeat(3,1fr)"><div class="lw-metric"><small>기존 행사</small><b id="lw-week-prev-count">0</b></div><div class="lw-metric"><small>신규 추가</small><b id="lw-week-new-count">0</b></div><div class="lw-metric"><small>결과</small><b id="lw-week-total-count">0</b></div></div><div class="lw-table-wrap"><table class="lw-week-table"><thead><tr><th style="width:170px">상품코드</th><th style="width:115px">상품등록일자</th><th>상품명</th><th style="width:120px">상시판매가</th><th style="width:140px">기존 스토어 할인률</th></tr></thead><tbody id="lw-week-body"></tbody></table></div></div>
-        </section>
-
-        <section class="lw-pane" data-lw-content="plan">
-          <div class="lw-info"><div><b>기획전 · GS샵과 같은 코드 매칭 방식</b><p><strong>셀메이트 매출순위 파일 + 롯데온 판매중 상품 파일</strong>을 사용합니다. 셀메이트 상품명과 롯데온 상품명의 괄호 안 상품키를 매칭해 롯데온 <strong>판매자상품번호</strong>를 연결합니다. 괄호 안의 <strong>봄 / 가을</strong>은 삭제 후 매칭합니다. 이 메뉴에서는 이전 행사 파일이 필요하지 않습니다.</p></div></div>
-          <div class="lw-grid">
-            <label class="lw-drop" id="lw-plan-lotte-drop"><input id="lw-plan-lotte" type="file" accept=".xlsx,.xls"><span class="lw-kicker">01 · LOTTEON PRODUCTS</span><span class="lw-drop-title">롯데온 판매중 상품 파일</span><span class="lw-desc">1행 분류명 기준 · 판매자상품번호 / 상품명 / 상품등록일자를 읽어 매칭합니다.</span><span class="lw-file"><b id="lw-plan-lotte-name">파일 선택 또는 끌어놓기</b><em id="lw-plan-lotte-size"></em></span></label>
-            <label class="lw-drop" id="lw-plan-sell-drop"><input id="lw-plan-sell" type="file" accept=".csv,.xlsx,.xls"><span class="lw-kicker">02 · SELLMATE RANKING</span><span class="lw-drop-title">셀메이트 매출순위 파일</span><span class="lw-desc">상품명 · 판매량 · 원가를 읽고, 롯데온 상품코드를 괄호키로 매칭합니다.</span><span class="lw-file"><b id="lw-plan-sell-name">파일 선택 또는 끌어놓기</b><em id="lw-plan-sell-size"></em></span></label>
-          </div>
-          <div class="lw-actions"><div class="lw-status" id="lw-plan-status">두 파일을 첨부하면 롯데온 상품 전체를 기준으로 자동 매칭합니다.</div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="lw-btn light" id="lw-plan-clear" type="button" disabled>선택 초기화</button><button class="lw-btn light" id="lw-plan-result-download" type="button" disabled>전체 결과 다운로드</button><button class="lw-btn dark" id="lw-plan-copy" type="button" disabled>선택 상품코드 복사</button><button class="lw-btn primary" id="lw-plan-download" type="button" disabled>기획전 등록 리스트 다운로드</button></div></div>
+          <div class="lw-actions"><div class="lw-status" id="lw-plan-status">두 파일을 첨부해주세요.</div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="lw-btn primary" id="lw-plan-result-download" type="button" disabled>롯데온 행사 파일 다운로드</button><button class="lw-btn light" id="lw-plan-clear" type="button" disabled style="display:none">선택 초기화</button><button class="lw-btn dark" id="lw-plan-copy" type="button" disabled style="display:none">선택 상품코드 복사</button><button class="lw-btn primary" id="lw-plan-download" type="button" disabled style="display:none">롯데온 파일 다운로드</button></div></div>
           <div class="lw-result" id="lw-plan-result">
             <div class="lw-metrics"><div class="lw-metric"><small>롯데온 상품</small><b id="lw-plan-total">0</b></div><div class="lw-metric"><small>매출파일 매칭</small><b id="lw-plan-match">0</b></div><div class="lw-metric"><small>내부DB 보완</small><b id="lw-plan-unmatch">0</b></div><div class="lw-metric"><small>선택</small><b id="lw-plan-selected">0</b></div></div>
-            <div class="lw-tools"><input class="lw-search" id="lw-plan-search" type="search" placeholder="주제 키워드 또는 상품명 검색 (예: 데님, 슬랙스, 스커트)"><label class="lw-check"><input id="lw-plan-match-only" type="checkbox"> 판매이력 있는 상품만 보기</label></div>
+            <div class="lw-tools"><input class="lw-search" id="lw-plan-search" type="search" placeholder="상품명 검색"><label class="lw-check"><input id="lw-plan-match-only" type="checkbox"> 판매량 있는 상품만 보기</label></div>
             <div class="lw-table-wrap"><table class="lw-table"><thead><tr><th style="width:44px" class="center">선택</th><th style="width:52px" class="center">순위</th><th style="width:300px">상품명</th><th style="width:80px" class="right">판매량</th><th style="width:95px" class="right">원가</th><th style="width:300px">롯데온 상품명</th><th style="width:145px">판매자상품번호</th><th style="width:115px">상품등록일자</th><th style="width:90px">정보</th></tr></thead><tbody id="lw-plan-body"></tbody></table></div>
-            <div class="lw-note">기준은 항상 롯데온 파일입니다. 매칭 기준: 괄호 안 텍스트 → 공백 제거 → ‘봄’, ‘가을’ 제거 → 대소문자 통일. 매출순위에 없는 상품은 내장 상품DB에서 원가를 보완하며, 그래도 정보가 없더라도 롯데온 상품코드는 결과에서 누락하지 않습니다.</div>
           </div>
-          <div class="lw-result" id="lw-selected-result">
-            <div class="lw-subhead"><div><b>기획전 등록 리스트</b><span style="margin-left:8px">상품섹션명은 롯데온 화면에 넣을 문구를 상품별로 직접 입력하세요.</span></div><span id="lw-selected-caption">0개 선택</span></div>
+          <div class="lw-result" id="lw-selected-result" style="display:none!important">
+            <div class="lw-subhead"><div><b>롯데온 등록 리스트</b><span style="margin-left:8px">상품섹션명은 롯데온 화면에 넣을 문구를 상품별로 직접 입력하세요.</span></div><span id="lw-selected-caption">0개 선택</span></div>
             <div class="lw-table-wrap" style="max-height:420px"><table class="lw-select-table"><thead><tr><th style="width:50px">번호</th><th style="width:270px">상품섹션명 *</th><th style="width:160px">판매자상품번호</th><th style="width:115px">상품등록일자</th><th>롯데온 상품명</th><th style="width:115px">순판매금액</th><th style="width:105px">순서 / 삭제</th></tr></thead><tbody id="lw-selected-body"></tbody></table></div>
           </div>
         </section>
@@ -3406,7 +3758,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   function parseLotte(rows){if(!rows.length)throw new Error('롯데온 파일이 비어 있습니다.');const h=rows[0]||[],code=idx(h,['판매자상품번호','판매자 상품번호']),name=idx(h,['상품명','판매자상품명']),sale=idx(h,['판매가']),status=idx(h,['상품판매상태']),app=idx(h,['APP 전용여부','APP전용여부','APP전용']),reg=idx(h,['상품등록일자','상품 등록일자','상품등록일','상품 등록일','상품등록일시','상품 등록일시']);if(code<0||name<0)throw new Error('롯데온 파일 1행에서 판매자상품번호 / 상품명 분류명을 찾지 못했습니다.');const out=[],seen=new Set();let excludedDeal=0,excludedApp=0,excludedNoKey=0,excludedStatus=0;for(let r=1;r<rows.length;r++){const row=rows[r]||[],c=norm(row[code]),n=norm(row[name]);if(!c||!n||seen.has(c))continue;if(status>=0&&norm(row[status])&&!/판매중/.test(norm(row[status]))){excludedStatus++;continue;}const appFlag=app>=0?norm(row[app]):'';if(/딜크릿/i.test(n)){excludedDeal++;continue;}if((/APP/i.test(appFlag)&&/전용/.test(appFlag))||/\[?\s*APP\s*전용\s*\]?/i.test(n)){excludedApp++;continue;}const key=pkey(n);if(!key){excludedNoKey++;continue;}seen.add(c);out.push({code:c,name:n,sale:sale>=0?num(row[sale]):null,regDate:reg>=0?fmtDate(row[reg]):'',key,order:out.length})}out.excludedDeal=excludedDeal;out.excludedApp=excludedApp;out.excludedNoKey=excludedNoKey;out.excludedStatus=excludedStatus;return out}
   function parseSell(rows){if(!rows.length)throw new Error('셀메이트 파일이 비어 있습니다.');const h=rows[0]||[],name=idx(h,['상품명']),qty=idx(h,['판매량','순판매량']),cost=idx(h,['원가']),amount=idx(h,['순판매금액','판매금액']),price=idx(h,['판매가']);if(name<0)throw new Error('셀메이트 파일 1행에서 상품명 분류명을 찾지 못했습니다.');const out=[];for(let r=1;r<rows.length;r++){const row=rows[r]||[],n=norm(row[name]);if(!n)continue;out.push({name:n,qty:qty>=0?(num(row[qty])??0):0,cost:cost>=0?num(row[cost]):null,amount:amount>=0?(num(row[amount])??0):0,price:price>=0?num(row[price]):null,key:pkey(n),full:nkey(n)})}out.sort((a,b)=>(b.amount??0)-(a.amount??0));out.forEach((x,i)=>x.rank=i+1);return out}
   function internalMaps(){const byKey=new Map(),byName=new Map();for(const rec of LOTTE_INTERNAL_PRODUCT_DB){const n=norm(rec[0]),cost=num(rec[1]),obj={name:n,cost,key:pkey(n),full:nkey(n)};if(obj.key&&!byKey.has(obj.key))byKey.set(obj.key,obj);if(obj.full&&!byName.has(obj.full))byName.set(obj.full,obj)}return{byKey,byName}}
-  async function buildPlan(){if(!plan.lotteFile||!plan.sellFile)return;$('#lw-plan-status').textContent='롯데온 상품 전체를 기준으로 매칭하고 있습니다…';try{const [lr,sr]=await Promise.all([rowsFromFile(plan.lotteFile),rowsFromFile(plan.sellFile)]),lotte=parseLotte(lr),sell=parseSell(sr),sellByKey=new Map(),sellByName=new Map();sell.forEach(x=>{if(x.key&&!sellByKey.has(x.key))sellByKey.set(x.key,x);if(x.full&&!sellByName.has(x.full))sellByName.set(x.full,x)});const internal=internalMaps();plan.rows=lotte.map((l,i)=>{const s=(l.key&&sellByKey.get(l.key))||sellByName.get(nkey(l.name))||null;const db=!s?((l.key&&internal.byKey.get(l.key))||internal.byName.get(nkey(l.name))||null):null;return{name:s?.name||db?.name||l.name,sellName:s?.name||'',qty:s?s.qty:0,cost:s?(s.cost??db?.cost??null):(db?.cost??null),amount:s?.amount??0,price:s?.price??null,key:l.key,rank:s?.rank??null,lotteOrder:i+1,match:l,source:s?'sellmate':(db?'internal':'lotte')}});plan.rows.sort((a,b)=>{const ar=a.rank??Number.MAX_SAFE_INTEGER,br=b.rank??Number.MAX_SAFE_INTEGER;return ar===br?a.lotteOrder-b.lotteOrder:ar-br});plan.selected=[];plan.sectionNames.clear();renderPlan();const sales=plan.rows.filter(x=>x.source==='sellmate').length,db=plan.rows.filter(x=>x.source==='internal').length,missing=plan.rows.filter(x=>x.source==='lotte').length;$('#lw-plan-total').textContent=plan.rows.length.toLocaleString();$('#lw-plan-match').textContent=sales.toLocaleString();$('#lw-plan-unmatch').textContent=db.toLocaleString();$('#lw-plan-result').classList.add('show');$('#lw-plan-clear').disabled=false;$('#lw-plan-result-download').disabled=false;$('#lw-plan-status').innerHTML=`롯데온 유효상품 <strong>${plan.rows.length.toLocaleString()}</strong>개 유지 · 매출파일 <strong>${sales.toLocaleString()}</strong>개 · 내부DB 보완 <strong>${db.toLocaleString()}</strong>개 · 정보 미확인 ${missing.toLocaleString()}개 · 제외: 딜크릿 ${lotte.excludedDeal||0} / APP전용 ${lotte.excludedApp||0} / 괄호키 없음 ${lotte.excludedNoKey||0}`}catch(e){console.error(e);$('#lw-plan-status').textContent=e.message||'파일 분석 중 오류가 발생했습니다.'}}
+  async function buildPlan(){if(!plan.lotteFile||!plan.sellFile)return;$('#lw-plan-status').textContent='상품을 매칭하고 있습니다…';try{const [lr,sr]=await Promise.all([rowsFromFile(plan.lotteFile),rowsFromFile(plan.sellFile)]),lotte=parseLotte(lr),sell=parseSell(sr),sellByKey=new Map(),sellByName=new Map();sell.forEach(x=>{if(x.key&&!sellByKey.has(x.key))sellByKey.set(x.key,x);if(x.full&&!sellByName.has(x.full))sellByName.set(x.full,x)});const internal=internalMaps();plan.rows=lotte.map((l,i)=>{const s=(l.key&&sellByKey.get(l.key))||sellByName.get(nkey(l.name))||null;const db=!s?((l.key&&internal.byKey.get(l.key))||internal.byName.get(nkey(l.name))||null):null;return{name:s?.name||db?.name||l.name,sellName:s?.name||'',qty:s?s.qty:0,cost:s?(s.cost??db?.cost??null):(db?.cost??null),amount:s?.amount??0,price:s?.price??null,key:l.key,rank:s?.rank??null,lotteOrder:i+1,match:l,source:s?'sellmate':(db?'internal':'lotte')}});plan.rows.sort((a,b)=>{const ar=a.rank??Number.MAX_SAFE_INTEGER,br=b.rank??Number.MAX_SAFE_INTEGER;return ar===br?a.lotteOrder-b.lotteOrder:ar-br});plan.selected=[];plan.sectionNames.clear();renderPlan();const sales=plan.rows.filter(x=>x.source==='sellmate').length,db=plan.rows.filter(x=>x.source==='internal').length,missing=plan.rows.filter(x=>x.source==='lotte').length;$('#lw-plan-total').textContent=plan.rows.length.toLocaleString();$('#lw-plan-match').textContent=sales.toLocaleString();$('#lw-plan-unmatch').textContent=db.toLocaleString();$('#lw-plan-result').classList.add('show');$('#lw-plan-clear').disabled=false;$('#lw-plan-result-download').disabled=false;$('#lw-plan-status').innerHTML=`롯데온 유효상품 <strong>${plan.rows.length.toLocaleString()}</strong>개 유지 · 매출파일 <strong>${sales.toLocaleString()}</strong>개 · 내부DB 보완 <strong>${db.toLocaleString()}</strong>개 · 정보 미확인 ${missing.toLocaleString()}개 · 제외: 딜크릿 ${lotte.excludedDeal||0} / APP전용 ${lotte.excludedApp||0} / 괄호키 없음 ${lotte.excludedNoKey||0}`}catch(e){console.error(e);$('#lw-plan-status').textContent=e.message||'파일 분석 중 오류가 발생했습니다.'}}
   function filteredPlan(){const q=norm($('#lw-plan-search').value).toLowerCase(),onlySales=$('#lw-plan-match-only').checked;return plan.rows.filter(x=>(!onlySales||x.source==='sellmate')&&(!q||x.name.toLowerCase().includes(q)||(x.match?.name||'').toLowerCase().includes(q)||(x.key||'').includes(q)))}
   function renderPlan(){const rows=filteredPlan(),selSet=new Set(plan.selected.map(x=>x.match?.code));$('#lw-plan-body').innerHTML=rows.length?rows.map(x=>{const info=x.source==='sellmate'?'매출파일':x.source==='internal'?'내부DB':'롯데온만';const cls=x.source==='lotte'?'match-no':'match-ok';return `<tr><td class="center"><input type="checkbox" data-plan-code="${esc(x.match?.code||'')}" ${selSet.has(x.match.code)?'checked':''}></td><td class="center">${x.rank??'-'}</td><td title="${esc(x.name)}">${esc(x.name)}</td><td class="right">${(x.qty??0).toLocaleString('ko-KR')}</td><td class="right">${x.cost==null?'-':x.cost.toLocaleString('ko-KR')}</td><td title="${esc(x.match?.name||'')}">${esc(x.match?.name||'-')}</td><td>${esc(x.match?.code||'-')}</td><td>${esc(x.match?.regDate||'-')}</td><td class="${cls}">${info}</td></tr>`}).join(''):`<tr><td colspan="9" class="center" style="padding:28px;color:#9d928b">조건에 맞는 상품이 없습니다.</td></tr>`;$$('#lw-plan-body input[data-plan-code]').forEach(ch=>ch.addEventListener('change',()=>toggleSelected(ch.dataset.planCode,ch.checked)));renderSelected()}
   function toggleSelected(code,on){if(!code)return;const row=plan.rows.find(x=>x.match?.code===code);if(!row)return;if(on){if(!plan.selected.some(x=>x.match.code===code))plan.selected.push(row)}else plan.selected=plan.selected.filter(x=>x.match.code!==code);renderPlan()}
@@ -3822,13 +4174,16 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const state={sell:null,product:null,rows:[]};
   function matchProduct(q,map){for(const key of q.keys){const hit=map.get(key);if(hit)return {hit,key}}return null}
   function sortRows(rows){return [...rows].sort((a,b)=>{
-    if(a.matched!==b.matched)return a.matched?-1:1;
-    if(a.matched){const aq=a.qty??-Infinity,bq=b.qty??-Infinity;if(aq!==bq)return bq-aq;}
-    return a.order-b.order;
-  })}
+    const aq=a.qty===null||a.qty===undefined||a.qty===''?null:Number(a.qty);
+    const bq=b.qty===null||b.qty===undefined||b.qty===''?null:Number(b.qty);
+    const aBlank=aq===null||Number.isNaN(aq), bBlank=bq===null||Number.isNaN(bq);
+    if(aBlank!==bBlank)return aBlank?1:-1;
+    if(!aBlank&&aq!==bq)return bq-aq;
+    return (a.order??0)-(b.order??0);
+  }).map((x,i)=>({...x,rank:i+1}))}
   async function build(){
     if(!state.sell||!state.product)return;
-    $('#q-status').textContent='판매량 E열 기준으로 매칭하고 있습니다…';
+    $('#q-status').textContent='상품을 매칭하고 있습니다…';
     try{
       const [sr,qr]=await Promise.all([matrix(state.sell),matrix(state.product)]), sell=parseSellmate(sr), queen=parseQueenit(qr), map=makeSellMap(sell);
       state.rows=sortRows(queen.map(q=>{const m=matchProduct(q,map),s=m?.hit||null;return {...q,matched:!!s,matchedKey:m?.key||'',sellName:s?.name||'',qty:s?s.qty:null,cost:s?s.cost:null}}));
@@ -3837,7 +4192,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       $('#q-total').textContent=state.rows.length.toLocaleString('ko-KR');
       $('#q-matched').textContent=matched.toLocaleString('ko-KR');
       $('#q-unmatched').textContent=(state.rows.length-matched).toLocaleString('ko-KR');
-      $('#q-status').innerHTML=`퀸잇 <strong>${state.rows.length.toLocaleString('ko-KR')}</strong>개 · 셀메이트 매칭 <strong>${matched.toLocaleString('ko-KR')}</strong>개 · 판매량은 E열 그대로 반영했습니다.`;
+      $('#q-status').innerHTML=`매칭 완료 · <strong>${matched.toLocaleString('ko-KR')}</strong>개`;
       $('#q-result').classList.add('show');$('#q-download').disabled=false;
     }catch(e){console.error(e);$('#q-status').textContent=e?.message||'파일 분석 중 오류가 발생했습니다.';$('#q-download').disabled=true}
   }
@@ -3845,7 +4200,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   function render(){
     const rows=filtered();
     const dispNum=v=>{const n=num(v);return n===null?esc(v):n.toLocaleString('ko-KR')};
-    $('#q-body').innerHTML=rows.length?rows.map(x=>`<tr><td>${esc(x.registered)}</td><td title="${esc(x.id)}">${esc(x.id)}</td><td title="${esc(x.name)}">${esc(x.name)}</td><td class="right">${dispNum(x.salePrice)}</td><td class="right">${dispNum(x.reservedPrice)}</td><td class="right">${esc(x.reviewCount)}</td><td class="right">${esc(x.reviewRating)}</td><td class="right">${x.matched?(x.qty==null?'':Number(x.qty).toLocaleString('ko-KR')):''}</td><td class="right">${x.matched?(x.cost==null?'':Number(x.cost).toLocaleString('ko-KR')):''}</td><td class="${x.matched?'q-ok':'q-no'}">${x.matched?'매칭':'미매칭'}</td></tr>`).join(''):`<tr><td colspan="10" style="padding:30px;text-align:center;color:#9d928b">검색 결과가 없습니다.</td></tr>`;
+    $('#q-body').innerHTML=rows.length?rows.map(x=>`<tr><td style="text-align:center;font-weight:800">${x.rank}</td><td>${esc(x.registered)}</td><td title="${esc(x.sellName)}">${esc(x.sellName)}</td><td title="${esc(x.name)}">${esc(x.name)}</td><td class="right">${x.qty==null?'':Number(x.qty).toLocaleString('ko-KR')}</td><td class="right">${x.cost==null?'':Number(x.cost).toLocaleString('ko-KR')}</td><td class="right">${dispNum(x.salePrice)}</td><td class="right">${dispNum(x.reservedPrice)}</td><td title="${esc(x.id)}">${esc(x.id)}</td><td class="right">${esc(x.reviewCount)}</td><td class="right">${esc(x.reviewRating)}</td></tr>`).join(''):`<tr><td colspan="11" style="padding:30px;text-align:center;color:#9d928b">검색 결과가 없습니다.</td></tr>`;
   }
   function bind(dropSel,inputSel,nameSel,sizeSel,key){
     const d=$(dropSel),i=$(inputSel),n=$(nameSel),z=$(sizeSel);
@@ -3858,14 +4213,114 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   bind('#q-sell-drop','#q-sell-file','#q-sell-name','#q-sell-size','sell');
   bind('#q-product-drop','#q-product-file','#q-product-name','#q-product-size','product');
   $('#q-search').addEventListener('input',render);
-  $('#q-download').addEventListener('click',()=>{
+  $('#q-download').addEventListener('click',async()=>{
     if(!state.rows.length)return;
-    // 화면과 동일한 순서: 매칭 상품 판매량 내림차순 → 미매칭 상품 맨 아래.
-    const data=[['퀸잇 등록일자','상품ID','셀메이트 상품명','판매처 상품명','퀸잇 판매가','할인 예약 적용가','리뷰 개수','리뷰 평점','판매량','원가','가용재고'],...state.rows.map(x=>[x.registered,x.id,x.sellName||'',x.name,x.salePrice,x.reservedPrice,x.reviewCount,x.reviewRating,x.matched?(x.qty??''):'',x.matched?(x.cost??''):'',window.FORESTFIT_CURRENT_STOCK?.get?.(x.sellName||x.name)??''])];
-    const ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();
-    ws['!cols']=[{wch:20},{wch:38},{wch:58},{wch:62},{wch:14},{wch:18},{wch:12},{wch:12},{wch:12},{wch:14},{wch:12}];
-    XLSX.utils.book_append_sheet(wb,ws,'퀸잇 행사');
-    XLSX.writeFile(wb,'퀸잇_행사_상품매칭.xlsx');
+    if(!window.ExcelJS){
+      alert('엑셀 파일 생성 모듈을 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.');
+      return;
+    }
+
+    // 다운로드 시점에 판매량을 다시 내림차순 정렬하고 1부터 순위를 재부여합니다.
+    const exportRows=[...state.rows].sort((a,b)=>{
+      const aq=a.qty===null||a.qty===undefined||a.qty===''?null:Number(a.qty);
+      const bq=b.qty===null||b.qty===undefined||b.qty===''?null:Number(b.qty);
+      const aBlank=aq===null||Number.isNaN(aq), bBlank=bq===null||Number.isNaN(bq);
+      if(aBlank!==bBlank)return aBlank?1:-1;
+      if(!aBlank&&aq!==bq)return bq-aq;
+      return (a.order??0)-(b.order??0);
+    }).map((x,i)=>({...x,rank:i+1}));
+
+    const stockEnabled=!!window.FORESTFIT_CURRENT_STOCK?.enabled?.();
+    const headers=['순위','등록일','셀메이트상품명','퀸잇상품명','판매량'];
+    if(stockEnabled)headers.push('가용재고');
+    headers.push('원가','판매가격','할인 예약 적용가','상품 ID','리뷰수','리뷰평점');
+
+    const wb=new ExcelJS.Workbook();
+    wb.creator='FORESTFIT';
+    wb.created=new Date();
+    const ws=wb.addWorksheet('퀸잇 행사',{views:[{state:'frozen',ySplit:1}]});
+    ws.addRow(headers);
+
+    for(const x of exportRows){
+      const row=[x.rank,x.registered??'',x.sellName||'',x.name,x.qty??''];
+      if(stockEnabled)row.push(window.FORESTFIT_CURRENT_STOCK?.get?.(x.sellName||x.name)??'');
+      row.push(x.cost??'',x.salePrice??'',x.reservedPrice??'',String(x.id??''),x.reviewCount??'',x.reviewRating??'');
+      ws.addRow(row);
+    }
+
+    // 줄바꿈 없이 한 줄로 보이도록 열너비를 넉넉하게 설정합니다.
+    const widths=[8,24,46,58,12];
+    if(stockEnabled)widths.push(13);
+    widths.push(14,15,18,26,11,11);
+    widths.forEach((w,i)=>{ws.getColumn(i+1).width=w});
+
+    const header=ws.getRow(1);
+    header.height=26;
+    header.eachCell(cell=>{
+      cell.font={bold:true,color:{argb:'FF3F3A37'}};
+      cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF1EEEB'}};
+      cell.alignment={horizontal:'center',vertical:'middle',wrapText:false};
+      cell.border={
+        top:{style:'thin',color:{argb:'FFD3CCC6'}},
+        bottom:{style:'medium',color:{argb:'FFC5BCB5'}},
+        left:{style:'thin',color:{argb:'FFE3DDD8'}},
+        right:{style:'thin',color:{argb:'FFE3DDD8'}}
+      };
+    });
+
+    const maleRe=/(남자|남성|맨즈)/;
+    const queenNameCol=4;
+    for(let r=2;r<=ws.rowCount;r++){
+      const row=ws.getRow(r);
+      row.height=22;
+      row.eachCell({includeEmpty:true},cell=>{
+        cell.alignment={vertical:'middle',horizontal:'center',wrapText:false,shrinkToFit:false};
+        cell.border={
+          top:{style:'hair',color:{argb:'FFF0ECE8'}},
+          bottom:{style:'hair',color:{argb:'FFE3DDD8'}},
+          left:{style:'hair',color:{argb:'FFECE7E3'}},
+          right:{style:'hair',color:{argb:'FFECE7E3'}}
+        };
+      });
+      row.getCell(3).alignment={vertical:'middle',horizontal:'left',wrapText:false,shrinkToFit:false};
+      row.getCell(4).alignment={vertical:'middle',horizontal:'left',wrapText:false,shrinkToFit:false};
+
+      const queenName=String(row.getCell(queenNameCol).value??'');
+      if(maleRe.test(queenName)){
+        row.eachCell({includeEmpty:true},(cell,col)=>{
+          cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF00B0F0'}};
+          cell.font={...(cell.font||{}),color:{argb:'FF0A2C38'}};
+          cell.border={
+            top:{style:'thin',color:{argb:'FF008CBF'}},
+            bottom:{style:'thin',color:{argb:'FF008CBF'}},
+            left:{style:col===1?'medium':'hair',color:{argb:col===1?'FF007AA6':'FF45C7F2'}},
+            right:{style:col===headers.length?'medium':'hair',color:{argb:col===headers.length?'FF007AA6':'FF45C7F2'}}
+          };
+        });
+      }
+    }
+
+    const qtyCol=5;
+    const stockCol=stockEnabled?6:null;
+    const costCol=stockEnabled?7:6;
+    const priceCol=stockEnabled?8:7;
+    const reservedPriceCol=stockEnabled?9:8;
+    [qtyCol,stockCol,costCol,priceCol,reservedPriceCol].filter(Boolean).forEach(c=>{ws.getColumn(c).numFmt='#,##0'});
+    ws.getColumn(1).numFmt='0';
+    const idCol=stockEnabled?10:9;
+    ws.getColumn(idCol).numFmt='@';
+    ws.autoFilter={from:'A1',to:`${String.fromCharCode(64+headers.length)}1`};
+
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='퀸잇_행사상품_판매량순.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
   });
 })();
 </script>
@@ -4250,6 +4705,100 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     };
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installXlsxWrapper);else installXlsxWrapper();
+})();
+</script>
+
+
+<script id="forestfit-stray-text-cleaner">
+(function(){
+  function cleanEscapedBreakText(){
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    const targets=[];
+    while(walker.nextNode()){
+      const n=walker.currentNode;
+      const p=n.parentElement;
+      if(!p||/^(SCRIPT|STYLE|TEXTAREA|PRE|CODE)$/i.test(p.tagName)) continue;
+      if(/^(?:\\n|\\r|\s)+$/.test(n.nodeValue||'')) targets.push(n);
+    }
+    targets.forEach(n=>n.nodeValue='');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',cleanEscapedBreakText);
+  else cleanEscapedBreakText();
+  setTimeout(cleanEscapedBreakText,0);
+})();
+</script>
+
+
+<style id="final-pricing-fee-guide-style">
+#channel-pricing .pricing-fee-guide{max-width:760px;margin:2px auto 20px;padding:13px 16px;border-top:1px solid rgba(72,57,47,.09);border-bottom:1px solid rgba(72,57,47,.09);display:flex;align-items:center;justify-content:center;gap:8px 16px;flex-wrap:wrap;color:#8f837c;font-size:9.5px;line-height:1.5}
+#channel-pricing .pricing-fee-guide span{white-space:nowrap}
+#channel-pricing .pricing-fee-guide b{color:#5d5551;font-weight:800}
+</style>
+
+<style id="lotteon-queenit-style-v3">
+#channel-lotteon *{box-sizing:border-box}
+#channel-lotteon .lq-shell{border:1px solid rgba(44,35,29,.09);border-radius:28px;background:linear-gradient(145deg,rgba(255,252,249,.98),rgba(249,247,252,.9));box-shadow:0 18px 42px rgba(79,62,48,.06);overflow:hidden}
+#channel-lotteon .lq-head{min-height:78px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(44,35,29,.09)}
+#channel-lotteon .lq-head strong{display:block;font-size:16px;letter-spacing:-.035em;color:#433b38}#channel-lotteon .lq-head span{display:block;margin-top:5px;font:800 8px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.12em;color:#a49a93}
+#channel-lotteon .lq-badge{padding:9px 12px;border-radius:999px;background:#efeeff;color:#6663aa;font-size:9px;font-weight:800;white-space:nowrap}
+#channel-lotteon .lq-body{padding:22px 24px 24px}
+#channel-lotteon .lq-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#channel-lotteon .lq-drop{position:relative;min-width:0;min-height:160px;padding:19px;border:1px dashed rgba(111,114,207,.34);border-radius:21px;background:rgba(255,255,255,.68);display:flex;flex-direction:column;cursor:pointer;transition:.18s;overflow:hidden}
+#channel-lotteon .lq-drop:hover,#channel-lotteon .lq-drop.dragover{border-color:#7478d5;background:#f7f7ff;transform:translateY(-1px)}#channel-lotteon .lq-drop.loaded{border-style:solid;background:#fafaff}
+#channel-lotteon .lq-drop input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#channel-lotteon .lq-kicker{font:800 8px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.13em;color:#a19790}#channel-lotteon .lq-drop-title{margin-top:17px;font-size:16px;font-weight:780;letter-spacing:-.035em;color:#4b4340}
+#channel-lotteon .lq-desc{margin-top:6px;font-size:9px;line-height:1.55;color:#a09690}#channel-lotteon .lq-file{margin-top:auto;padding-top:18px;display:flex;align-items:center;gap:10px;min-width:0}
+#channel-lotteon .lq-file b{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:#6c6460}#channel-lotteon .lq-file em{font-style:normal;font-size:8px;color:#aaa19b;white-space:nowrap}
+#channel-lotteon .lq-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding-top:15px;border-top:1px solid rgba(44,35,29,.09);flex-wrap:wrap}
+#channel-lotteon .lq-status{font-size:9px;color:#958a83;line-height:1.6}#channel-lotteon .lq-status strong{color:#5e596f}.lq-download{height:40px;padding:0 17px;border:0;border-radius:12px;background:#302b31;color:#fff;font-size:10px;font-weight:800;cursor:pointer}.lq-download:disabled{opacity:.45;cursor:not-allowed}
+#channel-lotteon .lq-result{display:none;margin-top:18px;border:1px solid rgba(44,35,29,.09);border-radius:20px;background:rgba(255,255,255,.76);overflow:hidden}#channel-lotteon .lq-result.show{display:block}
+#channel-lotteon .lq-metrics{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid rgba(44,35,29,.09)}#channel-lotteon .lq-metric{padding:15px 17px;border-right:1px solid rgba(44,35,29,.09)}#channel-lotteon .lq-metric:last-child{border-right:0}
+#channel-lotteon .lq-metric small{display:block;font:800 8px/1 "Plus Jakarta Sans",sans-serif;letter-spacing:.1em;color:#a0958d}#channel-lotteon .lq-metric b{display:block;margin-top:7px;font:700 21px/1 "Plus Jakarta Sans",sans-serif;color:#615d70;letter-spacing:-.04em}
+#channel-lotteon .lq-tools{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid #eee7e2;flex-wrap:wrap}.lq-tools span{font-size:8px;color:#a0958d}.lq-search{height:36px;min-width:240px;flex:1;padding:0 12px;border:1px solid #e1d9d4;border-radius:11px;background:#fff;color:#534b47;font-size:10px;outline:none}.lq-search:focus{border-color:#9c9ce2;box-shadow:0 0 0 3px rgba(126,126,210,.09)}
+#channel-lotteon .lq-table-wrap{width:100%;max-height:540px;overflow:auto}.lq-table{width:100%;min-width:1300px;border-collapse:collapse;table-layout:fixed}.lq-table th{position:sticky;top:0;z-index:2;background:#f7f3ef;color:#776d67;font-size:8px;font-weight:800;padding:10px 9px;border-bottom:1px solid #ded7d2;text-align:left;white-space:nowrap}.lq-table td{padding:9px;border-bottom:1px solid #eee8e4;font-size:9px;color:#504845;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lq-table tr:hover td{background:#fcfbfa}.lq-table .right{text-align:right}
+@media(max-width:900px){#channel-lotteon .lq-head{align-items:flex-start;flex-direction:column}#channel-lotteon .lq-grid{grid-template-columns:1fr}#channel-lotteon .lq-metrics{grid-template-columns:1fr}}
+</style>
+
+<script id="lotteon-ranking-v3-script">
+(()=>{
+  const panel=document.getElementById('channel-lotteon');
+  if(!panel||!window.XLSX)return;
+  panel.innerHTML=`
+    <div class="channel-label"><span>LOTTEON</span><span>CHANNEL EVENT · SALES RANKING</span></div>
+    <div class="lq-shell">
+      <div class="lq-head"><div><strong>롯데온 행사 상품 정리</strong><span>SELLMATE RANKING × LOTTEON PRODUCTS</span></div><div class="lq-badge">판매량 순 자동 정렬</div></div>
+      <div class="lq-body">
+        <div class="lq-grid">
+          <label class="lq-drop" id="lq-sell-drop"><input id="lq-sell-file" type="file" accept=".csv,.xlsx,.xls"><span class="lq-kicker">01 · SELLMATE RANKING</span><span class="lq-drop-title">셀메이트 순위 파일</span><span class="lq-desc">상품명 · 원가 · 판매량</span><span class="lq-file"><b id="lq-sell-name">파일 선택 또는 끌어놓기</b><em id="lq-sell-size"></em></span></label>
+          <label class="lq-drop" id="lq-product-drop"><input id="lq-product-file" type="file" accept=".xlsx,.xls"><span class="lq-kicker">02 · LOTTEON PRODUCTS</span><span class="lq-drop-title">롯데온 상품 파일</span><span class="lq-desc">판매자 상품코드 · 롯데온상품명 · 상품등록일 · 판매가 · CM 할인가</span><span class="lq-file"><b id="lq-product-name">파일 선택 또는 끌어놓기</b><em id="lq-product-size"></em></span></label>
+        </div>
+        <div class="lq-actions"><div class="lq-status" id="lq-status">두 파일을 첨부해주세요.</div><button class="lq-download" id="lq-download" type="button" disabled>결과 파일 다운로드</button></div>
+        <div class="lq-result" id="lq-result"><div class="lq-metrics"><div class="lq-metric"><small>롯데온 전체</small><b id="lq-total">0</b></div><div class="lq-metric"><small>셀메이트 매칭</small><b id="lq-matched">0</b></div><div class="lq-metric"><small>매칭 없음</small><b id="lq-unmatched">0</b></div></div>
+        <div class="lq-tools"><input class="lq-search" id="lq-search" type="search" placeholder="롯데온상품명 · 셀메이트상품명 · 판매자 상품코드 검색"><span>판매량 높은 순</span></div>
+        <div class="lq-table-wrap"><table class="lq-table"><thead><tr><th style="width:60px">순위</th><th style="width:142px">등록일</th><th style="width:250px">셀메이트상품명</th><th style="width:300px">롯데온상품명</th><th style="width:90px" class="right">판매량</th><th style="width:105px" class="right">원가</th><th style="width:105px" class="right">판매가격</th><th style="width:120px" class="right">CM 할인가</th><th style="width:190px">판매자 상품코드</th></tr></thead><tbody id="lq-body"></tbody></table></div></div>
+      </div>
+    </div>`;
+  const $=s=>panel.querySelector(s);
+  const norm=v=>String(v??'').replace(/\s+/g,' ').trim();
+  const nh=v=>norm(v).replace(/[\s._·:：\-]/g,'').toLowerCase();
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const num=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const n=Number(String(v).replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:null};
+  const fsize=n=>n<1024?`${n} B`:n<1048576?`${Math.round(n/1024)} KB`:`${(n/1048576).toFixed(1)} MB`;
+  const idx=(row,aliases)=>{const a=(row||[]).map(nh);for(const alias of aliases){const i=a.findIndex(x=>x===nh(alias));if(i>=0)return i}return-1};
+  function parenKeys(name){const out=[];for(const m of norm(name).matchAll(/\(([^)]+)\)/g)){const k=String(m[1]||'').replace(/봄|가을/gi,'').replace(/\s+/g,'').toLowerCase().trim();if(k&&!out.includes(k))out.push(k)}return out.sort((a,b)=>(/\d/.test(b)?1:0)-(/\d/.test(a)?1:0))}
+  async function matrix(file){const ab=await file.arrayBuffer();if(/\.csv$/i.test(file.name)){let txt='';try{txt=new TextDecoder('euc-kr').decode(ab)}catch(e){txt=new TextDecoder('utf-8').decode(ab)}const wb=XLSX.read(txt,{type:'string',raw:true});return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:null,raw:true})}const wb=XLSX.read(ab,{type:'array',raw:true});return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:null,raw:true})}
+  function findHeader(rows, requiredSets){for(let r=0;r<Math.min(rows.length,40);r++){const row=rows[r]||[];if(requiredSets.every(set=>set.some(a=>idx(row,[a])>=0)))return r}return -1}
+  function parseSellmate(rows){if(!rows.length)throw new Error('셀메이트 파일이 비어 있습니다.');const hr=findHeader(rows,[['상품명'],['원가'],['판매량']]);if(hr<0)throw new Error('셀메이트 파일에서 상품명 / 원가 / 판매량 분류명을 찾지 못했습니다.');const h=rows[hr]||[],name=idx(h,['상품명']),cost=idx(h,['원가']),qty=idx(h,['판매량']);const out=[];for(let r=hr+1;r<rows.length;r++){const row=rows[r]||[],productName=norm(row[name]);if(!productName)continue;out.push({name:productName,keys:parenKeys(productName),qty:num(row[qty]),cost:num(row[cost]),order:r})}return out}
+  function parseLotte(rows){if(!rows.length)throw new Error('롯데온 상품 파일이 비어 있습니다.');const hr=findHeader(rows,[['판매자 상품코드','판매자상품코드','판매자상품번호','판매자 상품번호'],['판매자상품명','판매자 상품명','상품명']]);if(hr<0)throw new Error('롯데온 파일에서 판매자 상품코드 / 판매자상품명을 찾지 못했습니다.');const h=rows[hr]||[];const code=idx(h,['판매자 상품코드','판매자상품코드','판매자상품번호','판매자 상품번호']);const name=idx(h,['판매자상품명','판매자 상품명','상품명']);const reg=idx(h,['상품등록일','상품 등록일','상품등록일시','상품 등록일시','등록일']);const sale=idx(h,['판매가','판매가격']);const cm=idx(h,['CM 할인가','CM할인가','cm 할인가','cm할인가']);const out=[];for(let r=hr+1;r<rows.length;r++){const row=rows[r]||[],productName=norm(row[name]),productCode=norm(row[code]);if(!productName&&!productCode)continue;out.push({code:productCode,name:productName,registered:reg>=0?(row[reg]??''):'',salePrice:sale>=0?(row[sale]??''):'',cmPrice:cm>=0?(row[cm]??''):'',keys:parenKeys(productName),order:out.length})}return out}
+  function makeMap(items){const map=new Map();for(const item of items)for(const key of item.keys){const prev=map.get(key);if(!prev||((item.qty??-Infinity)>(prev.qty??-Infinity)))map.set(key,item)}return map}
+  function sortRows(rows){return [...rows].sort((a,b)=>{const aq=a.qty==null?null:Number(a.qty),bq=b.qty==null?null:Number(b.qty),ab=aq==null||Number.isNaN(aq),bb=bq==null||Number.isNaN(bq);if(ab!==bb)return ab?1:-1;if(!ab&&aq!==bq)return bq-aq;return (a.order??0)-(b.order??0)}).map((x,i)=>({...x,rank:i+1}))}
+  const state={sell:null,product:null,rows:[]};
+  async function build(){if(!state.sell||!state.product)return;$('#lq-status').textContent='상품을 매칭하고 있습니다…';try{const [sr,lr]=await Promise.all([matrix(state.sell),matrix(state.product)]),sell=parseSellmate(sr),lotte=parseLotte(lr),map=makeMap(sell);state.rows=sortRows(lotte.map(p=>{let s=null,key='';for(const k of p.keys){if(map.has(k)){s=map.get(k);key=k;break}}return {...p,matched:!!s,matchedKey:key,sellName:s?.name||'',qty:s?.qty??null,cost:s?.cost??null}}));render();const m=state.rows.filter(x=>x.matched).length;$('#lq-total').textContent=state.rows.length.toLocaleString('ko-KR');$('#lq-matched').textContent=m.toLocaleString('ko-KR');$('#lq-unmatched').textContent=(state.rows.length-m).toLocaleString('ko-KR');$('#lq-status').innerHTML=`매칭 완료 · <strong>${m.toLocaleString('ko-KR')}</strong>개`;$('#lq-result').classList.add('show');$('#lq-download').disabled=false}catch(e){console.error(e);$('#lq-status').textContent=e?.message||'파일 분석 중 오류가 발생했습니다.';$('#lq-download').disabled=true}}
+  function filtered(){const q=norm($('#lq-search').value).toLowerCase();if(!q)return state.rows;return state.rows.filter(x=>x.name.toLowerCase().includes(q)||x.sellName.toLowerCase().includes(q)||x.code.toLowerCase().includes(q))}
+  function render(){const rows=filtered(),disp=v=>{const n=num(v);return n===null?esc(v):n.toLocaleString('ko-KR')};$('#lq-body').innerHTML=rows.length?rows.map(x=>`<tr><td style="text-align:center;font-weight:800">${x.rank}</td><td>${esc(x.registered)}</td><td title="${esc(x.sellName)}">${esc(x.sellName)}</td><td title="${esc(x.name)}">${esc(x.name)}</td><td class="right">${x.qty==null?'':Number(x.qty).toLocaleString('ko-KR')}</td><td class="right">${x.cost==null?'':Number(x.cost).toLocaleString('ko-KR')}</td><td class="right">${disp(x.salePrice)}</td><td class="right">${disp(x.cmPrice)}</td><td>${esc(x.code)}</td></tr>`).join(''):`<tr><td colspan="9" style="padding:30px;text-align:center;color:#9d928b">검색 결과가 없습니다.</td></tr>`}
+  function bind(dropSel,inputSel,nameSel,sizeSel,key){const d=$(dropSel),i=$(inputSel),n=$(nameSel),z=$(sizeSel);const set=f=>{if(!f)return;state[key]=f;d.classList.add('loaded');n.textContent=f.name;z.textContent=fsize(f.size);if(state.sell&&state.product)build()};i.addEventListener('change',()=>set(i.files?.[0]));['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();d.classList.add('dragover')}));['dragleave','dragend'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();d.classList.remove('dragover')}));d.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();d.classList.remove('dragover');set(e.dataTransfer?.files?.[0])})}
+  bind('#lq-sell-drop','#lq-sell-file','#lq-sell-name','#lq-sell-size','sell');bind('#lq-product-drop','#lq-product-file','#lq-product-name','#lq-product-size','product');$('#lq-search').addEventListener('input',render);
+  $('#lq-download').addEventListener('click',async()=>{if(!state.rows.length||!window.ExcelJS)return;const rows=sortRows(state.rows);const stock=!!window.FORESTFIT_CURRENT_STOCK?.enabled?.();const headers=['순위','등록일','셀메이트상품명','롯데온상품명','판매량'];if(stock)headers.push('가용재고');headers.push('원가','판매가격','CM 할인가','판매자 상품코드');const wb=new ExcelJS.Workbook();wb.creator='FORESTFIT';const ws=wb.addWorksheet('롯데온 행사',{views:[{state:'frozen',ySplit:1}]});ws.addRow(headers);for(const x of rows){const row=[x.rank,x.registered??'',x.sellName||'',x.name,x.qty??''];if(stock)row.push(window.FORESTFIT_CURRENT_STOCK?.get?.(x.sellName||x.name)??'');row.push(x.cost??'',x.salePrice??'',x.cmPrice??'',String(x.code??''));ws.addRow(row)}const widths=[8,24,46,58,12];if(stock)widths.push(13);widths.push(14,15,16,24);widths.forEach((w,i)=>ws.getColumn(i+1).width=w);const head=ws.getRow(1);head.height=26;head.eachCell(c=>{c.font={bold:true,color:{argb:'FF3F3A37'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF1EEEB'}};c.alignment={horizontal:'center',vertical:'middle',wrapText:false};c.border={top:{style:'thin',color:{argb:'FFD3CCC6'}},bottom:{style:'medium',color:{argb:'FFC5BCB5'}},left:{style:'thin',color:{argb:'FFE3DDD8'}},right:{style:'thin',color:{argb:'FFE3DDD8'}}}});for(let r=2;r<=ws.rowCount;r++){const row=ws.getRow(r);row.height=21;row.eachCell({includeEmpty:true},c=>{c.alignment={vertical:'middle',wrapText:false};c.border={bottom:{style:'thin',color:{argb:'FFEAE5E1'}}}});const productName=String(row.getCell(4).value??'');if(/남자|남성|맨즈/i.test(productName)){row.eachCell({includeEmpty:true},c=>{c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF00B0F0'}};c.border={top:{style:'thin',color:{argb:'FF2087A5'}},bottom:{style:'thin',color:{argb:'FF2087A5'}},left:{style:'thin',color:{argb:'FF5BBBD5'}},right:{style:'thin',color:{argb:'FF5BBBD5'}}}})}}ws.autoFilter={from:{row:1,column:1},to:{row:1,column:headers.length}};const buf=await wb.xlsx.writeBuffer();const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='롯데온_행사상품_판매량순.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)});
 })();
 </script>
 
