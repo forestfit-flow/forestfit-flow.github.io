@@ -609,11 +609,14 @@ function setExtraFileState(text,state=''){
 
 function extractReferenceProductRows(sheet,shared){
   const out=[];
+  if(!sheet?.doc)return out;
   const max=getLastUsedRow(sheet.doc);
   for(let r=1;r<=max;r++){
     const product=normalizeProduct(getCellText(sheet.doc,`C${r}`,shared));
     if(!isRealProduct(product) || product==='상품명' || product==='합계')continue;
-    if(!hasExactMerge(sheet.doc,`C${r}:E${r}`))continue;
+
+    // 추가 참고 파일은 '읽기 전용' 원본이므로 C:E 병합이 정확히 같지 않아도 허용합니다.
+    // 상품명(C)과 키워드 시작열(F/H/J/L)이 있으면 검색 원본으로 사용할 수 있습니다.
     const keywords={
       fit:normalizeText(getCellText(sheet.doc,`F${r}`,shared)),
       material:normalizeText(getCellText(sheet.doc,`H${r}`,shared)),
@@ -621,7 +624,7 @@ function extractReferenceProductRows(sheet,shared){
       feature:normalizeText(getCellText(sheet.doc,`L${r}`,shared))
     };
     if(!Object.values(keywords).some(Boolean))continue;
-    out.push({row:r,product,keywords});
+    out.push({row:r,product,keywords,merged:hasExactMerge(sheet.doc,`C${r}:E${r}`)});
   }
   return out;
 }
@@ -670,9 +673,12 @@ async function handleExtraFiles(fileList){
   for(let i=0;i<fresh.length;i++){
     const file=fresh[i];
     try{
-      const ctx=await loadWorkbook(file);
+      const ctx=await loadReferenceWorkbook(file);
       let productCount=0;
       for(const sheet of ctx.sheets)productCount+=extractReferenceProductRows(sheet,ctx.shared).length;
+      if(!productCount){
+        throw new Error('C열 상품명과 F/H/J/L 키워드가 함께 있는 행을 찾지 못했습니다.');
+      }
       extraKeywordFiles.push({file,ctx,key:extraFileKey(file),productCount});
       success++;
     }catch(e){
@@ -685,7 +691,8 @@ async function handleExtraFiles(fileList){
   processedZip=null;
   $('#downloadBtn').disabled=true;
   if(success){
-    setStatus(`추가 키워드 참고 XLSX ${success}개를 첨부했습니다. 기존 월 탭에서 미매칭된 상품에만 보조 검색으로 사용합니다.${failures.length?` · 읽지 못한 파일 ${failures.length}개`:''}`,'ok');
+    const skippedCount=extraKeywordFiles.reduce((n,x)=>n+(x.ctx.skipped?.length||0),0);
+    setStatus(`추가 키워드 참고 XLSX ${success}개를 첨부했습니다. 기존 월 탭에서 미매칭된 상품에만 보조 검색으로 사용합니다.${skippedCount?` · 특수/비정상 시트 ${skippedCount}개는 건너뜀`:''}${failures.length?` · 읽지 못한 파일 ${failures.length}개`:''}`,'ok');
   }else{
     setExtraFileState(`추가 파일을 읽지 못했습니다 · ${failures[0]||'파일 구조를 확인해주세요.'}`,'bad');
     setStatus(failures.join(' / ')||'추가 참고 파일을 읽지 못했습니다.','bad');
@@ -1030,6 +1037,68 @@ async function loadWorkbook(file){
     sheets.push({index:i,name,path,doc:xml(text,name)});
   }
   return {zip,shared,sheets};
+}
+
+// 추가 키워드 참고 파일 전용: 일부 시트가 특수 형식이어도 읽을 수 있는 시트만 사용합니다.
+async function loadReferenceWorkbook(file){
+  await ensureJSZip();
+  let zip;
+  try{
+    zip=await JSZip.loadAsync(await file.arrayBuffer());
+  }catch(e){
+    throw new Error('XLSX 압축 구조를 읽지 못했습니다. 파일이 실제 .xlsx 형식인지 확인해주세요.');
+  }
+
+  const workbookPart=zip.file('xl/workbook.xml');
+  const relPart=zip.file('xl/_rels/workbook.xml.rels');
+  if(!workbookPart||!relPart)throw new Error('정상적인 XLSX 통합문서 구조가 아닙니다.');
+
+  const workbookDoc=xml(await workbookPart.async('string'),'workbook');
+  const relDoc=xml(await relPart.async('string'),'workbook relationships');
+
+  // 일반 OOXML/Strict OOXML 모두 대응하기 위해 namespace 검색 실패 시 localName으로도 찾습니다.
+  let relNodes=[...relDoc.getElementsByTagNameNS(NS_PKG_REL,'Relationship')];
+  if(!relNodes.length)relNodes=[...relDoc.getElementsByTagName('*')].filter(x=>x.localName==='Relationship');
+  const relMap=new Map();
+  for(const rel of relNodes){
+    if((rel.getAttribute('TargetMode')||'').toLowerCase()==='external')continue;
+    const id=rel.getAttribute('Id');
+    const target=rel.getAttribute('Target');
+    if(id&&target)relMap.set(id,resolveTargetPath(target));
+  }
+
+  let shared=[];
+  const sharedFile=zip.file('xl/sharedStrings.xml');
+  if(sharedFile){
+    try{shared=parseSharedStrings(xml(await sharedFile.async('string'),'sharedStrings'));}
+    catch(e){console.warn('추가 참고 파일 sharedStrings 읽기 건너뜀:',e);shared=[];}
+  }
+
+  let sheetNodes=[...workbookDoc.getElementsByTagNameNS(NS_MAIN,'sheet')];
+  if(!sheetNodes.length)sheetNodes=[...workbookDoc.getElementsByTagName('*')].filter(x=>x.localName==='sheet');
+
+  const sheets=[];
+  const skipped=[];
+  for(let i=0;i<sheetNodes.length;i++){
+    const node=sheetNodes[i];
+    const name=node.getAttribute('name')||`Sheet${i+1}`;
+    let rid=node.getAttributeNS(NS_REL,'id')||node.getAttribute('r:id');
+    if(!rid){
+      const a=[...node.attributes].find(x=>x.localName==='id');
+      rid=a?.value||'';
+    }
+    const path=relMap.get(rid);
+    if(!path||!zip.file(path)){skipped.push(name);continue;}
+    try{
+      const text=await zip.file(path).async('string');
+      sheets.push({index:i,name,path,doc:xml(text,name)});
+    }catch(e){
+      console.warn(`추가 참고 파일 시트 읽기 건너뜀: ${name}`,e);
+      skipped.push(name);
+    }
+  }
+  if(!sheets.length)throw new Error('읽을 수 있는 워크시트를 찾지 못했습니다.');
+  return {shared,sheets,skipped};
 }
 
 function findTargetSheet(ctx){
