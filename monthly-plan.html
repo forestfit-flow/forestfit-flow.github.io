@@ -1027,20 +1027,32 @@ function getLastUsedRow(doc){
 
 function extractProductRows(sheet,shared){
   const out=[];
-  const max=getLastUsedRow(sheet.doc);
-  for(let r=1;r<=max;r++){
-    const rank=getCellText(sheet.doc,`B${r}`,shared);
+  const doc=sheet?.doc;
+  if(!doc)return out;
+  const index=getDocIndex(doc);
+
+  // 마지막 행 번호까지 1,2,3... 순회하지 않습니다.
+  // 실제 B열 셀이 존재하는 행만 후보로 잡아, 서식 때문에 104만 행까지 잡힌 파일도 빠르게 처리합니다.
+  const candidateRows=[];
+  for(const ref of index.cellMap.keys()){
+    const m=ref.match(/^B(\d+)$/);
+    if(m)candidateRows.push(Number(m[1]));
+  }
+  candidateRows.sort((a,b)=>a-b);
+
+  for(const r of candidateRows){
+    const rank=getCellText(doc,`B${r}`,shared);
     if(!isRealRank(rank))continue;
-    const product=normalizeProduct(getCellText(sheet.doc,`C${r}`,shared));
+    const product=normalizeProduct(getCellText(doc,`C${r}`,shared));
     if(!isRealProduct(product))continue;
     out.push({
       row:r,
       product,
       keywords:{
-        fit:normalizeText(getCellText(sheet.doc,`F${r}`,shared)),
-        material:normalizeText(getCellText(sheet.doc,`H${r}`,shared)),
-        detail:normalizeText(getCellText(sheet.doc,`J${r}`,shared)),
-        feature:normalizeText(getCellText(sheet.doc,`L${r}`,shared))
+        fit:normalizeText(getCellText(doc,`F${r}`,shared)),
+        material:normalizeText(getCellText(doc,`H${r}`,shared)),
+        detail:normalizeText(getCellText(doc,`J${r}`,shared)),
+        feature:normalizeText(getCellText(doc,`L${r}`,shared))
       }
     });
   }
@@ -1314,14 +1326,19 @@ const RANKING_SECTIONS=[
 
 function findSectionRow(doc,shared,title){
   const wanted=normalizeText(title);
-  const max=getLastUsedRow(doc);
-  for(let r=1;r<=max;r++){
-    for(const col of ['B','C']){
-      const v=normalizeText(getCellText(doc,`${col}${r}`,shared));
-      if(v===wanted)return r;
-    }
+  const index=getDocIndex(doc);
+
+  // 실제 존재하는 B/C 셀만 확인합니다. 빈 행을 마지막 행 번호까지 반복하지 않습니다.
+  let best=0;
+  for(const ref of index.cellMap.keys()){
+    const m=ref.match(/^[BC](\d+)$/);
+    if(!m)continue;
+    const r=Number(m[1]);
+    if(best&&r>=best)continue;
+    const v=normalizeText(getCellText(doc,ref,shared));
+    if(v===wanted)best=r;
   }
-  return 0;
+  return best;
 }
 
 function resolveRankingRows(doc,shared,section){
@@ -1429,13 +1446,14 @@ async function runCopy(){
     const sourceMap=new Map();
     for(let sheetIdx=0;sheetIdx<sourceSheets.length;sheetIdx++){
       const sheet=sourceSheets[sheetIdx];
-      for(const item of extractProductRows(sheet,ctx.shared)){
+      const items=extractProductRows(sheet,ctx.shared);
+      for(const item of items){
         const key=normalizeProduct(item.product);
         if(!sourceMap.has(key))sourceMap.set(key,[]);
         sourceMap.get(key).push({...item,sheetName:sheet.name,sheetIndex:sheet.index});
       }
-      // 시트가 많은 파일에서도 화면이 멈춘 것처럼 보이지 않도록 가끔 UI에 제어권을 돌려줍니다.
-      if(sheetIdx%2===1)await new Promise(resolve=>setTimeout(resolve,0));
+      setStatus(`기존 월 탭 키워드 확인 중 · ${sheetIdx+1}/${sourceSheets.length} · ${sheet.name} · 상품 ${items.length.toLocaleString()}개`);
+      await new Promise(resolve=>setTimeout(resolve,0));
     }
 
     // 추가 참고 XLSX는 기존 월 탭에 상품명이 아예 없을 때만 사용하는 fallback 원본입니다.
