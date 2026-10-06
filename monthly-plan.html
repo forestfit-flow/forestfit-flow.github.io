@@ -798,10 +798,41 @@ function parseSharedStrings(doc){
 function cellRefCol(ref){return String(ref||'').replace(/\d+/g,'').toUpperCase();}
 function colNumber(col){let n=0;for(const ch of col){n=n*26+(ch.charCodeAt(0)-64);}return n;}
 
+// 워크시트 XML은 셀을 찾을 때마다 전체 <c> 목록을 다시 훑으면 상품 수가 많을수록 급격히 느려집니다.
+// 문서별 셀/행/병합 정보를 한 번만 인덱싱해서 이후에는 Map/Set으로 즉시 찾습니다.
+const DOC_INDEX_CACHE=new WeakMap();
+function getDocIndex(doc){
+  let cached=DOC_INDEX_CACHE.get(doc);
+  if(cached)return cached;
+  const cellMap=new Map();
+  const rowMap=new Map();
+  const mergeSet=new Set();
+  let maxRow=0;
+  let cells=[...doc.getElementsByTagNameNS(NS_MAIN,'c')];
+  if(!cells.length)cells=[...doc.getElementsByTagName('*')].filter(x=>x.localName==='c');
+  for(const c of cells){
+    const ref=String(c.getAttribute('r')||'').toUpperCase();
+    if(ref)cellMap.set(ref,c);
+  }
+  let rows=[...doc.getElementsByTagNameNS(NS_MAIN,'row')];
+  if(!rows.length)rows=[...doc.getElementsByTagName('*')].filter(x=>x.localName==='row');
+  for(const row of rows){
+    const n=Number(row.getAttribute('r'))||0;
+    if(n){rowMap.set(n,row);if(n>maxRow)maxRow=n;}
+  }
+  let merges=[...doc.getElementsByTagNameNS(NS_MAIN,'mergeCell')];
+  if(!merges.length)merges=[...doc.getElementsByTagName('*')].filter(x=>x.localName==='mergeCell');
+  for(const m of merges){
+    const ref=normalizeText(m.getAttribute('ref')).toUpperCase();
+    if(ref)mergeSet.add(ref);
+  }
+  cached={cellMap,rowMap,mergeSet,maxRow};
+  DOC_INDEX_CACHE.set(doc,cached);
+  return cached;
+}
+
 function getCell(doc,ref){
-  const cells=doc.getElementsByTagNameNS(NS_MAIN,'c');
-  for(const c of cells){if(c.getAttribute('r')===ref)return c;}
-  return null;
+  return getDocIndex(doc).cellMap.get(String(ref||'').toUpperCase())||null;
 }
 
 function getCellText(doc,ref,shared){
@@ -818,15 +849,18 @@ function getCellText(doc,ref,shared){
 }
 
 function findOrCreateRow(doc,rowNo){
+  const index=getDocIndex(doc);
+  let row=index.rowMap.get(Number(rowNo));
+  if(row)return row;
   const sheetData=doc.getElementsByTagNameNS(NS_MAIN,'sheetData')[0];
   if(!sheetData)throw new Error('워크시트의 sheetData를 찾을 수 없습니다.');
-  const rows=[...sheetData.getElementsByTagNameNS(NS_MAIN,'row')];
-  let row=rows.find(r=>Number(r.getAttribute('r'))===rowNo);
-  if(row)return row;
   row=doc.createElementNS(NS_MAIN,'row');
   row.setAttribute('r',String(rowNo));
-  const next=rows.find(r=>Number(r.getAttribute('r'))>rowNo);
-  if(next)sheetData.insertBefore(row,next); else sheetData.appendChild(row);
+  const rows=[...index.rowMap.entries()].sort((a,b)=>a[0]-b[0]);
+  const nextPair=rows.find(([n])=>n>rowNo);
+  if(nextPair)sheetData.insertBefore(row,nextPair[1]); else sheetData.appendChild(row);
+  index.rowMap.set(Number(rowNo),row);
+  if(Number(rowNo)>index.maxRow)index.maxRow=Number(rowNo);
   return row;
 }
 
@@ -844,18 +878,20 @@ function nearestStyleFor(doc,ref){
 }
 
 function findOrCreateCell(doc,ref){
-  let c=getCell(doc,ref);
+  const normalizedRef=String(ref||'').toUpperCase();
+  let c=getCell(doc,normalizedRef);
   if(c)return c;
-  const rowNo=Number(String(ref).replace(/\D+/g,''));
+  const rowNo=Number(normalizedRef.replace(/\D+/g,''));
   const row=findOrCreateRow(doc,rowNo);
   c=doc.createElementNS(NS_MAIN,'c');
-  c.setAttribute('r',ref);
-  const style=nearestStyleFor(doc,ref);
+  c.setAttribute('r',normalizedRef);
+  const style=nearestStyleFor(doc,normalizedRef);
   if(style)c.setAttribute('s',style);
-  const targetCol=colNumber(cellRefCol(ref));
+  const targetCol=colNumber(cellRefCol(normalizedRef));
   const existing=[...row.children].filter(x=>x.localName==='c');
   const next=existing.find(x=>colNumber(cellRefCol(x.getAttribute('r')))>targetCol);
   if(next)row.insertBefore(c,next); else row.appendChild(c);
+  getDocIndex(doc).cellMap.set(normalizedRef,c);
   return c;
 }
 
@@ -865,8 +901,7 @@ function cellHasFormula(doc,ref){
 }
 
 function hasExactMerge(doc,mergeRef){
-  const mergeCells=doc.getElementsByTagNameNS(NS_MAIN,'mergeCell');
-  return [...mergeCells].some(m=>normalizeText(m.getAttribute('ref')).toUpperCase()===mergeRef.toUpperCase());
+  return getDocIndex(doc).mergeSet.has(String(mergeRef||'').toUpperCase());
 }
 
 function ensureCoreMerges(doc){
@@ -987,9 +1022,7 @@ async function prepareYellowBlankDxf(zip){
 }
 
 function getLastUsedRow(doc){
-  let max=0;
-  for(const row of doc.getElementsByTagNameNS(NS_MAIN,'row'))max=Math.max(max,Number(row.getAttribute('r'))||0);
-  return max;
+  return getDocIndex(doc).maxRow;
 }
 
 function extractProductRows(sheet,shared){
@@ -1391,6 +1424,8 @@ async function runCopy(){
     // 그 다음 새로 입력된 상품명을 기준으로 기존 월 키워드와 판매실적을 연결합니다.
     const rankingWrite=writeSalesRankingProducts(workingDoc,ctx.shared,salesSummary.rankings);
 
+    setStatus('기존 월 탭의 상품명/키워드를 빠르게 인덱싱하고 있습니다...');
+    await new Promise(resolve=>setTimeout(resolve,0));
     const sourceMap=new Map();
     for(let sheetIdx=0;sheetIdx<sourceSheets.length;sheetIdx++){
       const sheet=sourceSheets[sheetIdx];
@@ -1422,6 +1457,8 @@ async function runCopy(){
       if(fileIdx%2===1)await new Promise(resolve=>setTimeout(resolve,0));
     }
 
+    setStatus('상품명 매칭과 키워드 입력을 진행하고 있습니다...');
+    await new Promise(resolve=>setTimeout(resolve,0));
     const targetRows=extractProductRows({doc:workingDoc},ctx.shared);
     if(!targetRows.length)throw new Error(`${target.name} 탭에서 B열 순위 + C:E 상품명 구조의 상품 행을 찾지 못했습니다.`);
     const grouped=new Map();
