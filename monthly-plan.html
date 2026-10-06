@@ -281,7 +281,7 @@
             <div id="extraFileState" class="file-state">추가 참고 파일은 선택사항입니다.</div>
           </div>
         </div>
-        <div class="extra-note"><b>검색 기준</b> · 추가 파일의 모든 시트에서 C:E 상품명을 찾고 F:G(핏) · H:I(소재) · J:K(디테일) · L:M(기능) 값을 읽습니다. 기존 월 탭에서 이미 정상 매칭된 상품은 추가 파일로 덮어쓰지 않습니다.</div>
+        <div class="extra-note"><b>검색 기준</b> · 추가 파일의 모든 시트에서 <b>C:E 병합셀 상품명만</b> 읽습니다. 현재 상품명과 정확히 같은 경우에만 같은 행의 F:G(핏) · H:I(소재) · J:K(디테일) · L:M(기능) 키워드를 불러옵니다. 기존 월 탭에서 이미 정상 매칭된 상품은 추가 파일로 덮어쓰지 않습니다.</div>
         <div id="extraFileList" class="extra-file-list"></div>
         <div class="extra-toolbar"><button id="clearExtraBtn" class="secondary" type="button" style="display:none">추가 파일 전체 비우기</button></div>
       </div>
@@ -309,7 +309,7 @@
           <b>판매순위 자동 입력</b> · 3번 판매자료 CSV의 <b>판매량</b>을 상품명별로 합산한 뒤 내림차순 정렬하여 전체 / 데님 / 팬츠 / 슬랙스 / 스커트 각각 TOP5 상품명을 작성 월 탭의 순위 1~5위 C:E 병합셀에 자동 입력합니다. · 전체 판매순위는 24~28행을 사용하며 <b>29행의 ‘기타’ 및 수식은 절대 수정하지 않습니다.</b><br>
           <b>상품별 판매실적</b> · C:E 병합셀 상품명이 CSV의 상품명과 정확히 일치하면 같은 행 N:O 병합셀에 판매량, T:U 병합셀에 판매금액을 입력합니다. · 동일 상품이 여러 구역에 반복되면 모두 같은 판매실적을 입력합니다.<br>
           <b>키워드 처리</b> · 첫 번째/두 번째 탭과 선택한 월 탭은 검색 원본에서 제외합니다. · 순위(B열)가 숫자인 행의 C:E 병합셀 상품명을 비교합니다. · 같은 상품을 찾으면 빈 F:G(핏), H:I(소재), J:K(디테일), L:M(기능)에 자동 입력합니다. · 판매순위 자동 변경으로 상품명이 바뀐 행은 이전 상품의 키워드가 남지 않도록 키워드칸을 비운 뒤 새 상품 기준으로 다시 채웁니다. · 상품명이 다른 탭 어디에도 매칭되지 않으면 빈 키워드칸을 <b>노란색</b>으로 표시하며, 사용자가 값을 입력하거나 붙여넣으면 노란색이 자동으로 사라집니다.<br>
-          <b>추가 참고 파일</b> · 기존 사업계획서의 다른 월 탭에서 같은 상품명을 찾지 못한 경우에만 4번에서 첨부한 추가 XLSX 파일을 순서대로 검색합니다. · 추가 파일에서 같은 상품을 찾으면 해당 키워드를 입력하고, 추가 파일에서도 찾지 못한 상품만 빈 키워드칸을 노란색으로 표시합니다.<br>
+          <b>추가 참고 파일</b> · 기존 사업계획서의 다른 월 탭에서 같은 상품명을 찾지 못한 경우에만 4번에서 첨부한 추가 XLSX 파일을 순서대로 검색합니다. · 추가 파일에서는 C:E 병합셀의 상품명만 비교하며 상품명이 정확히 같은 경우에만 같은 행 키워드를 입력합니다. · 추가 파일에서도 찾지 못한 상품만 빈 키워드칸을 노란색으로 표시합니다.<br>
           <b>카테고리 판별</b> · CSV의 <b>상품명</b>만 기준으로 분류합니다. · <b>데님</b>: 데님·청바지·생지·노컷진·찐스판 포함 상품 → 37~41행 · <b>슬랙스</b>: 슬랙스 포함 상품 → 59~63행 · <b>스커트</b>: 스커트 포함 상품 → 70~74행 · <b>팬츠</b>: 위 세 카테고리에 분류되지 않은 나머지 상품 중 판매량 상위 5개 → 48~52행. · ‘데님 스커트’처럼 단어가 겹치면 스커트가 우선이며, 75행은 합계행이라 절대 수정하지 않습니다.
         </div>
         <div class="ready-box">
@@ -608,23 +608,63 @@ function setExtraFileState(text,state=''){
 }
 
 function extractReferenceProductRows(sheet,shared){
+  // 추가 참고 파일에서는 C:E가 실제로 병합된 상품행만 봅니다.
+  // 전체 행을 1행씩 순회하지 않고, mergeCell 목록에서 Cn:En 행만 골라
+  // 해당 행의 C / F / H / J / L 셀만 읽어 대용량 파일에서도 멈춤을 최소화합니다.
   const out=[];
-  if(!sheet?.doc)return out;
-  const max=getLastUsedRow(sheet.doc);
-  for(let r=1;r<=max;r++){
-    const product=normalizeProduct(getCellText(sheet.doc,`C${r}`,shared));
-    if(!isRealProduct(product) || product==='상품명' || product==='합계')continue;
+  const doc=sheet?.doc;
+  if(!doc)return out;
 
-    // 추가 참고 파일은 '읽기 전용' 원본이므로 C:E 병합이 정확히 같지 않아도 허용합니다.
-    // 상품명(C)과 키워드 시작열(F/H/J/L)이 있으면 검색 원본으로 사용할 수 있습니다.
+  let mergeNodes=[...doc.getElementsByTagNameNS(NS_MAIN,'mergeCell')];
+  if(!mergeNodes.length)mergeNodes=[...doc.getElementsByTagName('*')].filter(x=>x.localName==='mergeCell');
+
+  const rowSet=new Set();
+  for(const m of mergeNodes){
+    const ref=normalizeText(m.getAttribute('ref')).toUpperCase();
+    const hit=ref.match(/^C(\d+):E\1$/);
+    if(hit)rowSet.add(Number(hit[1]));
+  }
+  if(!rowSet.size)return out;
+
+  const neededRefs=new Set();
+  for(const r of rowSet){
+    ['C','F','H','J','L'].forEach(col=>neededRefs.add(`${col}${r}`));
+  }
+
+  let cells=[...doc.getElementsByTagNameNS(NS_MAIN,'c')];
+  if(!cells.length)cells=[...doc.getElementsByTagName('*')].filter(x=>x.localName==='c');
+  const cellMap=new Map();
+  for(const c of cells){
+    const ref=(c.getAttribute('r')||'').toUpperCase();
+    if(neededRefs.has(ref))cellMap.set(ref,c);
+  }
+
+  const readCell=ref=>{
+    const c=cellMap.get(ref);
+    if(!c)return '';
+    const type=c.getAttribute('t')||'';
+    let ts=[...c.getElementsByTagNameNS(NS_MAIN,'t')];
+    if(!ts.length)ts=[...c.getElementsByTagName('*')].filter(x=>x.localName==='t');
+    if(type==='inlineStr')return ts.map(x=>x.textContent||'').join('');
+    let vs=[...c.getElementsByTagNameNS(NS_MAIN,'v')];
+    if(!vs.length)vs=[...c.getElementsByTagName('*')].filter(x=>x.localName==='v');
+    const raw=vs[0]?.textContent||'';
+    if(type==='s')return shared[Number(raw)]??'';
+    if(type==='b')return raw==='1'?'TRUE':'FALSE';
+    return raw;
+  };
+
+  for(const r of [...rowSet].sort((a,b)=>a-b)){
+    const product=normalizeProduct(readCell(`C${r}`));
+    if(!isRealProduct(product)||product==='상품명'||product==='합계')continue;
     const keywords={
-      fit:normalizeText(getCellText(sheet.doc,`F${r}`,shared)),
-      material:normalizeText(getCellText(sheet.doc,`H${r}`,shared)),
-      detail:normalizeText(getCellText(sheet.doc,`J${r}`,shared)),
-      feature:normalizeText(getCellText(sheet.doc,`L${r}`,shared))
+      fit:normalizeText(readCell(`F${r}`)),
+      material:normalizeText(readCell(`H${r}`)),
+      detail:normalizeText(readCell(`J${r}`)),
+      feature:normalizeText(readCell(`L${r}`))
     };
     if(!Object.values(keywords).some(Boolean))continue;
-    out.push({row:r,product,keywords,merged:hasExactMerge(sheet.doc,`C${r}:E${r}`)});
+    out.push({row:r,product,keywords});
   }
   return out;
 }
@@ -673,13 +713,9 @@ async function handleExtraFiles(fileList){
   for(let i=0;i<fresh.length;i++){
     const file=fresh[i];
     try{
-      const ctx=await loadReferenceWorkbook(file);
-      let productCount=0;
-      for(const sheet of ctx.sheets)productCount+=extractReferenceProductRows(sheet,ctx.shared).length;
-      if(!productCount){
-        throw new Error('C열 상품명과 F/H/J/L 키워드가 함께 있는 행을 찾지 못했습니다.');
-      }
-      extraKeywordFiles.push({file,ctx,key:extraFileKey(file),productCount});
+      const ref=await loadReferenceWorkbook(file);
+      const productCount=ref.rows.length;
+      extraKeywordFiles.push({file,key:extraFileKey(file),productCount,rows:ref.rows,skipped:ref.skipped});
       success++;
     }catch(e){
       console.error(e);
@@ -691,7 +727,7 @@ async function handleExtraFiles(fileList){
   processedZip=null;
   $('#downloadBtn').disabled=true;
   if(success){
-    const skippedCount=extraKeywordFiles.reduce((n,x)=>n+(x.ctx.skipped?.length||0),0);
+    const skippedCount=extraKeywordFiles.reduce((n,x)=>n+(x.skipped?.length||0),0);
     setStatus(`추가 키워드 참고 XLSX ${success}개를 첨부했습니다. 기존 월 탭에서 미매칭된 상품에만 보조 검색으로 사용합니다.${skippedCount?` · 특수/비정상 시트 ${skippedCount}개는 건너뜀`:''}${failures.length?` · 읽지 못한 파일 ${failures.length}개`:''}`,'ok');
   }else{
     setExtraFileState(`추가 파일을 읽지 못했습니다 · ${failures[0]||'파일 구조를 확인해주세요.'}`,'bad');
@@ -1046,7 +1082,7 @@ async function loadReferenceWorkbook(file){
   try{
     zip=await JSZip.loadAsync(await file.arrayBuffer());
   }catch(e){
-    throw new Error('XLSX 압축 구조를 읽지 못했습니다. 파일이 실제 .xlsx 형식인지 확인해주세요.');
+    throw new Error('XLSX 파일을 읽지 못했습니다. 실제 .xlsx 파일인지 확인해주세요.');
   }
 
   const workbookPart=zip.file('xl/workbook.xml');
@@ -1056,14 +1092,12 @@ async function loadReferenceWorkbook(file){
   const workbookDoc=xml(await workbookPart.async('string'),'workbook');
   const relDoc=xml(await relPart.async('string'),'workbook relationships');
 
-  // 일반 OOXML/Strict OOXML 모두 대응하기 위해 namespace 검색 실패 시 localName으로도 찾습니다.
   let relNodes=[...relDoc.getElementsByTagNameNS(NS_PKG_REL,'Relationship')];
   if(!relNodes.length)relNodes=[...relDoc.getElementsByTagName('*')].filter(x=>x.localName==='Relationship');
   const relMap=new Map();
   for(const rel of relNodes){
     if((rel.getAttribute('TargetMode')||'').toLowerCase()==='external')continue;
-    const id=rel.getAttribute('Id');
-    const target=rel.getAttribute('Target');
+    const id=rel.getAttribute('Id'),target=rel.getAttribute('Target');
     if(id&&target)relMap.set(id,resolveTargetPath(target));
   }
 
@@ -1071,13 +1105,13 @@ async function loadReferenceWorkbook(file){
   const sharedFile=zip.file('xl/sharedStrings.xml');
   if(sharedFile){
     try{shared=parseSharedStrings(xml(await sharedFile.async('string'),'sharedStrings'));}
-    catch(e){console.warn('추가 참고 파일 sharedStrings 읽기 건너뜀:',e);shared=[];}
+    catch(e){console.warn('추가 참고 파일 sharedStrings 읽기 건너뜀:',e);}
   }
 
   let sheetNodes=[...workbookDoc.getElementsByTagNameNS(NS_MAIN,'sheet')];
   if(!sheetNodes.length)sheetNodes=[...workbookDoc.getElementsByTagName('*')].filter(x=>x.localName==='sheet');
 
-  const sheets=[];
+  const rows=[];
   const skipped=[];
   for(let i=0;i<sheetNodes.length;i++){
     const node=sheetNodes[i];
@@ -1089,16 +1123,28 @@ async function loadReferenceWorkbook(file){
     }
     const path=relMap.get(rid);
     if(!path||!zip.file(path)){skipped.push(name);continue;}
+
     try{
-      const text=await zip.file(path).async('string');
-      sheets.push({index:i,name,path,doc:xml(text,name)});
+      const sheetText=await zip.file(path).async('string');
+      // C:E 병합셀이 전혀 없는 시트는 XML DOM 생성 자체를 하지 않고 바로 건너뜁니다.
+      if(!/<(?:[A-Za-z0-9_]+:)?mergeCell\b[^>]*\bref\s*=\s*["']C\d+:E\d+["']/i.test(sheetText)){
+        skipped.push(name);
+        continue;
+      }
+      const doc=xml(sheetText,name);
+      const found=extractReferenceProductRows({doc},shared);
+      for(const item of found)rows.push({...item,sheetName:name,sheetIndex:i});
     }catch(e){
       console.warn(`추가 참고 파일 시트 읽기 건너뜀: ${name}`,e);
       skipped.push(name);
     }
+
+    // 시트 사이마다 브라우저에 제어권을 돌려 페이지 응답없음 현상을 방지합니다.
+    await new Promise(resolve=>setTimeout(resolve,0));
   }
-  if(!sheets.length)throw new Error('읽을 수 있는 워크시트를 찾지 못했습니다.');
-  return {shared,sheets,skipped};
+
+  if(!rows.length)throw new Error('C:E 병합셀의 상품명과 같은 행의 F/H/J/L 키워드를 찾지 못했습니다.');
+  return {rows,skipped};
 }
 
 function findTargetSheet(ctx){
@@ -1362,18 +1408,16 @@ async function runCopy(){
     const extraSourceMap=new Map();
     for(let fileIdx=0;fileIdx<extraKeywordFiles.length;fileIdx++){
       const extra=extraKeywordFiles[fileIdx];
-      for(let sheetIdx=0;sheetIdx<extra.ctx.sheets.length;sheetIdx++){
-        const sheet=extra.ctx.sheets[sheetIdx];
-        for(const item of extractReferenceProductRows(sheet,extra.ctx.shared)){
-          const key=normalizeProduct(item.product);
-          if(!extraSourceMap.has(key))extraSourceMap.set(key,[]);
-          extraSourceMap.get(key).push({
-            ...item,
-            sheetName:`${extra.file.name} › ${sheet.name}`,
-            sheetIndex:100000+(fileIdx*1000)+sheetIdx,
-            isExtra:true
-          });
-        }
+      // 첨부할 때 C:E 병합 상품행만 이미 추출해두므로 자동입력 때 엑셀 전체를 다시 읽지 않습니다.
+      for(const item of (extra.rows||[])){
+        const key=normalizeProduct(item.product);
+        if(!extraSourceMap.has(key))extraSourceMap.set(key,[]);
+        extraSourceMap.get(key).push({
+          ...item,
+          sheetName:`${extra.file.name} › ${item.sheetName}`,
+          sheetIndex:100000+(fileIdx*1000)+(item.sheetIndex||0),
+          isExtra:true
+        });
       }
       if(fileIdx%2===1)await new Promise(resolve=>setTimeout(resolve,0));
     }
