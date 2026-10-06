@@ -1948,6 +1948,18 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     const top = products.map(() => []);
     let fields = null;
 
+    const fmtNaverDate = v => {
+      const raw = cleanFormulaText(v);
+      if (!raw) return '';
+      const n = Number(String(raw).trim());
+      if (Number.isFinite(n) && /^\d+(?:\.\d+)?$/.test(String(raw).trim()) && n > 20000 && n < 80000 && window.XLSX?.SSF?.parse_date_code) {
+        const d = XLSX.SSF.parse_date_code(n);
+        if (d && d.y) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+      }
+      const m = String(raw).trim().match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})/);
+      return m ? `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}` : String(raw).trim();
+    };
+
     const processRows = (rows, rowFields) => {
       if (!fields) {
         fields = {
@@ -1970,7 +1982,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
           const s = naverScore(products[i], row, fields);
           if (s.score < 35) continue;
           const price = cleanFormulaText(row[fields.price]);
-          const registered = fields.registered ? cleanFormulaText(row[fields.registered]) : '';
+          const registered = fields.registered ? fmtNaverDate(row[fields.registered]) : '';
           const matchedName = s.smart || s.window || s.generic;
           const item = { ...s, price, registered, matchedName };
           const arr = top[i];
@@ -3951,6 +3963,19 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const num=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const n=Number(String(v).replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:null};
   const fsize=n=>n<1024?`${n} B`:n<1048576?`${Math.round(n/1024)} KB`:`${(n/1048576).toFixed(1)} MB`;
   const idx=(row,aliases)=>{const a=(row||[]).map(nh);for(const alias of aliases){const i=a.findIndex(x=>x===nh(alias));if(i>=0)return i}return-1};
+  const fmtChannelDate=v=>{
+    if(v===null||v===undefined||v==='')return '';
+    if(v instanceof Date&&!Number.isNaN(v.getTime()))return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}-${String(v.getDate()).padStart(2,'0')}`;
+    const raw=String(v).trim();
+    const n=Number(raw);
+    if(Number.isFinite(n)&&/^\d+(?:\.\d+)?$/.test(raw)&&n>20000&&n<80000&&window.XLSX?.SSF?.parse_date_code){
+      const d=XLSX.SSF.parse_date_code(n);
+      if(d&&d.y)return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+    }
+    const t=norm(v);
+    const m=t.match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})/);
+    return m?`${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`:t;
+  };
   function parenKeys(name){
     const s=norm(name),out=[];
     for(const m of s.matchAll(/\(([^)]+)\)/g)){
@@ -4011,7 +4036,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       out.push({
         code:productCode,
         name:productName,
-        registered:row[registered]??'',
+        registered:fmtChannelDate(row[registered]),
         salePrice:num(row[salePrice])??(row[salePrice]??''),
         keys:parenKeys(productName),
         order:out.length
@@ -4247,6 +4272,19 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const num=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const n=Number(String(v).replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:null};
   const fsize=n=>n<1024?`${n} B`:n<1048576?`${Math.round(n/1024)} KB`:`${(n/1048576).toFixed(1)} MB`;
   const idx=(row,aliases)=>{const a=(row||[]).map(nh);for(const alias of aliases){const i=a.findIndex(x=>x===nh(alias));if(i>=0)return i}return-1};
+  const fmtChannelDate=v=>{
+    if(v===null||v===undefined||v==='')return '';
+    if(v instanceof Date&&!Number.isNaN(v.getTime()))return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}-${String(v.getDate()).padStart(2,'0')}`;
+    const raw=String(v).trim();
+    const n=Number(raw);
+    if(Number.isFinite(n)&&/^\d+(?:\.\d+)?$/.test(raw)&&n>20000&&n<80000&&window.XLSX?.SSF?.parse_date_code){
+      const d=XLSX.SSF.parse_date_code(n);
+      if(d&&d.y)return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+    }
+    const t=norm(v);
+    const m=t.match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})/);
+    return m?`${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`:t;
+  };
   // 괄호 안 상품키에서 '봄'/'가을'만 제거한 뒤 공백/대소문자를 정규화합니다.
   function parenKeys(name){
     const s=norm(name), out=[];
@@ -4279,7 +4317,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       const row=rows[r]||[], productName=norm(row[name]), productId=norm(row[id]);
       if(!productName&&!productId)continue;
       out.push({
-        registered:row[reg]??'', id:productId, name:productName,
+        registered:fmtChannelDate(row[reg]), id:productId, name:productName,
         salePrice:sale>=0?(row[sale]??''):'',
         reservedPrice:reserved>=0?(row[reserved]??''):'',
         reviewCount:reviewCount>=0?(row[reviewCount]??''):'',
@@ -5221,13 +5259,21 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const nh=v=>norm(v).replace(/[\s._·:：\-]/g,'').toLowerCase();
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const num=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const n=Number(String(v).replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:null};
+  const fmtLotteDate=v=>{
+    if(v===null||v===undefined||v==='')return '';
+    if(v instanceof Date&&!Number.isNaN(v.getTime()))return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}-${String(v.getDate()).padStart(2,'0')}`;
+    if(typeof v==='number'&&Number.isFinite(v)&&window.XLSX?.SSF?.parse_date_code){const d=XLSX.SSF.parse_date_code(v);if(d&&d.y)return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;}
+    const t=norm(v);
+    const m=t.match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})/);
+    return m?`${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`:t;
+  };
   const fsize=n=>n<1024?`${n} B`:n<1048576?`${Math.round(n/1024)} KB`:`${(n/1048576).toFixed(1)} MB`;
   const idx=(row,aliases)=>{const a=(row||[]).map(nh);for(const alias of aliases){const i=a.findIndex(x=>x===nh(alias));if(i>=0)return i}return-1};
   function parenKeys(name){const out=[];for(const m of norm(name).matchAll(/\(([^)]+)\)/g)){const k=String(m[1]||'').replace(/봄|가을/gi,'').replace(/\s+/g,'').toLowerCase().trim();if(k&&!out.includes(k))out.push(k)}return out.sort((a,b)=>(/\d/.test(b)?1:0)-(/\d/.test(a)?1:0))}
   async function matrix(file){const ab=await file.arrayBuffer();if(/\.csv$/i.test(file.name)){let txt='';try{txt=new TextDecoder('euc-kr').decode(ab)}catch(e){txt=new TextDecoder('utf-8').decode(ab)}const wb=XLSX.read(txt,{type:'string',raw:true});return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:null,raw:true})}const wb=XLSX.read(ab,{type:'array',raw:true});return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:null,raw:true})}
   function findHeader(rows, requiredSets){for(let r=0;r<Math.min(rows.length,40);r++){const row=rows[r]||[];if(requiredSets.every(set=>set.some(a=>idx(row,[a])>=0)))return r}return -1}
   function parseSellmate(rows){if(!rows.length)throw new Error('셀메이트 파일이 비어 있습니다.');const hr=findHeader(rows,[['상품명'],['원가'],['판매량']]);if(hr<0)throw new Error('셀메이트 파일에서 상품명 / 원가 / 판매량 분류명을 찾지 못했습니다.');const h=rows[hr]||[],name=idx(h,['상품명']),cost=idx(h,['원가']),qty=idx(h,['판매량']);const out=[];for(let r=hr+1;r<rows.length;r++){const row=rows[r]||[],productName=norm(row[name]);if(!productName)continue;out.push({name:productName,keys:parenKeys(productName),qty:num(row[qty]),cost:num(row[cost]),order:r})}return out}
-  function parseLotte(rows){if(!rows.length)throw new Error('롯데온 상품 파일이 비어 있습니다.');const hr=findHeader(rows,[['판매자 상품코드','판매자상품코드','판매자상품번호','판매자 상품번호'],['판매자상품명','판매자 상품명','상품명']]);if(hr<0)throw new Error('롯데온 파일에서 판매자 상품코드 / 판매자상품명을 찾지 못했습니다.');const h=rows[hr]||[];const code=idx(h,['판매자 상품코드','판매자상품코드','판매자상품번호','판매자 상품번호']);const name=idx(h,['판매자상품명','판매자 상품명','상품명']);const reg=idx(h,['상품등록일','상품 등록일','상품등록일시','상품 등록일시','등록일']);const sale=idx(h,['판매가','판매가격']);const cm=idx(h,['CM 할인가','CM할인가','cm 할인가','cm할인가']);const out=[];for(let r=hr+1;r<rows.length;r++){const row=rows[r]||[],productName=norm(row[name]),productCode=norm(row[code]);if(!productName&&!productCode)continue;out.push({code:productCode,name:productName,registered:reg>=0?(row[reg]??''):'',salePrice:sale>=0?(row[sale]??''):'',cmPrice:cm>=0?(row[cm]??''):'',keys:parenKeys(productName),order:out.length})}return out}
+  function parseLotte(rows){if(!rows.length)throw new Error('롯데온 상품 파일이 비어 있습니다.');const hr=findHeader(rows,[['판매자 상품코드','판매자상품코드','판매자상품번호','판매자 상품번호'],['판매자상품명','판매자 상품명','상품명']]);if(hr<0)throw new Error('롯데온 파일에서 판매자 상품코드 / 판매자상품명을 찾지 못했습니다.');const h=rows[hr]||[];const code=idx(h,['판매자 상품코드','판매자상품코드','판매자상품번호','판매자 상품번호']);const name=idx(h,['판매자상품명','판매자 상품명','상품명']);const reg=idx(h,['상품등록일','상품 등록일','상품등록일시','상품 등록일시','등록일']);const sale=idx(h,['판매가','판매가격']);const cm=idx(h,['CM 할인가','CM할인가','cm 할인가','cm할인가']);const out=[];for(let r=hr+1;r<rows.length;r++){const row=rows[r]||[],productName=norm(row[name]),productCode=norm(row[code]);if(!productName&&!productCode)continue;out.push({code:productCode,name:productName,registered:reg>=0?fmtLotteDate(row[reg]):'',salePrice:sale>=0?(row[sale]??''):'',cmPrice:cm>=0?(row[cm]??''):'',keys:parenKeys(productName),order:out.length})}return out}
   function makeMap(items){const map=new Map();for(const item of items)for(const key of item.keys){const prev=map.get(key);if(!prev||((item.qty??-Infinity)>(prev.qty??-Infinity)))map.set(key,item)}return map}
   function sortRows(rows){return [...rows].sort((a,b)=>{const aq=a.qty==null?null:Number(a.qty),bq=b.qty==null?null:Number(b.qty),ab=aq==null||Number.isNaN(aq),bb=bq==null||Number.isNaN(bq);if(ab!==bb)return ab?1:-1;if(!ab&&aq!==bq)return bq-aq;return (a.order??0)-(b.order??0)}).map((x,i)=>({...x,rank:i+1}))}
   const state={sell:null,product:null,rows:[]};
