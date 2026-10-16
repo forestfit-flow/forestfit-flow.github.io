@@ -2506,6 +2506,8 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       '네이버 등록일자': r.registered || '',
       '네이버 판매가': r.price ? Number(r.price) || r.price : '',
       '가용재고': window.FORESTFIT_CURRENT_STOCK?.get?.(r.cellmateMatchedName || r.naverMatchedName || r.product.name) ?? '',
+      '원가': [r.cellmateMatchedName,r.naverMatchedName,r.product.name].map(n=>n&&window.FORESTFIT_PRICING_API?.lookupCost?.(n,'')?.cost).find(v=>v!==null&&v!==undefined&&v!=='')??'',
+      '공급처명': [r.cellmateMatchedName,r.naverMatchedName,r.product.name].map(n=>n&&window.FORESTFIT_SUPPLIERS?.lookup?.(n)).find(Boolean)||'',
       '매칭상태': r.status
     }));
   }
@@ -2897,42 +2899,79 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     const v=cell?.value;
     return String(v&&typeof v==='object'?(v.text??v.result??''):v??'').replace(/\s+/g,'');
   };
+  // 행사 탭의 엑셀 결과물에 저장된 최신 원가와 공급처명을 함께 반영합니다.
+  // VLOOKUP처럼 상품명을 검색하지만, 셀메이트상품명이 없는 행은 판매처상품명으로 재검색합니다.
   function addToExcelJS(workbook){
     if(!workbook?.worksheets)return workbook;
+    const cellText=cell=>{
+      const v=cell?.value;
+      return String(v&&typeof v==='object'?(v.text??v.result??''):v??'').trim();
+    };
+    const setHeader=(ws,headerRow,col,title)=>{
+      const head=ws.getCell(headerRow,col);
+      head.value=title;
+      const before=ws.getCell(headerRow,Math.max(1,col-1));
+      head.font={...(before.font||{}),bold:true};
+      if(before.fill&&before.fill.type==='pattern')head.fill=before.fill;
+      else head.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF1EEEB'}};
+      head.alignment={horizontal:'center',vertical:'middle',wrapText:false};
+    };
     for(const ws of workbook.worksheets){
+      // 행사가 책정 기준표/원가DB는 수정하지 않습니다.
       if(/마지노선|상품\s*원가|원가표/.test(ws.name))continue;
-      let hr=0,prodCol=0,supplierCol=0;
-      for(let r=1;r<=Math.min(20,ws.rowCount);r++){
-        const row=ws.getRow(r),n=Math.min(ws.columnCount||0,80);
-        let names=[],sup=0;
-        for(let c=1;c<=n;c++){
+      let headerRow=0,names=[],costCol=0,supplierCol=0;
+      for(let r=1;r<=Math.min(30,ws.rowCount);r++){
+        const row=ws.getRow(r),candidates=[];
+        let cost=0,supplier=0;
+        for(let c=1;c<=Math.min(ws.columnCount||0,100);c++){
           const h=headerText(row.getCell(c));
-          if(/^공급처(명)?$/.test(h))sup=c;
+          if(/^(?:원가|상품원가|매입원가)$/.test(h))cost=c;
+          if(/^공급처(명)?$/.test(h))supplier=c;
           if(/상품명|^품명$/.test(h)){
-            const priority=/셀메이트/.test(h)?0:/^상품명$/.test(h)?1:/판매처/.test(h)?2:3;
-            names.push({col:c,priority});
+            const priority=/셀메이트/.test(h)?0:/^상품명$/.test(h)?1:/판매처|롯데온|퀸잇|GS/.test(h)?2:3;
+            candidates.push({col:c,priority});
           }
         }
-        if(names.length){names.sort((a,b)=>a.priority-b.priority);hr=r;prodCol=names[0].col;supplierCol=sup;break;}
+        if(candidates.length){
+          candidates.sort((a,b)=>a.priority-b.priority);
+          headerRow=r;names=candidates.map(x=>x.col);costCol=cost;supplierCol=supplier;
+          break;
+        }
       }
-      if(!hr||!prodCol)continue;
-      if(!supplierCol){supplierCol=Math.max(ws.columnCount||0,prodCol)+1;ws.getCell(hr,supplierCol).value='공급처명';}
+      if(!headerRow||!names.length)continue;
+      // 기존 열과 데이터는 유지하고 빠진 열만 우측 끝에 추가합니다.
+      if(!costCol){costCol=(ws.columnCount||0)+1;setHeader(ws,headerRow,costCol,'원가');}
+      if(!supplierCol){supplierCol=(ws.columnCount||0)+1;setHeader(ws,headerRow,supplierCol,'공급처명');}
+      ws.getColumn(costCol).width=Math.max(Number(ws.getColumn(costCol).width)||0,14);
       ws.getColumn(supplierCol).width=Math.max(Number(ws.getColumn(supplierCol).width)||0,23);
-      const head=ws.getCell(hr,supplierCol),before=ws.getCell(hr,Math.max(1,supplierCol-1));
-      if(!head.font||!head.font.bold){head.font={...(before.font||{}),bold:true};}
-      if(!head.fill||head.fill.type!=='pattern')head.fill=before.fill||{type:'pattern',pattern:'solid',fgColor:{argb:'FFF1EEEB'}};
-      head.alignment={horizontal:'center',vertical:'middle',wrapText:false};
-      for(let r=hr+1;r<=ws.rowCount;r++){
-        const row=ws.getRow(r),v=row.getCell(prodCol).value;
-        const name=String(v&&typeof v==='object'?(v.text??v.result??''):v??'').trim();
-        if(!name)continue;
-        const cell=row.getCell(supplierCol);
-        if(cell.value==null||cell.value==='')cell.value=lookup(name);
-        cell.alignment={horizontal:'center',vertical:'middle',wrapText:false};
-        const anchor=row.getCell(Math.max(1,supplierCol-1));
-        if(anchor.fill&&anchor.fill.type==='pattern')cell.fill=anchor.fill;
+      ws.getColumn(costCol).numFmt='#,##0';
+      for(let r=headerRow+1;r<=ws.rowCount;r++){
+        const row=ws.getRow(r);
+        const productNames=[...new Set(names.map(c=>cellText(row.getCell(c))).filter(Boolean))];
+        if(!productNames.length)continue;
+        let savedCost=null,savedSupplier='';
+        for(const name of productNames){
+          const hit=window.FORESTFIT_PRICING_API?.lookupCost?.(name,'');
+          const raw=Number(String(hit?.cost??'').replace(/,/g,''));
+          if(savedCost===null&&hit?.cost!==null&&hit?.cost!==undefined&&hit?.cost!==''&&Number.isFinite(raw)&&raw>0)savedCost=raw;
+          if(!savedSupplier)savedSupplier=lookup(name,hit?.key||'');
+          if(savedCost!==null&&savedSupplier)break;
+        }
+        const costCell=row.getCell(costCol),supplierCell=row.getCell(supplierCol);
+        // 기준 원가에 매칭되면 최신 저장값을 우선 반영, 없는 상품은 기존 원가를 보존합니다.
+        if(savedCost!==null)costCell.value=savedCost;
+        if(savedSupplier)supplierCell.value=savedSupplier;
+        costCell.alignment={horizontal:'right',vertical:'middle',wrapText:false};
+        supplierCell.alignment={horizontal:'center',vertical:'middle',wrapText:false};
+        const anchor=row.getCell(names[0]);
+        for(const cell of [costCell,supplierCell]){
+          if(anchor.fill&&anchor.fill.type==='pattern'&&(!cell.fill||cell.fill.type!=='pattern'))cell.fill=anchor.fill;
+        }
       }
-      if(ws.autoFilter)ws.autoFilter={from:{row:hr,column:1},to:{row:hr,column:supplierCol}};
+      if(ws.autoFilter&&typeof ws.autoFilter==='object'){
+        const lastCol=Math.max(ws.columnCount||0,costCol,supplierCol);
+        ws.autoFilter={from:{row:headerRow,column:1},to:{row:headerRow,column:lastCol}};
+      }
     }
     return workbook;
   }
@@ -3931,6 +3970,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
         row.getCell(nameCol).font={...(row.getCell(nameCol).font||{}),color:{argb:'FF333333'}};
         row.commit();
       }
+      window.FORESTFIT_SUPPLIERS?.addToExcelJS?.(wb);
       window.FORESTFIT_APPLY_MALE_BLUE_EXCELJS?.(wb);
       const out=await wb.xlsx.writeBuffer(); const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}); const url=URL.createObjectURL(blob); const a=document.createElement('a');
       const base=state.pricingFile.name.replace(/\.xlsx?$/i,''); a.href=url; a.download=`${base}_신규상품추가_판매가반영.xlsx`; document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -5517,7 +5557,10 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
           const array=window.XLSX.write(workbook,{type:'array',bookType:'xlsx',cellDates:true});
           const ex=new window.ExcelJS.Workbook();
           await ex.xlsx.load(array);
-          if(/행사|기획전|롯데온|판매중.*정리/.test(name))window.FORESTFIT_SUPPLIERS?.addToExcelJS?.(ex);
+          // 행사 결과 리포트만 확장합니다. 쇼핑몰 업로드용 입력 양식은 열 구조 유지.
+          if(/행사|기획전|롯데온|판매중.*정리|퀸잇|gs샵/i.test(name)&&!/옵션조합|입력용|가격책정/i.test(name)){
+            window.FORESTFIT_SUPPLIERS?.addToExcelJS?.(ex);
+          }
           apply(ex);
           const buf=await ex.xlsx.writeBuffer();
           const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
