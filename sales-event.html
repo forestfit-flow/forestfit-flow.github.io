@@ -3022,11 +3022,12 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
         }
         const costCell=row.getCell(costCol),supplierCell=row.getCell(supplierCol);
         if(isBundle){
-          // 1+1 구성품 수량 및 조합을 자동 계산하지 않으며, 담당자가 원가 직접 입력합니다.
-          costCell.value=null;
+          // 1+1: 판매처 상품명 괄호키로 찾은 셀메이트 원가(또는 파일에 이미 들어 있는 원가)는 유지합니다.
+          // 단품 원가와 실제 1+1 총원가가 다를 수 있으므로 원가 셀의 연노란색 강조는 계속 표시합니다.
+          if(costNum(costCell.value)===null&&savedCost!==null)costCell.value=savedCost;
           costCell.fill={type:'pattern',pattern:'solid',fgColor:{argb:ORANGE}};
           costCell.font={...(costCell.font||{}),color:{argb:'FF8B4B00'}};
-          if(typeof costCell.addNote==='function')costCell.addNote('1+1 상품: 구성에 맞는 총원가를 직접 입력하세요.');
+          if(typeof costCell.addNote==='function')costCell.addNote('1+1 상품: 괄호 안 상품명으로 매칭한 원가입니다. 구성별 총원가를 확인하고 필요하면 직접 수정하세요.');
         }else if(savedCost!==null){
           costCell.value=savedCost;
         }
@@ -3063,7 +3064,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
           const row=ws.getRow(r);
           if(!sellerCols.some(c=>isBundleName(row.getCell(c).value)))continue;
           const cell=row.getCell(costCol);
-          cell.value=null;
+          // 마지막 색상 보정에서도 원가값은 지우지 않습니다.
           cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:ORANGE}};
           cell.font={...(cell.font||{}),color:{argb:'FF8B4B00'}};
         }
