@@ -897,7 +897,7 @@ html,body{max-width:100%;overflow-x:hidden}
           <div class="cost-toolbar">
             <div class="cost-toolbar-left"><input class="pricing-input cost-search" id="cost-search" type="search" placeholder="상품명 · 상품키 · 공급처명 검색" /><span class="pricing-count" id="cost-count"></span></div>
             <div class="cost-toolbar-right">
-              <span class="cost-save-note" id="cost-save-state">이 PC에 저장</span>
+              <span class="cost-save-note" id="cost-save-state">입력 즉시 자동 저장 · 이 PC</span>
               <button class="pricing-mini-btn dark" id="ff-cloud-connect" type="button">공유 원가 연결</button>
               <button class="pricing-mini-btn" id="ff-cloud-refresh" type="button" disabled>공유 원가 새로고침</button>
               <button class="pricing-mini-btn" id="ff-cloud-migrate" type="button" disabled title="이 PC의 기존 저장 원가를 최초 1회 클라우드로 옮깁니다">기존 원가 올리기</button>
@@ -3159,7 +3159,17 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   let eventName=localStorage.getItem(STORAGE_EVENT_NAME)||'';
 
   function priceToast(msg){const t=$('#toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(priceToast.timer);priceToast.timer=setTimeout(()=>t.classList.remove('show'),2200);}
-  function saveCore(){saveSuppliers();safeLocalSet(STORAGE_COST,costData);safeLocalSet(STORAGE_MARGIN,marginData);localStorage.setItem(STORAGE_SOURCE,sourceLabel);$('#cost-save-state').textContent=window.FORESTFIT_SHARED_COSTS?.connected?.()?'공유 저장 요청':'이 PC에만 저장됨';window.FORESTFIT_SHARED_COSTS?.saveDiff?.(costData);}
+  function saveCore(){
+    // 상품 원가/공급처 변경 즉시 브라우저에 기록합니다. 클라우드 연결 시에는 공유 저장도 요청합니다.
+    saveSuppliers();
+    const saved=safeLocalSet(STORAGE_COST,costData);
+    safeLocalSet(STORAGE_MARGIN,marginData);
+    try{localStorage.setItem(STORAGE_SOURCE,sourceLabel);}catch(err){console.warn('[FORESTFIT] 설정 저장 실패',err);}
+    const label=$('#cost-save-state');
+    if(label)label.textContent=!saved?'저장 실패 · 저장 공간 확인':window.FORESTFIT_SHARED_COSTS?.connected?.()?'이 PC 저장됨 · 공유 저장 요청':'이 PC에 자동 저장됨';
+    window.FORESTFIT_SHARED_COSTS?.saveDiff?.(costData);
+    return saved;
+  }
   function stripNo(v){return String(v??'').replace(/^\s*\d{1,3}\s*(?:[.)]|[-–—])\s*/,'').trim();}
   function rebuildCostIndex(){
     const byKey=new Map(),byName=new Map();
@@ -3218,14 +3228,53 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   $('#pricing-rate-row').addEventListener('click',e=>{const b=e.target.closest('[data-rate]');if(!b)return;const r=Number(b.dataset.rate);if(!EVENT_RATES.includes(r))return;selectedRate=r;localStorage.setItem(STORAGE_CHANNEL,String(r));renderMargin();renderChannel();});
 
   const escAttr=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // 표의 원가를 입력한 순간 자동 저장하고, 무거운 행사가 계산 화면만 짧게 지연하여 갱신합니다.
+  let costChannelRefreshTimer=null;
+  const refreshChannelAfterCostEdit=()=>{
+    clearTimeout(costChannelRefreshTimer);
+    costChannelRefreshTimer=setTimeout(()=>renderChannel(),250);
+  };
   function renderCosts(){
     const q=norm($('#cost-search').value);
     const rows=costData.map((x,i)=>({...x,_i:i})).filter(x=>!q||norm(x.name).includes(q)||norm(x.key).includes(q)||norm(x.supplier).includes(q));
     $('#cost-count').innerHTML=`<strong>${rows.length.toLocaleString('ko-KR')}</strong> / ${costData.length.toLocaleString('ko-KR')}`;
     const shown=rows.slice(0,350);
-    $('#cost-table-body').innerHTML=shown.map(x=>`<tr><td>${escAttr(x.name)}</td><td>${escAttr(x.key)}</td><td class="num"><input class="cost-cell-input" data-cost-index="${x._i}" value="${toNum(x.cost)??''}" inputmode="numeric"></td><td><input class="cost-supplier-input" data-supplier-index="${x._i}" value="${escAttr(x.supplier)}" placeholder="공급처명"></td><td><span class="cost-save-note">자동</span></td></tr>`).join('');
-    $('#cost-table-body').querySelectorAll('[data-cost-index]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.costIndex),v=toNum(inp.value);if(v!==null){costData[i].cost=v;saveCore();renderChannel();}}));
-    $('#cost-table-body').querySelectorAll('[data-supplier-index]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.supplierIndex);if(!costData[i])return;costData[i].supplier=inp.value.trim();saveCore();}));
+    $('#cost-table-body').innerHTML=shown.map(x=>`<tr><td>${escAttr(x.name)}</td><td>${escAttr(x.key)}</td><td class="num"><input class="cost-cell-input" data-cost-index="${x._i}" value="${toNum(x.cost)??''}" inputmode="numeric"></td><td><input class="cost-supplier-input" data-supplier-index="${x._i}" value="${escAttr(x.supplier)}" placeholder="공급처명"></td><td><span class="cost-save-note" data-row-save>자동 저장</span></td></tr>`).join('');
+    $('#cost-table-body').querySelectorAll('[data-cost-index]').forEach(inp=>{
+      const commit=()=>{
+        const i=Number(inp.dataset.costIndex),v=toNum(inp.value);
+        if(!costData[i]||v===null||v<=0)return false;
+        if(Number(costData[i].cost)===v)return true;
+        costData[i].cost=v;
+        const saved=saveCore();
+        const label=inp.closest('tr')?.querySelector('[data-row-save]');
+        if(label)label.textContent=saved?'저장됨':'저장 실패';
+        refreshChannelAfterCostEdit();
+        return saved;
+      };
+      inp.addEventListener('input',commit);
+      inp.addEventListener('change',()=>{
+        if(!commit()){
+          // 잘못된 금액은 기존 저장값을 유지합니다.
+          inp.value=toNum(costData[Number(inp.dataset.costIndex)]?.cost)??'';
+          priceToast('원가는 0보다 큰 숫자로 입력해주세요.');
+        }
+      });
+    });
+    $('#cost-table-body').querySelectorAll('[data-supplier-index]').forEach(inp=>{
+      const commit=()=>{
+        const i=Number(inp.dataset.supplierIndex);
+        if(!costData[i])return;
+        const supplier=inp.value.trim();
+        if((costData[i].supplier||'')===supplier)return;
+        costData[i].supplier=supplier;
+        const saved=saveCore();
+        const label=inp.closest('tr')?.querySelector('[data-row-save]');
+        if(label)label.textContent=saved?'저장됨':'저장 실패';
+      };
+      inp.addEventListener('input',commit);
+      inp.addEventListener('change',commit);
+    });
   }
   $('#cost-search').addEventListener('input',renderCosts);
   $('#cost-add-btn').addEventListener('click',()=>{
