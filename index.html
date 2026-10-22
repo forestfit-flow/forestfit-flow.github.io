@@ -139,7 +139,7 @@ button,input{font:inherit}
 .card:nth-child(3),.card:nth-child(4),.card:nth-child(5){grid-column:span 4;min-height:198px}
 .card:nth-child(6){grid-column:span 5;min-height:232px}
 .card:nth-child(7){grid-column:span 7;min-height:232px}
-.card:nth-child(8){grid-column:span 12;min-height:208px}
+.card:nth-child(8),.card:nth-child(9){grid-column:span 6;min-height:208px}
 .card::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,var(--accent),transparent 70%);opacity:.8}
 .card::after{content:"";position:absolute;inset:auto 24px 20px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle, color-mix(in srgb,var(--accent) 12%, transparent), transparent 68%);opacity:.5;pointer-events:none}
 .card:hover{transform:translateY(-3px);border-color:var(--line-strong);background:#fff}
@@ -339,7 +339,7 @@ body.locked > *:not(#passwordGate){visibility:hidden;pointer-events:none;user-se
 </div>
 
 <div class="wrap">
-  <div class="section-head"><strong>Work Index</strong><span><span id="resultCount">04</span> / 08</span></div>
+  <div class="section-head"><strong>Work Index</strong><span><span id="resultCount">05</span> / 09</span></div>
 
   <main class="tools">
     <a class="card delivery reveal" href="integrated-delivery.html" data-category="delivery" data-groups="supply" data-search="통합 납기관리 납기 배송 출고 delivery schedule">
@@ -381,6 +381,11 @@ body.locked > *:not(#passwordGate){visibility:hidden;pointer-events:none;user-se
       <div class="card-top"><div class="card-index"><span class="mini-no">008</span><span class="category">Sales · Event</span></div><span class="card-arrow">↗</span></div>
       <div class="card-body"><h2 class="tool-name">행사</h2><span class="card-label">Sales Team · Open tool</span></div><span class="card-watermark">08</span>
     </a>
+    <a class="card analytics reveal" href="middleware-center.html" data-category="middleware" data-groups="sales" data-search="미들웨어 판매팀 미들웨어 재고장 연동 미등록 상품 매핑 middleware stock sync unmapped mapping">
+      <div class="card-top"><div class="card-index"><span class="mini-no">009</span><span class="category">Middleware</span></div><span class="card-arrow">↗</span></div>
+      <div class="card-body"><h2 class="tool-name">미들웨어</h2><span class="card-label">Sales Team · Open tool</span></div><span class="card-watermark">09</span>
+    </a>
+
 <div class="empty" id="emptyState">검색 결과가 없습니다.</div>
   </main>
 
