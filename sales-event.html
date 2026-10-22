@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FORESTFIT · 채널별 행사</title>
+  <!-- 2026-10-22 cloud connection + sellmate cost file null guard -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -903,6 +904,7 @@ html,body{max-width:100%;overflow-x:hidden}
               <button class="pricing-mini-btn" id="ff-cloud-migrate" type="button" disabled title="이 PC의 기존 저장 원가를 최초 1회 클라우드로 옮깁니다">기존 원가 올리기</button>
               <button class="pricing-mini-btn" id="ff-cloud-apply-csv" type="button" disabled title="2026-10-13 CSV 원가 1,065건을 클라우드에 반영합니다">10/13 CSV 원가 공유 반영</button>
               <span class="cost-save-note" id="ff-cloud-status" role="status" aria-live="polite">공유 연결 전 · 이 PC에만 저장됨</span>
+              <span class="cost-save-note" id="ff-patch-marker" style="color:#6a62ba">연결 수정본 10/22</span>
               <span class="cost-save-note" id="cost-import-state"></span>
               <label class="pricing-mini-btn dark" for="pricing-cost-sellmate-file">셀메이트 원가 파일 첨부</label>
               <input id="pricing-cost-sellmate-file" type="file" accept=".csv,.xlsx,.xls" style="display:none" />
@@ -3333,7 +3335,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     const seen=new Set();pricingRows=out.filter(x=>{const k=norm(x.name);if(seen.has(k))return false;seen.add(k);return true;});safeLocalSet(STORAGE_ROWS,pricingRows);renderChannel();return pricingRows.length;
   }
 
-  function renderChannelSelect(){const s=$('#channel-select');if(s)s.value=String(selectedRate);const base=RATE_BASE[selectedRate]||selectedRate;const derived=!NATIVE_RATES.includes(selectedRate);$('#channel-rate-badge').textContent=derived?`수수료 ${selectedRate}% · ${base}% 기준 역산`:`수수료 ${selectedRate}% · 기존표`;const n=$('#pricing-event-name');if(n&&n.value!==eventName)n.value=eventName;}
+  function renderChannelSelect(){const s=$('#channel-select');if(s)s.value=String(selectedRate);const base=RATE_BASE[selectedRate]||selectedRate;const derived=!NATIVE_RATES.includes(selectedRate);const rateBadge=$('#channel-rate-badge');if(rateBadge)rateBadge.textContent=derived?`수수료 ${selectedRate}% · ${base}% 기준 역산`:`수수료 ${selectedRate}% · 기존표`;const n=$('#pricing-event-name');if(n&&n.value!==eventName)n.value=eventName;}
   function rowStatus(row,cost,margin,end){if(cost===null)return ['원가 입력','bad'];if(margin===null)return ['마지노선 확인','warn'];if(end!==null&&end<margin)return ['마지노선 미달','bad'];return ['조회완료','ok'];}
   function renderChannel(){renderChannelSelect();const rate=selectedRate;const tbody=$('#channel-table-body'),empty=$('#channel-empty');if(!pricingRows.length){tbody.innerHTML='';empty.style.display='block';return;}empty.style.display='none';tbody.innerHTML=pricingRows.map((row,i)=>{const hit=lookupCost(row.name,row.key),cost=hit?toNum(hit.cost):null,margin=marginAt(cost,rate),end=endingPrice(row.proposed,row.coupon),ratio=(cost!==null&&end)?cost/end:null,[st,cls]=rowStatus(row,cost,margin,end);return `<tr class="${end!==null&&margin!==null&&end<margin?'danger':''}"><td><input class="editable-price" style="text-align:left" data-row-field="code" data-row-i="${i}" value="${String(row.code??'').replace(/"/g,'&quot;')}"></td><td><input class="editable-price product-name-input" data-row-field="name" data-row-i="${i}" value="${String(row.name??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}"></td><td><input class="editable-price" style="text-align:left;width:210px" data-row-field="options" data-row-i="${i}" value="${String(row.options??'').replace(/"/g,'&quot;')}"></td><td class="num"><input class="editable-price" data-row-field="normal" data-row-i="${i}" value="${row.normal??''}"></td><td class="num"><input class="editable-price" data-row-field="proposed" data-row-i="${i}" value="${row.proposed??''}"></td><td class="num"><input class="editable-price" data-row-field="coupon" data-row-i="${i}" value="${row.coupon??''}"></td><td class="num">${fmt(end)}</td><td class="num">${cost===null?`<input class="cost-cell-input missing" data-missing-cost="${i}" placeholder="원가 입력">`:fmt(cost)}</td><td class="num">${fmt(margin)}</td><td class="num"><input class="editable-price" data-row-field="lowest" data-row-i="${i}" value="${row.lowest??''}"></td><td class="num">${ratio===null?'-':(ratio*100).toFixed(1)+'%'}</td><td>${row.key||displayKey(row.name)||'-'}</td><td><span class="status-pill ${cls}">${st}</span></td></tr>`;}).join('');
     tbody.querySelectorAll('[data-row-field]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.rowI),f=inp.dataset.rowField;if(f==='name'){pricingRows[i].name=stripNo(inp.value);pricingRows[i].key=productKeyFor(pricingRows[i].name);}else{pricingRows[i][f]=(f==='code'||f==='options')?inp.value:toNum(inp.value);}safeLocalSet(STORAGE_ROWS,pricingRows);renderChannel();}));
@@ -3523,8 +3525,8 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   // Project Settings > API Keys > Publishable key (또는 기존 anon public key)
   // service_role / secret key는 절대 입력하지 마세요.
   // ========================================
-  const FF_SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
-  const FF_SUPABASE_PUBLISHABLE_KEY = 'YOUR_PUBLISHABLE_KEY';
+  const FF_SUPABASE_URL = 'https://xblqgllzkvfmtogtzljl.supabase.co';
+  const FF_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_wPZrGqO_6bcGki1uZezr0Q_lTvjjHHR';
 
   const $=s=>document.querySelector(s);
   const status=$('#ff-cloud-status');
@@ -3534,7 +3536,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const migrateBtn=$('#ff-cloud-migrate');
   const csvBtn=$('#ff-cloud-apply-csv');
   const api=window.FORESTFIT_PRICING_API;
-  let client=null, password='', isConnected=false, busy=false, latestLocal=[], migrationSnapshot=[];
+  let client=null, isConnected=false, busy=false, latestLocal=[], migrationSnapshot=[];
   let baseline=new Map(), pending=new Map(), debounce=null, poll=null;
   let requestVersion=0;
   const normalize=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/봄|가을/g,'').replace(/\s+/g,'').replace(/[._·:：\-–—]/g,'');
@@ -3575,7 +3577,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     // Supabase API 기본 응답 행 제한(일반적으로 1000행)을 고려해 페이지별로 불러옵니다.
     const result=[],pageSize=500;
     for(let start=0;start<100000;start+=pageSize){
-      const {data,error}=await client.rpc('forestfit_get_costs',{p_password:password})
+      const {data,error}=await client.rpc('forestfit_get_costs')
         .range(start,start+pageSize-1);
       if(error)throw error;
       const page=Array.isArray(data)?data:[];
@@ -3605,7 +3607,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   async function saveBatch(rows){
     for(let i=0;i<rows.length;i+=200){
       const chunk=rows.slice(i,i+200);
-      const {error}=await client.rpc('forestfit_save_costs',{p_password:password,p_items:chunk});
+      const {error}=await client.rpc('forestfit_save_costs',{p_items:chunk});
       if(error)throw error;
       for(const x of chunk)baseline.set(x.product_id,x);
     }
@@ -3614,18 +3616,20 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   async function flush(){
     if(!isConnected||busy||!pending.size)return;
     const patch=[...pending.values()];pending.clear();
-    busy=true;setStatus(`${patch.length}개 상품 공유 저장 중…`);
+    busy=true;let failed=false;setStatus(`${patch.length}개 상품 공유 저장 중…`);
     try{
       await saveBatch(patch);
       setStatus(`${patch.length}개 상품 클라우드 저장 완료`, 'ok');
     }catch(err){
+      failed=true;
       console.error('[FORESTFIT cloud save]',err);
       for(const row of patch)if(!pending.has(row.product_id))pending.set(row.product_id,row);
-      setStatus('공유 저장 실패 · 연결 및 비밀번호를 확인하세요: '+describeErr(err),'error');
-      setTimeout(()=>{if(isConnected&&!busy&&pending.size)flush();},15000);
+      setStatus('공유 저장 실패 · 연결 또는 DB 설정을 확인하세요: '+describeErr(err),'error');
+      // 실패 후 무한 재시도 대신 15초 이후에만 재시도합니다.
     }finally{
       busy=false;
-      if(pending.size)scheduleSave(150);
+      if(failed){if(pending.size)scheduleSave(15000);}
+      else if(pending.size)scheduleSave(150);
       else refresh(true);
     }
   }
@@ -3645,9 +3649,6 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       setStatus('연결 설정 필요: URL / Publishable key','error');return;
     }
     if(!window.supabase?.createClient){alert('Supabase 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');return;}
-    const entered=prompt('FORESTFIT 공유 원가 비밀번호를 입력하세요.\n※ 비밀번호는 GitHub/HTML에 저장되지 않습니다.');
-    if(!entered)return;
-    password=entered;
     migrationSnapshot=api?.allCosts?.()||[]; // 연결 전 이 PC에 저장돼 있던 원가의 사본
     // 최초 연결 시 이전 버전 로컬 데이터를 별도 키로 백업합니다.
     try{
@@ -3657,7 +3658,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       else localStorage.setItem(backupKey,JSON.stringify(migrationSnapshot));
     }catch(e){console.warn('기존 원가 백업을 만들지 못했습니다.',e);}
     try{
-      connectBtn.disabled=true;setStatus('Supabase 접속 및 비밀번호 확인 중…');
+      connectBtn.disabled=true;setStatus('Supabase 자동 연결 중…');
       client=window.supabase.createClient(FF_SUPABASE_URL,FF_SUPABASE_PUBLISHABLE_KEY,{
         auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
       });
@@ -3669,7 +3670,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       if(!poll)poll=setInterval(()=>refresh(true),30000);
     }catch(err){
       console.error('[FORESTFIT cloud connect]',err);
-      client=null;password='';isConnected=false;
+      client=null;isConnected=false;
       setStatus('공유 연결 실패: '+describeErr(err),'error');
       alert('공유 원가 연결에 실패했습니다.\n'+describeErr(err));
     }finally{connectBtn.disabled=false;setButtons();}
@@ -3714,7 +3715,10 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true);});
   window.FORESTFIT_SHARED_COSTS={saveDiff,connected:()=>isConnected,refresh};
   setButtons();
-  setStatus('공유 연결 전 · 이 PC에만 저장됨');
+  if(confReady()){
+    setStatus('클라우드 자동 연결 대기 중…');
+    connect().catch(err=>{console.error('[FORESTFIT auto connect]',err);});
+  }else setStatus('클라우드 설정 전 · 이 PC에 자동 저장됨');
 })();
 </script>
 
@@ -4428,7 +4432,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const nkey=name=>norm(name).replace(/^\s*\d+\s*[.)-]\s*/,'').toLowerCase();
   const idx=(row,aliases)=>{const a=(row||[]).map(nh);for(const alias of aliases){const k=nh(alias),i=a.findIndex(x=>x===k);if(i>=0)return i}return-1};
   const saveBlob=(blob,name)=>{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
-  function bindDrop(dropSel,inputSel,nameSel,sizeSel,onFile){const d=$(dropSel),i=$(inputSel),n=$(nameSel),z=$(sizeSel);const set=f=>{if(!f)return;d.classList.add('loaded');n.textContent=f.name;z.textContent=fsize(f.size);onFile(f)};i.addEventListener('change',()=>set(i.files?.[0]));['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();d.classList.add('dragover')}));['dragleave','dragend'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('dragover')}));d.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();d.classList.remove('dragover');set(e.dataTransfer?.files?.[0])})}
+  function bindDrop(dropSel,inputSel,nameSel,sizeSel,onFile){const d=$(dropSel),i=$(inputSel),n=$(nameSel),z=$(sizeSel);if(!d||!i||!n||!z)return;const set=f=>{if(!f)return;d.classList.add('loaded');n.textContent=f.name;z.textContent=fsize(f.size);onFile(f)};i.addEventListener('change',()=>set(i.files?.[0]));['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();d.classList.add('dragover')}));['dragleave','dragend'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('dragover')}));d.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();d.classList.remove('dragover');set(e.dataTransfer?.files?.[0])})}
 
   $$('.lw-tab').forEach(btn=>btn.addEventListener('click',()=>{$$('.lw-tab').forEach(x=>x.classList.toggle('active',x===btn));$$('.lw-pane').forEach(x=>x.classList.toggle('active',x.dataset.lwContent===btn.dataset.lwPane))}));
 
@@ -4440,7 +4444,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   function weekCurrentItems(m){const out=[],seen=new Set();for(let r=m.header+1;r<m.rows.length;r++){const row=m.rows[r]||[],code=norm(row[m.seller]),name=norm(row[m.name]);if(!code||!name||seen.has(code))continue;const app=m.app>=0?norm(row[m.app]):'';if(/딜크릿/i.test(name))continue;if((/APP/i.test(app)&&/전용/.test(app))||/\[?APP\s*전용\]?/i.test(name))continue;seen.add(code);out.push({code,name,price:num(row[m.price]),regDate:m.reg>=0?fmtDate(row[m.reg]):''})}return out}
   async function buildWeek(){if(!week.prev||!week.current)return;$('#lw-week-status').textContent='두 파일을 비교하고 있습니다…';try{const [pa,ca]=await Promise.all([week.prev.arrayBuffer(),week.current.arrayBuffer()]),pm=findPrevMeta(XLSX.read(pa,{type:'array'})),cm=findCurrentMeta(XLSX.read(ca,{type:'array'})),prev=weekPrevItems(pm),cur=weekCurrentItems(cm),byCode=new Map(cur.map(x=>[x.code,x])),byKey=new Map(),byName=new Map();cur.forEach(x=>{const k=pkey(x.name),n=nkey(x.name);if(k&&!byKey.has(k))byKey.set(k,x);if(n&&!byName.has(n))byName.set(n,x)});const prevCodes=new Set(prev.map(x=>x.code));const rows=prev.map(x=>{let c=byCode.get(x.code);if(!c)c=(pkey(x.name)&&byKey.get(pkey(x.name)))||byName.get(nkey(x.name));return{...x,price:c?.price??null,regDate:c?.regDate||'',isNew:false}});cur.forEach(x=>{if(!prevCodes.has(x.code))rows.push({code:x.code,name:x.name,price:x.price,regDate:x.regDate||'',discount:'',isNew:true})});week.rows=rows;week.prevCount=prev.length;week.newCount=rows.filter(x=>x.isNew).length;$('#lw-week-prev-count').textContent=prev.length.toLocaleString();$('#lw-week-new-count').textContent=week.newCount.toLocaleString();$('#lw-week-total-count').textContent=rows.length.toLocaleString();$('#lw-week-body').innerHTML=rows.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.regDate||'')}</td><td title="${esc(x.name)}">${esc(x.name)}</td><td>${x.price==null?'':x.price.toLocaleString('ko-KR')}</td><td>${esc(x.discount)}</td></tr>`).join('');$('#lw-week-result').classList.add('show');$('#lw-week-download').disabled=false;$('#lw-week-status').innerHTML=`기존 <strong>${prev.length}</strong>개 + 신규 <strong>${week.newCount}</strong>개 = 결과 <strong>${rows.length}</strong>개`}catch(e){console.error(e);$('#lw-week-download').disabled=true;$('#lw-week-status').textContent=e.message||'파일 분석 중 오류가 발생했습니다.'}}
   bindDrop('#lw-week-prev-drop','#lw-week-prev','#lw-week-prev-name','#lw-week-prev-size',f=>{week.prev=f;if(week.current)buildWeek()});bindDrop('#lw-week-current-drop','#lw-week-current','#lw-week-current-name','#lw-week-current-size',f=>{week.current=f;if(week.prev)buildWeek()});
-  $('#lw-week-download').addEventListener('click',()=>{if(!week.rows.length)return;const data=[['상품코드','상품등록일자','상품명','상시판매가','기존 스토어 할인률'],...week.rows.map(x=>[String(x.code||''),x.regDate||'',x.name||'',x.price??'',x.discount??''])],ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();ws['!cols']=[{wch:20},{wch:14},{wch:58},{wch:16},{wch:20}];XLSX.utils.book_append_sheet(wb,ws,'롯데온 가격컨펌');XLSX.writeFile(wb,'롯데온_가격컨펌.xlsx')});
+  $('#lw-week-download')?.addEventListener('click',()=>{if(!week.rows.length)return;const data=[['상품코드','상품등록일자','상품명','상시판매가','기존 스토어 할인률'],...week.rows.map(x=>[String(x.code||''),x.regDate||'',x.name||'',x.price??'',x.discount??''])],ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();ws['!cols']=[{wch:20},{wch:14},{wch:58},{wch:16},{wch:20}];XLSX.utils.book_append_sheet(wb,ws,'롯데온 가격컨펌');XLSX.writeFile(wb,'롯데온_가격컨펌.xlsx')});
 
   // ---------- 기획전 ----------
   // 셀메이트 상품목록 2026-09-18 기준 내장 DB: 매출순위에 없는 롯데온 상품의 상품명/원가 보완용
