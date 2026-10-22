@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>재고장 · 미들웨어 수량 매칭</title>
+  <title>미들웨어 | FORESTFIT 업무센터</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
@@ -19,15 +19,107 @@
     .download-note{background:var(--green2);border-radius:12px;padding:13px 14px;margin-bottom:13px;color:var(--green)}
     .precheck-stack{display:grid;gap:14px}.precheck-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff}.precheck-card.add{border-color:#efd18e;background:#fffaf1}.precheck-card.remove{border-color:#efbcbc;background:#fff7f7}.precheck-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:5px}.precheck-title h3{margin:0;font-size:17px}.precheck-count{flex:0 0 auto;padding:4px 9px;border-radius:999px;font-weight:850;font-size:12px}.precheck-card.add .precheck-count{background:#f8e7bd;color:#815700}.precheck-card.remove .precheck-count{background:#f8dddd;color:#a92f2f}.precheck-help{margin:0 0 13px;color:var(--muted)}.precheck-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 10px;margin:0;padding:0;list-style:none}.precheck-list li{border:1px solid rgba(0,0,0,.07);border-radius:9px;background:rgba(255,255,255,.75);padding:9px 11px;font-weight:780;overflow-wrap:anywhere}.precheck-summary-action{display:flex;align-items:flex-start;gap:8px;margin-top:14px;padding:12px 13px;border-radius:10px;font-weight:850;font-size:15px;line-height:1.45}.precheck-card.add .precheck-summary-action{background:#fff0c9;color:#835700}.precheck-card.remove .precheck-summary-action{background:#ffe4e4;color:#ae3030}.arrow{font-size:21px;line-height:1.1;flex:0 0 auto}.all-ok{padding:18px;text-align:center;border:1px solid #b8d8c7;background:var(--green2);color:var(--green);border-radius:12px;font-weight:800}@media(max-width:700px){.precheck-list{grid-template-columns:1fr}}
     @media(max-width:700px){.summary{grid-template-columns:repeat(2,1fr)}.wrap{padding:0 12px}.step-head,.body{padding:17px}}
+
+    /* FORESTFIT Workroom | 미들웨어 내부 탭 UI (원본 업무 로직과 분리) */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap');
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    :root{--workspace-bg:#f5f6f7;--workspace-ink:#202936;--workspace-line:#d9dee5;--workspace-muted:#8893a2;--workspace-accent:#302e38}
+    html{scroll-behavior:smooth}
+    body{background:var(--workspace-bg);color:var(--workspace-ink);font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 0 76px;width:calc(100% - 88px)}
+    .utility-header{height:72px;border-bottom:1px solid var(--workspace-line);display:flex;align-items:center;gap:22px}
+    .small-brand{color:#202936;text-decoration:none;font:800 15px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.05em;white-space:nowrap}
+    .breadcrumb{display:flex;gap:10px;align-items:center;color:#9aa3ae;font-size:11px;font-weight:650}
+    .breadcrumb strong{color:#6d7889}
+    .main-back{margin-left:auto;color:#748092;font-size:12px;text-decoration:none;font-weight:700}
+    .main-back:hover{color:#202936}
+    .hero{margin:0;padding:64px 0 40px}
+    .hero-eyebrow{display:flex;gap:10px;align-items:center;color:#8f95a2;font:800 10px/1.3 'Plus Jakarta Sans',sans-serif;letter-spacing:.13em}
+    .hero-eyebrow span{display:block;width:25px;height:1px;background:#9eabc3}
+    .hero h1{display:flex;align-items:baseline;flex-wrap:wrap;gap:18px;margin:16px 0 14px;color:#202936;font-size:clamp(38px,5.1vw,65px);font-weight:750;line-height:1.12;letter-spacing:-.065em}
+    .hero h1 em{color:#828ba6;font:italic 500 clamp(27px,3.2vw,42px)/1 'Cormorant Garamond',Georgia,serif;letter-spacing:-.035em}
+    .hero p{margin:0;color:#929aa7;font-size:13px;line-height:1.75}
+    .workspace-tabs{display:flex;gap:4px;align-items:center;padding:7px;border:1px solid #e3e3e6;border-radius:18px;background:rgba(255,255,255,.85);box-shadow:0 14px 35px rgba(30,40,56,.035)}
+    .workspace-tab{font-family:'Pretendard',sans-serif;flex:1;min-width:0;border:0;border-radius:11px;padding:16px 12px;background:transparent;color:#858b97;font-size:13px;font-weight:800;line-height:1.25;transition:background .18s ease,color .18s ease,box-shadow .18s ease}
+    .workspace-tab:not(.active):hover{background:#edf0f5;color:#293247}
+    .workspace-tab.active{background:var(--workspace-accent);color:#fff;box-shadow:0 4px 13px rgba(32,33,43,.14)}
+    .workspace-tab:focus-visible{outline:2px solid #8593b4;outline-offset:2px}
+    .workspace-meta{display:flex;justify-content:space-between;gap:10px;padding:18px 2px 13px;color:#929aa7;font:800 9px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:.1em}
+    .workspace-content{background:#fff;border:1px solid #dfe3ee;border-radius:24px;overflow:hidden;box-shadow:0 16px 44px rgba(30,40,56,.035)}
+    .workspace-content[hidden]{display:none!important}
+    .workspace-content-head{text-align:center;padding:28px 20px 26px;background:linear-gradient(135deg,#f8f8fc,#fff 75%);border-bottom:1px solid #e7e9f0}
+    .content-sup{display:block;margin-bottom:11px;color:#9ba5b9;font:800 9px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:.14em}
+    .workspace-content-head h2{font-size:20px;font-weight:750;letter-spacing:-.04em;color:#293245;margin:0 0 9px}
+    .workspace-content-head p{margin:0;color:#9098a5;font-size:12px;line-height:1.65}
+    .workspace-content-body{padding:13px 24px 24px;background:#fdfdff}
+    .workspace-content-body .step{background:#fff;border:1px solid #e5e8ef;box-shadow:none;border-radius:15px;margin:12px 0}
+    .workspace-content-body .step-head{border-bottom:1px solid #eff0f5;padding:19px 22px}
+    .workspace-content-body .num{background:#485675;color:#fff;width:29px;height:29px;border-radius:9px;font:800 12px/29px 'Plus Jakarta Sans',sans-serif;text-align:center}
+    .workspace-content-body .step h2{font-size:16px;color:#2c3547}
+    .workspace-content-body .desc{color:#8c96a5;font-size:12px}
+    .workspace-content-body .body{padding:18px 22px}
+    .workspace-content-body .dropzone{border:1.5px dashed #c3cbd9;background:#fafbfe;color:#818da0}
+    .workspace-content-body .dropzone strong{color:#364256}
+    .workspace-content-body .dropzone:hover,.workspace-content-body .dropzone.dragover{border-color:#6e819e;background:#f0f3fa;color:#34465f}
+    .workspace-content-body .primary{background:#31384a;color:#fff}
+    .workspace-content-body .secondary{background:#eef1f6;color:#46556d}
+    .workspace-content-body .primary:not(:disabled):hover{background:#485775}
+    .workspace-content-body .status.ok{background:#eef6f1;color:#356d4b}
+    .workspace-content-body .download-note{background:#eef5f0;color:#377050}
+    .mapping-placeholder{min-height:370px;display:grid;grid-template-columns:230px minmax(0,1fr);align-items:center;gap:42px;padding:54px max(30px,7%);background:linear-gradient(130deg,#fff,#fafbfe)}
+    .mapping-visual{height:210px;position:relative;display:flex;align-items:center;justify-content:center;border:1px solid #e4e8f1;background:linear-gradient(145deg,#f9fafe,#f1f4f9);border-radius:22px;overflow:hidden}
+    .mapping-visual > span:first-child{font:800 113px/1 'Plus Jakarta Sans',sans-serif;color:#e2e7f0;letter-spacing:-.12em}
+    .mapping-visual-label{position:absolute;bottom:23px;left:24px;color:#98a3b5;font:800 9px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:.14em}
+    .planning-marker{display:inline-block;border:1px solid #e1e5ee;border-radius:100px;padding:7px 11px;color:#8491a5;font-size:11px;font-weight:800;background:#f8f9fc}
+    .mapping-details h3{margin:18px 0 13px;font-size:clamp(24px,2.5vw,32px);line-height:1.2;font-weight:750;letter-spacing:-.05em;color:#293245}
+    .mapping-details p{margin:0;color:#8994a5;font-size:13px;line-height:1.85;word-break:keep-all}
+    .mapping-footnote{border-top:1px solid #e7eaf0;margin-top:25px;padding-top:16px;color:#929cab;font-size:12px;line-height:1.7}
+    .mapping-footnote span{margin-right:5px;color:#6e7d96}
+    .workspace-footer{display:flex;justify-content:space-between;gap:20px;align-items:center;border-top:1px solid var(--workspace-line);min-height:90px;margin-top:44px;font:800 9px/1.4 'Plus Jakarta Sans',sans-serif;letter-spacing:.12em;color:#a3acb8}
+    .workspace-footer a{color:#778397;text-decoration:none;font:700 12px/1 'Pretendard',sans-serif;letter-spacing:normal}
+    .workspace-footer a:hover{color:#293245}
+    @media(max-width:700px){
+      .wrap{width:calc(100% - 32px);padding-bottom:30px}
+      .utility-header{height:64px;gap:9px}.breadcrumb{gap:6px;font-size:10px}.small-brand{font-size:13px}.main-back{font-size:10px}
+      .hero{padding:48px 0 28px}.hero h1{gap:9px;font-size:40px}.hero h1 em{font-size:27px}.hero p{font-size:12px}
+      .workspace-tab{font-size:12px;padding:13px 5px}.workspace-meta{font-size:8px}
+      .workspace-content-head{padding:24px 17px}.workspace-content-head h2{font-size:18px}
+      .workspace-content-body{padding:9px 10px 12px}.workspace-content-body .step-head,.workspace-content-body .body{padding:16px 14px}
+      .mapping-placeholder{grid-template-columns:1fr;gap:22px;padding:25px 20px 33px}.mapping-visual{height:150px}.mapping-visual > span:first-child{font-size:80px}.mapping-details h3{font-size:25px}
+      .desktop-break{display:none}.workspace-footer{gap:12px;flex-direction:column;align-items:flex-start;justify-content:center;padding:20px 0}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
 <body>
 <div class="wrap">
+  <header class="utility-header">
+    <a class="small-brand" href="index.html" aria-label="FORESTFIT 메인 화면">FORESTFIT</a>
+    <div class="breadcrumb"><span>판매팀</span><span aria-hidden="true">/</span><strong>미들웨어</strong></div>
+    <a class="main-back" href="index.html">← 업무센터 메인</a>
+  </header>
+
   <div class="hero">
-    <h1>재고장 · 미들웨어 수량 매칭</h1>
-    <p>재고장 K열의 수량을 상품명·색상·기장·사이즈 기준으로 찾아 미들웨어 D열에 반영합니다.</p>
+    <div class="hero-eyebrow"><span></span> SALES · MIDDLEWARE</div>
+    <h1>미들웨어 <em>Middleware Workspace</em></h1>
+    <p>재고장 수량 연동과 미등록 상품 매핑을 하나의 업무 화면에서 관리합니다.</p>
   </div>
 
+  <nav class="workspace-tabs" role="tablist" aria-label="미들웨어 업무 종류">
+    <button class="workspace-tab active" id="tab-stock" role="tab" aria-selected="true" aria-controls="stock-panel" type="button" data-workspace-tab="stock">미들웨어 재고장 연동</button>
+    <button class="workspace-tab" id="tab-mapping" role="tab" aria-selected="false" aria-controls="mapping-panel" tabindex="-1" type="button" data-workspace-tab="mapping">미등록 상품 매핑</button>
+  </nav>
+
+  <div class="workspace-meta" aria-hidden="true"><span>STOCK · MIDDLEWARE</span><span>FORESTFIT INTERNAL WORKSPACE</span></div>
+
+  <main>
+    <div class="workspace-content" id="stock-panel" role="tabpanel" aria-labelledby="tab-stock">
+      <div class="workspace-content-head">
+        <span class="content-sup">01 / STOCK SYNC</span>
+        <h2>미들웨어 재고장 연동</h2>
+        <p>재고장 K열 수량을 상품명·색상·기장·사이즈 기준으로 매칭해 미들웨어 D열에 반영합니다.</p>
+      </div>
+      <div class="workspace-content-body">
   <section class="step" id="step1">
     <div class="step-head"><div class="num">1</div><div><h2>재고장 파일 첨부</h2><p class="desc">첫 번째 탭은 제외하고 두 번째 탭부터 B·C·E 병합값과 F·K열을 읽습니다.</p></div></div>
     <div class="body"><div class="filebox"><label class="dropzone" id="stockDropzone" for="stockFile"><strong>재고장 파일을 클릭하거나 이곳에 끌어다 놓아주세요.</strong><small>지원 형식: .xlsx, .xlsm</small><input id="stockFile" type="file" accept=".xlsx,.xlsm" /></label></div><div id="stockStatus" class="status">재고장 파일을 선택해주세요.</div></div>
@@ -57,6 +149,27 @@
     <div class="step-head"><div class="num">6</div><div><h2>결과 파일 다운로드</h2><p class="desc">매칭된 행만 미들웨어 D열에 반영하고, 매칭 실패 항목은 기존 D열 값을 유지합니다.</p></div></div>
     <div class="body"><div id="downloadNote" class="download-note">매칭을 먼저 실행해주세요.</div><button id="downloadBtn" class="primary" disabled>미들웨어 반영 파일 다운로드</button></div>
   </section>
+      </div>
+    </div>
+
+    <section class="workspace-content" id="mapping-panel" role="tabpanel" aria-labelledby="tab-mapping" hidden>
+      <div class="workspace-content-head">
+        <span class="content-sup">02 / PRODUCT MAPPING</span>
+        <h2>미등록 상품 매핑</h2>
+        <p>미들웨어 미등록 상품의 신규 매핑 업무를 위한 작업 공간입니다.</p>
+      </div>
+      <div class="mapping-placeholder">
+        <div class="mapping-visual" aria-hidden="true"><span>02</span><span class="mapping-visual-label">PRODUCT MAPPING</span></div>
+        <div class="mapping-details">
+          <span class="planning-marker">기능 제작 예정</span>
+          <h3>미등록 상품 매핑</h3>
+          <p>이 화면에서 미등록 상품을 확인하고 매핑하는 기능을 새로 제작할 예정입니다.<br class="desktop-break">현재는 메뉴와 작업 공간만 준비되어 있으며, 실제 매핑·저장 기능은 아직 없습니다.</p>
+          <div class="mapping-footnote"><span aria-hidden="true">↗</span> 향후 매핑 기준과 사용할 파일 형식이 정해지면 이 탭에 기능을 추가합니다.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="workspace-footer"><strong>FORESTFIT · MIDDLEWARE</strong><a href="index.html">← 업무센터 메인으로 돌아가기</a></footer>
 </div>
 <script>
 'use strict';
@@ -504,6 +617,45 @@ async function handleMiddlewareFile(f){try{middlewareExtension=(f.name.split('.'
 setupDropzone('stockDropzone','stockFile',handleStockFile);
 setupDropzone('middlewareDropzone','middlewareFile',handleMiddlewareFile);
 $('runBtn').addEventListener('click',runMatching);$('downloadBtn').addEventListener('click',download);$('resetBtn').addEventListener('click',fullReset);
+</script>
+
+<script>
+(function(){
+  'use strict';
+  const tabs=Array.from(document.querySelectorAll('[data-workspace-tab]'));
+  const panels={stock:document.getElementById('stock-panel'),mapping:document.getElementById('mapping-panel')};
+  function activateTab(name, updateHash){
+    const chosen=panels[name] ? name : 'stock';
+    tabs.forEach(tab=>{
+      const selected=tab.dataset.workspaceTab===chosen;
+      tab.classList.toggle('active',selected);
+      tab.setAttribute('aria-selected',String(selected));
+      tab.tabIndex=selected ? 0 : -1;
+    });
+    Object.entries(panels).forEach(([key,panel])=>{panel.hidden=key!==chosen;});
+    if(updateHash){
+      const hash=chosen==='mapping' ? '#mapping' : '#stock-sync';
+      if(location.hash!==hash)history.replaceState(null,'',hash);
+    }
+  }
+  tabs.forEach((tab,index)=>{
+    tab.addEventListener('click',()=>activateTab(tab.dataset.workspaceTab,true));
+    tab.addEventListener('keydown',event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();
+      let next=index;
+      if(event.key==='ArrowLeft')next=(index-1+tabs.length)%tabs.length;
+      if(event.key==='ArrowRight')next=(index+1)%tabs.length;
+      if(event.key==='Home')next=0;
+      if(event.key==='End')next=tabs.length-1;
+      tabs[next].focus();
+      activateTab(tabs[next].dataset.workspaceTab,true);
+    });
+  });
+  function fromHash(){activateTab(location.hash==='#mapping'?'mapping':'stock',false);}
+  window.addEventListener('hashchange',fromHash);
+  fromHash();
+})();
 </script>
 </body>
 </html>
