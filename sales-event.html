@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FORESTFIT · 채널별 행사</title>
-  <!-- 2026-10-22 cloud connection + sellmate cost file null guard -->
+  <!-- 2026-10-22 V5 verified supplier-level cloud importer. No legacy key mixing. -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -221,6 +221,8 @@
 
   
 .pricing-download-guide{margin-top:18px;padding:22px 24px;border:1px solid #e8e2dc;border-radius:18px;background:rgba(255,255,255,.72);display:flex;gap:10px;align-items:flex-start;flex-direction:column}.pricing-download-guide strong{font-size:12px;color:#332e2b}.pricing-download-guide span{font-size:10px;line-height:1.7;color:#756b65}.pricing-download-guide b{color:#625ca7}
+  /* 과거 10/13 일괄 덮어쓰기 버튼은 최신 원가를 덮어쓸 수 있어 비표시. */
+  #ff-cloud-apply-csv{display:none!important}
 </style>
 
 <style id="lotte-layout-fix-v2">
@@ -902,11 +904,11 @@ html,body{max-width:100%;overflow-x:hidden}
               <button class="pricing-mini-btn dark" id="ff-cloud-connect" type="button">공유 원가 연결</button>
               <button class="pricing-mini-btn" id="ff-cloud-refresh" type="button" disabled>공유 원가 새로고침</button>
               <button class="pricing-mini-btn" id="ff-cloud-migrate" type="button" disabled title="이 PC의 기존 저장 원가를 최초 1회 클라우드로 옮깁니다">기존 원가 올리기</button>
-              <button class="pricing-mini-btn" id="ff-cloud-apply-csv" type="button" disabled title="2026-10-13 CSV 원가 1,065건을 클라우드에 반영합니다">10/13 CSV 원가 공유 반영</button>
               <span class="cost-save-note" id="ff-cloud-status" role="status" aria-live="polite">공유 연결 전 · 이 PC에만 저장됨</span>
-              <span class="cost-save-note" id="ff-patch-marker" style="color:#6a62ba">연결 수정본 10/22</span>
+              <span class="cost-save-note" id="ff-patch-marker" style="color:#6158bb;font-weight:800">✅ 공용원가 검증 V5.1 · 10/22</span>
               <span class="cost-save-note" id="cost-import-state"></span>
               <label class="pricing-mini-btn dark" for="pricing-cost-sellmate-file">셀메이트 원가 파일 첨부</label>
+              <button class="pricing-mini-btn" type="button" id="ff-cost-file-push" style="display:none;border-color:#8f8ccd;color:#645eb8;font-weight:800">첨부 파일 클라우드 재저장</button>
               <input id="pricing-cost-sellmate-file" type="file" accept=".csv,.xlsx,.xls" style="display:none" />
               <button class="pricing-mini-btn" id="pricing-cost-download" type="button">원가 파일 다운로드</button>
             </div>
@@ -2907,7 +2909,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     return !left.length&&right.size===0&&!!norm(a)&&norm(a)===norm(b);
   };
   const byExact=new Map(),byKey=new Map(),supplierByName=new Map();
-  const closedRe=/^\s*(?:[<＜\[【(]?\s*판매종료\s*[>＞\]】)]?|판매종료)/;
+  const closedRe=/^\s*(?:[<＜\[【(]?\s*판매\s*종료(?:\s*예정)?\s*[>＞\]】)]?|판매\s*종료(?:\s*예정)?)/;
   for(const [name,supplier] of rows){
     // 중복된 키에 이전 '판매종료' 상품이 있으면 판매 중인 셀메이트명을 우선합니다.
     const row={name,supplier,closed:closedRe.test(name)};
@@ -3106,18 +3108,33 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const safeLocalGet=(k,fallback)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fallback;}catch(e){return fallback;}};
   const safeLocalSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}};
   // 상품키는 저장된 key 값을 신뢰하지 않고 상품명에서 다시 추출합니다. 이전 버전의 잘못된 key도 이 단계에서 자동 교정됩니다.
+  // 괄호 상품키가 같아도 전체 상품명이나 공급처가 다르면 서로 다른 원가 행입니다.
+  const costIdentity=row=>`n:${norm(row?.name||'')}|s:${norm(row?.supplier??row?.product_supplier??'')}`;
+  const isClosedCostName=name=>/^\s*(?:[<＜\[【(]\s*)?판매\s*종료(?:\s*예정)?(?:\s*[>＞\]】)])?/i.test(String(name||'').normalize('NFKC'));
+  const isEndingSoon=name=>/^\s*(?:[<＜\[【(]\s*)?판매\s*종료\s*예정(?:\s*[>＞\]】)])?/i.test(String(name||'').normalize('NFKC'));
+  const costMatchRank=name=>isClosedCostName(name)?(isEndingSoon(name)?1:2):0;
   const mergeCostData=(base,saved)=>{
     const out=[],pos=new Map();
-    const put=(raw,override=false)=>{const name=String(raw?.name||'').trim(),cost=toNum(raw?.cost);if(!name||cost===null||cost<=0)return;const key=displayKey(name)||displayKey(raw?.key||'')||'';const id=key?`k:${normalizeKey(key)}`:`n:${norm(name)}`;if(!id||id==='n:')return;const row={...raw,name,key,cost};if(pos.has(id)){if(override)out[pos.get(id)]={...out[pos.get(id)],...row};}else{pos.set(id,out.length);out.push(row);}};
+    const put=(raw,override=false)=>{
+      const name=String(raw?.name||'').trim(),cost=toNum(raw?.cost);
+      if(!name||cost===null||cost<=0)return;
+      const key=displayKey(name)||displayKey(raw?.key||'')||'';
+      const supplier=String(raw?.supplier??raw?.product_supplier??'').trim();
+      const row={...raw,name,key,cost,supplier},id=costIdentity(row);
+      if(pos.has(id)){if(override)out[pos.get(id)]={...out[pos.get(id)],...row};}
+      else{pos.set(id,out.length);out.push(row);}
+    };
     (Array.isArray(base)?base:[]).forEach(x=>put(x,false));
     (Array.isArray(saved)?saved:[]).forEach(x=>put(x,true));
-    return out;
+    const withSupplier=new Set(out.filter(x=>x.supplier).map(x=>norm(x.name)));
+    return out.filter(x=>x.supplier||!withSupplier.has(norm(x.name)));
   };
   // 2026-10-13 셀메이트 최신 CSV 원가: 사용중인 상품 1,065개를 최초 1회 기존 로컬 원가에 반영.
   // 다음 접속부터는 직원이 직접 수정한 금액을 유지합니다.
   const CSV_COST_VERSION='20261013_144108';
   const CSV_COST_VERSION_KEY='forestfit_csv_cost_applied_version';
   const CSV_COST_IDENTITIES=new Set(["k:(올데이슬랙스32탄)","k:(p2696)","k:(p2695)","k:(p2694)","k:(s2634)","k:(p2692)","k:(p2693)","k:(p2691)","k:(p2690)","k:(mp2650)","k:(mp2649)","k:(mp2647)","k:(mp2648)","k:(j2653)","k:(j2652)","k:(mj2625)","k:(j2651)","k:(mp2646)","k:(j2650)","k:(올데이팬츠19탄)","k:(p2689)","k:(j2649)","k:(코듀로이4탄)","k:(s2633)","k:(p2687)","k:(sk2609)","k:(j2648)","k:(s2632)","k:(j2647)","k:(p2686)","k:(s2631)","k:(찐코튼45탄)","k:(s2630)","k:(j2646)","k:(찐코튼44탄)","k:(올데이팬츠18탄)","k:(j2645)","k:(p2685)","k:(p2684)","k:(노컷슬랙스28탄)","k:(s2629)","k:(p2682)","k:(mp2645)","k:(j2644)","k:(p2683)","k:(올데이팬츠17탄)","k:(j2643)","k:(s2628)","k:(또입진맨즈4탄)","k:(p2681)","k:(찐스판21탄)","k:(s2627)","k:(ms2609)","k:(올데이슬랙스31탄)","k:(mp2644)","k:(mj2624)","k:(노컷슬랙스27탄)","k:(올데이슬랙스30탄)","k:(mp2643)","k:(ms2608)","k:(s2626)","k:(p2680)","k:(올데이슬랙스29탄)","k:(j2642)","k:(p2679)","k:(s2625)","k:(올데이팬츠15탄)","k:(올데이팬츠16탄)","k:(올데이슬랙스28탄)","k:(j2641)","k:(s2624)","k:(j2640)","k:(찐코튼17탄)","k:(p2678)","k:(j2639)","k:(p2677)","k:(j2638)","k:(s2623)","k:(노컷진14탄)","k:(찐스판20탄)","k:(p2676)","k:(j2637)","k:(s2622)","k:(올데이슬랙스27탄)","k:(p2675)","k:(p2672)","k:(노컷진5탄)","k:(올데이팬츠14탄)","k:(p2674)","k:(p2673)","k:(j2636)","k:(p2671)","k:(j2635)","k:(노컷진72탄)","k:(p2670)","k:(올데이팬츠13탄)","k:(p2669)","k:(올데이슬랙스7탄)","k:(p2668)","k:(j2634)","k:(sk2608)","k:(p2667)","k:(j2633)","k:(j2632)","k:(올데이팬츠12탄)","k:(또입진2탄)","k:(찐코튼9탄)","k:(j2631)","k:(sk2607)","k:(p2666)","k:(또입진6탄)","k:(올데이팬츠11탄)","k:(찐코튼18탄)","k:(j2629)","k:(올데이슬랙스3탄)","k:(노컷진53탄)","k:(찐코튼4탄)","k:(p2665)","k:(mj2623)","k:(mj2622)","k:(mj2620)","k:(j2628)","k:(또입진맨즈2탄)","k:(mj2621)","k:(노컷진51탄)","k:(노컷진29탄)","k:(노컷진30탄)","k:(ms2607)","k:(ms2606)","k:(mp2642)","k:(mj2618)","k:(mj2619)","k:(mp2641)","k:(p2664)","k:(노컷진24탄)","k:(노컷진8탄)","k:(p2663)","k:(노컷진2탄)","k:(찐코튼3탄)","k:(j2626)","k:(j2627)","k:(여름올데이팬츠10탄)","k:(s2621)","k:(여름올데이슬랙스8탄)","k:(p2662)","k:(s2620)","k:(여름올데이슬랙스7탄)","k:(여름올데이슬랙스6탄)","k:(여름올데이팬츠9탄)","k:(여름올데이팬츠8탄)","k:(j2625)","k:(s2619)","k:(s2618)","k:(p2661)","k:(p2660)","k:(여름노컷슬랙스6탄)","k:(j2624)","k:(p2659)","k:(p2658)","k:(여름올데이슬랙스5탄)","k:(p2657)","k:(여름노컷슬랙스5탄)","k:(여름노컷슬랙스4탄)","k:(여름올데이슬랙스4탄)","k:(노컷슬랙스26탄)","k:(p2656)","k:(노컷진맨즈7탄)","k:(mp2640)","k:(mp2639)","k:(mj2617)","k:(아이스텍2탄)","k:(아이스텍1탄)","k:(mp2638)","k:(mp2637)","k:(올데이슬랙스맨즈3탄)","k:(ms2605)","k:(여름올데이슬랙스3탄)","k:(p2655)","k:(냉장고바지25탄)","k:(냉장고바지24탄)","k:(p2654)","k:(p2653)","k:(냉장고바지23탄)","k:(p2652)","k:(j2623)","k:(올데이팬츠10탄)","k:(냉장고바지8탄)","k:(냉장고바지4탄)","k:(p2651)","k:(여름노컷진18탄)","k:(여름노컷진맨즈1탄)","k:(mj2616)","k:(mp2636)","k:(올데이팬츠9탄)","k:(sjt26044)","k:(sjt26043)","k:(sjk26067)","k:(sjk26066)","k:(sjk26065)","k:(sjk26064)","k:(sjk26063)","k:(sjt26042)","k:(sjt26041)","k:(sjt26040)","k:(sjt26039)","k:(sjt26038)","k:(sjt26037)","k:(sjt26036)","k:(sjt26035)","k:(sjt26034)","k:(sjk26062)","k:(여름올데이팬츠7탄)","k:(p2650)","k:(p2649)","k:(p2648)","k:(p2647)","k:(j2622)","k:(노컷진90탄)","k:(노컷진89탄)","k:(여름노컷진17탄)","k:(냉장고바지22탄)","k:(p2646)","k:(j2621)","k:(여름노컷진16탄)","k:(여름찐코튼17탄)","k:(s2617)","k:(s2616)","k:(p2645)","k:(p2644)","k:(p2643)","k:(p2642)","k:(p2641)","k:(j2620)","k:(j2619)","k:(s2615)","k:(sjk26061)","k:(sjt26033)","k:(mp2633)","k:(sjk26060)","k:(sjk26059)","k:(sjk26058)","k:(sjk26057)","k:(sjk26056)","k:(ms2604)","k:(mp2634)","k:(sjk26055)","k:(s2614)","k:(여름노컷슬랙스3탄)","k:(p2640)","k:(j2618)","k:(mp2635)","k:(mp2632)","k:(mp2631)","k:(여름올데이팬츠4탄)","k:(sjk26054)","k:(sjk26053)","k:(sjt26032)","k:(냉장고바지맨즈2탄)","k:(여름노컷슬랙스2탄)","k:(p2639)","k:(j2617)","k:(sjs26008)","k:(sjs26007)","k:(sjs26006)","k:(mj2614)","k:(mp2630)","k:(mp2629)","k:(mp2628)","k:(여름노컷진15탄)","k:(여름올데이팬츠3탄)","k:(여름노컷슬랙스1탄)","k:(j2616)","k:(s2613)","k:(mj2615)","k:(여름찐코튼16탄)","k:(p2636)","k:(여름올데이팬츠5탄)","k:(p2638)","k:(노컷진88탄)","k:(여름찐코튼15탄)","k:(여름찐코튼14탄)","k:(s2612)","k:(s2611)","k:(sk2606)","k:(sjk26052)","k:(sjk26051)","k:(sjk26050)","k:(여름노컷진14탄)","k:(sjk26049)","k:(sjk26048)","k:(sjk26047)","k:(sjk26046-1)","k:(sjk26046)","k:(여름노컷진13탄)","k:(sjk26045)","k:(sjk26044)","k:(여름노컷진12탄)","k:(여름노컷진11탄)","k:(냉장고바지21탄)","k:(ms2603)","k:(sjk26043)","k:(sjk26042)","k:(sjt26031)","k:(sjs26005)","k:(sjk26041)","k:(sjt26030)","k:(sjt26029)","k:(sk2605)","k:(p2635)","k:(p2634)","k:(p2633)","k:(여름올데이팬츠1탄)","k:(mj2613)","k:(s2608)","k:(노컷슬랙스25탄)","k:(냉장고바지20탄)","k:(s2610)","k:(s2609)","k:(mp2627)","k:(mp2626)","k:(mp2625)","k:(mp2624)","k:(냉장고바지19탄)","k:(냉장고바지18탄)","k:(p2632)","k:(p2631)","k:(에어핏11탄)","k:(노컷슬랙스24탄)","k:(냉장고바지17탄)","k:(냉장고바지16탄)","k:(여름올데이슬랙스1탄)","k:(mp2623)","k:(mp2622)","k:(mj2612)","k:(ms2602)","k:(냉장고바지15탄)","k:(올데이슬랙스26탄)","k:(올데이슬랙스24탄)","k:(여름올데이슬랙스2탄)","k:(올데이팬츠7탄)","k:(s2607)","k:(p2630)","k:(j2615)","k:(s2606)","k:(p2629)","k:(p2625)","k:(p2628)","k:(p2626)","k:(j2614)","k:(j2613)","k:(올데이슬랙스25탄)","k:(mj2611)","k:(mj2610)","k:(mj2609)","k:(mj2608)","k:(mp2621)","k:(sjs26004)","k:(sjt26028)","k:(에어핏10탄)","k:(에어핏9탄)","k:(에어핏8탄)","k:(에어핏7탄)","k:(에어핏6탄)","k:(에어핏5탄)","k:(에어핏4탄)","k:(에어핏3탄)","k:(에어핏2탄)","k:(에어핏1탄)","k:(sjk26034)","k:(sjk26035)","k:(sjk26036)","k:(sjk26037)","k:(sjk26038)","k:(sjk26039)","k:(sjk26040)","k:(sjt26015)","k:(sjt26027)","k:(sjt26026)","k:(sjk26026)","k:(sjk26025)","k:(sjk26033)","k:(sjk26031)","k:(sjk26027)","k:(sjk26030)","k:(sjk26032)","k:(찐코튼23탄)","k:(찐코튼12탄)","k:(sjk26024)","k:(sjt26024)","k:(sjt26023)","k:(sjk26029)","k:(sjk26028)","k:(sjt26025)","k:(sjt26022)","k:(sjt26021)","k:(sjt26020)","k:(sjt26019)","k:(sjt26014)","k:(sjt26018)","k:(sjt26017)","k:(sjt26016)","k:(sjk26022)","k:(sjk26021)","k:(sjt26013)","k:(sjt26011)","k:(sjt26012)","k:(sjt26010)","k:(sjt26009)","k:(sjt26008)","k:(sjk26023)","k:(sjk26018)","k:(sjk26016)","k:(sjk26014)","k:(sjt26007)","k:(sjk26019)","k:(sjk26017)","k:(sjt26006)","k:(sjk26020)","k:(sjs26003)","k:(sjk26013)","k:(sjk26015)","k:(sjk26012)","k:(sjk26011)","k:(sjk26010)","k:(sjt26005)","k:(sjt26004)","k:(sjt26003)","k:(sjk26007)","k:(sjk26009)","k:(sjk26008)","k:(sjk26006)","k:(sjk26005)","k:(p2624)","k:(p2623)","k:(sjk26004)","k:(sjt26002)","k:(sjt26001)","k:(sjs26002)","k:(sjk26003)","k:(살안타템)","k:(sjk26002)","k:(s2604)","k:(올데이슬랙스23탄)","k:(s2603)","k:(p2622)","k:(p2621)","k:(p2620)","k:(p2619)","k:(p2616)","n:[와디즈]포레스트핏냉감팬츠","k:(p2618)","k:(p2615)","k:(p2617)","k:(sk2602)","k:(s2601)","k:(s2602)","k:(sjk26001)","k:(j2612)","k:(t2601)","k:(j2611)","k:(여름찐스판맨즈1탄)","k:(냉장고바지12탄)","k:(냉장고바지10탄)","k:(노컷진66탄)","k:(냉장고바지13탄)","k:(냉장고바지14탄)","k:(냉장고바지1탄)","k:(p2614)","k:(p2613)","k:(mp2620)","k:(mp2617)","k:(mp2616)","k:(mp2612)","k:(올데이팬츠6탄)","k:(p2610)","k:(mj2607)","k:(mj2605)","k:(p2611)","k:(p2612)","k:(mj2606)","k:(mj2602)","k:(찐코튼43탄)","k:(올데이팬츠5탄)","k:(mj2603)","k:(mp2615)","k:(j2610)","k:(p2609)","k:(노컷진맨즈6탄)","k:(올데이슬랙스22탄)","k:(j2609)","k:(j2608)","k:(mp2618)","k:(mp2619)","k:(노컷슬랙스맨즈3탄)","k:(j2607)","k:(올데이팬츠3탄)","k:(mp2608)","k:(mp2609)","k:(mp2610)","k:(mj2604)","k:(mp2614)","k:(ms2601)","k:(올데이슬랙스21탄)","k:(찐코튼41탄)","k:(p2604)","k:(mp2603)","k:(mp2613)","k:(mp2611)","k:(p2608)","k:(p2607)","k:(mp2604)","k:(mp2607)","k:(mp2606)","k:(mp2605)","k:(찐코튼42탄)","k:(p2605)","k:(찐코튼맨즈1탄)","k:(노컷진맨즈5탄)","k:(mp2602)","k:(mp2601)","k:(노컷슬랙스맨즈2탄)","k:(j2605)","k:(mj2601)","k:(올데이팬츠1탄)","k:(노컷슬랙스23탄)","k:(찐코튼40탄)","k:(j2606)","k:(올데이슬랙스10탄)","k:(올데이팬츠2탄)","k:(노컷진64탄)","k:(찐코튼39탄)","k:(노컷진65탄)","k:(노컷슬랙스15탄)","k:(찐스판3탄)","k:(찐코튼38탄)","k:(노컷진16탄)","k:(찐코튼37탄)","k:(j2603)","k:(j2604)","k:(찐코튼36탄)","k:(찐코튼35탄)","k:(p2603)","k:(p2602)","k:(sk2601)","k:(찐코튼34탄)","k:(j2602)","k:(겨울올데이슬랙스12탄)","k:(겨울올데이슬랙스11탄)","k:(여름올데이슬랙스11탄)","k:(p2601)","k:(j2601)","k:(노컷진63탄)","k:(j2548)","k:(노컷진87탄)","k:(찐코튼32탄)","k:(올데이슬랙스20탄)","k:(겨울찐코튼7탄)","k:(겨울노컷진5탄)","k:(노컷진86탄)","k:(따숩진12탄)","k:(노컷진85탄)","k:(올데이윈터팬츠15탄)","k:(p2558)","k:(j2546)","k:(겨울노컷진4탄)","k:(겨울찐스판9탄)","k:(sjk25089)","k:(sjk25088)","k:(sjk25087)","k:(sjk25086)","k:(j2545)","k:(찐코튼33탄)","k:(ms2514)","k:(sjk25085)","k:(sjk25084)","k:(sjk25083)","k:(sjj25003)","k:(ms2512)","k:(ms2515)","k:(따숩진13탄)","k:(올데이윈터팬츠13탄)","k:(j2544)","k:(mj2513)","k:(sjk25080)","k:(sjk25079)","k:(sjk25082)","k:(코듀로이25탄)","k:(코듀로이24탄)","k:(j2543)","k:(ms2508)","k:(mj2514)","k:(sjk25078)","k:(sjk25077)","k:(코듀로이23탄)","k:(코듀로이22탄)","k:(ms2511)","k:(ms2510)","k:(sjk25090)","k:(sjk25091)","k:(sjk25092)","k:(겨울찐코튼6탄)","k:(ms2517)","k:(겨울찐스판8탄)","k:(올데이윈터팬츠12탄)","k:(ms2513)","k:(ms2516)","k:(sjk25076)","k:(sjk25075)","k:(sjk25074)","k:(sjk25069)","k:(sjk25071)","k:(sjk25073)","k:(mp2515)","k:(mp2513)","k:(sjj25002)","k:(sjk25072)","k:(노컷진84탄)","k:(mj2515)","k:(올데이윈터팬츠11탄)","k:(mp2514)","k:(또입진맨즈16탄)","k:(sk2509)","k:(찐스판15탄)","k:(p2555)","k:(올데이윈터팬츠6탄)","k:(노컷진83탄)","k:(ms2509)","k:(노컷진맨즈32탄)","k:(노컷슬랙스맨즈1탄)","k:(sjk25068)","k:(sjk25067)","k:(sjk25066)","k:(sjk25065)","k:(겨울노컷진2탄)","k:(sjk25064)","k:(sjk25063)","k:(sjk25062)","k:(sjs25002)","k:(sjk25059)","k:(sjk25061)","k:(올데이윈터팬츠7탄)","k:(올데이윈터팬츠10탄)","k:(올데이윈터팬츠9탄)","k:(sjk25060)","k:(sjk25058)","k:(sjk25057)","k:(sjk25056)","k:(윈터슬랙스4탄)","k:(올데이윈터팬츠8탄)","k:(방한팬츠10탄)","k:(방한팬츠9탄)","k:(sjk25055)","k:(sjk25054)","k:(sjk25053)","k:(sjk25052)","k:(sjk25051)","k:(윈터슬랙스20탄)","k:(sjk25049)","k:(sjk25048)","k:(sjk25050)","k:(sjk25047)","k:(노컷진맨즈31탄)","k:(j2538)","k:(p2554)","k:(노컷진맨즈30탄)","k:(윈터슬랙스5탄)","k:(겨울노컷진6탄)","k:(j2540)","k:(mj2512)","k:(j2539)","k:(겨울노컷진10탄)","k:(겨울노컷진1탄)","k:(p022102-s)","k:(p022101-s)","k:(겨울찐코튼3탄)","k:(코듀로이5탄)","k:(노컷진맨즈28탄)","k:(코듀로이6탄)","k:(sjk25044)","k:(sjk25046)","k:(sjk25045)","k:(p2551)","k:(겨울찐코튼2탄)","k:(sjk25041)","k:(sjk25043)","k:(sjk25040)","k:(sjk25042)","k:(p2552)","k:(겨울찐스판10탄)","k:(sjj25001)","k:(sjk25039)","k:(올데이슬랙스19탄)","k:(sjk25038)","k:(sjk25035)","k:(sjk25034)","k:(sjk25036)","k:(sjk25037)","k:(겨울찐스판6탄)","k:(sjk25030)","k:(sjk25033)","k:(sjk25031)","k:(sjk25032)","k:(sjk25029)","k:(겨울찐스판5탄)","k:(겨울찐스판7탄)","k:(올데이윈터팬츠2탄)","k:(올데이윈터팬츠1탄)","k:(겨울찐스판3탄)","k:(따숩진1탄)","k:(겨울찐코튼1탄)","k:(찐코튼30탄)","k:(찐코튼31탄)","k:(노컷진40탄)","k:(sk2508)","k:(노컷진19탄)","k:(sjk25028)","k:(sjk25027)","k:(sja25002)","k:(sjk25025)","k:(sjk25024)","k:(sjk25023)","k:(sjk25019)","k:(sjk25021)","k:(sjk25026)","k:(sjk25020)","k:(sjk25012)","k:(노컷진맨즈27탄)","k:(sjk25017)","k:(sjk25018)","k:(sjk25013)","k:(올데이슬랙스1탄)","k:(sjk25022)","k:(sjs25001)","k:(올데이슬랙스맨즈2탄)","k:(찐코튼28탄)","k:(올데이슬랙스18탄)","k:(sjk25015)","k:(sjk25014)","k:(sjk25010)","k:(sjk25011)","k:(sjk25008)","k:(sjk25003)","k:(sjk25004)","k:(sja25001)","k:(sjk25001)","k:(sjk25002)","k:(sjk25005)","k:(찐코튼26탄)","k:(p2550)","k:(올데이슬랙스13탄)","k:(mp2512)","k:(올데이슬랙스17탄)","k:(찐코튼24탄)","k:(노컷진79탄)","k:(노컷진맨즈26탄)","k:(j2537)","k:(찐코튼맨즈3탄)","k:(또입진23탄)","k:(찐코튼10탄)","k:(j2536)","k:(p2548)","k:(p2549)","k:(노컷진78탄)","k:(노컷진76탄)","k:(노컷진27탄)","k:(j2534)","k:(노컷진77탄)","k:(올데이슬랙스16탄)","k:(노컷진15탄)","k:(j2533)","k:(ms2507)","k:(mj2511)","k:(p2541)","k:(냉장고바지9탄)","k:(냉장고바지7탄)","k:(냉장고바지5탄)","k:(냉장고바지2탄)","k:(냉장고바지3탄)","k:(mj2510)","k:(여름찐코튼6탄)","k:(j2525)","k:(mj2509)","k:(mp2510)","k:(j2524)","k:(p2537)","k:(여름찐코튼10탄)","k:(여름찐코튼12탄)","k:(s251)","k:(j2531)","k:(여름찐코튼5탄)","k:(찐코튼19탄)","k:(sk2507)","k:(여름찐코튼9탄)","k:(ms2506)","k:(찐코튼15탄)","k:(여름올데이팬츠2탄)","k:(여름찐코튼13탄)","k:(여름찐코튼11탄)","k:(여름올데이팬츠6탄)","k:(여름노컷진10탄)","k:(mj2508)","k:(sk2506)","k:(여름노컷진7탄)","k:(텐셀진맨즈6탄)","k:(j2521)","k:(노컷슬랙스22탄)","k:(sk2505)","k:(찐코튼16탄)","k:(노컷진맨즈4탄)","k:(j2520)","k:(여름찐코튼1탄)","k:(여름노컷진5탄)","k:(j2519)","k:(여름찐스판8탄)","k:(여름노컷진4탄)","k:(p2523)","k:(sk2504)","k:(sk2503)","k:(여름올데이슬랙스12탄)","k:(p2520)","k:(p2519)","k:(p2521)","k:(찐스판17탄)","k:(mj2506)","k:(mp2507)","k:(mp2506)","k:(mp2505)","k:(mj2505)","k:(mp2504)","k:(mj2503)","k:(mj2504)","k:(p2516)","k:(j2513)","k:(j2514)","k:(찐코튼14탄)","k:(p2517)","k:(j2515)","k:(j2516)","k:(j2511)","k:(j2509)","k:(또입진20탄)","k:(p2515)","k:(찐코튼21탄)","k:(p2513)","k:(j2508)","k:(찐스판16탄)","k:(텐셀진맨즈2탄)","k:(mj2502)","k:(노컷진73탄)","k:(ms2505)","k:(올데이슬랙스맨즈1탄)","k:(여름노컷진맨즈2탄)","k:(ms2504)","k:(ms2502)","k:(ms2503)","k:(올데이슬랙스15탄)","k:(mp2502)","k:(텐셀진20탄)","k:(p2511)","k:(또입진7탄)","k:(ms2501)","k:(찐스판18탄)","k:(또입진18탄)","k:(찐코튼11탄)","k:(sk2502)","k:(찐스판14탄)","k:(노컷진맨즈2탄)","k:(mp2501)","k:(또입진맨즈3탄)","k:(또입진맨즈15탄)","k:(또입진21탄)","k:(또입진22탄)","k:(찐스판맨즈2탄)","k:(노컷진맨즈18탄)","k:(찐코튼맨즈2탄)","k:(노컷진맨즈1탄)","k:(노컷진맨즈3탄)","k:(또입진맨즈1탄)","k:(mj2501)","k:(노컷진맨즈29탄)","k:(찐스판10탄)","k:(찐스판12탄)","k:(p2506)","k:(또입진8탄)","k:(노컷진71탄)","k:(노컷진70탄)","k:(또입진17탄)","k:(찐스판6탄)","k:(노컷진62탄)","k:(sk2501)","k:(찐스판2탄)","k:(노컷슬랙스20탄)","k:(찐스판9탄)","k:(또입진4탄)","k:(p2504)","k:(p2503)","k:(또입진15탄)","k:(j2501)","k:(노컷진69탄)","k:(또입진3탄)","k:(p2501)","k:(올데이슬랙스14탄)","k:(j2441)","k:(겨울노컷진9탄)","k:(p2497)","k:(올데이윈터팬츠14탄)","k:(겨울노컷진8탄)","k:(겨울노컷진7탄)","k:(윈터슬랙스3탄)","k:(겨울노컷진15탄)","k:(겨울찐코튼5탄)","k:(윈터슬랙스2탄)","k:(j2439)","k:(p2493)","k:(노컷슬랙스19탄)","k:(겨울찐스판2탄)","k:(p2492)","n:dw301302","k:(겨울찐스판1탄)","k:(p2491)","k:(sk246)","k:(p2487)","k:(p2488)","k:(코듀로이3탄)","k:(코듀로이2탄)","n:ds0281/ds0301","n:df214/df2101/df2111","n:dw303,306일자약기모","k:(노컷슬랙스16탄)","k:(노컷진49탄)","k:(노컷슬랙스12탄)","k:(p2483)","k:(노컷진46탄)","k:(노컷진47탄)","k:(p2479)","k:(노컷진44탄)","k:(p2478)","k:(찐코튼6탄)","k:(p2476)","k:(노컷슬랙스5탄)","k:(라이크라2탄)","k:(노컷진37탄)","k:(p2475)","k:(노컷진23탄)","k:(노컷진42탄)","k:(p2472)","k:(노컷진43탄)","k:(j2430)","k:(p2470/mp2470)","k:(j2431)","k:(노컷진36탄)","k:(s248)","k:(s247)","k:(p062201)","k:(여름노컷진1탄)","k:(여름찐스판7탄)","k:(j2422)","k:(j2420)","k:(냉장고바지11탄)","k:(여름찐스판5탄)","k:(s244)","k:(텐셀진12탄)","k:(여름찐스판6탄)","k:(j2416)","k:(여름찐코튼2탄)","k:(노컷진38탄)","k:(p2437)","k:(여름찐스판3탄)","k:(여름찐스판4탄)","k:(여름찐코튼4탄)","k:(p2410)","n:dm103,104,107","n:[여름찐스판1탄]텐셀와이드청바지","n:dm112113","n:dm108109110111","n:dm128dm129dm130","n:dm105106","k:(j252)","n:dm124125126127","k:(j251)","k:(j247)","k:(j248)","k:(노컷진60탄)","k:(노컷진57탄)","n:ds017019020","k:(노컷진56탄)","n:ds07","n:ds010","n:ds040506","n:df206df212","k:(p030701)","k:(찐코튼5탄)","k:(p022601)","k:(j092701)","k:(j101001)","k:(p022102-w)","k:(p022101-w)","k:(라이크라1탄)","n:ds028ds029ds030","n:ds031032","k:(찐스판11탄)","k:(s021401)","k:(찐스판4탄)","k:(찐스판7탄)","k:(찐스판8탄)","k:(찐스판5탄)","k:(찐스판1탄)","k:(따숩진10탄)","k:(겨울노컷진13탄)","k:(노컷슬랙스17탄)","k:(노컷슬랙스14탄)","k:(p112201)","k:(p112202)","k:(노컷진39탄)","k:(핫기모10탄)","k:(코듀로이1탄)","k:(따숩진4탄)","k:(또입진13탄)","k:(또입진16탄)","k:(j100501)","k:(또입진12탄)","k:(j092601)","k:(올데이슬랙스11탄)","k:(p091501)","k:(p091403)","k:(노컷슬랙스13탄)","k:(코듀로이11탄)","k:(찐코튼1탄)","k:(코듀로이10탄)","k:(코듀로이9탄)","k:(코듀로이8탄)","k:(여름노컷진9탄)","k:(여름찐스판13탄)","k:(여름노컷진3탄)","k:(여름노컷진2탄)","k:(1+1)","k:(여름노컷진8탄)","k:(노컷슬랙스9탄)","k:(노컷슬랙스8탄)","k:(노컷슬랙스7탄)","k:(노컷진22탄)","k:(노컷진20탄)","k:(노컷슬랙스6탄)","k:(올데이슬랙스9탄)","k:(올데이슬랙스8탄)","k:(노컷슬랙스4탄)","k:(노컷슬랙스3탄)","k:(겨울노컷진16탄)","k:(핫기모4탄)","k:(핫기모5탄)","k:(겨울노컷진11탄)","k:(겨울노컷진12탄)","k:(노컷진4탄)","k:(노컷진3탄)","k:(노컷진1탄)","k:(롱한느낌1탄)","k:(k2412)","k:(텐셀진3탄)","k:(여름찐스판2탄)","n:[무료배송]사이즈넉넉~고무줄쭈리밴딩빅포켓청반바지3컬러j062201","k:(p053101,mp053101)","k:(냉장고바지6탄)","k:(노컷슬랙스1탄)","k:(노컷슬랙스2탄)","k:(핫기모1탄)"]);
+  // CSV 기준 원가의 식별자는 이전 기본자료와의 비교용으로만 사용합니다.
   const costRowId=row=>{
     const k=displayKey(row?.name||'')||displayKey(row?.key||'');
     return k?`k:${normalizeKey(k)}`:`n:${norm(row?.name||'')}`;
@@ -3125,10 +3142,8 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   // 공급처명은 기존 원가 테이블에 필드가 없어 별도로 브라우저에 저장합니다.
   // 공유 원가를 새로고침해도 공급처명이 초기화되지 않도록 상품키를 기준으로 복원합니다.
   const supplierCache=safeLocalGet(STORAGE_SUPPLIER,{});
-  const supplierId=row=>{
-    const key=displayKey(row?.name||'')||displayKey(row?.key||'');
-    return key?`k:${normalizeKey(key)}`:`n:${norm(row?.name||'')}`;
-  };
+  // 공급처 캐시도 괄호키가 아니라 전체 상품명별로 관리해 공급처가 섞이지 않게 합니다.
+  const supplierId=row=>`n:${norm(row?.name||'')}`;
   const supplierValue=row=>String(row?.supplier??row?.supplierName??row?.supplier_name??row?.['공급처명']??row?.['공급처']??'').trim();
   const restoreSuppliers=rows=>rows.map(row=>({
     ...row,supplier:supplierValue(row)||String(supplierCache[supplierId(row)]||'').trim()||window.FORESTFIT_SUPPLIERS?.reference?.(row?.name,row?.key)||''
@@ -3141,17 +3156,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     safeLocalSet(STORAGE_SUPPLIER,supplierCache);
   };
   let costData=restoreSuppliers(mergeCostData(DEFAULT_COST_DATA,safeLocalGet(STORAGE_COST,[])));
-  try{
-    if(localStorage.getItem(CSV_COST_VERSION_KEY)!==CSV_COST_VERSION){
-      const latest=new Map(DEFAULT_COST_DATA.filter(x=>CSV_COST_IDENTITIES.has(costRowId(x))).map(x=>[costRowId(x),x]));
-      costData=costData.map(x=>{
-        const reference=latest.get(costRowId(x));
-        return reference?{...x,cost:reference.cost}:x;
-      });
-      // 최초 적용 이후에는 변경된 원가가 자동 덮어쓰기 되지 않도록 버전을 표시합니다.
-      if(safeLocalSet(STORAGE_COST,costData))localStorage.setItem(CSV_COST_VERSION_KEY,CSV_COST_VERSION);
-    }
-  }catch(err){console.warn('[FORESTFIT CSV cost migration]',err);}
+  // 과거 10/13 CSV 기본값으로 로컬에 입력한 최신 원가를 다시 덮어쓰지 않습니다.
   saveSuppliers();safeLocalSet(STORAGE_COST,costData);
   let marginData=safeLocalGet(STORAGE_MARGIN,DEFAULT_MARGIN_DATA.map(x=>({...x})));
   let sourceLabel=localStorage.getItem(STORAGE_SOURCE)||DEFAULT_SOURCE;
@@ -3161,7 +3166,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   let eventName=localStorage.getItem(STORAGE_EVENT_NAME)||'';
 
   function priceToast(msg){const t=$('#toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(priceToast.timer);priceToast.timer=setTimeout(()=>t.classList.remove('show'),2200);}
-  function saveCore(){
+  function saveCore({cloud=true,changedRows=[]}={}){
     // 상품 원가/공급처 변경 즉시 브라우저에 기록합니다. 클라우드 연결 시에는 공유 저장도 요청합니다.
     saveSuppliers();
     const saved=safeLocalSet(STORAGE_COST,costData);
@@ -3169,26 +3174,52 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     try{localStorage.setItem(STORAGE_SOURCE,sourceLabel);}catch(err){console.warn('[FORESTFIT] 설정 저장 실패',err);}
     const label=$('#cost-save-state');
     if(label)label.textContent=!saved?'저장 실패 · 저장 공간 확인':window.FORESTFIT_SHARED_COSTS?.connected?.()?'이 PC 저장됨 · 공유 저장 요청':'이 PC에 자동 저장됨';
-    window.FORESTFIT_SHARED_COSTS?.saveDiff?.(costData);
+    if(cloud&&changedRows.length)window.FORESTFIT_SHARED_COSTS?.saveDiff?.(changedRows);
     return saved;
   }
   function stripNo(v){return String(v??'').replace(/^\s*\d{1,3}\s*(?:[.)]|[-–—])\s*/,'').trim();}
   function rebuildCostIndex(){
     const byKey=new Map(),byName=new Map();
-    costData.forEach((x,i)=>{const c=toNum(x.cost);if(c===null||c<=0)return;const k=normalizeKey(x.key);if(k)byKey.set(k,{...x,index:i});const n=norm(x.name);if(n)byName.set(n,{...x,index:i});});
+    costData.forEach((x,i)=>{
+      const c=toNum(x.cost);if(c===null||c<=0)return;
+      const rec={...x,index:i};
+      const k=normalizeKey(x.key);if(k){if(!byKey.has(k))byKey.set(k,[]);byKey.get(k).push(rec);}
+      const n=norm(x.name);if(n){if(!byName.has(n))byName.set(n,[]);byName.get(n).push(rec);}
+    });
     return {byKey,byName};
   }
   function lookupCost(name,keyHint=''){
-    const idx=rebuildCostIndex();
-    const candidates=[];if(keyHint)candidates.push(keyHint);candidates.push(...allParenKeys(name));
-    for(const k of candidates){const hit=idx.byKey.get(normalizeKey(k));if(hit)return hit;}
-    const n=norm(name);if(idx.byName.has(n))return idx.byName.get(n);
-    const code=String(name??'').match(/([A-Z]{1,3}\d{3,7})/i);if(code){const hit=idx.byKey.get(normalizeKey(`(${code[1]})`));if(hit)return hit;}
-    return null;
+    const idx=rebuildCostIndex(),target=norm(name);
+    const candidates=[];
+    if(keyHint)candidates.push(keyHint);
+    candidates.push(...allParenKeys(name));
+    const hits=[],seen=new Set();
+    for(const k of candidates){
+      for(const hit of (idx.byKey.get(normalizeKey(k))||[])){
+        if(!seen.has(hit.index)){hits.push(hit);seen.add(hit.index);}
+      }
+    }
+    if(!hits.length){
+      for(const hit of (idx.byName.get(target)||[])){
+        if(!seen.has(hit.index)){hits.push(hit);seen.add(hit.index);}
+      }
+    }
+    if(!hits.length){
+      const code=String(name??'').match(/\b([A-Z]{1,3}\d{3,7})\b/i);
+      if(code)hits.push(...(idx.byKey.get(normalizeKey(`(${code[1]})`))||[]));
+    }
+    // 판매 종료/종료 예정 미표기 상품을 우선하고, 그 다음 전체 상품명이 정확히 같은 상품을 선택합니다.
+    hits.sort((a,b)=>costMatchRank(a.name)-costMatchRank(b.name)
+      || Number(norm(b.name)===target)-Number(norm(a.name)===target)
+      || a.index-b.index);
+    return hits[0]||null;
   }
   function getOrCreateCostEntry(row,cost){
-    const found=lookupCost(row.name,row.key);if(found){costData[found.index].cost=cost;return;}
-    const key=displayKey(row.name)||row.key||'';costData.unshift({name:stripNo(row.name),key,cost});
+    const name=stripNo(row.name),supplier=String(row.supplier||'').trim();
+    const i=costData.findIndex(x=>costIdentity(x)===costIdentity({name,supplier}));
+    if(i>=0){costData[i].cost=cost;return;}
+    const key=displayKey(name)||row.key||'';
+    costData.unshift({name,key,cost,supplier});
   }
   function interpCostColumn(cost,key){
     const rows=marginData.filter(r=>toNum(r.cost)!==null&&toNum(r[key])!==null).sort((a,b)=>a.cost-b.cost);if(!rows.length)return null;
@@ -3248,7 +3279,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
         if(!costData[i]||v===null||v<=0)return false;
         if(Number(costData[i].cost)===v)return true;
         costData[i].cost=v;
-        const saved=saveCore();
+        const saved=saveCore({changedRows:[costData[i]]});
         const label=inp.closest('tr')?.querySelector('[data-row-save]');
         if(label)label.textContent=saved?'저장됨':'저장 실패';
         refreshChannelAfterCostEdit();
@@ -3270,7 +3301,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
         const supplier=inp.value.trim();
         if((costData[i].supplier||'')===supplier)return;
         costData[i].supplier=supplier;
-        const saved=saveCore();
+        const saved=saveCore({changedRows:[costData[i]]});
         const label=inp.closest('tr')?.querySelector('[data-row-save]');
         if(label)label.textContent=saved?'저장됨':'저장 실패';
       };
@@ -3283,10 +3314,12 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     const name=$('#cost-add-name').value.trim(),rawKey=$('#cost-add-key').value.trim(),cost=toNum($('#cost-add-value').value),supplier=$('#cost-add-supplier').value.trim();
     if(!name||cost===null){priceToast('상품명과 원가를 입력해주세요.');return;}
     const key=rawKey?(/^\(.+\)$/.test(rawKey)?rawKey:`(${rawKey})`):displayKey(name),nk=normalizeKey(key),nn=norm(name);
-    let hit=-1;if(nk)hit=costData.findIndex(x=>normalizeKey(x.key)===nk);if(hit<0&&nn)hit=costData.findIndex(x=>norm(x.name)===nn);
-    if(hit>=0){costData[hit]={...costData[hit],name:stripNo(name),key:key||costData[hit].key,cost,supplier:supplier||costData[hit].supplier||''};}
-    else{costData.unshift({name:stripNo(name),key,cost,supplier});}
-    saveCore();$('#cost-add-name').value='';$('#cost-add-key').value='';$('#cost-add-value').value='';$('#cost-add-supplier').value='';renderCosts();renderChannel();
+    // 새 상품 수동 추가도 괄호키만 같다는 이유로 덮어쓰지 않습니다.
+    const product={name:stripNo(name),key,cost,supplier};
+    const hit=costData.findIndex(x=>costIdentity(x)===costIdentity(product));
+    if(hit>=0)costData[hit]={...costData[hit],...product};
+    else costData.unshift(product);
+    saveCore({changedRows:[product]});$('#cost-add-name').value='';$('#cost-add-key').value='';$('#cost-add-value').value='';$('#cost-add-supplier').value='';renderCosts();renderChannel();
     priceToast(hit>=0?'기존 원가를 업데이트했습니다.':'원가가 저장되었습니다.');
   });
 
@@ -3302,20 +3335,57 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     const supplierCol=heads.findIndex(x=>['공급처명','공급처','공급업체명','공급업체','매입처명','매입처','거래처명','매입거래처'].includes(x));
     if(costCol<0)throw new Error('셀메이트 파일에서 원가 열을 찾지 못했습니다.');
     let added=0,updated=0,skipped=0;
+    const imported=[];
     for(let r=hi+1;r<rows.length;r++){
       const rawName=String(rows[r]?.[nameCol]??'').trim(),cost=toNum(rows[r]?.[costCol]),supplier=supplierCol>=0?String(rows[r]?.[supplierCol]??'').trim():'';
       if(!rawName||cost===null||cost<=0){skipped++;continue;}
-      const name=stripNo(rawName),key=productKeyFor(name)||displayKey(name)||'',nk=normalizeKey(key),nn=norm(name);
-      let hit=-1;if(nk)hit=costData.findIndex(x=>normalizeKey(x.key)===nk);if(hit<0&&nn)hit=costData.findIndex(x=>norm(x.name)===nn);
-      if(hit>=0){costData[hit]={...costData[hit],name,key:key||costData[hit].key,cost,supplier:supplier||costData[hit].supplier||''};updated++;}
-      else{costData.unshift({name,key,cost,supplier});added++;}
+      const name=stripNo(rawName),key=productKeyFor(name)||displayKey(name)||'';
+      const product={name,key,cost,supplier};
+      imported.push(product);
+      const hit=costData.findIndex(x=>costIdentity(x)===costIdentity(product));
+      if(hit>=0){costData[hit]={...costData[hit],...product};updated++;}
+      else{costData.unshift(product);added++;}
     }
-    saveCore();renderCosts();renderChannel();
-    return {added,updated,skipped};
+    // 전체 로컬DB를 통째로 전송하면 오래된 캐시가 서버 데이터를 덮을 수 있어, 업로드한 파일 행만 따로 클라우드에 보냅니다.
+    saveCore({cloud:false});renderCosts();renderChannel();
+    // 파일 읽기 문제와 저장 문제를 구분하기 위한 검증 숫자입니다.
+    const targetRows=costData.filter(x=>normalizeKey(displayKey(x.name))==='(겨울찐스판3탄)');
+    const targetFromFile=rows.slice(hi+1).filter(rr=>String(rr?.[nameCol]??'').includes('겨울찐스판3탄')).length;
+    return {added,updated,skipped,targetCount:targetRows.length,targetFileCount:targetFromFile,imported};
   }
+  let lastImportedFileRows=[];
+  const pushBtn=$('#ff-cost-file-push');
+  async function pushLastFile(){
+    if(!lastImportedFileRows.length)return;
+    const state=$('#cost-import-state');
+    const cloud=window.FORESTFIT_SHARED_COSTS;
+    if(!cloud?.connected?.()){
+      if(state)state.textContent=`이 PC에 ${lastImportedFileRows.length}개 로드됨 · 공유 연결 대기 (공유 원가 연결 클릭 후 클라우드 재저장)`;
+      return;
+    }
+    if(pushBtn)pushBtn.disabled=true;
+    try{
+      if(state)state.textContent=`첨부 파일 ${lastImportedFileRows.length}개 클라우드 업로드 및 검증 중…`;
+      const info=await cloud.uploadImportedFile(lastImportedFileRows);
+      if(state)state.textContent=`공유 저장 검증 완료 · 파일 ${info.sent}개 / 서버 확인 ${info.verified}개 · 겨울찐스판3탄 서버 ${info.targetCount}개`;
+      priceToast(`클라우드 원가 ${info.verified}개 저장 확인`);
+    }catch(err){
+      console.error('[FORESTFIT latest sellmate cloud upload]',err);
+      if(state)state.textContent='이 PC만 저장됨 · 클라우드 저장 실패: '+(err?.message||err);
+      alert('공유 원가 업로드 실패: '+(err?.message||err)+'\n파일을 다시 선택할 필요 없이 「첨부 파일 클라우드 재저장」을 누르세요.');
+    }finally{if(pushBtn)pushBtn.disabled=false;}
+  }
+  pushBtn?.addEventListener('click',pushLastFile);
   $('#pricing-cost-sellmate-file')?.addEventListener('change',async e=>{
     const file=e.target.files?.[0];if(!file)return;const state=$('#cost-import-state');
-    try{if(state)state.textContent='불러오는 중…';const r=await importSellmateCosts(file);if(state)state.textContent=`추가 ${r.added} · 갱신 ${r.updated}`;priceToast(`셀메이트 원가 반영 완료 · 추가 ${r.added}개 · 갱신 ${r.updated}개`);}
+    try{
+      if(state)state.textContent='불러오는 중…';
+      const r=await importSellmateCosts(file);
+      lastImportedFileRows=r.imported;
+      if(pushBtn)pushBtn.style.display='inline-flex';
+      if(state)state.textContent=`파일 로드됨: ${file.name} · 추가 ${r.added} / 갱신 ${r.updated} · 겨울찐스판3탄 파일 ${r.targetFileCount}/원가목록 ${r.targetCount}개 · 서버 저장 미확인`;
+      await pushLastFile();
+    }
     catch(err){console.error(err);if(state)state.textContent='불러오기 실패';alert(err.message||'셀메이트 원가 파일을 불러오지 못했습니다.');}
     finally{e.target.value='';}
   });
@@ -3339,7 +3409,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   function rowStatus(row,cost,margin,end){if(cost===null)return ['원가 입력','bad'];if(margin===null)return ['마지노선 확인','warn'];if(end!==null&&end<margin)return ['마지노선 미달','bad'];return ['조회완료','ok'];}
   function renderChannel(){renderChannelSelect();const rate=selectedRate;const tbody=$('#channel-table-body'),empty=$('#channel-empty');if(!pricingRows.length){tbody.innerHTML='';empty.style.display='block';return;}empty.style.display='none';tbody.innerHTML=pricingRows.map((row,i)=>{const hit=lookupCost(row.name,row.key),cost=hit?toNum(hit.cost):null,margin=marginAt(cost,rate),end=endingPrice(row.proposed,row.coupon),ratio=(cost!==null&&end)?cost/end:null,[st,cls]=rowStatus(row,cost,margin,end);return `<tr class="${end!==null&&margin!==null&&end<margin?'danger':''}"><td><input class="editable-price" style="text-align:left" data-row-field="code" data-row-i="${i}" value="${String(row.code??'').replace(/"/g,'&quot;')}"></td><td><input class="editable-price product-name-input" data-row-field="name" data-row-i="${i}" value="${String(row.name??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}"></td><td><input class="editable-price" style="text-align:left;width:210px" data-row-field="options" data-row-i="${i}" value="${String(row.options??'').replace(/"/g,'&quot;')}"></td><td class="num"><input class="editable-price" data-row-field="normal" data-row-i="${i}" value="${row.normal??''}"></td><td class="num"><input class="editable-price" data-row-field="proposed" data-row-i="${i}" value="${row.proposed??''}"></td><td class="num"><input class="editable-price" data-row-field="coupon" data-row-i="${i}" value="${row.coupon??''}"></td><td class="num">${fmt(end)}</td><td class="num">${cost===null?`<input class="cost-cell-input missing" data-missing-cost="${i}" placeholder="원가 입력">`:fmt(cost)}</td><td class="num">${fmt(margin)}</td><td class="num"><input class="editable-price" data-row-field="lowest" data-row-i="${i}" value="${row.lowest??''}"></td><td class="num">${ratio===null?'-':(ratio*100).toFixed(1)+'%'}</td><td>${row.key||displayKey(row.name)||'-'}</td><td><span class="status-pill ${cls}">${st}</span></td></tr>`;}).join('');
     tbody.querySelectorAll('[data-row-field]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.rowI),f=inp.dataset.rowField;if(f==='name'){pricingRows[i].name=stripNo(inp.value);pricingRows[i].key=productKeyFor(pricingRows[i].name);}else{pricingRows[i][f]=(f==='code'||f==='options')?inp.value:toNum(inp.value);}safeLocalSet(STORAGE_ROWS,pricingRows);renderChannel();}));
-    tbody.querySelectorAll('[data-missing-cost]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.missingCost),v=toNum(inp.value);if(v===null||v<=0)return;getOrCreateCostEntry(pricingRows[i],v);saveCore();renderCosts();renderChannel();priceToast('원가가 저장되었습니다.');}));
+    tbody.querySelectorAll('[data-missing-cost]').forEach(inp=>inp.addEventListener('change',()=>{const i=Number(inp.dataset.missingCost),v=toNum(inp.value);if(v===null||v<=0)return;getOrCreateCostEntry(pricingRows[i],v);saveCore({changedRows:[{name:stripNo(pricingRows[i].name),key:pricingRows[i].key||displayKey(pricingRows[i].name),cost:v}]});renderCosts();renderChannel();priceToast('원가가 저장되었습니다.');}));
   }
   $('#channel-select').addEventListener('change',e=>{selectedRate=Number(e.target.value)||18;localStorage.setItem(STORAGE_CHANNEL,String(selectedRate));renderChannel();renderRates();renderMarginTest();});
   $('#pricing-event-name').addEventListener('input',e=>{eventName=e.target.value.trim();localStorage.setItem(STORAGE_EVENT_NAME,eventName);});
@@ -3425,14 +3495,14 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     if(newCosts)costData=restoreSuppliers(newCosts);
     if(newMargins)marginData=newMargins;
     sourceLabel=`${file.name}${costSheetName?` · ${costSheetName}`:''}`;
-    saveCore();
+    saveCore({cloud:false});
     updateSourceLabels();
     renderMargin();
     renderCosts();
     renderChannel();
   }
   $('#pricing-config-file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{await importPricingConfig(f);priceToast('금액 세팅을 다시 불러왔습니다.');}catch(err){priceToast(err.message||'파일을 읽지 못했습니다.');}e.target.value='';});
-  $('#pricing-reset-default').addEventListener('click',()=>{if(!confirm('사이트에 저장된 원가/마지노선을 기본 파일 값으로 되돌릴까요?'))return;costData=DEFAULT_COST_DATA.map(x=>({...x}));marginData=DEFAULT_MARGIN_DATA.map(x=>({...x}));sourceLabel=DEFAULT_SOURCE;saveCore();updateSourceLabels();renderMargin();renderCosts();renderChannel();priceToast('기본값으로 복원했습니다.');});
+  $('#pricing-reset-default').addEventListener('click',()=>{if(!confirm('사이트에 저장된 원가/마지노선을 기본 파일 값으로 되돌릴까요?'))return;costData=DEFAULT_COST_DATA.map(x=>({...x}));marginData=DEFAULT_MARGIN_DATA.map(x=>({...x}));sourceLabel=DEFAULT_SOURCE;saveCore({cloud:false});updateSourceLabels();renderMargin();renderCosts();renderChannel();priceToast('기본값으로 복원했습니다.');});
 
   let pricingTemplateFile=null;
   const TEMPLATE_START_ROW=5, TEMPLATE_MAX_ROW=54;
@@ -3450,7 +3520,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       out.push({id:`tpl_${r+1}`,code:'',name,options:String(rr[6]??'').trim(),normal:toNum(rr[7]),proposed:toNum(rr[8]),coupon:toNum(rr[11]),lowest:toNum(rr[16]),key});
       if(cost!==null&&cost>0&&!lookupCost(name,key))costData.push({name,key,cost});
     }
-    if(out.length){pricingRows=out;safeLocalSet(STORAGE_ROWS,pricingRows);saveCore();renderCosts();renderChannel();}
+    if(out.length){pricingRows=out;safeLocalSet(STORAGE_ROWS,pricingRows);saveCore({cloud:false});renderCosts();renderChannel();}
     $('#pricing-template-info').textContent=`${file.name} · ${out.length}개`;
     priceToast(`원본 양식에서 ${out.length}개 상품을 불러왔습니다.`);
   }
@@ -3502,15 +3572,23 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
     allCosts:()=>costData.map(x=>({name:x.name,key:x.key,cost:toNum(x.cost),supplier:x.supplier||''})),
     csvReferenceCosts:()=>DEFAULT_COST_DATA.filter(x=>CSV_COST_IDENTITIES.has(costRowId(x))).map(x=>({name:x.name,key:x.key,cost:toNum(x.cost)})),
     applySharedCosts:(remoteRows)=>{
-      costData=restoreSuppliers(mergeCostData(DEFAULT_COST_DATA,Array.isArray(remoteRows)?remoteRows:[]));
+      const shared=Array.isArray(remoteRows)?remoteRows:[];
+      // 공유 DB에서 동일 괄호키를 읽으면 오래된 PC 기본자료/캐시를 우선하지 않습니다.
+      // 서로 다른 공급처는 공유 상품 각각을 별도 원가 행으로 유지합니다.
+      const authoritativeKeys=new Set(shared.map(x=>normalizeKey(displayKey(x.name)||x.key||'')).filter(Boolean));
+      const local=mergeCostData(DEFAULT_COST_DATA,costData).filter(x=>{
+        const key=normalizeKey(displayKey(x.name)||x.key||'');
+        return !key||!authoritativeKeys.has(key);
+      });
+      costData=restoreSuppliers(mergeCostData(local,shared));
       safeLocalSet(STORAGE_COST,costData);
       renderCosts();renderChannel();
     },
     importCosts:(rows)=>{
       costData=restoreSuppliers(mergeCostData(costData,Array.isArray(rows)?rows:[]));
-      saveCore();renderCosts();renderChannel();
+      saveCore({changedRows:Array.isArray(rows)?rows:[]});renderCosts();renderChannel();
     },
-    saveCost:(name,key,cost)=>{const c=toNum(cost);if(c===null||c<=0)return null;getOrCreateCostEntry({name:stripNo(name),key:key||displayKey(name)||''},c);saveCore();renderCosts();renderChannel();const h=lookupCost(name,key);return h?{name:h.name,key:h.key,cost:toNum(h.cost)}:null;},
+    saveCost:(name,key,cost)=>{const c=toNum(cost);if(c===null||c<=0)return null;getOrCreateCostEntry({name:stripNo(name),key:key||displayKey(name)||''},c);saveCore({changedRows:[{name:stripNo(name),key:key||displayKey(name)||'',cost:c}]});renderCosts();renderChannel();const h=lookupCost(name,key);return h?{name:h.name,key:h.key,cost:toNum(h.cost)}:null;},
     source:()=>sourceLabel
   };
   updateSourceLabels();renderMargin();renderCosts();renderChannel();
@@ -3520,7 +3598,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
 (()=>{
   'use strict';
   // ========================================
-  // 이 2개 값만 Supabase의 내 프로젝트 정보로 변경합니다.
+  // 이 파일은 공급처별 원가 공유를 위해 Supabase SQL 패치를 먼저 실행해야 합니다.
   // Project Settings > Data API > Project URL
   // Project Settings > API Keys > Publishable key (또는 기존 anon public key)
   // service_role / secret key는 절대 입력하지 마세요.
@@ -3542,23 +3620,49 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const normalize=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/봄|가을/g,'').replace(/\s+/g,'').replace(/[._·:：\-–—]/g,'');
   const keyFrom=v=>{const m=String(v||'').normalize('NFKC').match(/[（(]\s*([^()（）]+?)\s*[)）]/);return m?`(${m[1].trim()})`:'';};
   const keyNorm=v=>String(v||'').normalize('NFKC').toLowerCase().replace(/봄|가을/g,'').replace(/\s+/g,'');
+  // 클라우드 상품 ID도 괄호키만이 아닌 [전체 상품명 + 공급처] 조합의 안정적 해시입니다.
+  const hashId=str=>{
+    let a=2166136261,b=2246822519;
+    for(let i=0;i<str.length;i++){
+      const c=str.charCodeAt(i);
+      a=Math.imul(a^c,16777619);
+      b=Math.imul(b^(c+i),3266489917);
+    }
+    return (a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');
+  };
+  // 저장용 식별은 상품명 속 봄/가을을 제거하지 않습니다. 계절을 제외하는 것은 매칭 시에만 적용합니다.
+  const storageNorm=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/[._·:：\-–—]/g,'');
   const identity=x=>{
-    const name=String(x?.name??x?.product_name??'').trim();
-    const key=keyFrom(name)||keyFrom(x?.key??x?.product_key)||'';
-    if(key)return 'k:'+keyNorm(key);
-    const cleaned=normalize(name).replace(/^\d{1,3}[.)-]/,'');
-    return cleaned?'n:'+cleaned:'';
+    const name=storageNorm(x?.name??x?.product_name??'').replace(/^\d{1,3}[.)-]/,'');
+    const supplier=storageNorm(x?.supplier??x?.product_supplier??'');
+    return name?'v2:'+hashId(name+'\u241f'+supplier):'';
   };
   const asRow=x=>{
     const name=String(x?.name??x?.product_name??'').trim();
     const key=keyFrom(name)||keyFrom(x?.key??x?.product_key)||'';
+    const supplier=String(x?.supplier??x?.product_supplier??'').trim();
     const cost=Number(String(x?.cost??'').replace(/,/g,''));
     if(!name||!Number.isFinite(cost)||cost<=0)return null;
-    const id=identity({name,key});if(!id)return null;
-    return {product_id:id,product_name:name,product_key:key,cost};
+    const id=identity({name,supplier});if(!id)return null;
+    return {product_id:id,product_name:name,product_key:key,product_supplier:supplier,cost};
   };
-  const uniqueRows=rows=>{const m=new Map();for(const x of rows||[]){const r=asRow(x);if(r)m.set(r.product_id,r);}return [...m.values()];};
-  const same=(a,b)=>a&&b&&a.cost===b.cost&&a.product_name===b.product_name&&a.product_key===b.product_key;
+  const uniqueRows=rows=>{
+    const m=new Map();
+    // 같은 괄호키에 v2(상품명+공급처) 행이 있으면 예전 v1 행은 폐기합니다.
+    // v1에 상품명/공급처가 잘못 섞여 있어도 되살리지 않기 위한 처리입니다.
+    const modernKeys=new Set((rows||[]).filter(x=>String(x?.product_id||'').startsWith('v2:'))
+      .map(x=>keyNorm(keyFrom(x?.product_name||x?.name)||x?.product_key||'' )).filter(Boolean));
+    const modernNames=new Set((rows||[]).filter(x=>String(x?.product_id||'').startsWith('v2:'))
+      .map(x=>storageNorm(x?.product_name||x?.name)));
+    for(const x of rows||[]){
+      const modern=String(x?.product_id||'').startsWith('v2:');
+      if(!modern && (modernNames.has(storageNorm(x?.product_name||x?.name))
+        || modernKeys.has(keyNorm(keyFrom(x?.product_name||x?.name)||x?.product_key||''))))continue;
+      const r=asRow(x);if(r)m.set(r.product_id,r);
+    }
+    return [...m.values()];
+  };
+  const same=(a,b)=>a&&b&&a.cost===b.cost&&a.product_name===b.product_name&&a.product_key===b.product_key&&a.product_supplier===b.product_supplier;
   const setStatus=(message,type='normal')=>{
     if(status){status.textContent=message;status.style.color=type==='error'?'#a34d49':type==='ok'?'#477967':'#847a72';}
     if(state)state.textContent=isConnected?(type==='error'?'공유 저장 실패':busy||pending.size?'공유 저장 중':'공유 저장 사용 중'):'이 PC에만 저장됨';
@@ -3589,10 +3693,10 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   function applyRemote(data){
     const rows=uniqueRows(data);
     // 서버가 빈 상태면 이 PC의 기존 원가를 자동 삭제/교체하지 않습니다.
-    if(!rows.length){baseline=new Map(uniqueRows(api?.allCosts?.()||[]).map(x=>[x.product_id,x]));return;}
-    api?.applySharedCosts?.(rows.map(x=>({name:x.product_name,key:x.product_key,cost:x.cost})));
-    // 포함된 기본 원가까지 모두 읽기 기준점으로 삼습니다.
-    baseline=new Map(uniqueRows(api?.allCosts?.()||[]).map(x=>[x.product_id,x]));
+    if(!rows.length){baseline=new Map();return;}
+    api?.applySharedCosts?.(rows.map(x=>({name:x.product_name,key:x.product_key,cost:x.cost,supplier:x.product_supplier||''})));
+    // 서버에 실제 존재하는 행만 기준점으로 기록합니다. 신규 공급처 상품은 별도로 업로드할 수 있습니다.
+    baseline=new Map(rows.map(x=>[x.product_id,x]));
   }
   async function refresh(quiet=false){
     if(!isConnected||busy||pending.size)return;
@@ -3641,6 +3745,31 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
       if(!same(base,row))pending.set(row.product_id,row);
     }
     if(pending.size){setStatus(`${pending.size}개 원가 공유 저장 대기 중`);scheduleSave();}
+  }
+  async function uploadImportedFile(imported){
+    if(!isConnected)throw new Error('공유 연결이 완료되지 않았습니다. 공유 원가 연결을 눌러주세요.');
+    if(busy||pending.size)throw new Error('다른 원가 저장이 진행 중입니다. 저장 완료 후 다시 눌러주세요.');
+    const rows=uniqueRows(imported);
+    if(!rows.length)throw new Error('클라우드에 저장할 원가가 없습니다.');
+    busy=true;clearTimeout(debounce);++requestVersion;
+    try{
+      setStatus(`첨부 파일 ${rows.length}개 서버 저장 중…`);
+      await saveBatch(rows);
+      setStatus(`서버 저장 후 ${rows.length}개 재조회·검증 중…`);
+      const remote=await readRemote();
+      const canonical=uniqueRows(remote),byId=new Map(canonical.map(x=>[x.product_id,x]));
+      let verified=0;
+      for(const row of rows){
+        const check=byId.get(row.product_id);
+        if(!check||!same(check,row))throw new Error(`서버 검증 불일치: ${row.product_name} / ${row.product_supplier} (원가 ${row.cost})`);
+        verified++;
+      }
+      applyRemote(remote);
+      const targetCount=canonical.filter(x=>keyNorm(keyFrom(x.product_name))==='(겨울찐스판3탄)').length;
+      setStatus(`클라우드 원가 저장·재조회 검증 완료 · ${verified}개 / 겨울찐스판3탄 ${targetCount}개`, 'ok');
+      return {sent:rows.length,verified,targetCount};
+    }catch(err){setStatus('첨부 파일 클라우드 저장 실패: '+describeErr(err),'error');throw err;}
+    finally{busy=false;}
   }
   async function connect(){
     if(isConnected){setStatus('공유 원가가 이미 연결되어 있습니다.','ok');return;}
@@ -3713,7 +3842,7 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   refreshBtn?.addEventListener('click',()=>refresh(false));
   migrateBtn?.addEventListener('click',migrate);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(true);});
-  window.FORESTFIT_SHARED_COSTS={saveDiff,connected:()=>isConnected,refresh};
+  window.FORESTFIT_SHARED_COSTS={saveDiff,connected:()=>isConnected,refresh,uploadImportedFile};
   setButtons();
   if(confReady()){
     setStatus('클라우드 자동 연결 대기 중…');
@@ -5058,7 +5187,14 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const parenKey=v=>{const m=String(v??'').normalize('NFKC').match(/[（(]\s*([^()（）]+?)\s*[)）]/);return m?`(${cleanSeason(m[1]).replace(/\s+/g,'')})`:'';};
   const normName=v=>String(v??'').normalize('NFKC').toLowerCase().replace(/^\s*\d{1,3}\s*(?:[.)]|[-–—])\s*/,'').replace(/봄|가을/g,'').replace(/\s+/g,'').replace(/[._·:：\-–—]/g,'');
   // 엑셀 원가 탭 생성 시에도 상품명 기준으로 상품키를 재생성해 행-키 어긋남을 방지합니다.
-  function uniqueCosts(list){const out=[],pos=new Map();for(const raw of (Array.isArray(list)?list:[])){const c=num(raw?.cost);const name=String(raw?.name||'').trim();if(!name||c===null||c<=0)continue;const k=parenKey(name)||parenKey(raw?.key||'');const id=k?`k:${k.toLowerCase()}`:`n:${normName(name)}`;if(!id||id==='n:')continue;if(pos.has(id)){out[pos.get(id)]={...out[pos.get(id)],...raw,name,key:k||String(raw?.key||''),cost:c};}else{pos.set(id,out.length);out.push({...raw,name,key:k||String(raw?.key||''),cost:c});}}return out;}
+  function uniqueCosts(list){const out=[],pos=new Map();for(const raw of (Array.isArray(list)?list:[])){
+    const c=num(raw?.cost),name=String(raw?.name||'').trim();if(!name||c===null||c<=0)continue;
+    const k=parenKey(name)||parenKey(raw?.key||''),supplier=String(raw?.supplier||'').trim();
+    const id=`n:${normName(name)}|s:${normName(supplier)}`;
+    const row={...raw,name,key:k||String(raw?.key||''),cost:c,supplier};
+    if(pos.has(id))out[pos.get(id)]={...out[pos.get(id)],...row};
+    else{pos.set(id,out.length);out.push(row);}
+  }return out;}
   function dl(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200);}
   async function baseArray(){return overrideBaseFile?new Uint8Array(await overrideBaseFile.arrayBuffer()):b64u8(BASE_TEMPLATE_B64);}
   function sheetInfos(wbDoc,relsDoc){
@@ -5441,7 +5577,14 @@ window.downloadTalkdealOptionWorkbook = async function(rows, filename='톡딜옵
   const keyFrom=v=>{const m=String(v??'').normalize('NFKC').match(/[（(]\s*([^()（）]+?)\s*[)）]/);return m?`(${cleanSeason(m[1]).replace(/\s+/g,'')})`:'';};
   const normName=v=>stripNo(v).normalize('NFKC').toLowerCase().replace(/봄|가을/g,'').replace(/\s+/g,'').replace(/[._·:：\-–—]/g,'');
   const getDB=()=>{try{return JSON.parse(localStorage.getItem(STORAGE)||'[]')||[];}catch(e){return [];}};
-  function dedupe(list){const out=[],map=new Map();for(const raw of list){const name=String(raw?.name||'').trim(),cost=toNum(raw?.cost);if(!name||cost===null)continue;const key=keyFrom(name)||keyFrom(raw?.key||''),id=key?`k:${key.toLowerCase()}`:`n:${normName(name)}`;if(!id||id==='n:')continue;if(map.has(id)){const i=map.get(id);out[i]={...out[i],...raw,name,key:key||String(raw?.key||''),cost};}else{map.set(id,out.length);out.push({...raw,name,key:key||String(raw?.key||''),cost});}}return out;}
+  function dedupe(list){const out=[],map=new Map();for(const raw of list){
+    const name=String(raw?.name||'').trim(),cost=toNum(raw?.cost);if(!name||cost===null)continue;
+    const key=keyFrom(name)||keyFrom(raw?.key||''),supplier=String(raw?.supplier||'').trim();
+    const id=`n:${normName(name)}|s:${normName(supplier)}`;
+    const row={...raw,name,key:key||String(raw?.key||''),cost,supplier};
+    if(map.has(id)){const i=map.get(id);out[i]={...out[i],...row};}
+    else{map.set(id,out.length);out.push(row);}
+  }return out;}
   function dbIndex(){const byKey=new Map(),byName=new Map();for(const x of dedupe(getDB())){const k=keyFrom(x.name)||keyFrom(x.key||'');if(k)byKey.set(k.toLowerCase(),x);const n=normName(x.name);if(n)byName.set(n,x);}return {byKey,byName};}
   function hasCost(name){const ix=dbIndex(),k=keyFrom(name);if(k&&ix.byKey.has(k.toLowerCase()))return true;return ix.byName.has(normName(name));}
   const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
