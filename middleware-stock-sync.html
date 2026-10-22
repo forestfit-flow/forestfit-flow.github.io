@@ -89,6 +89,44 @@
       .desktop-break{display:none}.workspace-footer{gap:12px;flex-direction:column;align-items:flex-start;justify-content:center;padding:20px 0}
     }
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+/* --- FORESTFIT product mapping workbench --- */
+.map-layout{padding:26px 28px 34px;background:#fff}
+.map-info{padding:16px 18px;border:1px solid #dce3ed;background:#f8faff;color:#647188;border-radius:14px;font-size:13px;line-height:1.8;margin-bottom:18px}
+.map-info strong{color:#263347}
+.map-stage{border:1px solid #dce2ea;border-radius:16px;margin-bottom:16px;overflow:hidden;background:#fff}
+.map-stage-head{display:flex;align-items:center;gap:12px;padding:17px 20px;border-bottom:1px solid #e7ebf0;background:#fafbfc}
+.map-stage-num{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border-radius:9px;background:#354561;color:#fff;font:800 12px/1 'Plus Jakarta Sans',sans-serif}
+.map-stage-head h3{margin:0;font-size:15px;letter-spacing:-.03em;color:#263245}
+.map-stage-head p{margin:3px 0 0;font-size:12px;color:#8792a0}
+.map-stage-body{padding:18px 20px}
+.map-file-label{display:block;cursor:pointer;border:1px dashed #bcc6d5;border-radius:13px;padding:21px 14px;text-align:center;color:#465875;background:#fafbfe;transition:.18s}
+.map-file-label:hover,.map-file-label:focus-within{border-color:#647797;background:#f3f6fb}
+.map-file-label b{display:block;font-size:14px;margin-bottom:5px}
+.map-file-label small{color:#8792a3}
+.map-file-label input{display:none}
+.map-file-status{font-size:12px;color:#7d8796;margin-top:9px;line-height:1.8;overflow-wrap:anywhere}
+.map-file-status.ok{color:#356951}.map-file-status.err{color:#b44949}
+.map-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:17px}
+.map-stat{border:1px solid #e0e5ed;background:#f9fafc;border-radius:12px;padding:14px 15px}
+.map-stat strong{font:750 26px/1.2 'Plus Jakarta Sans','Pretendard',sans-serif;color:#273248;display:block}
+.map-stat span{font-size:12px;color:#7b8797}
+.map-results-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.6;text-align:left}
+.map-results-table th,.map-results-table td{padding:11px 10px;border-bottom:1px solid #e9edf2;vertical-align:top}
+.map-results-table th{background:#f7f9fc;font-weight:750;color:#637188;font-size:11px}
+.map-results-table td:first-child{font-weight:750;color:#263245}
+.map-ok{color:#2e7650;font-weight:750}.map-warn{color:#b15c40;font-weight:750}
+.map-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+.map-btn{padding:12px 20px;border-radius:11px;border:1px solid #293346;background:#293346;color:#fff;font-weight:750;font-size:13px;cursor:pointer}
+.map-btn:disabled{opacity:.4;cursor:not-allowed}.map-btn.secondary{background:#fff;color:#4b5970;border-color:#cfd7e2}
+.map-note{font-size:12px;line-height:1.7;color:#8490a0}
+.map-preview{margin-top:14px;max-height:270px;overflow:auto;border:1px solid #e3e8ef;border-radius:11px}
+.map-preview details{padding:10px 14px;border-bottom:1px solid #e7ebf0}.map-preview details:last-child{border-bottom:0}.map-preview summary{cursor:pointer;font-weight:650;color:#344157}.map-preview p{margin:8px 0 0;color:#8b4c3f;font-size:12px}
+@media(max-width:700px){.map-layout{padding:16px 12px 24px}.map-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.map-stage-head,.map-stage-body{padding:14px}.map-results-table{font-size:11px}}
+
+    .map-selected-files{margin-top:12px;display:grid;gap:8px}
+    .map-selected-file{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f6f8fc;border:1px solid #e0e5ee;border-radius:10px;padding:9px 12px;color:#344259;font-size:12px;overflow-wrap:anywhere}
+    .map-selected-file button{background:transparent;border:1px solid #cbd3df;border-radius:7px;font-size:12px;padding:5px 10px;cursor:pointer;color:#67768c;white-space:nowrap}
+    .map-selected-file button:hover{border-color:#8c9cb3;color:#273248}
   </style>
 </head>
 <body>
@@ -156,16 +194,39 @@
       <div class="workspace-content-head">
         <span class="content-sup">02 / PRODUCT MAPPING</span>
         <h2>미등록 상품 매핑</h2>
-        <p>미들웨어 미등록 상품의 신규 매핑 업무를 위한 작업 공간입니다.</p>
+        <p>셀메이트 옵션과 판매처별 미들웨어 품목코드를 비교해 매핑 검증 결과를 만듭니다.</p>
       </div>
-      <div class="mapping-placeholder">
-        <div class="mapping-visual" aria-hidden="true"><span>02</span><span class="mapping-visual-label">PRODUCT MAPPING</span></div>
-        <div class="mapping-details">
-          <span class="planning-marker">기능 제작 예정</span>
-          <h3>미등록 상품 매핑</h3>
-          <p>이 화면에서 미등록 상품을 확인하고 매핑하는 기능을 새로 제작할 예정입니다.<br class="desktop-break">현재는 메뉴와 작업 공간만 준비되어 있으며, 실제 매핑·저장 기능은 아직 없습니다.</p>
-          <div class="mapping-footnote"><span aria-hidden="true">↗</span> 향후 매핑 기준과 사용할 파일 형식이 정해지면 이 탭에 기능을 추가합니다.</div>
+      <div class="map-layout">
+        <div class="map-info"><strong>검증 기준</strong> · 셀메이트 C열 바코드의 하이픈(-) 제거 → 판매처 H열 품목코드 대조 → 셀메이트 B열 옵션과 판매처 G열 옵션의 <strong>색상·기장·사이즈 각각 확인</strong> → E열 괄호 상품명 비교(있는 경우). 옵션 순서가 다른 하프클럽 형식도 자동 해석하되 불명확한 값은 매칭하지 않습니다.</div>
+        <div class="map-stage">
+          <div class="map-stage-head"><div class="map-stage-num">01</div><div><h3>셀메이트 상품·옵션 파일 첨부</h3><p>상품명 A열 · 옵션 B열 · 바코드번호 C열</p></div></div>
+          <div class="map-stage-body">
+            <label class="map-file-label" for="mapSellmateInput"><b>셀메이트 CSV 첨부</b><small>CP949 / UTF-8 인코딩 지원 · .csv</small><input id="mapSellmateInput" type="file" accept=".csv,text/csv" /></label>
+            <div class="map-file-status" id="mapSellmateStatus">셀메이트 CSV 파일을 먼저 선택해주세요.</div>
+          </div>
         </div>
+        <div class="map-stage">
+          <div class="map-stage-head"><div class="map-stage-num">02</div><div><h3>미들웨어 판매처 파일 첨부</h3><p>C열 채널명 기준 자동 분리 · GS, 네이버, 롯데온, 퀸잇, 하프클럽</p></div></div>
+          <div class="map-stage-body">
+            <label class="map-file-label" for="mapChannelInput"><b>통합 파일 먼저 첨부 → 네이버 파일 이어서 추가</b><small>여러 번 선택해도 기존 파일 유지 · 한 파일에 채널이 섞여 있어도 C열로 자동 분리 · .xls / .xlsx</small><input id="mapChannelInput" type="file" accept=".xlsx,.xls" multiple /></label>
+            <div class="map-file-status" id="mapChannelStatus">통합 파일과 별도 네이버 파일을 차례로 선택해 추가할 수 있습니다.</div><div id="mapSelectedFiles" class="map-selected-files" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="map-stage">
+          <div class="map-stage-head"><div class="map-stage-num">03</div><div><h3>상품 및 옵션 검증 · 결과 다운로드</h3><p>일치 확인된 항목만 검증 완료 처리하고, 없는 품목과 옵션 불일치를 분리합니다.</p></div></div>
+          <div class="map-stage-body">
+            <div class="map-actions"><button class="map-btn" id="mapRunBtn" type="button" disabled>바코드 · 옵션 검증 시작</button><button class="map-btn secondary" id="mapResetBtn" type="button">초기화</button></div>
+            <p class="map-note" id="mapNotice">두 종류의 파일을 첨부하면 바코드와 옵션을 비교할 수 있습니다.</p>
+            <div id="mapResults" hidden>
+              <div class="map-stats"><div class="map-stat"><strong id="mapStatSell">0</strong><span>셀메이트 고유 바코드</span></div><div class="map-stat"><strong id="mapStatRows">0</strong><span>판매처 비교 행</span></div><div class="map-stat"><strong id="mapStatOK">0</strong><span>검증 완료</span></div><div class="map-stat"><strong id="mapStatIssues">0</strong><span>검증 확인 필요</span></div></div>
+              <div style="overflow-x:auto"><table class="map-results-table"><thead><tr><th>판매처</th><th>엑셀 옵션 행</th><th>검증 완료</th><th>미확인·불일치 옵션</th></tr></thead><tbody id="mapSummaryBody"></tbody></table></div>
+              <div class="map-preview" id="mapIssueList"></div>
+              <div class="map-actions"><button class="map-btn" id="mapZipBtn" type="button" disabled>채널별 5개 파일 ZIP 다운로드</button><span class="map-note">ZIP 안에 GS · 네이버 · 롯데온 · 퀸잇 · 하프클럽 엑셀을 각각 생성합니다. 원본 A~J열 + 검증 정보 K~T열.</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="map-note">한 파일에 여러 채널이 섞여 있어도 C열로 자동 분리합니다. 네이버 파일은 나중에 추가 선택해도 기존 통합 파일이 지워지지 않습니다. <b>파일 미첨부 채널은 미등록으로 간주하지 않습니다.</b></p>
+        <p class="map-note">첨부 파일은 브라우저 안에서 처리합니다. 비교 결과는 실제 판매처 등록 여부를 직접 조회한 것이 아니라 <b>첨부 엑셀에 기록된 품목코드와 옵션을 검증한 결과</b>입니다.</p>
       </div>
     </section>
   </main>
@@ -656,6 +717,303 @@ $('runBtn').addEventListener('click',runMatching);$('downloadBtn').addEventListe
   window.addEventListener('hashchange',fromHash);
   fromHash();
 })();
+</script>
+<script>
+/* === FORESTFIT 미등록 상품 매핑: 셀메이트 기준 / 판매처 옵션 검증 === */
+(()=>{
+  'use strict';
+  const CHANNELS=['GS','네이버','롯데온','퀸잇','하프클럽'];
+  const fileSell=document.getElementById('mapSellmateInput');
+  const fileChannels=document.getElementById('mapChannelInput');
+  const statusSell=document.getElementById('mapSellmateStatus');
+  const statusChannels=document.getElementById('mapChannelStatus');
+  const runBtn=document.getElementById('mapRunBtn');
+  const zipBtn=document.getElementById('mapZipBtn');
+  const resetBtn=document.getElementById('mapResetBtn');
+  const results=document.getElementById('mapResults');
+  const notice=document.getElementById('mapNotice');
+  const get=id=>document.getElementById(id);
+  const str=v=>v==null?'':String(v).trim();
+  const norm=v=>str(v).replace(/\s+/g,'').toUpperCase().replace(/FREE/g,'F');
+  const normBarcode=v=>str(v).replace(/[-\s]/g,'');
+  const normalizeLength=v=>({SHORT:'숏',LONG:'롱',BASIC:'기본','기본기장':'기본'})[norm(v)]||norm(v);
+  const lengthSet=new Set(['숏','롱','기본']);
+  const isSize=v=>/^(?:\d+XL|[SML]|XL|F|FREE|\d{2,3})$/i.test(norm(v));
+  const esc=v=>str(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let sellmate=null,channels=null,report=null;
+  // Additive file collection: selecting Naver later must never erase the combined 4-channel file.
+  const selectedFiles=new Map();
+  const selectedList=get('mapSelectedFiles');
+
+  function productKey(s){const m=str(s).match(/\(([^()]+)\)/);return m?norm(m[1]):null;}
+  function productName(s){const m=str(s).match(/\(([^()]+)\)/);return m?str(m[1]):str(s);}
+  function parseSellmateOpt(value){
+    const x=str(value).split(/[,，]/).map(str).filter(Boolean);
+    if(x.length===3)return {parts:[norm(x[0]),normalizeLength(x[1]),norm(x[2])],reason:''};
+    if(x.length===2&&isSize(x[1]))return {parts:[norm(x[0]),'기본',norm(x[1])],reason:''};
+    return {parts:null,reason:'셀메이트 B열 옵션의 색상·기장·사이즈 구성을 해석할 수 없음'};
+  }
+  function parseChannelOpt(value){
+    // 1옵션 : 블랙 / 2옵션 : 숏 / 3옵션 : S
+    // 1옵션 : 기본 S / 2옵션 : 블랙 (하프클럽 역순 형식)
+    const cleaned=str(value).replace(/\d+\s*옵션\s*[:：]\s*/g,'');
+    const segments=cleaned.split(/[/／,，]/).map(str).filter(Boolean);
+    const colors=[],lengths=[],sizes=[];
+    for(const seg of segments){
+      const words=seg.split(/\s+/).filter(Boolean);
+      if(words.length===2&&lengthSet.has(normalizeLength(words[0]))&&isSize(words[1])){
+        lengths.push(normalizeLength(words[0]));sizes.push(norm(words[1]));continue;
+      }
+      if(lengthSet.has(normalizeLength(seg)))lengths.push(normalizeLength(seg));
+      else if(isSize(seg))sizes.push(norm(seg));
+      else colors.push(norm(seg));
+    }
+    if(colors.length===1&&sizes.length===1&&lengths.length===1)return {parts:[colors[0],lengths[0],sizes[0]],reason:''};
+    if(colors.length===1&&sizes.length===1&&lengths.length===0)return {parts:[colors[0],'기본',sizes[0]],reason:''};
+    return {parts:null,reason:'판매처 G열에서 색상·기장·사이즈를 확정할 수 없음'};
+  }
+  function sameParts(a,b){return !!a&&!!b&&a.length===b.length&&a.every((v,i)=>v===b[i]);}
+  function detectChannel(s){
+    const v=str(s).toLowerCase();
+    if(/gs홈쇼핑|gs샵|gs\s*shop|gs\s*홈쇼핑/.test(v))return 'GS';
+    if(/스마트스토어|네이버|smart\s*store/.test(v))return '네이버';
+    if(/롯데온|lotteon|롯데\s*on/.test(v))return '롯데온';
+    if(/퀸잇|queenit/.test(v))return '퀸잇';
+    if(/하프클럽|halfclub/.test(v))return '하프클럽';
+    return '';
+  }
+  function parseCsv(raw){
+    const rows=[];let cur='',row=[],inQuotes=false;
+    for(let i=0;i<raw.length;i++){
+      const c=raw[i];
+      if(inQuotes){if(c==='"'&&raw[i+1]==='"'){cur+='"';i++;}else if(c==='"')inQuotes=false;else cur+=c;}
+      else if(c==='"')inQuotes=true;
+      else if(c===','){row.push(cur);cur='';}
+      else if(c==='\n'||c==='\r'){if(c==='\r'&&raw[i+1]==='\n')i++;row.push(cur);if(row.some(x=>str(x)))rows.push(row);row=[];cur='';}
+      else cur+=c;
+    }
+    if(inQuotes)throw Error('CSV 따옴표가 닫히지 않았습니다. 원본 파일을 확인해주세요.');
+    row.push(cur);if(row.some(x=>str(x)))rows.push(row);
+    return rows;
+  }
+  async function decodeCsv(file){
+    const bytes=new Uint8Array(await file.arrayBuffer());
+    let content;
+    try{content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch(_){content=new TextDecoder('euc-kr').decode(bytes);}
+    return parseCsv(content.replace(/^\ufeff/,''));
+  }
+  function setMessage(target,message,kind){target.className='map-file-status'+(kind?' '+kind:'');target.textContent=message;}
+  function formatNumber(v){return Number(v||0).toLocaleString('ko-KR');}
+  function updateEnabled(){runBtn.disabled=!(sellmate&&channels&&channels.records.length);zipBtn.disabled=true;report=null;results.hidden=true;}
+  fileSell.addEventListener('change',async e=>{
+    sellmate=null;
+    try{
+      const file=e.target.files?.[0];if(!file)return;
+      if(!/\.csv$/i.test(file.name))throw Error('셀메이트 파일은 CSV 형식으로 첨부해주세요.');
+      const rows=await decodeCsv(file);
+      if(!rows.length||!/상품명/.test(str(rows[0][0]))||!/옵션/.test(str(rows[0][1]))||!/바코드/.test(str(rows[0][2])))throw Error('셀메이트 A열 상품명, B열 옵션명, C열 바코드번호를 확인해주세요.');
+      const map=new Map(),duplicates=new Set();let count=0;
+      rows.slice(1).forEach((r,i)=>{if(!r[0]&&!r[1]&&!r[2])return;const b=normBarcode(r[2]);if(!b)return;count++;
+        const parsed=parseSellmateOpt(r[1]);const item={barcode:b,name:str(r[0]),option:str(r[1]),parsed:parsed.parts,reason:parsed.reason,product:productName(r[0]),key:productKey(r[0]),sourceRow:i+2};
+        if(map.has(b))duplicates.add(b);else map.set(b,item);
+      });
+      if(!count)throw Error('바코드가 입력된 데이터가 없습니다.');
+      sellmate={map,duplicates,count,filename:file.name};
+      setMessage(statusSell,`${file.name} · ${formatNumber(count)}행 · 고유 바코드 ${formatNumber(map.size)}개${duplicates.size?' · 중복 바코드 '+duplicates.size+'개':''} · 하이픈 제거 완료`,'ok');
+    }catch(err){setMessage(statusSell,err.message,'err');fileSell.value='';}
+    updateEnabled();
+  });
+  function selectedKey(file){return [file.name,file.size,file.lastModified].join('||');}
+  async function parseChannelFile(file){
+    if(!/\.(xlsx|xls)$/i.test(file.name))throw Error(file.name+' : .xlsx 또는 .xls만 첨부할 수 있습니다.');
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const records=[], ignored=[];
+    let headerFound=false;
+    for(const sheetName of wb.SheetNames){
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1,raw:false,defval:''});
+      if(!rows.length)continue;
+      const headerIndex=rows.findIndex((r,i)=>i<20&&str(r[2])==='채널명'&&str(r[4]).includes('상품명')&&str(r[6]).includes('옵션정보')&&str(r[7]).includes('품목코드'));
+      if(headerIndex===-1)continue;
+      headerFound=true;
+      rows.slice(headerIndex+1).forEach((r,i)=>{
+        if(!r.some(x=>str(x)))return;
+        if(str(r[2])==='채널명')return; // repeated page header, not a product row
+        const channel=detectChannel(r[2]);
+        const rownum=headerIndex+i+2;
+        if(!channel){ignored.push(`${file.name} / ${sheetName} ${rownum}행: C열 채널명 ${str(r[2])||'(빈칸)'}`);return;}
+        records.push({channel,row:r.slice(0,10),rownum,fileName:file.name,sheetName,
+          barcode:normBarcode(r[7]),productKey:productKey(r[4]),product:productName(r[4]),opt:parseChannelOpt(r[6])});
+      });
+    }
+    if(!headerFound)throw Error(file.name+' : C/E/G/H열의 미들웨어 원본 머리글을 찾을 수 없습니다.');
+    if(!records.length)throw Error(file.name+' : 인식 가능한 판매처 데이터가 없습니다.');
+    return {file,records,ignored};
+  }
+  function updateFileCollection(){
+    const parts=[...selectedFiles.values()];
+    const records=parts.flatMap(p=>p.records),ignored=parts.flatMap(p=>p.ignored);
+    const present=new Set(records.map(r=>r.channel));
+    channels=records.length?{records,ignored,present,info:parts.map(p=>p.file.name+' ('+formatNumber(p.records.length)+'행)')}:null;
+    selectedList.innerHTML=parts.length?parts.map((p,i)=>
+      `<div class="map-selected-file"><span>${esc(p.file.name)} <small>· ${formatNumber(p.records.length)}행</small></span><button type="button" data-map-remove="${i}" aria-label="${esc(p.file.name)} 제거">제거</button></div>`
+    ).join(''):'';
+    const counts=CHANNELS.map(c=>`${c} ${formatNumber(records.filter(r=>r.channel===c).length)}행`).join(' · ');
+    if(!records.length)setMessage(statusChannels,'판매처 파일을 선택해주세요. 통합 파일과 네이버 별도 파일을 이어서 추가할 수 있습니다.');
+    else setMessage(statusChannels,`누적 ${parts.length}개 파일 · ${formatNumber(records.length)}행 · ${counts}${ignored.length?' · 인식 불가 '+ignored.length+'행 (확인 전 다운로드 차단)':''}`,ignored.length?'err':'ok');
+    updateEnabled();
+  }
+  fileChannels.addEventListener('change',async e=>{
+    const newFiles=[...(e.target.files||[])];
+    e.target.value=''; // allows choosing a second file without dropping the first selection
+    if(!newFiles.length)return;
+    const errors=[];
+    for(const file of newFiles){
+      const key=selectedKey(file);
+      if(selectedFiles.has(key))continue;
+      try{selectedFiles.set(key,await parseChannelFile(file));}
+      catch(err){errors.push(err.message);}
+    }
+    updateFileCollection();
+    if(errors.length){
+      setMessage(statusChannels,statusChannels.textContent+' · 추가 실패: '+errors.join(' / '),'err');
+      notice.textContent='추가할 수 없었던 파일: '+errors.join(' / ');
+    }
+  });
+  selectedList.addEventListener('click',e=>{
+    const btn=e.target.closest('button[data-map-remove]');if(!btn)return;
+    const key=[...selectedFiles.keys()][Number(btn.dataset.mapRemove)];
+    if(key!=null)selectedFiles.delete(key);
+    updateFileCollection();
+  });
+  function analyze(){
+    if(!sellmate||!channels)return;
+    const present=channels.present||new Set(channels.records.map(r=>r.channel));
+    const seenByChannel=new Map();
+    for(const r of channels.records){const key=r.channel+'|'+r.barcode;seenByChannel.set(key,(seenByChannel.get(key)||0)+1);}
+    const verified=new Map();const foundByChannel=new Map(CHANNELS.map(c=>[c,[]]));
+    for(const row of channels.records){
+      const sel=sellmate.map.get(row.barcode);
+      const duplicate=seenByChannel.get(row.channel+'|'+row.barcode)>1;
+      let state='',reason='';
+      if(!row.barcode){state='품목코드 없음';reason='H열 품목코드가 비어 있음';}
+      else if(duplicate){state='중복 확인';reason='동일 판매처 파일에 같은 품목코드가 중복됨';}
+      else if(sellmate.duplicates.has(row.barcode)){state='중복 확인';reason='셀메이트 C열에 같은 바코드가 중복됨';}
+      else if(!sel){state='셀메이트 미확인';reason='H열 품목코드가 셀메이트 C열(- 제거)과 일치하지 않음';}
+      else if(!sel.parsed){state='옵션 확인 필요';reason=sel.reason;}
+      else if(!row.opt.parts){state='옵션 확인 필요';reason=row.opt.reason;}
+      else if(!sameParts(sel.parsed,row.opt.parts)){state='옵션 불일치';reason='셀메이트 B열과 판매처 G열의 색상/기장/사이즈 불일치';}
+      else if(row.productKey&&sel.key&&row.productKey!==sel.key){state='상품명 불일치';reason='E열 괄호 속 상품명과 셀메이트 상품명 불일치';}
+      else{state='검증 완료';reason=row.productKey?'바코드·옵션·상품명 일치':'바코드·옵션 일치 (E열 괄호 상품명은 없음)';}
+      row.sell=sel;row.state=state;row.reason=reason;
+      foundByChannel.get(row.channel).push(row);
+      if(state==='검증 완료'){
+        if(!verified.has(row.barcode))verified.set(row.barcode,new Set());verified.get(row.barcode).add(row.channel);
+      }
+    }
+    const registeredProduct=new Map();
+    for(const [barcode,chans] of verified.entries()){
+      const sel=sellmate.map.get(barcode);if(!sel)continue;
+      const key=sel.key||sel.product;
+      if(!registeredProduct.has(key))registeredProduct.set(key,new Set());
+      chans.forEach(ch=>registeredProduct.get(key).add(ch));
+    }
+    const summary=CHANNELS.map(c=>{
+      const rows=foundByChannel.get(c);
+      const verifiedCount=rows.filter(r=>r.state==='검증 완료').length;
+      const unverified=[];
+      if(present.has(c))for(const sel of sellmate.map.values())if(!verified.get(sel.barcode)?.has(c)){
+        const existing=rows.filter(r=>r.barcode===sel.barcode);
+        unverified.push({sel,reason:existing.length?existing.map(x=>x.state).join(' / '):'판매처 파일에 바코드 없음',category:existing.length?'검증 실패':'판매처 파일에서 바코드 없음'});
+      }
+      return {name:c,rows,verifiedCount,unverified,uploaded:present.has(c)};
+    });
+    return {summary,verified,registeredProduct,present,checked:channels.records.length,success:channels.records.filter(r=>r.state==='검증 완료').length};
+  }
+  function showReport(){
+    const t=report;
+    get('mapStatSell').textContent=formatNumber(sellmate.map.size);
+    get('mapStatRows').textContent=formatNumber(t.checked);
+    get('mapStatOK').textContent=formatNumber(t.success);
+    get('mapStatIssues').textContent=formatNumber(t.checked-t.success);
+    const body=get('mapSummaryBody');body.innerHTML=t.summary.map(x=>
+      `<tr><td>${esc(x.name)}${!x.uploaded?' <small class="map-warn">(자료 미첨부)</small>':''}</td><td>${x.uploaded?formatNumber(x.rows.length)+'행':'미첨부'}</td><td class="map-ok">${x.uploaded?formatNumber(x.verifiedCount)+'행':'—'}</td><td class="${x.unverified.length?'map-warn':'map-ok'}">${x.uploaded?formatNumber(x.unverified.length)+'개':'판단 불가'}</td></tr>`
+    ).join('');
+    const review=channels.records.filter(r=>r.state!=='검증 완료');
+    const list=get('mapIssueList');
+    list.innerHTML=review.length?
+      '<details><summary>확인 필요한 '+review.length+'개 행 보기</summary>'+review.slice(0,100).map(r=>
+      `<p>${esc(r.channel)} · ${esc(r.fileName)} ${r.rownum}행 · 바코드 ${esc(r.barcode)} · ${esc(r.state)} · ${esc(r.reason)}<br>셀메이트 ${esc(r.sell?.option||'없음')} / 판매처 ${esc(r.row[6])}</p>`).join('')+'</details>'
+      :'<div class="map-note">✓ 첨부된 판매처 행의 바코드와 옵션이 모두 검증됐습니다.</div>';
+    results.hidden=false;
+    zipBtn.disabled=channels.ignored.length>0;
+    notice.textContent=channels.ignored.length
+      ?`알 수 없는 채널 ${channels.ignored.length}행이 있습니다. 누락을 막기 위해 ZIP 다운로드를 차단했습니다: ${channels.ignored.slice(0,3).join(' / ')}`
+      :'결과는 첨부 파일 기준입니다. 자료 미첨부 채널은 미등록으로 판단하지 않습니다. 상품명·옵션 불일치 행을 먼저 확인해주세요.';
+  }
+  runBtn.addEventListener('click',()=>{
+    try{report=analyze();showReport();results.scrollIntoView({behavior:'smooth',block:'start'});}
+    catch(err){notice.textContent='분석 오류: '+err.message;}
+  });
+  zipBtn.addEventListener('click',async()=>{
+    if(!report)return;
+    zipBtn.disabled=true;zipBtn.textContent='파일 생성 중...';
+    try{
+      const zip=new JSZip();
+      const missingChannelNote=CHANNELS.filter(c=>!report.present.has(c));
+      const headers=['No','mid','채널명','채널상품코드','채널 상품명','옵션순번','옵션정보','품목코드','묶음수량','판매상태',
+        '바코드(-제거)','셀메이트 상품명','셀메이트 B열 옵션','판매처 G열 해석','검증 상태','동일 옵션 검증된 다른 판매처','동일 옵션 미확인 판매처(첨부자료)','상품명(옵션 검증 판매처 포함)','검증 상세','자료 미첨부 판매처'];
+      for(const ch of report.summary){
+        const data=[headers];
+        for(const item of ch.rows){
+          const sel=item.sell;
+          const key=sel?.key||sel?.product||'';
+          const chans=report.verified.get(item.barcode)||new Set();
+          const others=CHANNELS.filter(c=>c!==ch.name&&chans.has(c));
+          const missing=CHANNELS.filter(c=>report.present.has(c)&&!chans.has(c));
+          const label=sel?.product||item.product;
+          const display=label+' [옵션 검증: '+(CHANNELS.filter(c=>chans.has(c)).join(' · ')||'완료 채널 없음')+']';
+          data.push([...Array.from({length:10},(_,i)=>item.row[i]??''),item.barcode,sel?.name||'',sel?.option||'',item.opt.parts?.join(' / ')||'분석 불가',item.state,
+            others.join(' / ')||'없음',missing.join(' / ')||'없음',display,item.reason,missingChannelNote.join(' / ')||'없음']);
+        }
+        const wb=XLSX.utils.book_new();
+        const ws=XLSX.utils.aoa_to_sheet(data);
+        ws['!cols']=[{wch:8},{wch:10},{wch:30},{wch:22},{wch:54},{wch:10},{wch:42},{wch:20},{wch:12},{wch:13},
+          {wch:19},{wch:45},{wch:23},{wch:25},{wch:17},{wch:28},{wch:28},{wch:55},{wch:50},{wch:28}];
+        ws['!autofilter']={ref:'A1:T'+data.length};
+        XLSX.utils.book_append_sheet(wb,ws,'판매처 검증');
+        if(!ch.uploaded){
+          const note=XLSX.utils.aoa_to_sheet([['상태','자료 미첨부'],['판매처',ch.name],['안내','이 판매처의 파일을 첨부하지 않았으므로 등록/미등록 여부를 판정하지 않았습니다.'],['작업','판매처 원본 파일을 추가 첨부하고 다시 검증해주세요.']]);
+          note['!cols']=[{wch:20},{wch:93}];
+          XLSX.utils.book_append_sheet(wb,note,'자료 미첨부 안내');
+        }
+        const missingHeader=['셀메이트 상품명','셀메이트 B열 옵션','바코드(-제거)','판매처','분류','참고'];
+        const missingRows=ch.uploaded?ch.unverified.map(i=>[i.sel.name,i.sel.option,i.sel.barcode,ch.name,i.category,i.reason]):[];
+        const ms=XLSX.utils.aoa_to_sheet([missingHeader,...(missingRows.length?missingRows:[[ch.uploaded?'파일 기준 미확인·불일치 옵션 없음':'자료 미첨부 — 확인 불가']])]);
+        ms['!cols']=[{wch:46},{wch:25},{wch:20},{wch:15},{wch:30},{wch:50}];
+        XLSX.utils.book_append_sheet(wb,ms,'매핑 필요 옵션');
+        const bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+        zip.file(ch.name+'.xlsx',bytes);
+      }
+      const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+      const names=[...new Set(channels.records.map(r=>{
+        const m=str(r.row[4]).match(/\(([^()]+)\)/);return m?m[1].trim():'';
+      }).filter(Boolean))];
+      const safeName=value=>str(value).replace(/[\\/:*?"<>|\x00-\x1F]/g,'_').slice(0,70);
+      const archiveName=names.length===1?safeName(names[0]):names.length>1?safeName(names[0])+'_외'+(names.length-1)+'개':'미들웨어';
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=archiveName+'_판매처별_매핑검증.zip';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      notice.textContent='판매처별 5개 XLSX를 ZIP으로 다운로드했습니다. 미첨부 채널 파일은 자료 미첨부로 표시되고 미등록으로 판정하지 않습니다.';
+    }catch(err){notice.textContent='ZIP 생성 실패: '+err.message;}
+    finally{zipBtn.disabled=false;zipBtn.textContent='채널별 5개 파일 ZIP 다운로드';}
+  });
+  resetBtn.addEventListener('click',()=>{
+    fileSell.value='';fileChannels.value='';selectedFiles.clear();selectedList.innerHTML='';sellmate=null;channels=null;report=null;
+    setMessage(statusSell,'셀메이트 CSV 파일을 먼저 선택해주세요.');setMessage(statusChannels,'통합 파일과 별도 네이버 파일을 차례로 선택해 추가할 수 있습니다.');
+    notice.textContent='두 종류의 파일을 첨부하면 바코드와 옵션을 비교할 수 있습니다.';results.hidden=true;updateEnabled();
+  });
+})();
+
 </script>
 </body>
 </html>
