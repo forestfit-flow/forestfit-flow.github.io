@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>포레스트핏 재고매칭 확인 - 옵션 예외조건 개선</title>
+<title>포레스트핏 재고매칭 확인 - 검증 강화</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
 <style>
 *{box-sizing:border-box;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif}
@@ -42,7 +42,7 @@ td.reason-cell{color:#6b3d00;font-weight:750;background:#fff8dc}
   <h1>재고매칭 확인</h1>
   <div class="desc">
     상품명/옵션 매칭을 확인합니다. 묶음상품은 같은 일련번호 안에서 예상 옵션 세트와 실제 작업자 옵션 세트를 비교합니다.<br>
-    기본2XL, 빈티지중청2XL처럼 붙어 있는 옵션을 분리하고, 와디즈 선택1/선택2/선택3 묶음·동일 색상 중복수량·일련번호별 설정수량을 검증합니다.
+    기본2XL, 빈티지중청2XL처럼 붙은 옵션을 인식하며, 와디즈 선택 묶음·동일 색상 수량·일련번호를 엄격하게 검증합니다. 판단이 불분명한 경우 확인필요로 표시합니다.
   </div>
 
   <div class="card">
@@ -109,6 +109,8 @@ function preSplitOption(v){
   s=s.replace(/([가-힣a-zA-Z]+)(5XL|4XL|3XL|2XL|XL|FREE|F4|F3|F2|F1|XS|S|M|L|F)\b/gi,(m,color,size)=>{
     if(/^(10부|9부|8부|7부|숏|기본|롱)$/i.test(color)) return m;
     if(color.length<2) return m;
+    // 영어 색상명 CAMEL, CORAL 등의 마지막 L을 사이즈 L로 오인하지 않는다.
+    if(/^[a-zA-Z]+$/.test(color) && /^[SMLF]$/i.test(size))return m;
     return color + "," + size;
   });
 
@@ -225,7 +227,6 @@ function cleanOptionString(v){
   s=s.replace(/기장\s*[-:=]\s*/gi," ");
   s=s.replace(/사이즈\s*[-:=]\s*/gi," ");
   s=s.replace(/시이즈\s*[-:=]\s*/gi," ");
-  s=s.replace(/시이즈\s*[-:=]\s*/gi," ");
   s=s.replace(/1\+1\s*컬러\s*:/gi," ");
   return s;
 }
@@ -269,239 +270,194 @@ function parseOpt(v){
 
 function inter(a,b){return a.some(x=>b.includes(x));}
 
+// 상품명은 괄호 안의 첫 상품 키워드만 비교한다. 전체 상품명 유사도는 사용하지 않는다.
 function extractKeyword(value){
-  const s=txt(value);
-  let m=s.match(/\(([^()]*)\)/);
-  if(m&&m[1])return m[1].trim();
-  const brackets=[...s.matchAll(/\[([^\[\]]*)\]/g)].map(x=>x[1].trim()).filter(Boolean);
-  return brackets.find(b=>b!=="포레스트핏")||"";
+  const m=txt(value).match(/\(([^()]*)\)/);
+  return m&&txt(m[1]) ? txt(m[1]) : "";
 }
-
-function isProductMatched(a,b,d){
-  a=txt(a);b=txt(b);d=txt(d);
-  if(!a||!b)return false;
+function isProductMatched(a,b){
   const ka=extractKeyword(a),kb=extractKeyword(b);
-  if(!ka&&kb&&d&&clean(d).includes(clean(kb)))return true;
-  if(a.includes(GENERIC_TITLE)){
-    if(!kb)return false;
-    return clean(a).includes(clean(kb))||clean(d).includes(clean(kb));
-  }
-  if(ka&&kb)return clean(ka)===clean(kb);
-  if(ka&&!kb)return clean(b).includes(clean(ka));
-  if(!ka&&kb)return clean(a).includes(clean(kb))||clean(d).includes(clean(kb));
-  const ca=clean(a),cb=clean(b);
-  return ca===cb||ca.includes(cb)||cb.includes(ca);
+  return Boolean(ka&&kb&&clean(ka)===clean(kb));
 }
-
-function productReason(a,b,d){
-  if(isProductMatched(a,b,d))return"";
+function productReason(a,b){
   const ka=extractKeyword(a),kb=extractKeyword(b);
-  if(!ka&&kb)return`상품명 확인 필요: 작업자 상품 키워드(${kb})가 원본/옵션에서 확인되지 않음`;
-  if(ka&&!kb)return`상품명 확인 필요: 원본 상품 키워드(${ka})가 작업자 상품명에서 확인되지 않음`;
-  if(ka&&kb)return`상품명 키워드 불일치: 원본(${ka}) / 작업자(${kb})`;
-  return"상품명 키워드 확인 필요";
+  if(!ka||!kb)return `상품명 괄호 키워드 누락: 원본(${ka||"없음"}) / 작업자(${kb||"없음"})`;
+  if(clean(ka)!==clean(kb))return `상품명 괄호 키워드 불일치: 원본(${ka}) / 작업자(${kb})`;
+  return "";
 }
 
-/*
-  번호형 묶음상품: 와디즈 "1.선택1 (...)" 및 기존 "1.옵션1 (...)" 지원.
-  동일 색상·사이즈·기장이 두 번 등장해도 배열의 개수를 그대로 유지한다.
-*/
-function parseNamedOptionFields(value){
-  const parsed=parseOpt(value);
-  return {colorAliases:[...parsed.colors],sizes:[...parsed.sizes],lengths:[...parsed.lengths]};
-}
-
-function parseNumberedOptions(value){
-  const text=txt(value);
-  const result=[];
-  // 1.선택1 (...), 2.선택2 (...) / 1.옵션 1 (...), 2.옵션 2 (...)
-  const regex=/(?:^|[,\s])\s*\d+\s*\.\s*(?:선택|옵션)\s*\d*\s*\(([^()]*)\)/gi;
-  let match;
-  while((match=regex.exec(text))!==null){
-    const item=parseNamedOptionFields(match[1]);
-    if(item.colorAliases.length || item.sizes.length || item.lengths.length) result.push(item);
+// 한 색상의 별칭(베이지(브라운))은 한 그룹으로 유지한다.
+// 쉼표 또는 + 로 구분된 다른 색상은 서로 다른 그룹이므로 추가값 검증이 가능하다.
+function parseDetailed(v){
+  const groups=[],sizes=new Set(),lengths=new Set();
+  const parts=cleanOptionString(v).split(/[,\/+|]+/).map(txt).filter(Boolean);
+  for(const part of parts){
+    const parsed=parseOpt(part);
+    if(parsed.colors.length)groups.push([...parsed.colors]);
+    parsed.sizes.forEach(x=>sizes.add(x));
+    parsed.lengths.forEach(x=>lengths.add(x));
   }
-  return result;
+  return {colorGroups:groups,sizes:[...sizes],lengths:[...lengths]};
+}
+function singleExpected(v){
+  const p=parseDetailed(v);
+  return {colorAliases:p.colorGroups.length===1?p.colorGroups[0]:[],sizes:p.sizes,lengths:p.lengths};
+}
+function sameOne(aliases,actualGroup){
+  return Boolean(actualGroup&&aliases.some(x=>actualGroup.includes(x)));
+}
+function equalValues(expected,actual,omittable){
+  if(expected.length>1 || actual.length>1)return false; // 값이 2개 이상이면 애매하므로 검토
+  if(expected.length===0)return actual.length===0;
+  if(actual.length===0)return Boolean(omittable && expected[0]===omittable);
+  return expected[0]===actual[0];
+}
+function checkItem(actual,expected,allowSingleColorOmission){
+  // 색상은 별칭 중 하나만 일치하면 되지만, 추가 색상 그룹은 허용하지 않는다.
+  if(expected.colorAliases.length>0){
+    if(actual.colorGroups.length===0){if(!allowSingleColorOmission)return false;}
+    else if(actual.colorGroups.length!==1||!sameOne(expected.colorAliases,actual.colorGroups[0]))return false;
+  }else if(actual.colorGroups.length!==0)return false;
+  if(!equalValues(expected.sizes,actual.sizes,"free"))return false;
+  if(!equalValues(expected.lengths,actual.lengths,"기본"))return false;
+  return true;
+}
+function itemMatch(actual,expected){
+  return checkItem(actual,expected,false);
+}
+function normalOptionOk(original,worker){
+  const s=parseDetailed(original),w=parseDetailed(worker);
+  if(!parseOpt(original).tokens.length||!parseOpt(worker).tokens.length)return false;
+  if(s.colorGroups.length>1||s.sizes.length>1||s.lengths.length>1)return false;
+  return checkItem(w,singleExpected(original),true);
+}
+function optionReason(original,worker){
+  const s=parseDetailed(original),w=parseDetailed(worker),reasons=[];
+  if(!parseOpt(original).tokens.length)reasons.push("원본 옵션 분석 불가");
+  if(!parseOpt(worker).tokens.length)reasons.push("작업자 옵션 분석 불가");
+  if(s.colorGroups.length>1||s.sizes.length>1||s.lengths.length>1)
+    reasons.push("원본 옵션에 여러 색상·사이즈·기장 값이 있어 구성 확인 필요");
+  if(s.colorGroups.length<=1){
+    if(w.colorGroups.length>1)reasons.push(`작업자 색상 추가/중복: ${w.colorGroups.map(g=>g.join("(")+ (g.length>1?")":"")).join(", ")}`);
+    else if(s.colorGroups.length===0&&w.colorGroups.length>0)reasons.push(`원본에 없는 색상 추가: ${w.colorGroups[0].join("/")}`);
+    else if(s.colorGroups.length===1&&w.colorGroups.length===1&&!sameOne(s.colorGroups[0],w.colorGroups[0]))
+      reasons.push(`색상 불일치: 원본(${s.colorGroups[0].join("/")}) / 작업자(${w.colorGroups[0].join("/")})`);
+  }
+  if(!equalValues(s.sizes,w.sizes,"free"))
+    reasons.push(`사이즈 누락·추가·불일치: 원본(${s.sizes.join(",")||"없음"}) / 작업자(${w.sizes.join(",")||"없음"})`);
+  if(!equalValues(s.lengths,w.lengths,"기본"))
+    reasons.push(`기장 누락·추가·불일치: 원본(${s.lengths.join(",")||"없음"}) / 작업자(${w.lengths.join(",")||"없음"})`);
+  return reasons.join(" / ")||"옵션 구성 확인 필요";
 }
 
-function delimitedColorBundleItems(value){
-  // "블랙+블랙", "아이보리,아이보리", "민트 / +1 연그레이"처럼
-  // 색상 항목이 구분자로 나뉘어 있으면 중복을 제거하지 않고 개별 상품으로 보존.
-  // 베이지(브라운)은 '베이지/브라운' 별칭 1개이므로 묶음으로 보지 않음.
-  if(parseNumberedOptions(value).length>=2)return [];
-  const segments=cleanOptionString(value).split(/[,\/+|]+/).map(txt).filter(Boolean);
+// 와디즈 선택1/선택2/선택3 및 기존 옵션1/옵션2 지원.
+// 태그의 개수와 닫는 괄호를 전부 검사하므로 잘린 선택 항목은 통과하지 못한다.
+function inspectNumberedOptions(value){
+  const input=txt(value);
+  const tags=[...input.matchAll(/(?:^|[,\s])(\d+)\s*\.\s*(?:선택|옵션)\s*(\d*)\s*/gi)];
+  if(!tags.length)return {present:false,valid:false,items:[],reason:""};
+  if(tags.length<2)return {present:true,valid:false,items:[],reason:"선택 항목이 1개만 인식됨"};
+  const items=[],indices=[];
+  for(let i=0;i<tags.length;i++){
+    const match=tags[i],outerIndex=Number(match[1]),innerIndex=match[2]?Number(match[2]):outerIndex;
+    if(outerIndex!==innerIndex)return {present:true,valid:false,items:[],reason:`선택 번호 불일치 (${outerIndex} / ${innerIndex})`};
+    indices.push(outerIndex);
+    const from=match.index+match[0].length;
+    const to=i+1<tags.length?tags[i+1].index:input.length;
+    const raw=input.slice(from,to).replace(/^[,\s]+|[,\s]+$/g,"");
+    if(!raw.startsWith("("))return {present:true,valid:false,items:[],reason:`선택${outerIndex} 괄호 누락`};
+    let depth=0,end=-1;
+    for(let j=0;j<raw.length;j++){
+      if(raw[j]==="(")depth++;
+      if(raw[j]===")"){
+        depth--;
+        if(depth<0)break;
+        if(depth===0){end=j;break;}
+      }
+    }
+    if(depth!==0||end<0||txt(raw.slice(end+1)))return {present:true,valid:false,items:[],reason:`선택${outerIndex} 괄호 또는 뒤쪽 데이터 손상`};
+    const part=parseDetailed(raw.slice(1,end));
+    if(part.colorGroups.length!==1||part.sizes.length!==1||part.lengths.length>1)
+      return {present:true,valid:false,items:[],reason:`선택${outerIndex} 색상·사이즈·기장 분석 불가`};
+    items.push({colorAliases:part.colorGroups[0],sizes:part.sizes,lengths:part.lengths});
+  }
+  if(indices.some((n,i)=>n!==i+1))return {present:true,valid:false,items:[],reason:"선택 번호 중복 또는 연속 번호 누락"};
+  return {present:true,valid:true,items,reason:""};
+}
+function parseNumberedOptions(v){const p=inspectNumberedOptions(v);return p.valid?p.items:[];}
+function delimitedColorBundleItems(v){
+  if(inspectNumberedOptions(v).present)return [];
+  const parts=cleanOptionString(v).split(/[,\/+|]+/).map(txt).filter(Boolean);
   const items=[];
-  const leadingSizes=[];
-  const leadingLengths=[];
-  for(const seg of segments){
-    const p=parseOpt(seg);
-    if(p.colors.length){
-      items.push({colorAliases:[...p.colors],sizes:[...p.sizes],lengths:[...p.lengths]});
+  for(const part of parts){
+    const parsed=parseDetailed(part);
+    if(parsed.colorGroups.length!==0){
+      // 별칭은 하나의 색상으로 유지. 같은 색상 두 번은 별도 행으로 유지.
+      if(parsed.colorGroups.length!==1)return [];
+      items.push({colorAliases:parsed.colorGroups[0],sizes:parsed.sizes,lengths:parsed.lengths});
     }else if(items.length){
-      // 뒤따르는 기장·사이즈는 직전 색상 옵션에 우선 연결
-      items[items.length-1].sizes.push(...p.sizes);
-      items[items.length-1].lengths.push(...p.lengths);
-    }else{
-      leadingSizes.push(...p.sizes);
-      leadingLengths.push(...p.lengths);
+      items[items.length-1].sizes.push(...parsed.sizes);
+      items[items.length-1].lengths.push(...parsed.lengths);
     }
   }
   if(items.length<2)return [];
-
-  const overall=parseOpt(value);
-  // 원본에서 사이즈/기장이 하나뿐일 때만 묶음 공통값으로 보충.
-  const commonSize=overall.sizes.length===1 ? overall.sizes[0] : null;
-  const commonLength=overall.lengths.length===1 ? overall.lengths[0] : null;
+  const all=parseDetailed(v);
   for(const item of items){
-    if(!item.sizes.length)item.sizes.push(...(commonSize?[commonSize]:leadingSizes));
-    if(!item.lengths.length)item.lengths.push(...(commonLength?[commonLength]:leadingLengths));
+    if(!item.sizes.length&&all.sizes.length===1)item.sizes=[...all.sizes];
+    if(!item.lengths.length&&all.lengths.length===1)item.lengths=[...all.lengths];
     item.sizes=[...new Set(item.sizes)];
     item.lengths=[...new Set(item.lengths)];
   }
   return items;
 }
-
-function bundleMode(v){
-  if(parseNumberedOptions(v).length>=2)return "numbered";
-  return delimitedColorBundleItems(v).length>=2 ? "color-list" : "";
-}
-
-function isBundleOption(v){return bundleMode(v)!=="";}
-
-function expectedBundleItems(originalOption){
-  const numbered=parseNumberedOptions(originalOption);
-  return numbered.length>=2 ? numbered : delimitedColorBundleItems(originalOption);
-}
-
-function actualItem(workerOption){
-  const p=parseOpt(workerOption);
-  return {colors:p.colors,sizes:p.sizes,lengths:p.lengths,raw:txt(workerOption)};
-}
-
-function itemMatch(actual,expected){
-  if(expected.colorAliases.length>0){
-    if(actual.colors.length===0)return false;
-    if(!inter(expected.colorAliases,actual.colors))return false;
+function bundleInfo(v){
+  const numbered=inspectNumberedOptions(v);
+  if(numbered.present)return {mode:"numbered",valid:numbered.valid,items:numbered.items,reason:numbered.reason};
+  const delimited=delimitedColorBundleItems(v);
+  if(delimited.length>=2){
+    const valid=delimited.every(x=>x.colorAliases.length && x.sizes.length<=1 && x.lengths.length<=1);
+    return {mode:"color-list",valid,items:delimited,reason:valid?"":"색상 묶음 옵션 형식 확인 필요"};
   }
-
-  if(expected.sizes.length>0){
-    // FREE 공통옵션은 작업자 표기 생략 허용, S/M/L/2XL 등은 반드시 확인
-    if(actual.sizes.length===0 && !expected.sizes.every(s=>s==="free"))return false;
-    if(actual.sizes.length>0 && !inter(expected.sizes,actual.sizes))return false;
-  }
-
-  if(expected.lengths.length>0){
-    // 기본 기장은 작업자 옵션에서 생략 가능
-    const onlyBasic=expected.lengths.length===1&&expected.lengths[0]==="기본";
-    if(actual.lengths.length===0 && !onlyBasic)return false;
-    if(actual.lengths.length>0 && !inter(expected.lengths,actual.lengths))return false;
-  }
-  return true;
+  return {mode:"",valid:true,items:[],reason:""};
 }
+function bundleMode(v){return bundleInfo(v).mode;}
+function isBundleOption(v){return Boolean(bundleMode(v));}
+function expectedBundleItems(v){return bundleInfo(v).items;}
+function actualItem(v){const parsed=parseDetailed(v);return {...parsed,raw:txt(v)};}
 
-// 실제 작업자 상품 인스턴스와 예상 구성품을 1:1로 최대한 많이 짝짓는다.
-// 개별 구성품을 Set으로 뭉치지 않으므로 동일 옵션 2개/3개도 각각 검사한다.
+// 중복 옵션 포함, 모든 예상 구성품과 작업자 수량을 일대일로 매칭한다.
 function bundleMatchDetails(expected,actual){
-  const assignedToActual=new Array(actual.length).fill(-1);
-  function augment(expectedIdx,visited){
+  const assigned=new Array(actual.length).fill(-1);
+  function augment(i,seen){
     for(let j=0;j<actual.length;j++){
-      if(visited.has(j) || !itemMatch(actual[j],expected[expectedIdx]))continue;
-      visited.add(j);
-      if(assignedToActual[j]===-1 || augment(assignedToActual[j],visited)){
-        assignedToActual[j]=expectedIdx;
-        return true;
+      if(seen.has(j)||!itemMatch(actual[j],expected[i]))continue;
+      seen.add(j);
+      if(assigned[j]===-1||augment(assigned[j],seen)){
+        assigned[j]=i;return true;
       }
     }
     return false;
   }
   for(let i=0;i<expected.length;i++)augment(i,new Set());
-  const found=new Set(assignedToActual.filter(i=>i>=0));
-  const missing=expected.filter((_,i)=>!found.has(i));
-  const extra=actual.filter((_,i)=>assignedToActual[i]===-1);
-  return {ok:!missing.length&&!extra.length&&expected.length===actual.length,missing,extra};
+  const matched=new Set(assigned.filter(x=>x!==-1));
+  const missing=expected.filter((_,i)=>!matched.has(i));
+  const extra=actual.filter((_,i)=>assigned[i]===-1);
+  return {ok:missing.length===0&&extra.length===0&&expected.length===actual.length,missing,extra};
 }
-
 function describeBundleCounts(items){
   const counts=new Map();
-  for(const item of items){
-    const label=optionText(item);
-    counts.set(label,(counts.get(label)||0)+1);
-  }
-  return [...counts.entries()].map(([label,count])=>`${label} ×${count}`).join(" / ") || "없음";
+  for(const item of items){const label=optionText(item);counts.set(label,(counts.get(label)||0)+1);}
+  return [...counts].map(([label,n])=>`${label} ×${n}`).join(" / ")||"없음";
 }
-
-function bundleKeyFromRow(row){
-  const preferred=[row[6],row[7],row[8],row[0]].map(v=>txt(v)).filter(Boolean);
-  for(const v of preferred){
-    const n=v.replace(/\D/g,"");
-    if(/^\d{5,8}$/.test(n))return n;
-  }
-  const nums=[];
-  row.forEach(v=>{
-    const m=txt(v).match(/\d{5,8}/g);
-    if(m)m.forEach(n=>nums.push(n));
-  });
-  return nums.length?nums[nums.length-1]:(preferred[0]||"");
+function qtyValue(v){
+  const t=txt(v).replace(/\s+/g,"");
+  if(t==="주문수량")return 1;
+  const m=t.match(/^(?:주문수량(?:[xX×*])?)?(\d+)개$/);
+  return m&&Number(m[1])>=1&&Number(m[1])<=1000?Number(m[1]):null;
 }
-
-function normalOptionOk(original,worker){
-  const s=parseOpt(original),w=parseOpt(worker);
-  if(s.tokens.length===0||w.tokens.length===0)return false;
-
-  // 색상 비교
-  // 1) 양쪽 모두 색상 없음 → 색상 비교 생략
-  // 2) 원본 단일 색상 + 작업자 색상 생략 → 단일색상 생략으로 허용
-  // 3) 원본 복수 색상 + 작업자 색상 없음 → 확인 필요
-  if(s.colors.length>0&&w.colors.length>0){
-    if(!inter(s.colors,w.colors))return false;
-  }else if(s.colors.length>1&&w.colors.length===0){
-    return false;
-  }
-
-  // 원본에 사이즈가 하나뿐이면 작업자 사이즈 생략을 공통 사이즈 생략으로 허용
-  if(s.sizes.length>0){
-    if(w.sizes.length===0){
-      if(s.sizes.length!==1)return false;
-    }else if(!inter(s.sizes,w.sizes))return false;
-  }
-
-  // 원본 기장이 기본 하나뿐이면 작업자 기장 생략 허용
-  if(s.lengths.length>0){
-    if(w.lengths.length===0){
-      const onlyBasic=s.lengths.length===1&&s.lengths[0]==="기본";
-      if(!onlyBasic)return false;
-    }else if(!inter(s.lengths,w.lengths))return false;
-  }
-  return true;
-}
-
-function optionReason(original,worker){
-  const s=parseOpt(original),w=parseOpt(worker);
-  const r=[];
-
-  if(s.colors.length>0&&w.colors.length>0){
-    if(!inter(s.colors,w.colors))r.push(`색상 불일치: 원본(${s.colors.join(", ")}) / 작업자(${w.colors.join(", ")})`);
-  }else if(s.colors.length>1&&w.colors.length===0){
-    r.push("작업자 색상 누락: 원본에 복수 색상이 존재함");
-  }
-
-  if(s.sizes.length>0){
-    if(w.sizes.length===0){
-      if(s.sizes.length!==1)r.push("작업자 사이즈 누락");
-    }else if(!inter(s.sizes,w.sizes)){
-      r.push(`사이즈 불일치: 원본(${s.sizes.join(", ")}) / 작업자(${w.sizes.join(", ")})`);
-    }
-  }
-
-  if(s.lengths.length>0){
-    if(w.lengths.length===0){
-      const onlyBasic=s.lengths.length===1&&s.lengths[0]==="기본";
-      if(!onlyBasic)r.push(`작업자 기장 누락: 원본(${s.lengths.join(", ")})`);
-    }else if(!inter(s.lengths,w.lengths)){
-      r.push(`기장 불일치: 원본(${s.lengths.join(", ")}) / 작업자(${w.lengths.join(", ")})`);
-    }
-  }
-  return r.join(" / ");
+function serialValid(v){return /^\d{5,12}$/.test(txt(v));}
+function bundleSignature(items){
+  return JSON.stringify(items.map(x=>[[...x.colorAliases].sort().join("|"),[...x.lengths].sort().join("|"),[...x.sizes].sort().join("|")].join("#")).sort());
 }
 
 function optionText(item){
@@ -520,98 +476,91 @@ function processFile(){
   if(!workbook){alert("파일을 업로드해주세요.");return;}
   const rows=getRows();
   const temp=[];
-
   for(let i=1;i<rows.length;i++){
     const r=rows[i]||[];
-    const productName=r[1]??"";
-    const stockName=r[3]??"";
-    const originalOption=r[2]??"";
-    const workerOption=r[4]??"";
-
-    if([productName,stockName,originalOption,workerOption].every(v=>txt(v)===""))continue;
-
-    temp.push({
-      row:r,
-      productName,
-      stockName,
-      originalOption,
-      workerOption,
-      bundleMode:bundleMode(originalOption),
-      serial:txt(r[0]),
-      // 주문수량 / 2개 / 3개 / 주문수량 X 2개 모두 인식
-      orderQty:(()=>{const m=txt(r[5]).match(/(\d+)\s*개/);return m?Math.max(1,Number(m[1])):1;})(),
-      productOk:isProductMatched(productName,stockName,originalOption),
+    const productName=r[1]??"",stockName=r[3]??"",originalOption=r[2]??"",workerOption=r[4]??"";
+    if([productName,stockName,originalOption,workerOption].every(x=>!txt(x)))continue;
+    const b=bundleInfo(originalOption);
+    temp.push({row:r,productName,stockName,originalOption,workerOption,
+      serial:txt(r[0]),qty:qtyValue(r[5]),
+      productOk:isProductMatched(productName,stockName),
       optionOk:normalOptionOk(originalOption,workerOption),
-      isBundle:isBundleOption(originalOption),
-      bundleReason:""
-    });
+      bundle:b,optionReasonText:""});
   }
 
-  const groups=new Map();
-  temp.forEach((item,idx)=>{
-    if(!item.isBundle||!item.serial)return;
-    const groupKey=item.bundleMode+"||"+item.serial;
-    if(!groups.has(groupKey))groups.set(groupKey,[]);
-    groups.get(groupKey).push({idx,item});
-  });
-
-  temp.forEach((item,idx)=>{
-    if(!item.isBundle)return;
-    const expected=expectedBundleItems(item.originalOption);
-    if(expected.length===0)return;
-    const groupKey=item.bundleMode+"||"+item.serial;
-    const group=groups.get(groupKey)||[{idx,item}];
-    const actual=[];
-    group.forEach(g=>{
-      const one=actualItem(g.item.workerOption);
-      for(let q=0;q<g.item.orderQty;q++) actual.push({...one});
-    });
-    const detail=bundleMatchDetails(expected,actual);
-    const groupOk=detail.ok;
-    const rowActual=actualItem(item.workerOption);
-    const rowOk=expected.some(exp=>itemMatch(rowActual,exp));
-    item.optionOk=groupOk&&rowOk;
-    if(!item.optionOk){
-      const gaps=[];
-      if(detail.missing.length)gaps.push(`누락/부족(${describeBundleCounts(detail.missing)})`);
-      if(detail.extra.length)gaps.push(`추가/초과(${describeBundleCounts(detail.extra)})`);
-      item.bundleReason=`묶음상품 확인 필요 [일련번호 ${item.serial||"없음"}]: 예상 ${expected.length}개(${describeBundleCounts(expected)}) / 작업자 ${actual.length}개(${describeBundleCounts(actual)})${gaps.length?" / "+gaps.join(" / "):""}`;
+  const serialGroups=new Map();
+  for(const item of temp){
+    if(!item.serial)continue;
+    if(!serialGroups.has(item.serial))serialGroups.set(item.serial,[]);
+    serialGroups.get(item.serial).push(item);
+  }
+  // 묶음상품은 동일 일련번호의 모든 행을 비교한다. 다른 상품명/구성/일반행이
+  // 같은 일련번호에 섞여 있으면 자동 일치시키지 않고 관련 행 전부를 확인필요 처리한다.
+  for(const item of temp){
+    if(!serialValid(item.serial)){
+      item.optionOk=false;
+      item.optionReasonText=`일련번호 누락/형식 오류: ${item.serial||"없음"}`;
+    }else if(item.qty===null){
+      item.optionOk=false;
+      item.optionReasonText=`설정수량 분석 불가: ${txt(item.row[5])||"없음"}`;
     }
-  });
-
+  }
+  for(const [serial,group] of serialGroups){
+    if(!group.some(x=>x.bundle.mode))continue;
+    const invalid=group.find(x=>!x.bundle.valid);
+    const first=group[0];
+    const signature=first.bundle.valid?bundleSignature(first.bundle.items):"";
+    const mismatch=group.some(x=>!x.bundle.mode || x.bundle.mode!==first.bundle.mode ||
+      clean(extractKeyword(x.productName))!==clean(extractKeyword(first.productName)) ||
+      bundleSignature(x.bundle.items)!==signature);
+    if(invalid||mismatch){
+      const reason=invalid?`묶음상품 선택 구성 분석 불가: ${invalid.bundle.reason}`:
+        "동일 일련번호에 서로 다른 상품명·묶음 구성·일반상품 행이 혼재";
+      group.forEach(x=>{x.optionOk=false;x.optionReasonText=`일련번호 ${serial}: ${reason}`;});
+      continue;
+    }
+    if(!group.every(x=>serialValid(x.serial)&&x.qty!==null)){
+      group.forEach(x=>{x.optionOk=false;x.optionReasonText=`일련번호 ${serial}: 묶음 구성 중 일련번호/설정수량 분석 불가`;});
+      continue;
+    }
+    const expected=first.bundle.items;
+    const actual=[];
+    for(const item of group){
+      const one=actualItem(item.workerOption);
+      for(let n=0;n<item.qty;n++)actual.push(one);
+    }
+    const detail=bundleMatchDetails(expected,actual);
+    for(const item of group){
+      item.optionOk=detail.ok;
+      if(!detail.ok){
+        const gaps=[];
+        if(detail.missing.length)gaps.push(`누락/부족(${describeBundleCounts(detail.missing)})`);
+        if(detail.extra.length)gaps.push(`추가/초과(${describeBundleCounts(detail.extra)})`);
+        item.optionReasonText=`묶음상품 [일련번호 ${serial}]: 예상 ${expected.length}개(${describeBundleCounts(expected)}) / 작업자 ${actual.length}개(${describeBundleCounts(actual)}) / ${gaps.join(" / ")||"옵션 세부값 불일치"}`;
+      }
+    }
+  }
   resultRows=[["상태","상품명(상품매칭)","작업자 재고매칭 상품명","상품명 매칭 확인","원본 옵션","작업자 옵션","옵션 매칭 확인","확인 사유","재고매칭 설정수량","일련번호","등록일자","작업자"]];
-
-  temp.forEach(item=>{
+  for(const item of temp){
     const r=item.row;
-    const status=(item.productOk&&item.optionOk)?"정상":"확인필요";
+    const status=item.productOk&&item.optionOk?"정상":"확인필요";
     const reasons=[
-      productReason(item.productName,item.stockName,item.originalOption),
-      item.optionOk?"":(item.bundleReason||optionReason(item.originalOption,item.workerOption))
+      productReason(item.productName,item.stockName),
+      item.optionOk?"":(item.optionReasonText||optionReason(item.originalOption,item.workerOption))
     ].filter(Boolean).join(" / ");
-
-    resultRows.push([
-      status,
-      item.productName,
-      item.stockName,
-      item.productOk?"":"재확인 요망",
-      item.originalOption,
-      item.workerOption,
-      item.optionOk?"":"재확인 요망",
-      reasons,
-      r[5]??"",
-      r[0]??"",
-      r[6]??"",  // 첨부파일 G열 → 결과파일 K열(등록일자)
-      r[7]??""   // 첨부파일 H열 → 결과파일 L열(작업자)
+    resultRows.push([status,item.productName,item.stockName,item.productOk?"":"재확인 요망",
+      item.originalOption,item.workerOption,item.optionOk?"":"재확인 요망",reasons,
+      r[5]??"",r[0]??"",r[6]??"",r[7]??""
     ]);
-  });
-
+  }
   renderTable(resultRows.slice(0,101));
   const total=resultRows.length-1;
   const productWarn=resultRows.filter((r,i)=>i>0&&r[3]==="재확인 요망").length;
   const optionWarn=resultRows.filter((r,i)=>i>0&&r[6]==="재확인 요망").length;
-  document.getElementById("summary").innerHTML=`총 ${total}건 / 상품명 재확인 ${productWarn}건 / 옵션 재확인 ${optionWarn}건`;
+  document.getElementById("summary").textContent=`총 ${total}건 / 상품명 재확인 ${productWarn}건 / 옵션 재확인 ${optionWarn}건`;
 }
 
+function escapeHTML(v){return txt(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function renderTable(rows){
   if(!rows.length)return;
   let html="<table><thead><tr>";
@@ -625,7 +574,7 @@ function renderTable(rows){
       if(c===0&&v==="확인필요")cls="status-warn";
       if(c===0&&v==="정상")cls="status-ok";
       if(c===7&&v)cls="reason-cell";
-      html+=`<td class="${cls}">${v??""}</td>`;
+      html+=`<td class="${cls}">${escapeHTML(v)}</td>`;
     });
     html+="</tr>";
   }
@@ -705,7 +654,14 @@ document.getElementById("fileInput").addEventListener("change",e=>{
       if(idx===0)select.value=name;
     });
   };
+  reader.onerror=()=>alert("파일을 읽을 수 없습니다. 파일 형식을 확인해주세요.");
   reader.readAsArrayBuffer(file);
+});
+// 시트 변경 시 이전 시트의 다운로드 결과를 폐기한다.
+document.getElementById("sheetSelect").addEventListener("change",()=>{
+  resultRows=[];
+  document.getElementById("summary").textContent="";
+  document.getElementById("tableWrap").textContent="";
 });
 </script>
 </body>
